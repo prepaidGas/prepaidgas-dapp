@@ -2,81 +2,85 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
-import "./Validators.sol";
+import {Validators} from "./Validators.sol";
+import {IGasOrder} from "./interfaces/IGasOrder.sol";
+import {ExecutionMessage, Message} from "./ExecutionMessage.sol";
 
-contract Executor is EIP712, Validators {
+import "./Errors.sol" as Error;
+
+contract Executor is ExecutionMessage, Validators {
   using ECDSA for bytes32;
 
-  bytes32 private constant MESSAGE_TYPE_HASH =
-    keccak256(
-      "Message("
-      "address signer,"
-      "uint256 nonce,"
-      "address gasPrepayer,"
-      "uint256 gasOrder,"
-      "uint256 deadline,"
-      "address endpoint,"
-      "uint256 gas,"
-      "bytes data"
-      ")"
-    );
+  address public immutable gasOrder;
 
-  struct Message {
-    address signer;
-    uint256 nonce;
-    address gasPrepayer;
-    uint256 gasOrder;
-    uint256 deadline;
-    address endpoint;
-    uint256 gas;
-    bytes data;
+  mapping(address => mapping(uint256 => bool)) public nonces;
+
+  event Executed(address signer, uint256 nonce, bool status, bytes result, uint256 timestamp, address executor);
+  event Liquidated(address signer, uint256 nonce, bool status, bytes result, uint256 timestamp, address liquidator);
+
+  modifier validNonce(address signer, uint256 nonce) {
+    if (nonces[signer][nonce]) revert Error.NonceExhausted(signer, nonce);
+    _;
   }
 
-  mapping(address user => mapping(uint256 nonce => bool used)) public nonces;
-
-  event Executed(address signer, uint256 nonce, bool status, bytes result, uint256 timestamp);
-  event Liquidated(address signer, uint256 nonce, address liquidator);
-
-  constructor(string memory name, string memory version) EIP712(name, version) {}
-
-  function execute(Message calldata message, bytes calldata signature) public {
-    if (nonces[message.signer][message.nonce]) revert Error.NonceExhausted(message.signer, message.nonce);
-
-    bytes32 digest = _hashTypedDataV4(messageHash(message));
-    address recovered = digest.recover(signature);
-    if (recovered != message.signer) revert Error.UnexpectedRecovered(recovered, message.signer);
-
-    nonces[message.signer][message.nonce] = true;
-
-    (bool success, bytes memory result) = address(message.endpoint).call{gas: message.gas}(message.data);
-
-    emit Executed(message.signer, message.nonce, success, result, block.timestamp);
-    // @todo callback
+  modifier deadlineMet(uint256 deadline) {
+    if (deadline > block.timestamp) revert Error.DeadlineNotMet(block.timestamp, deadline);
+    _;
   }
 
-  function liquidate(Message calldata message, bytes calldata signature, bytes[] calldata validations) external {
-    if (nonces[message.signer][message.nonce]) revert Error.NonceExhausted(message.signer, message.nonce);
-    if (message.deadline > block.timestamp) revert Error.DeadlineNotMet(block.timestamp, message.deadline);
+  constructor(address ordersManager, string memory name, string memory version) ExecutionMessage(name, version) {
+    gasOrder = ordersManager;
+  }
 
-    if (validatorThreshold() > validations.length)
-      revert Error.UnderThreshold(validatorThreshold(), validations.length);
+  function execute(
+    Message calldata message,
+    bytes calldata signature
+  ) external validNonce(message.signer, message.nonce) {
+    uint256 gas = gasleft();
+
+    (bool success, bytes memory result) = _execute(message, signature);
+    emit Executed(message.signer, message.nonce, success, result, block.timestamp, msg.sender);
+
+    // @todo calculate constant base gas usage and add here
+    /// @dev address(0) means registered executor should be rewarded
+    IGasOrder(gasOrder).reportExecution(message.gasOrder, address(0), gasleft() - gas);
+  }
+
+  function liquidate(
+    Message calldata message,
+    bytes calldata signature,
+    bytes[] calldata validations
+  )
+    external
+    enoughValidations(validations.length)
+    deadlineMet(message.deadline)
+    validNonce(message.signer, message.nonce)
+  {
+    uint256 gas = gasleft();
 
     address last;
     for (uint256 i = 0; i < validatorThreshold(); i++) {
-      bytes32 digest = _hashTypedDataV4(messageHash(message));
+      bytes32 digest = messageHash(message);
       address recovered = digest.recover(validations[i]);
       if (last >= recovered) revert Error.IncorrectSignatureOrder(last, recovered);
       if (!isValidator(recovered)) revert Error.UnknownRecovered(recovered);
     }
 
-    execute(message, signature);
-    emit Liquidated(message.signer, message.nonce, msg.sender);
-    // @todo callback
+    (bool success, bytes memory result) = _execute(message, signature);
+    emit Liquidated(message.signer, message.nonce, success, result, block.timestamp, msg.sender);
+
+    // @todo calculate constant base gas usage and add here
+    IGasOrder(gasOrder).reportExecution(message.gasOrder, msg.sender, gasleft() - gas);
   }
 
-  function messageHash(Message calldata message) public pure returns (bytes32) {
-    return keccak256(abi.encode(MESSAGE_TYPE_HASH, message));
+  function _execute(Message calldata message, bytes calldata signature) private returns (bool, bytes memory) {
+    bytes32 digest = messageHash(message);
+    address recovered = digest.recover(signature);
+    if (recovered != message.signer) revert Error.UnexpectedRecovered(recovered, message.signer);
+
+    nonces[message.signer][message.nonce] = true;
+
+    return address(message.endpoint).call{gas: message.gas}(message.data);
   }
 }

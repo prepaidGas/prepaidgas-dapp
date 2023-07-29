@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.9;
+pragma solidity 0.8.19;
 
-uint256 constant DENOMINATOR = 10000;
-uint256 constant MAX_FEE = 1000;
-uint256 constant MINIMAL_THRESHOLD = 1;
+uint256 constant DENOM = 10000;
+uint256 constant MAX_FEE = 500;
+uint256 constant MIN_THRESHOLD = 1;

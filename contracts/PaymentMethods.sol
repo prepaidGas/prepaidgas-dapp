@@ -8,9 +8,9 @@ import "./Errors.sol" as Error;
 contract PaymentMethods is Ownable2Step {
   mapping(address => bool) private _isPaymentMethod;
 
-  event SetPaymentMethodStatus(address token, bool old, bool current);
+  event UpdatePaymentMethodStatus(address token, bool old, bool current);
 
-  modifier onlyPaymentMethod(address token) {
+  modifier paymentMethod(address token) {
     if (!_isPaymentMethod[token]) revert Error.NotPaymentMethod(token);
     _;
   }
@@ -21,10 +21,10 @@ contract PaymentMethods is Ownable2Step {
     bool old = _isPaymentMethod[token];
     _isPaymentMethod[token] = status;
 
-    emit SetPaymentMethodStatus(token, old, status);
+    emit UpdatePaymentMethodStatus(token, old, status);
   }
 
-  function isPaymentMethod(address token) public view returns (bool) {
+  function isPaymentMethod(address token) external view returns (bool) {
     return _isPaymentMethod[token];
   }
 }

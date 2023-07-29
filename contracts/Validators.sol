@@ -6,29 +6,36 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "./Errors.sol" as Error;
 import "./Constants.sol" as Const;
 
+/// @dev Should be replaced with stake-to-validate implementation in future
 contract Validators is Ownable2Step {
   uint256 private _validatorThreshold;
 
   mapping(address => bool) private _isValidator;
 
-  event ValidatorThresholdUpdate(uint256 old, uint256 current);
-  event SetValidatorStatus(address validator, bool old, bool current);
+  event UpdateValidatorThreshold(uint256 old, uint256 current);
+  event UpdateValidatorStatus(address validator, bool old, bool current);
+
+  modifier enoughValidations(uint256 validations) {
+    if (_validatorThreshold > validations) revert Error.FewValidations(validations, _validatorThreshold);
+    _;
+  }
 
   constructor() Ownable2Step() {}
 
   function setValidatorThreshold(uint256 value) external onlyOwner {
-    if (value < Const.MINIMAL_THRESHOLD) revert Error.UnderThreshold(Const.MINIMAL_THRESHOLD, value);
+    if (value < Const.MIN_THRESHOLD) revert Error.OverlowValue(value, Const.MIN_THRESHOLD);
+
     uint256 old = _validatorThreshold;
     _validatorThreshold = value;
 
-    emit ValidatorThresholdUpdate(old, value);
+    emit UpdateValidatorThreshold(old, value);
   }
 
   function setValidatorStatus(address validator, bool status) external onlyOwner {
     bool old = _isValidator[validator];
     _isValidator[validator] = status;
 
-    emit SetValidatorStatus(validator, old, status);
+    emit UpdateValidatorStatus(validator, old, status);
   }
 
   function validatorThreshold() public view returns (uint256) {
