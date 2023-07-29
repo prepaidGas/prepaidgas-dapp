@@ -2,168 +2,144 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+import {FeeProcessor} from "./FeeProcessor.sol";
+import {PaymentMethods} from "./PaymentMethods.sol";
+import "./Errors.sol" as Error;
+
 /**
- * @title GasOrders
+ * @title GasOrder
  * @notice This contract manages the deposit for Gas orders
  * @dev It is recomended to deploy the contract to the cheep network
  * @author SteMak, markfender
  */
 
-contract GasOrders {
+contract GasOrder is FeeProcessor, PaymentMethods {
   using SafeERC20 for IERC20;
 
-  enum OrderStatus {
-    None,
-    Pending, // waiting to be accepted
-    Active, // somebody taken
-    Revoked, // client revoked the execution request
-    Fulfilled,
-    Liquidated
-  }
-  struct Deposit {
-    uint256 amount;
-    address token;
-  }
-
   struct Order {
-    // @todo pack values
-    // @dev `gasBalance` subtracts on every execution
-    uint256 gasBalance; // amount of gas to be spend
-    uint256 maxExecutionDealy; // time to process execution, after the execution request
-    uint256 excecutionDeadline; // the latest possible execution time
-    uint256 maxGasCost; // maximum Gas cost during the execution
-    uint256 callsAmount; // amount of calls which might be executed
-    OrderStatus currentStatus;
-    address executor;
     address creator;
-  }
-  mapping(address => bool) public validators;
-
-  // order id => order data
-  mapping(uint256 => Order) public orders;
-  // order id => executionCost
-  mapping(uint256 => Deposit) public executionCost;
-
-  // executor address => executor locked deposit
-  mapping(uint256 => Deposit) public lockedDeposit;
-
-  uint256 public totalOrders;
-
-  uint256 public protocolFee;
-  address public treasury;
-
-  modifier onlyValidator(address _account) {
-    // @todo rework to a set of validators
-    if (validators[_account]) _;
-  } 
-  // @todo add simple protocol msg
-
-  constructor(address[] memory _listOfValidators, uint256 _protocolFee) {
-    for (uint256 i = 0; i < _listOfValidators.length; i++) {
-      validators[_listOfValidators[i]] = true;
-    }
+    address spender;
+    uint256 maxGas;
+    uint256 maxCalls;
+    uint256 deadline;
   }
 
-  onlyValidator
+  struct Spend {
+    uint256 gasExecuted;
+    uint256 gasLiquidated;
+    uint256 gasTakenBack;
+    uint256 calls;
+  }
 
-  // None -> Pending
+  struct Deposit {
+    address token;
+    uint256 gasPrice;
+  }
+
+  uint256 public orders;
+
+  mapping(uint256 => Order) public order;
+  mapping(uint256 => Spend) public spend;
+
+  mapping(uint256 => Deposit) public prepay;
+  mapping(uint256 => Deposit) public guarantee;
+
+  mapping(uint256 => address) public executor;
+
+  event OrderCreate(uint256 id);
+
+  modifier activeOrder(uint256 id) {
+    if (order[id].deadline < block.timestamp) revert Error.DeadlineExpired(block.timestamp, order[id].deadline);
+    _;
+  }
+
   function createOrder(
-    uint256 _gasToBuy,
-    uint256 _maxExecutionDealy,
-    uint256 _excecutionDeadline,
-    uint256 _maxGasCost,
-    uint256 _callsAmount,
-    Deposit memory _executionCost,
-    Deposit memory _executorLock
-  ) public {
-    // @todo add validations
-    orders[totalOrders] = Order({
-      gasBalance: _gasToBuy,
-      maxExecutionDealy: _maxExecutionDealy,
-      excecutionDeadline: _excecutionDeadline,
-      maxGasCost: _maxGasCost,
-      callsAmount: _callsAmount,
-      currentStatus: OrderStatus.Pending,
-      executor: address(0),
-      creator: msg.sender
-    });
+    address spender,
+    uint256 maxGas,
+    uint256 maxCalls,
+    uint256 deadline,
+    address pToken,
+    uint256 pGasPrice,
+    address gToken,
+    uint256 gGasPrice
+  ) public onlyPaymentMethod(pToken) onlyPaymentMethod(gToken) {
+    uint256 id = orders++;
+    order[id] = Order({creator: msg.sender, spender: spender, maxGas: maxGas, maxCalls: maxCalls, deadline: deadline});
+    prepay[id] = Deposit({token: pToken, gasPrice: pGasPrice});
+    guarantee[id] = Deposit({token: gToken, gasPrice: gGasPrice});
 
-    executionCost[totalOrders] = Deposit({token: _executionCost.token, amount: _executionCost.amount});
-    lockedDeposit[totalOrders] = Deposit({token: _executorLock.token, amount: _executorLock.amount});
-    totalOrders++;
+    IERC20(pToken).safeTransferFrom(msg.sender, address(this), pGasPrice * maxGas);
 
-    IERC20(_executionCost.token).safeTransferFrom(msg.sender, address(this), _executionCost.amount);
-
-    //@todo emit event
+    emit OrderCreate(id);
   }
 
-  // Pending -> Revoked
-  function revokeOrder(uint256 _orderId) public {
-    // @todo update error condition
-    Order storage currentOrder = orders[_orderId];
-    require(currentOrder.creator == msg.sender);
-    require(currentOrder.currentStatus == OrderStatus.Pending);
+  function closeOrder(uint256 id) public {
+    if (order[id].creator != msg.sender) revert Error.Unauthorized(msg.sender, order[id].creator);
 
-    currentOrder.currentStatus = OrderStatus.Revoked;
+    if (order[id].deadline >= block.timestamp) order[id].deadline = block.timestamp - 1;
 
-    IERC20(executionCost[_orderId].token).safeTransferFrom(
-      address(this),
-      currentOrder.creator,
-      executionCost[_orderId].amount
-    );
+    uint256 remainingGas = (order[id].maxGas -
+      (spend[id].gasExecuted + spend[id].gasLiquidated + spend[id].gasTakenBack));
+
+    spend[id].gasTakenBack += remainingGas;
+    IERC20(prepay[id].token).safeTransferFrom(address(this), order[id].creator, prepay[id].gasPrice * remainingGas);
+
+    // @todo emit event
   }
 
-  // Pending -> Active
-  function acceptOrder(uint256 _orderId) public {
-    Order storage currentOrder = orders[_orderId];
-    require(currentOrder.currentStatus == OrderStatus.Pending);
+  function acceptOrder(uint256 id) public activeOrder(id) {
+    if (executor[id] != address(0x0)) revert Error.OrderExecutorExhausted(id);
 
-    currentOrder.currentStatus = OrderStatus.Active;
-    currentOrder.executor = msg.sender;
+    executor[id] = msg.sender;
 
-    IERC20(lockedDeposit[_orderId].token).safeTransferFrom(
-      msg.sender,
-      currentOrder.executor,
-      lockedDeposit[_orderId].amount
-    );
+    IERC20(guarantee[id].token).safeTransferFrom(msg.sender, address(this), order[id].maxGas * guarantee[id].gasPrice);
+
+    // @todo emit event
+  }
+
+  function fundOrder(uint256 id, uint256 gasPriceIncrease) public activeOrder(id) {
+    prepay[id].gasPrice += gasPriceIncrease;
+
+    IERC20(prepay[id].token).safeTransferFrom(msg.sender, address(this), gasPriceIncrease * order[id].maxGas);
+
+    // @todo emit event
   }
 
   // CALLBACKS
   // @todo add valiation that msg is approved by signer
   // @todo allow executing a portion of Gas
   // @todo add protocol fee
-  function executionCallback(uint256 _orderId, address _currentExecutor, uint256 _gasSpent) public {
-    Order storage currentOrder = orders[_orderId];
-    require(currentOrder.currentStatus == OrderStatus.Active);
-    // Active => Fulfilled
-    if (_currentExecutor != orders[_orderId].executor) {
-      // unlock executor balance
-      currentOrder.currentStatus = OrderStatus.Liquidated;
+  // function executionCallback(uint256 _orderId, address _currentExecutor, uint256 _gasSpent) public {
+  //   Order storage currentOrder = orders[_orderId];
+  //   require(currentOrder.currentStatus == OrderStatus.Active);
+  //   // Active => Fulfilled
+  //   if (_currentExecutor != orders[_orderId].executor) {
+  //     // unlock executor balance
+  //     currentOrder.currentStatus = OrderStatus.Liquidated;
 
-      IERC20(executionCost[_orderId].token).safeTransferFrom(
-        address(this),
-        currentOrder.creator,
-        executionCost[_orderId].amount
-      );
-    } else {
-      currentOrder.currentStatus = OrderStatus.Fulfilled;
+  //     IERC20(executionCost[_orderId].token).safeTransferFrom(
+  //       address(this),
+  //       currentOrder.creator,
+  //       executionCost[_orderId].amount
+  //     );
+  //   } else {
+  //     currentOrder.currentStatus = OrderStatus.Fulfilled;
 
-      IERC20(executionCost[_orderId].token).safeTransferFrom(
-        address(this),
-        _currentExecutor,
-        executionCost[_orderId].amount
-      );
-    }
+  //     IERC20(executionCost[_orderId].token).safeTransferFrom(
+  //       address(this),
+  //       _currentExecutor,
+  //       executionCost[_orderId].amount
+  //     );
+  //   }
 
-    IERC20(lockedDeposit[_orderId].token).safeTransferFrom(
-      address(this),
-      _currentExecutor,
-      lockedDeposit[_orderId].amount
-    );
-  }
+  //   IERC20(lockedDeposit[_orderId].token).safeTransferFrom(
+  //     address(this),
+  //     _currentExecutor,
+  //     lockedDeposit[_orderId].amount
+  //   );
+  // }
 
   // client (sign msg to validator)
   // validator (sign that the msg is valid, publish)
