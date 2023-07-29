@@ -1,8 +1,8 @@
 {
   "name": "prepaid_gas_executor",
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
-    "@openzeppelin/contracts": "^4.9.2",
-    "hardhat": "^2.17.0"
+    "@nomicfoundation/hardhat-toolbox": "3.0.0",
+    "@openzeppelin/contracts": "4.9.3",
+    "hardhat": "2.17.0"
   }
 }
