@@ -17,7 +17,7 @@ error UnexpectedRecovered(address recovered, address expected);
 error UnknownRecovered(address recovered);
 error IncorrectSignatureOrder(address lower, address higher);
 
-error WrongOrderStatus(OrderStatus expected);
+error WrongOrderStatus(OrderStatus received, OrderStatus expected);
 error Unauthorized(address received, address expected);
 error GasLimitExceedBalance(uint256 limit, uint256 balance);
 

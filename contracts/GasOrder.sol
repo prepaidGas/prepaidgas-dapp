@@ -70,7 +70,8 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
 
     order[id] = Order({deadline: deadline});
 
-    rewardValue.amount = _takeFee(rewardValue.token, rewardValue.amount);
+    uint256 rewardFee = _calculateFee(rewardValue.amount);
+    rewardValue.amount = rewardValue.amount - rewardFee;
 
     reward[id] = rewardValue;
     prepay[id] = prepayValue;
@@ -79,11 +80,13 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
     IERC20(rewardValue.token).safeTransferFrom(msg.sender, address(this), rewardValue.amount);
     IERC20(prepayValue.token).safeTransferFrom(msg.sender, address(this), prepayValue.gasPrice * maxGas);
 
+    _takeFee(rewardValue.token, rewardFee);
+
     emit OrderCreate(id);
   }
 
   function acceptOrder(uint256 id) public {
-    if (status(id) != OrderStatus.Pending) revert Error.WrongOrderStatus(OrderStatus.Pending);
+    if (status(id) != OrderStatus.Pending) revert Error.WrongOrderStatus(status(id), OrderStatus.Pending);
 
     executor[id] = msg.sender;
 
@@ -96,12 +99,12 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
   function retrievePrepay(uint256 id, uint256 amount) external {
     _utilize(msg.sender, msg.sender, id, amount);
 
-    IERC20(prepay[id].token).safeTransfer(msg.sender, prepay[id].gasPrice * amount);
     if (executor[id] != address(0)) _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * amount);
+    IERC20(prepay[id].token).safeTransfer(msg.sender, prepay[id].gasPrice * amount);
   }
 
   function retrieveGuarantee(uint256 id) external {
-    if (status(id) != OrderStatus.Exhausted) revert Error.WrongOrderStatus(OrderStatus.Exhausted);
+    if (status(id) != OrderStatus.Exhausted) revert Error.WrongOrderStatus(status(id), OrderStatus.Exhausted);
 
     _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * totalSupply(id));
     executor[id] = address(0);
@@ -115,19 +118,27 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
     address fulfiller,
     uint256 gasSpent
   ) external executionCallback {
+    if (status(id) != OrderStatus.Active) revert Error.WrongOrderStatus(status(id), OrderStatus.Active);
     // @todo implement infrastructure gas constant and add to gasLimit
     uint256 balance = usable(onBehalf, id, signer);
     if (gasLimit > balance) revert Error.GasLimitExceedBalance(gasLimit, balance);
 
-    // @todo gasSpent should be <= gasLimit !!!
+    if (gasSpent > balance) gasSpent = balance;
     _utilize(onBehalf, signer, id, gasSpent);
 
     if (fulfiller == address(0)) fulfiller = executor[id];
 
-    uint256 unlock = guarantee[id].gasPrice * gasSpent;
-    address unlockToken = guarantee[id].token;
-    _distribute(fulfiller, unlockToken, fulfiller != executor[id] ? _takeFee(unlockToken, unlock) : unlock);
     _distribute(fulfiller, prepay[id].token, prepay[id].gasPrice * gasSpent);
+
+    if (fulfiller == executor[id]) {
+      _distribute(fulfiller, guarantee[id].token, guarantee[id].gasPrice * gasSpent);
+    } else {
+      uint256 unlock = guarantee[id].gasPrice * gasSpent;
+      uint256 unlockFee = _calculateFee(unlock);
+      address unlockToken = guarantee[id].token;
+      _distribute(fulfiller, unlockToken, unlock - unlockFee);
+      _takeFee(unlockToken, unlockFee);
+    }
   }
 
   function status(uint256 id) public view returns (OrderStatus) {

@@ -42,12 +42,13 @@ contract FeeProcessor is Ownable2Step {
     return _treasury;
   }
 
-  function _takeFee(address token, uint256 amount) internal returns (uint256) {
-    if (_treasury == address(0)) return amount;
+  function _takeFee(address token, uint256 taken) internal {
+    if (taken > 0) IERC20(token).safeTransfer(_treasury, taken);
+  }
 
-    uint256 taken = (amount * _fee) / Const.DENOM;
-    IERC20(token).safeTransfer(_treasury, taken);
+  function _calculateFee(uint256 amount) internal view returns (uint256) {
+    if (_treasury == address(0)) return 0;
 
-    return amount - taken;
+    return (amount * _fee) / Const.DENOM;
   }
 }
