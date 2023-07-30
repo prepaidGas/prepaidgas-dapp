@@ -8,6 +8,7 @@ bytes32 constant MESSAGE_TYPE_HASH = keccak256(
   "address signer,"
   "uint256 nonce,"
   "uint256 gasOrder,"
+  "address gasPayer,"
   "uint256 deadline,"
   "address endpoint,"
   "uint256 gas,"
@@ -19,6 +20,7 @@ struct Message {
   address signer;
   uint256 nonce;
   uint256 gasOrder;
+  address gasPayer;
   uint256 deadline;
   address endpoint;
   uint256 gas;

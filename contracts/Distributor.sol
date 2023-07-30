@@ -22,12 +22,12 @@ contract Distributor is PaymentMethods {
     emit Claim(msg.sender, token, amount);
   }
 
-  function _mint(address receiver, address token, uint256 amount) internal {
+  function _distribute(address receiver, address token, uint256 amount) internal {
     _balances[receiver][token] += amount;
     emit Distribute(receiver, token, amount);
   }
 
-  function balanceOf(address user, address token) external view returns (uint256) {
+  function claimable(address user, address token) external view returns (uint256) {
     return _balances[user][token];
   }
 }

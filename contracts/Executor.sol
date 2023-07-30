@@ -44,7 +44,14 @@ contract Executor is ExecutionMessage, Validators {
 
     // @todo calculate constant base gas usage and add here
     /// @dev address(0) means registered executor should be rewarded
-    IGasOrder(gasOrder).reportExecution(message.gasOrder, address(0), gasleft() - gas);
+    IGasOrder(gasOrder).reportExecution(
+      message.gasOrder,
+      message.signer,
+      message.gasPayer,
+      message.gas,
+      address(0),
+      gasleft() - gas
+    );
   }
 
   function liquidate(
@@ -71,7 +78,14 @@ contract Executor is ExecutionMessage, Validators {
     emit Liquidated(message.signer, message.nonce, success, result, block.timestamp, msg.sender);
 
     // @todo calculate constant base gas usage and add here
-    IGasOrder(gasOrder).reportExecution(message.gasOrder, msg.sender, gasleft() - gas);
+    IGasOrder(gasOrder).reportExecution(
+      message.gasOrder,
+      message.signer,
+      message.gasPayer,
+      message.gas,
+      msg.sender,
+      gasleft() - gas
+    );
   }
 
   function _execute(Message calldata message, bytes calldata signature) private returns (bool, bytes memory) {
