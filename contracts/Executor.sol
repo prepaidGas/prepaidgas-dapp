@@ -3,11 +3,11 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import {Validators} from "./Validators.sol";
+import {Validators} from "./tools/Validators.sol";
 import {IGasOrder} from "./interfaces/IGasOrder.sol";
-import {ExecutionMessage, Message} from "./ExecutionMessage.sol";
+import {ExecutionMessage, Message} from "./base/ExecutionMessage.sol";
 
-import "./Errors.sol" as Error;
+import "./common/Errors.sol" as Error;
 
 contract Executor is ExecutionMessage, Validators {
   using ECDSA for bytes32;

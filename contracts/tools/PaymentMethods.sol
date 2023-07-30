@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
-import "./Errors.sol" as Error;
+import "./../common/Errors.sol" as Error;
 
 contract PaymentMethods is Ownable2Step {
   mapping(address => bool) private _isPaymentMethod;

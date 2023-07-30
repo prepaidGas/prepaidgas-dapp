@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.19;
 
-import "./Errors.sol" as Error;
+import "./../common/Errors.sol" as Error;
 
 // @todo make ERC1155 compatible, check what wallet need for compatibility, wrap to standard contract
 contract ERC1155ish {

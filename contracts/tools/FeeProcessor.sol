@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./Errors.sol" as Error;
-import "./Constants.sol" as Const;
+import "./../common/Errors.sol" as Error;
+import "./../common/Constants.sol" as Const;
 
 contract FeeProcessor is Ownable2Step {
   using SafeERC20 for IERC20;

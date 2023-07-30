@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.19;
 
-import {OrderStatus} from "./interfaces/IGasOrder.sol";
+import {OrderStatus} from "./../interfaces/IGasOrder.sol";
 
 error OverlowValue(uint256 value, uint256 min);
 error OverhighValue(uint256 value, uint256 max);

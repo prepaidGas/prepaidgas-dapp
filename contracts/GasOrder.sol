@@ -5,13 +5,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {IGasOrder} from "./interfaces/IGasOrder.sol";
-import {FeeProcessor} from "./FeeProcessor.sol";
-import {PaymentMethods} from "./PaymentMethods.sol";
-import {Distributor} from "./Distributor.sol";
-import {ERC1155ish} from "./ERC1155ish.sol";
+import {FeeProcessor} from "./tools/FeeProcessor.sol";
+import {PaymentMethods} from "./tools/PaymentMethods.sol";
+import {Distributor} from "./tools/Distributor.sol";
+import {ERC1155ish} from "./base/ERC1155ish.sol";
 import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
 
-import "./Errors.sol" as Error;
+import "./common/Errors.sol" as Error;
 
 /**
  * @title GasOrder

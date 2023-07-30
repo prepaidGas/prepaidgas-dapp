@@ -1,8 +1,22 @@
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
+import { HardhatUserConfig } from "hardhat/config"
+import "@nomicfoundation/hardhat-toolbox"
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.19",
-};
+  solidity: {
+    version: "0.8.19",
+    settings: {
+      viaIR: true,
+      optimizer: {
+        enabled: true,
+        runs: 200,
+        details: {
+          yulDetails: {
+            optimizerSteps: "u",
+          },
+        },
+      },
+    },
+  },
+}
 
-export default config;
+export default config

@@ -3,8 +3,8 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
-import "./Errors.sol" as Error;
-import "./Constants.sol" as Const;
+import "./../common/Errors.sol" as Error;
+import "./../common/Constants.sol" as Const;
 
 /// @dev Should be replaced with stake-to-validate implementation in future
 contract Validators is Ownable2Step {
