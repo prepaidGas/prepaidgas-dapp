@@ -47,7 +47,7 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
     _;
   }
 
-  constructor(address executionEndpoint) {
+  constructor(address executionEndpoint, string memory link) ERC1155ish(link) {
     execution = executionEndpoint;
   }
 
@@ -96,11 +96,11 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
     emit OrderAccept(id, msg.sender);
   }
 
-  function retrievePrepay(uint256 id, uint256 amount) external {
-    _utilize(msg.sender, msg.sender, id, amount);
+  function retrievePrepay(address holder, uint256 id, uint256 amount) external {
+    _utilizeOperator(holder, id, msg.sender, amount);
 
     if (executor[id] != address(0)) _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * amount);
-    IERC20(prepay[id].token).safeTransfer(msg.sender, prepay[id].gasPrice * amount);
+    IERC20(prepay[id].token).safeTransfer(holder, prepay[id].gasPrice * amount);
   }
 
   function retrieveGuarantee(uint256 id) external {
@@ -124,7 +124,7 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
     if (gasLimit > balance) revert Error.GasLimitExceedBalance(gasLimit, balance);
 
     if (gasSpent > balance) gasSpent = balance;
-    _utilize(onBehalf, signer, id, gasSpent);
+    _utilizeAllowance(onBehalf, id, signer, gasSpent);
 
     if (fulfiller == address(0)) fulfiller = executor[id];
 

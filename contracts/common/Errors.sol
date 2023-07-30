@@ -21,4 +21,5 @@ error WrongOrderStatus(OrderStatus received, OrderStatus expected);
 error Unauthorized(address received, address expected);
 error GasLimitExceedBalance(uint256 limit, uint256 balance);
 
-error MissingAllowance(uint256 requested, uint256 allowed);
+error BalanceExhausted(uint256 requested, uint256 allowed);
+error NotOperator(address holder, address spender);
