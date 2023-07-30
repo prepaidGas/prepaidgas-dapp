@@ -2,7 +2,6 @@
 pragma solidity 0.8.19;
 
 struct Order {
-  uint256 maxGas;
   uint256 deadline;
 }
 

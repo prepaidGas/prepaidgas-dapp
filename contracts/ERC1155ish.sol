@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.19;
 
+import "./Errors.sol" as Error;
+
 contract ERC1155ish {
   event Transfer(address indexed from, address indexed to, uint256 id, uint256 amount);
   event Approval(address indexed from, address indexed to, uint256 id, uint256 amount);
@@ -34,7 +36,8 @@ contract ERC1155ish {
   }
 
   function _utilize(address from, address by, uint256 id, uint256 amount) internal {
-    require(by == from || _allowance[from][id][by] >= amount);
+    if (by != from && _allowance[from][id][by] < amount)
+      revert Error.MissingAllowance(amount, _allowance[from][id][by]);
 
     _balanceOf[from][id] -= amount;
     unchecked {
@@ -52,7 +55,16 @@ contract ERC1155ish {
     return _totalSupply[id];
   }
 
-  function allowance(address from, uint256 id, address to) public view returns (uint256) {
+  function allowance(address from, uint256 id, address to) external view returns (uint256) {
     return _allowance[from][id][to];
+  }
+
+  function usable(address from, uint256 id, address by) public view returns (uint256) {
+    uint256 possible = _balanceOf[from][id];
+    uint256 boundary = _allowance[from][id][by];
+
+    if (from == by) return possible;
+    if (possible > boundary) return boundary;
+    return possible;
   }
 }

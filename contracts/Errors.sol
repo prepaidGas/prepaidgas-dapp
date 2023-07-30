@@ -19,3 +19,6 @@ error IncorrectSignatureOrder(address lower, address higher);
 
 error WrongOrderStatus(OrderStatus expected);
 error Unauthorized(address received, address expected);
+error GasLimitExceedBalance(uint256 limit, uint256 balance);
+
+error MissingAllowance(uint256 requested, uint256 allowed);

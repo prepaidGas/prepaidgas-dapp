@@ -35,30 +35,31 @@ contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
   mapping(uint256 => address) public executor;
 
   event OrderCreate(uint256 id);
+  event OrderAccept(uint256 id);
 
-  modifier onlyExecutionManager() {
+  modifier executionCallback() {
     if (execution != msg.sender) revert Error.Unauthorized(msg.sender, execution);
     _;
   }
 
-  modifier deadlineNotMet(uint256 expire) {
-    if (expire <= block.timestamp) revert Error.DeadlineExpired(block.timestamp, expire);
+  modifier deadlineNotMet(uint256 deadline) {
+    if (deadline <= block.timestamp) revert Error.DeadlineExpired(block.timestamp, deadline);
     _;
   }
 
-  constructor(address executionManager) {
-    execution = executionManager;
+  constructor(address execEndpoint) {
+    execution = execEndpoint;
   }
 
   function createOrder(
     uint256 maxGas,
-    uint256 expire,
+    uint256 deadline,
     Payment calldata cliffValue,
     GasPayment calldata prepayValue,
     GasPayment calldata guaranteeValue
   )
     external
-    deadlineNotMet(expire)
+    deadlineNotMet(deadline)
     paymentMethod(cliffValue.token)
     paymentMethod(prepayValue.token)
     paymentMethod(guaranteeValue.token)
@@ -67,7 +68,7 @@ contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
 
     _mint(msg.sender, id, maxGas);
 
-    order[id] = Order({deadline: expire, maxGas: maxGas});
+    order[id] = Order({deadline: deadline});
     cliff[id] = cliffValue;
     prepay[id] = prepayValue;
     guarantee[id] = guaranteeValue;
@@ -78,22 +79,6 @@ contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
     emit OrderCreate(id);
   }
 
-  function retrievePrepay(uint256 id) external {
-    uint256 amount = balanceOf(msg.sender, id);
-    _utilize(msg.sender, msg.sender, id, amount);
-
-    IERC20(prepay[id].token).safeTransfer(msg.sender, prepay[id].gasPrice * amount);
-    if (status(id) == OrderStatus.Fulfilled)
-      _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * amount);
-  }
-
-  function retrieveGuarantee(uint256 id) external {
-    if (status(id) == OrderStatus.Exhausted) revert Error.WrongOrderStatus(OrderStatus.Exhausted);
-
-    _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * totalSupply(id));
-    executor[id] = address(1);
-  }
-
   function acceptOrder(uint256 id) public {
     if (status(id) != OrderStatus.Pending) revert Error.WrongOrderStatus(OrderStatus.Pending);
 
@@ -102,7 +87,22 @@ contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
     IERC20(guarantee[id].token).safeTransferFrom(msg.sender, address(this), totalSupply(id) * guarantee[id].gasPrice);
     IERC20(cliff[id].token).safeTransfer(msg.sender, cliff[id].amount);
 
-    // @todo emit event
+    emit OrderAccept(id);
+  }
+
+  function retrievePrepay(uint256 id, uint256 amount) external {
+    _utilize(msg.sender, msg.sender, id, amount);
+
+    IERC20(prepay[id].token).safeTransfer(msg.sender, prepay[id].gasPrice * amount);
+    if (status(id) != OrderStatus.Fulfilled && executor[id] != address(0))
+      _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * amount);
+  }
+
+  function retrieveGuarantee(uint256 id) external {
+    if (status(id) != OrderStatus.Exhausted) revert Error.WrongOrderStatus(OrderStatus.Exhausted);
+
+    _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * totalSupply(id));
+    executor[id] = address(0);
   }
 
   function reportExecution(
@@ -112,13 +112,12 @@ contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
     uint256 gasLimit,
     address fulfiller,
     uint256 gasSpent
-  ) external onlyExecutionManager {
+  ) external executionCallback {
     // @todo implement infrastructure gas constant and add to gasLimit
-    if (signer == onBehalf) {
-      if (gasLimit > balanceOf(signer, id)) revert();
-    } else {
-      if (gasLimit > allowance(onBehalf, id, signer)) revert();
-    }
+    uint256 balance = usable(onBehalf, id, signer);
+    if (gasLimit > balance) revert Error.GasLimitExceedBalance(gasLimit, balance);
+
+    // @todo gasSpent should be <= gasLimit !!!
     _utilize(onBehalf, signer, id, gasSpent);
 
     if (fulfiller == address(0)) fulfiller = executor[id];
@@ -128,7 +127,7 @@ contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
 
   function status(uint256 id) public view returns (OrderStatus) {
     if (totalSupply(id) == 0) return OrderStatus.Fulfilled;
-    if (executor[id] == address(1)) return OrderStatus.Fulfilled;
+    if (executor[id] == address(0) && order[id].deadline < block.timestamp) return OrderStatus.Fulfilled;
 
     if (order[id].deadline < block.timestamp) return OrderStatus.Exhausted;
 
