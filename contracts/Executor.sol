@@ -17,8 +17,26 @@ contract Executor is ExecutionMessage, Validators {
 
   mapping(address => mapping(uint256 => bool)) public nonces;
 
-  event Executed(address signer, uint256 nonce, bool status, bytes result, uint256 timestamp, address executor);
-  event Liquidated(address signer, uint256 nonce, bool status, bytes result, uint256 timestamp, address liquidator);
+  event Executed(
+    address signer,
+    uint256 nonce,
+    uint256 gasOrder,
+    address onBehalf,
+    bool status,
+    bytes result,
+    uint256 timestamp,
+    address executor
+  );
+  event Liquidated(
+    address signer,
+    uint256 nonce,
+    uint256 gasOrder,
+    address onBehalf,
+    bool status,
+    bytes result,
+    uint256 timestamp,
+    address liquidator
+  );
 
   modifier validNonce(address signer, uint256 nonce) {
     if (nonces[signer][nonce]) revert Error.NonceExhausted(signer, nonce);
@@ -39,13 +57,22 @@ contract Executor is ExecutionMessage, Validators {
     bytes calldata signature
   ) external validNonce(message.signer, message.nonce) {
     (bool success, bytes memory result, uint256 gasSpent) = _execute(message, signature);
-    emit Executed(message.signer, message.nonce, success, result, block.timestamp, msg.sender);
+    emit Executed(
+      message.signer,
+      message.nonce,
+      message.gasOrder,
+      message.onBehalf,
+      success,
+      result,
+      block.timestamp,
+      msg.sender
+    );
 
     /// @dev address(0) means registered executor should be rewarded
     IGasOrder(gasOrder).reportExecution(
       message.gasOrder,
       message.signer,
-      message.gasPayer,
+      message.onBehalf,
       message.gas + Const.INFR_GAS_EXECUTE,
       address(0),
       gasSpent + Const.INFR_GAS_EXECUTE
@@ -71,13 +98,22 @@ contract Executor is ExecutionMessage, Validators {
     }
 
     (bool success, bytes memory result, uint256 gasSpent) = _execute(message, signature);
-    emit Liquidated(message.signer, message.nonce, success, result, block.timestamp, msg.sender);
+    emit Liquidated(
+      message.signer,
+      message.nonce,
+      message.gasOrder,
+      message.onBehalf,
+      success,
+      result,
+      block.timestamp,
+      msg.sender
+    );
 
     uint256 infrastructureGas = Const.INFR_GAS_LIQUIDATE + Const.INFR_GAS_RECOVER_SIGNER * validatorThreshold();
     IGasOrder(gasOrder).reportExecution(
       message.gasOrder,
       message.signer,
-      message.gasPayer,
+      message.onBehalf,
       message.gas + infrastructureGas,
       msg.sender,
       gasSpent + infrastructureGas
