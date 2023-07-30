@@ -20,8 +20,6 @@ contract Validators is Ownable2Step {
     _;
   }
 
-  constructor() Ownable2Step() {}
-
   function setValidatorThreshold(uint256 value) external onlyOwner {
     if (value < Const.MIN_THRESHOLD) revert Error.OverlowValue(value, Const.MIN_THRESHOLD);
 

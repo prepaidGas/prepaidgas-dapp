@@ -1,1 +1,3 @@
-# Prepaid Gas Executor
+# Prepaid Gas Platform
+
+prepaidgas.io

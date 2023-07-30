@@ -15,8 +15,6 @@ contract PaymentMethods is Ownable2Step {
     _;
   }
 
-  constructor() Ownable2Step() {}
-
   function setPaymentMethodStatus(address token, bool status) external onlyOwner {
     bool old = _isPaymentMethod[token];
     _isPaymentMethod[token] = status;

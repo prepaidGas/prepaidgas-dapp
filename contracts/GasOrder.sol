@@ -20,7 +20,7 @@ import "./Errors.sol" as Error;
  * @author SteMak, markfender
  */
 
-contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
+contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
   using SafeERC20 for IERC20;
 
   address public immutable execution;
@@ -28,14 +28,14 @@ contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
   uint256 public orders;
   mapping(uint256 => Order) public order;
 
-  mapping(uint256 => Payment) public cliff;
+  mapping(uint256 => Payment) public reward;
   mapping(uint256 => GasPayment) public prepay;
   mapping(uint256 => GasPayment) public guarantee;
 
   mapping(uint256 => address) public executor;
 
   event OrderCreate(uint256 id);
-  event OrderAccept(uint256 id);
+  event OrderAccept(uint256 id, address executor);
 
   modifier executionCallback() {
     if (execution != msg.sender) revert Error.Unauthorized(msg.sender, execution);
@@ -47,20 +47,20 @@ contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
     _;
   }
 
-  constructor(address execEndpoint) {
-    execution = execEndpoint;
+  constructor(address executionEndpoint) {
+    execution = executionEndpoint;
   }
 
   function createOrder(
     uint256 maxGas,
     uint256 deadline,
-    Payment calldata cliffValue,
+    Payment memory rewardValue,
     GasPayment calldata prepayValue,
     GasPayment calldata guaranteeValue
   )
     external
     deadlineNotMet(deadline)
-    paymentMethod(cliffValue.token)
+    paymentMethod(rewardValue.token)
     paymentMethod(prepayValue.token)
     paymentMethod(guaranteeValue.token)
   {
@@ -69,11 +69,14 @@ contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
     _mint(msg.sender, id, maxGas);
 
     order[id] = Order({deadline: deadline});
-    cliff[id] = cliffValue;
+
+    rewardValue.amount = _takeFee(rewardValue.token, rewardValue.amount);
+
+    reward[id] = rewardValue;
     prepay[id] = prepayValue;
     guarantee[id] = guaranteeValue;
 
-    IERC20(cliffValue.token).safeTransferFrom(msg.sender, address(this), cliffValue.amount);
+    IERC20(rewardValue.token).safeTransferFrom(msg.sender, address(this), rewardValue.amount);
     IERC20(prepayValue.token).safeTransferFrom(msg.sender, address(this), prepayValue.gasPrice * maxGas);
 
     emit OrderCreate(id);
@@ -85,17 +88,16 @@ contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
     executor[id] = msg.sender;
 
     IERC20(guarantee[id].token).safeTransferFrom(msg.sender, address(this), totalSupply(id) * guarantee[id].gasPrice);
-    IERC20(cliff[id].token).safeTransfer(msg.sender, cliff[id].amount);
+    IERC20(reward[id].token).safeTransfer(msg.sender, reward[id].amount);
 
-    emit OrderAccept(id);
+    emit OrderAccept(id, msg.sender);
   }
 
   function retrievePrepay(uint256 id, uint256 amount) external {
     _utilize(msg.sender, msg.sender, id, amount);
 
     IERC20(prepay[id].token).safeTransfer(msg.sender, prepay[id].gasPrice * amount);
-    if (status(id) != OrderStatus.Fulfilled && executor[id] != address(0))
-      _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * amount);
+    if (executor[id] != address(0)) _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * amount);
   }
 
   function retrieveGuarantee(uint256 id) external {
@@ -121,8 +123,11 @@ contract GasOrder is FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
     _utilize(onBehalf, signer, id, gasSpent);
 
     if (fulfiller == address(0)) fulfiller = executor[id];
+
+    uint256 unlock = guarantee[id].gasPrice * gasSpent;
+    address unlockToken = guarantee[id].token;
+    _distribute(fulfiller, unlockToken, fulfiller != executor[id] ? _takeFee(unlockToken, unlock) : unlock);
     _distribute(fulfiller, prepay[id].token, prepay[id].gasPrice * gasSpent);
-    _distribute(fulfiller, guarantee[id].token, guarantee[id].gasPrice * gasSpent);
   }
 
   function status(uint256 id) public view returns (OrderStatus) {

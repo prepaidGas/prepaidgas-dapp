@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import "./Errors.sol" as Error;
 
+// @todo make ERC1155 compatible, check what wallet need for compatibility, wrap to standard contract
 contract ERC1155ish {
   event Transfer(address indexed from, address indexed to, uint256 id, uint256 amount);
   event Approval(address indexed from, address indexed to, uint256 id, uint256 amount);
@@ -20,6 +21,7 @@ contract ERC1155ish {
     emit Transfer(msg.sender, to, id, amount);
   }
 
+  // @todo increase/decrease function
   function approve(address to, uint256 id, uint256 amount) external {
     _allowance[msg.sender][id][to] = amount;
 
@@ -36,8 +38,11 @@ contract ERC1155ish {
   }
 
   function _utilize(address from, address by, uint256 id, uint256 amount) internal {
+    // @todo check for operator approval
     if (by != from && _allowance[from][id][by] < amount)
       revert Error.MissingAllowance(amount, _allowance[from][id][by]);
+
+    if (by != from) _allowance[from][id][by] -= amount;
 
     _balanceOf[from][id] -= amount;
     unchecked {
@@ -63,8 +68,7 @@ contract ERC1155ish {
     uint256 possible = _balanceOf[from][id];
     uint256 boundary = _allowance[from][id][by];
 
-    if (from == by) return possible;
-    if (possible > boundary) return boundary;
+    if (from != by && possible > boundary) return boundary;
     return possible;
   }
 }
