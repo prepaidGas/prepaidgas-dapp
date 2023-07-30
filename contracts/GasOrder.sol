@@ -119,7 +119,7 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
     uint256 gasSpent
   ) external executionCallback {
     if (status(id) != OrderStatus.Active) revert Error.WrongOrderStatus(status(id), OrderStatus.Active);
-    // @todo implement infrastructure gas constant and add to gasLimit
+
     uint256 balance = usable(onBehalf, id, signer);
     if (gasLimit > balance) revert Error.GasLimitExceedBalance(gasLimit, balance);
 

@@ -8,6 +8,7 @@ import {IGasOrder} from "./interfaces/IGasOrder.sol";
 import {ExecutionMessage, Message} from "./base/ExecutionMessage.sol";
 
 import "./common/Errors.sol" as Error;
+import "./common/Constants.sol" as Const;
 
 contract Executor is ExecutionMessage, Validators {
   using ECDSA for bytes32;
@@ -37,20 +38,17 @@ contract Executor is ExecutionMessage, Validators {
     Message calldata message,
     bytes calldata signature
   ) external validNonce(message.signer, message.nonce) {
-    uint256 gas = gasleft();
-
-    (bool success, bytes memory result) = _execute(message, signature);
+    (bool success, bytes memory result, uint256 gasSpent) = _execute(message, signature);
     emit Executed(message.signer, message.nonce, success, result, block.timestamp, msg.sender);
 
-    // @todo calculate constant base gas usage and add here
     /// @dev address(0) means registered executor should be rewarded
     IGasOrder(gasOrder).reportExecution(
       message.gasOrder,
       message.signer,
       message.gasPayer,
-      message.gas,
+      message.gas + Const.INFR_GAS_EXECUTE,
       address(0),
-      gasleft() - gas
+      gasSpent + Const.INFR_GAS_EXECUTE
     );
   }
 
@@ -64,8 +62,6 @@ contract Executor is ExecutionMessage, Validators {
     deadlineMet(message.deadline)
     validNonce(message.signer, message.nonce)
   {
-    uint256 gas = gasleft();
-
     address last;
     for (uint256 i = 0; i < validatorThreshold(); i++) {
       bytes32 digest = messageHash(message);
@@ -74,27 +70,32 @@ contract Executor is ExecutionMessage, Validators {
       if (!isValidator(recovered)) revert Error.UnknownRecovered(recovered);
     }
 
-    (bool success, bytes memory result) = _execute(message, signature);
+    (bool success, bytes memory result, uint256 gasSpent) = _execute(message, signature);
     emit Liquidated(message.signer, message.nonce, success, result, block.timestamp, msg.sender);
 
-    // @todo calculate constant base gas usage and add here
+    uint256 infrastructureGas = Const.INFR_GAS_LIQUIDATE + Const.INFR_GAS_RECOVER_SIGNER * validatorThreshold();
     IGasOrder(gasOrder).reportExecution(
       message.gasOrder,
       message.signer,
       message.gasPayer,
-      message.gas,
+      message.gas + infrastructureGas,
       msg.sender,
-      gasleft() - gas
+      gasSpent + infrastructureGas
     );
   }
 
-  function _execute(Message calldata message, bytes calldata signature) private returns (bool, bytes memory) {
+  function _execute(
+    Message calldata message,
+    bytes calldata signature
+  ) private returns (bool success, bytes memory result, uint256 gasSpent) {
     bytes32 digest = messageHash(message);
     address recovered = digest.recover(signature);
     if (recovered != message.signer) revert Error.UnexpectedRecovered(recovered, message.signer);
 
     nonces[message.signer][message.nonce] = true;
 
-    return address(message.endpoint).call{gas: message.gas}(message.data);
+    uint256 gas = gasleft();
+    (success, result) = address(message.endpoint).call{gas: message.gas}(message.data);
+    gasSpent = gas - gasleft() - Const.INFR_GAS_GET_GAS_SPENT;
   }
 }
