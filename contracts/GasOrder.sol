@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {IGasOrder} from "./interfaces/IGasOrder.sol";
 import {FeeProcessor} from "./tools/FeeProcessor.sol";
-import {PaymentMethods} from "./tools/PaymentMethods.sol";
 import {Distributor} from "./tools/Distributor.sol";
 import {ERC1155ish} from "./base/ERC1155ish.sol";
 import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
@@ -20,7 +19,7 @@ import "./common/Errors.sol" as Error;
  * @author SteMak, markfender
  */
 
-contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
+contract GasOrder is IGasOrder, FeeProcessor, Distributor, ERC1155ish {
   using SafeERC20 for IERC20;
 
   address public immutable execution;
@@ -57,13 +56,7 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
     Payment memory rewardValue,
     GasPayment calldata prepayValue,
     GasPayment calldata guaranteeValue // @todo replace with payment
-  )
-    external
-    deadlineNotMet(deadline)
-    paymentMethod(rewardValue.token)
-    paymentMethod(prepayValue.token)
-    paymentMethod(guaranteeValue.token)
-  {
+  ) external deadlineNotMet(deadline) {
     uint256 id = orders++; // @todo (proposal) start from number 1
 
     _mint(msg.sender, id, maxGas);

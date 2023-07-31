@@ -4,9 +4,7 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import {PaymentMethods} from "./PaymentMethods.sol";
-
-contract Distributor is PaymentMethods {
+contract Distributor {
   using SafeERC20 for IERC20;
 
   mapping(address => mapping(address => uint256)) private _balances;
@@ -14,7 +12,7 @@ contract Distributor is PaymentMethods {
   event Distribute(address receiver, address token, uint256 amount);
   event Claim(address receiver, address token, uint256 amount);
 
-  function claim(address token) external paymentMethod(token) {
+  function claim(address token) external {
     uint256 amount = _balances[msg.sender][token];
     _balances[msg.sender][token] = 0;
 

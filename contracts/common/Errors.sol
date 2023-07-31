@@ -7,7 +7,6 @@ error OverlowValue(uint256 value, uint256 min);
 error OverhighValue(uint256 value, uint256 max);
 
 error FewValidations(uint256 value, uint256 min);
-error NotPaymentMethod(address token);
 
 error NonceExhausted(address signer, uint256 nonce);
 error DeadlineNotMet(uint256 timestamp, uint256 deadline);
