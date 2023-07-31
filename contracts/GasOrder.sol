@@ -56,7 +56,7 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
     uint256 deadline,
     Payment memory rewardValue,
     GasPayment calldata prepayValue,
-    GasPayment calldata guaranteeValue
+    GasPayment calldata guaranteeValue // @todo replace with payment
   )
     external
     deadlineNotMet(deadline)
@@ -64,7 +64,7 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
     paymentMethod(prepayValue.token)
     paymentMethod(guaranteeValue.token)
   {
-    uint256 id = orders++;
+    uint256 id = orders++; // @todo (proposal) start from number 1
 
     _mint(msg.sender, id, maxGas);
 

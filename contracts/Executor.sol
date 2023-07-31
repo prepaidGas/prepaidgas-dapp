@@ -89,13 +89,8 @@ contract Executor is ExecutionMessage, Validators {
     deadlineMet(message.deadline)
     validNonce(message.signer, message.nonce)
   {
-    address last;
-    for (uint256 i = 0; i < validatorThreshold(); i++) {
-      bytes32 digest = messageHash(message);
-      address recovered = digest.recover(validations[i]);
-      if (last >= recovered) revert Error.IncorrectSignatureOrder(last, recovered);
-      if (!isValidator(recovered)) revert Error.UnknownRecovered(recovered);
-    }
+    // @todo review function
+    _validateSignaturesAndValidators(message, validations);
 
     (bool success, bytes memory result, uint256 gasSpent) = _execute(message, signature);
     emit Liquidated(
@@ -108,7 +103,21 @@ contract Executor is ExecutionMessage, Validators {
       block.timestamp,
       msg.sender
     );
+    // @todo review function
+    _reportGasExecution(message, gasSpent);
+  }
 
+  function _validateSignaturesAndValidators(Message calldata message, bytes[] calldata validations) private view {
+    address last;
+    for (uint256 i = 0; i < validatorThreshold(); i++) {
+      bytes32 digest = messageHash(message);
+      address recovered = digest.recover(validations[i]);
+      if (last >= recovered) revert Error.IncorrectSignatureOrder(last, recovered);
+      if (!isValidator(recovered)) revert Error.UnknownRecovered(recovered);
+    }
+  }
+
+  function _reportGasExecution(Message calldata message, uint256 gasSpent) private {
     uint256 infrastructureGas = Const.INFR_GAS_LIQUIDATE + Const.INFR_GAS_RECOVER_SIGNER * validatorThreshold();
     IGasOrder(gasOrder).reportExecution(
       message.gasOrder,

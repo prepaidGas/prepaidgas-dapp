@@ -11,7 +11,7 @@ enum OrderStatus {
   Exhausted,
   Fulfilled
 }
-
+// @todo (proposal) remove separate struct for GasPayment
 struct GasPayment {
   address token;
   uint256 gasPrice;
