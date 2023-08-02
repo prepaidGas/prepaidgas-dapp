@@ -4,10 +4,7 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import {IGasOrder} from "./interfaces/IGasOrder.sol";
 import {FeeProcessor} from "./tools/FeeProcessor.sol";
-import {PaymentMethods} from "./tools/PaymentMethods.sol";
-import {Distributor} from "./tools/Distributor.sol";
 import {ERC1155ish} from "./base/ERC1155ish.sol";
 import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
 
@@ -20,7 +17,7 @@ import "./common/Errors.sol" as Error;
  * @author SteMak, markfender
  */
 
-contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC1155ish {
+contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   using SafeERC20 for IERC20;
 
   address public immutable execution;
@@ -57,30 +54,21 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
     Payment memory rewardValue,
     GasPayment calldata prepayValue,
     GasPayment calldata guaranteeValue
-  )
-    external
-    deadlineNotMet(deadline)
-    paymentMethod(rewardValue.token)
-    paymentMethod(prepayValue.token)
-    paymentMethod(guaranteeValue.token)
-  {
+  ) external deadlineNotMet(deadline) {
     uint256 id = orders++;
 
     _mint(msg.sender, id, maxGas);
 
     order[id] = Order({deadline: deadline});
 
-    uint256 rewardFee = _calculateFee(rewardValue.amount);
-    rewardValue.amount = rewardValue.amount - rewardFee;
-
     reward[id] = rewardValue;
+    reward[id].amount = _takeFee(rewardValue.token, rewardValue.amount);
     prepay[id] = prepayValue;
     guarantee[id] = guaranteeValue;
 
+    // @todo allow fee on transfer tokens
     IERC20(rewardValue.token).safeTransferFrom(msg.sender, address(this), rewardValue.amount);
     IERC20(prepayValue.token).safeTransferFrom(msg.sender, address(this), prepayValue.gasPrice * maxGas);
-
-    _takeFee(rewardValue.token, rewardFee);
 
     emit OrderCreate(id);
   }
@@ -133,11 +121,8 @@ contract GasOrder is IGasOrder, FeeProcessor, PaymentMethods, Distributor, ERC11
     if (fulfiller == executor[id]) {
       _distribute(fulfiller, guarantee[id].token, guarantee[id].gasPrice * gasSpent);
     } else {
-      uint256 unlock = guarantee[id].gasPrice * gasSpent;
-      uint256 unlockFee = _calculateFee(unlock);
       address unlockToken = guarantee[id].token;
-      _distribute(fulfiller, unlockToken, unlock - unlockFee);
-      _takeFee(unlockToken, unlockFee);
+      _distribute(fulfiller, unlockToken, _takeFee(unlockToken, guarantee[id].gasPrice * gasSpent));
     }
   }
 

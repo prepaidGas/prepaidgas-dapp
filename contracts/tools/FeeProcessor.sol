@@ -3,15 +3,12 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Distributor} from "./Distributor.sol";
 
 import "./../common/Errors.sol" as Error;
 import "./../common/Constants.sol" as Const;
 
-contract FeeProcessor is Ownable2Step {
-  using SafeERC20 for IERC20;
-
+contract FeeProcessor is Ownable2Step, Distributor {
   address private _treasury;
   uint256 private _fee;
 
@@ -42,13 +39,14 @@ contract FeeProcessor is Ownable2Step {
     return _treasury;
   }
 
-  function _takeFee(address token, uint256 taken) internal {
-    if (taken > 0) IERC20(token).safeTransfer(_treasury, taken);
+  function _takeFee(address token, uint256 amount) internal returns (uint256) {
+    uint256 taken = (amount * _fee) / Const.DENOM;
+    if (taken > 0) _distribute(Const.TREASURY, token, taken);
+
+    return amount - taken;
   }
 
-  function _calculateFee(uint256 amount) internal view returns (uint256) {
-    if (_treasury == address(0)) return 0;
-
-    return (amount * _fee) / Const.DENOM;
+  function takeAway(address token, uint256 amount) external onlyOwner {
+    _claim(Const.TREASURY, token, amount);
   }
 }

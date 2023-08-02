@@ -4,9 +4,9 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import {PaymentMethods} from "./PaymentMethods.sol";
+import "./../common/Errors.sol" as Error;
 
-contract Distributor is PaymentMethods {
+contract Distributor {
   using SafeERC20 for IERC20;
 
   mapping(address => mapping(address => uint256)) private _balances;
@@ -14,12 +14,16 @@ contract Distributor is PaymentMethods {
   event Distribute(address receiver, address token, uint256 amount);
   event Claim(address receiver, address token, uint256 amount);
 
-  function claim(address token) external paymentMethod(token) {
-    uint256 amount = _balances[msg.sender][token];
-    _balances[msg.sender][token] = 0;
+  function claim(address token, uint256 amount) external {
+    _claim(msg.sender, token, amount);
+  }
 
-    IERC20(token).safeTransfer(msg.sender, amount);
-    emit Claim(msg.sender, token, amount);
+  function _claim(address user, address token, uint256 amount) internal {
+    if (_balances[user][token] < amount) revert Error.BalanceExhausted(amount, _balances[user][token]);
+    _balances[user][token] -= amount;
+
+    IERC20(token).safeTransfer(user, amount);
+    emit Claim(user, token, amount);
   }
 
   function _distribute(address receiver, address token, uint256 amount) internal {
