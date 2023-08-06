@@ -36,10 +36,14 @@ contract Distributor {
   }
 
   /// @dev be carefull with usage as writing the function result to storage brokes CEI
-  function _acceptIncoming(address token, address user, uint256 amount) internal returns (uint256) {
+  function _acceptIncoming(address token, address user, uint256 amount, uint256 expected) internal {
     uint256 pre = IERC20(token).balanceOf(address(this));
     IERC20(token).safeTransferFrom(user, address(this), amount);
-    return IERC20(token).balanceOf(address(this)) - pre;
+    uint256 incoming = IERC20(token).balanceOf(address(this)) - pre;
+
+    if (incoming < expected) revert Error.BadIncomeTransfer(incoming, expected);
+
+    _distribute(msg.sender, token, incoming - expected);
   }
 
   function claimable(address user, address token) external view returns (uint256) {
