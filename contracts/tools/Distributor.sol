@@ -19,6 +19,8 @@ contract Distributor {
   }
 
   function _claim(address user, address token, uint256 amount) internal {
+    if (amount == 0) return;
+
     if (_balances[user][token] < amount) revert Error.BalanceExhausted(amount, _balances[user][token]);
     _balances[user][token] -= amount;
 
@@ -27,8 +29,17 @@ contract Distributor {
   }
 
   function _distribute(address receiver, address token, uint256 amount) internal {
+    if (amount == 0) return;
+
     _balances[receiver][token] += amount;
     emit Distribute(receiver, token, amount);
+  }
+
+  /// @dev be carefull with usage as writing the function result to storage brokes CEI
+  function _acceptIncoming(address token, address user, uint256 amount) internal returns (uint256) {
+    uint256 pre = IERC20(token).balanceOf(address(this));
+    IERC20(token).safeTransferFrom(user, address(this), amount);
+    return IERC20(token).balanceOf(address(this)) - pre;
   }
 
   function claimable(address user, address token) external view returns (uint256) {

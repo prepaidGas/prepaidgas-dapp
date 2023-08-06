@@ -51,35 +51,46 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   function createOrder(
     uint256 maxGas,
     uint256 deadline,
-    Payment memory rewardValue,
+    Payment calldata rewardValue,
     GasPayment calldata prepayValue,
-    GasPayment calldata guaranteeValue
+    GasPayment calldata guaranteeValue,
+    uint256 rewardTransfer,
+    uint256 prepayTransfer
   ) external deadlineNotMet(deadline) {
     uint256 id = orders++;
-
-    _mint(msg.sender, id, maxGas);
 
     order[id] = Order({deadline: deadline});
 
     reward[id] = rewardValue;
-    reward[id].amount = _takeFee(rewardValue.token, rewardValue.amount);
     prepay[id] = prepayValue;
     guarantee[id] = guaranteeValue;
 
-    // @todo allow fee on transfer tokens
-    IERC20(rewardValue.token).safeTransferFrom(msg.sender, address(this), rewardValue.amount);
-    IERC20(prepayValue.token).safeTransferFrom(msg.sender, address(this), prepayValue.gasPrice * maxGas);
+    uint256 incomeReward = _acceptIncoming(rewardValue.token, msg.sender, rewardTransfer);
+    if (incomeReward < rewardValue.amount) revert Error.BadIncomeTransfer(incomeReward, rewardValue.amount);
+    _distribute(msg.sender, rewardValue.token, incomeReward - rewardValue.amount);
+
+    uint256 incomePrepay = _acceptIncoming(prepayValue.token, msg.sender, prepayTransfer);
+    uint256 expectedPrepay = prepayValue.gasPrice * maxGas;
+    if (incomePrepay < expectedPrepay) revert Error.BadIncomeTransfer(incomePrepay, expectedPrepay);
+    _distribute(msg.sender, prepayValue.token, incomePrepay - expectedPrepay);
+
+    /// @dev before mint is called entering to all the functions (for the id) is impossible
+    _mint(msg.sender, id, maxGas);
 
     emit OrderCreate(id);
   }
 
-  function acceptOrder(uint256 id) public {
+  function acceptOrder(uint256 id, uint256 guaranteeTransfer) public {
     if (status(id) != OrderStatus.Pending) revert Error.WrongOrderStatus(status(id), OrderStatus.Pending);
 
     executor[id] = msg.sender;
 
-    IERC20(guarantee[id].token).safeTransferFrom(msg.sender, address(this), totalSupply(id) * guarantee[id].gasPrice);
-    IERC20(reward[id].token).safeTransfer(msg.sender, reward[id].amount);
+    uint256 incomeGuarantee = _acceptIncoming(guarantee[id].token, msg.sender, guaranteeTransfer);
+    uint256 expectedGuarantee = totalSupply(id) * guarantee[id].gasPrice;
+    if (incomeGuarantee < expectedGuarantee) revert Error.BadIncomeTransfer(incomeGuarantee, expectedGuarantee);
+    _distribute(msg.sender, guarantee[id].token, incomeGuarantee - expectedGuarantee);
+
+    IERC20(reward[id].token).safeTransfer(msg.sender, _takeFee(reward[id].token, reward[id].amount));
 
     emit OrderAccept(id, msg.sender);
   }
