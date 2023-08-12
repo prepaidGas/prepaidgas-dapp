@@ -87,13 +87,23 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     prepay[id] = prepayValue;
     guarantee[id] = guaranteeValue;
 
-    _acceptIncoming(rewardValue.token, msg.sender, rewardTransfer, rewardValue.amount);
-    _acceptIncoming(prepayValue.token, msg.sender, prepayTransfer, prepayValue.gasPrice * maxGas);
+    _acceptIncomingOrderCreate(maxGas, rewardValue, prepayValue, rewardTransfer, prepayTransfer);
 
     emit OrderCreate(id, executionWindow);
   }
 
-  function acceptOrder(uint256 id, uint256 guaranteeTransfer) public specificStatus(id, OrderStatus.Pending) {
+  function _acceptIncomingOrderCreate(
+    uint256 maxGas,
+    Payment calldata rewardValue,
+    GasPayment calldata prepayValue,
+    uint256 rewardTransfer,
+    uint256 prepayTransfer
+  ) private {
+    _acceptIncoming(rewardValue.token, msg.sender, rewardTransfer, rewardValue.amount);
+    _acceptIncoming(prepayValue.token, msg.sender, prepayTransfer, prepayValue.gasPrice * maxGas);
+  }
+
+  function acceptOrder(uint256 id, uint256 guaranteeTransfer) external specificStatus(id, OrderStatus.Pending) {
     executor[id] = msg.sender;
     _mint(order[id].creator, id, order[id].maxGas);
 
