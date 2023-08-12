@@ -11,9 +11,11 @@ contract Validators is Ownable2Step {
   uint256 private _validatorThreshold;
 
   mapping(address => bool) private _isValidator;
+  mapping(address => string) private _validatorURI;
 
   event UpdateValidatorThreshold(uint256 old, uint256 current);
   event UpdateValidatorStatus(address indexed validator, bool old, bool current);
+  event UpdateValidatorURI(address indexed validator, string old, string current);
 
   modifier enoughValidations(uint256 validations) {
     if (_validatorThreshold > validations) revert Error.FewValidations(validations, _validatorThreshold);
@@ -36,11 +38,24 @@ contract Validators is Ownable2Step {
     emit UpdateValidatorStatus(validator, old, status);
   }
 
+  function setValidatorLink(string calldata link) external {
+    address validator = msg.sender;
+
+    string memory old = _validatorURI[validator];
+    _validatorURI[validator] = link;
+
+    emit UpdateValidatorURI(validator, old, link);
+  }
+
   function validatorThreshold() public view returns (uint256) {
     return _validatorThreshold;
   }
 
   function isValidator(address validator) public view returns (bool) {
     return _isValidator[validator];
+  }
+
+  function validatorURI(address validator) public view returns (string memory) {
+    return _validatorURI[validator];
   }
 }
