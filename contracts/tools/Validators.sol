@@ -13,7 +13,7 @@ contract Validators is Ownable2Step {
   mapping(address => bool) private _isValidator;
 
   event UpdateValidatorThreshold(uint256 old, uint256 current);
-  event UpdateValidatorStatus(address validator, bool old, bool current);
+  event UpdateValidatorStatus(address indexed validator, bool old, bool current);
 
   modifier enoughValidations(uint256 validations) {
     if (_validatorThreshold > validations) revert Error.FewValidations(validations, _validatorThreshold);
@@ -21,7 +21,7 @@ contract Validators is Ownable2Step {
   }
 
   function setValidatorThreshold(uint256 value) external onlyOwner {
-    if (value < Const.MIN_THRESHOLD) revert Error.OverlowValue(value, Const.MIN_THRESHOLD);
+    if (value < Const.MIN_VALIDATIONS) revert Error.OverlowValue(value, Const.MIN_VALIDATIONS);
 
     uint256 old = _validatorThreshold;
     _validatorThreshold = value;

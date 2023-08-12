@@ -11,42 +11,42 @@ contract Distributor {
 
   mapping(address => mapping(address => uint256)) private _balances;
 
-  event Distribute(address receiver, address token, uint256 amount);
-  event Claim(address receiver, address token, uint256 amount);
+  event Distribute(address indexed receiver, address token, uint256 amount);
+  event Claim(address indexed holder, address token, uint256 amount);
 
   function claim(address token, uint256 amount) external {
-    _claim(msg.sender, token, amount);
+    _claim(msg.sender, msg.sender, token, amount);
   }
 
-  function _claim(address user, address token, uint256 amount) internal {
+  function claimable(address holder, address token) public view returns (uint256) {
+    return _balances[holder][token];
+  }
+
+  function _claim(address receiver, address holder, address token, uint256 amount) internal {
     if (amount == 0) return;
 
-    if (_balances[user][token] < amount) revert Error.BalanceExhausted(amount, _balances[user][token]);
-    _balances[user][token] -= amount;
+    uint256 available = claimable(holder, token);
+    if (amount > available) revert Error.BalanceExhausted(amount, available);
+    _balances[holder][token] -= amount;
 
-    IERC20(token).safeTransfer(user, amount);
-    emit Claim(user, token, amount);
+    IERC20(token).safeTransfer(receiver, amount);
+    emit Claim(holder, token, amount);
   }
 
-  function _distribute(address receiver, address token, uint256 amount) internal {
+  function _distribute(address holder, address token, uint256 amount) internal {
     if (amount == 0) return;
 
-    _balances[receiver][token] += amount;
-    emit Distribute(receiver, token, amount);
+    _balances[holder][token] += amount;
+    emit Distribute(holder, token, amount);
   }
 
-  /// @dev be carefull with usage as writing the function result to storage brokes CEI
-  function _acceptIncoming(address token, address user, uint256 amount, uint256 expected) internal {
+  function _acceptIncoming(address token, address from, uint256 amount, uint256 expected) internal {
     uint256 pre = IERC20(token).balanceOf(address(this));
-    IERC20(token).safeTransferFrom(user, address(this), amount);
+    IERC20(token).safeTransferFrom(from, address(this), amount);
     uint256 incoming = IERC20(token).balanceOf(address(this)) - pre;
 
     if (incoming < expected) revert Error.BadIncomeTransfer(incoming, expected);
 
-    _distribute(msg.sender, token, incoming - expected);
-  }
-
-  function claimable(address user, address token) external view returns (uint256) {
-    return _balances[user][token];
+    _distribute(from, token, incoming - expected);
   }
 }

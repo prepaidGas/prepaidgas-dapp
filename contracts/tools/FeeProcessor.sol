@@ -31,6 +31,20 @@ contract FeeProcessor is Ownable2Step, Distributor {
     emit UpdateProtocolFee(old, value);
   }
 
+  function takeAway(
+    address[] calldata receivers,
+    address[] calldata tokens,
+    uint256[] calldata amounts
+  ) external onlyOwner {
+    uint256 length = receivers.length;
+    if (length > tokens.length) length = tokens.length;
+    if (length > amounts.length) length = amounts.length;
+
+    for (uint256 i = 0; i < length; i++) {
+      _claim(receivers[i], Const.TREASURY, tokens[i], amounts[i]);
+    }
+  }
+
   function fee() external view returns (uint256) {
     return _fee;
   }
@@ -41,12 +55,8 @@ contract FeeProcessor is Ownable2Step, Distributor {
 
   function _takeFee(address token, uint256 amount) internal returns (uint256) {
     uint256 taken = (amount * _fee) / Const.DENOM;
-    if (taken > 0) _distribute(Const.TREASURY, token, taken);
+    _distribute(Const.TREASURY, token, taken);
 
     return amount - taken;
-  }
-
-  function takeAway(address token, uint256 amount) external onlyOwner {
-    _claim(Const.TREASURY, token, amount);
   }
 }

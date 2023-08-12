@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "./../common/Errors.sol" as Error;
 
 contract ERC1155ish is ERC1155Supply, Ownable2Step {
+  /// @dev holder => id => spender => amount
   mapping(address => mapping(uint256 => mapping(address => uint256))) private _allowance;
 
   event Approval(address indexed holder, uint256 id, address indexed spender, uint256 amount);
@@ -26,16 +27,15 @@ contract ERC1155ish is ERC1155Supply, Ownable2Step {
 
   function decreaseAllowance(uint256 id, address spender, uint256 subtractedValue) external {
     address holder = _msgSender();
-    _approve(holder, id, spender, allowance(holder, id, spender) - subtractedValue);
+
+    uint256 allowed = allowance(holder, id, spender);
+    if (allowed < subtractedValue) subtractedValue = allowed;
+    _approve(holder, id, spender, allowed - subtractedValue);
   }
 
   function approve(uint256 id, address spender, uint256 amount) external {
     address holder = _msgSender();
     _approve(holder, id, spender, amount);
-  }
-
-  function allowance(address holder, uint256 id, address spender) public view returns (uint256) {
-    return _allowance[holder][id][spender];
   }
 
   function usable(address holder, uint256 id, address spender) public view returns (uint256) {
@@ -44,6 +44,14 @@ contract ERC1155ish is ERC1155Supply, Ownable2Step {
 
     if (holder != spender && !isApprovedForAll(holder, spender) && possible > boundary) return boundary;
     return possible;
+  }
+
+  function allowance(address holder, uint256 id, address spender) public view returns (uint256) {
+    return _allowance[holder][id][spender];
+  }
+
+  function _mint(address holder, uint256 id, uint256 amount) internal {
+    _mint(holder, id, amount, "Mint GasOrder Tokens");
   }
 
   function _utilizeAllowance(address holder, uint256 id, address spender, uint256 amount) internal {
@@ -66,9 +74,5 @@ contract ERC1155ish is ERC1155Supply, Ownable2Step {
   function _approve(address holder, uint256 id, address spender, uint256 amount) private {
     _allowance[holder][id][spender] = amount;
     emit Approval(holder, id, spender, amount);
-  }
-
-  function _mint(address holder, uint256 id, uint256 amount) internal {
-    _mint(holder, id, amount, "Mint GasOrder Tokens");
   }
 }

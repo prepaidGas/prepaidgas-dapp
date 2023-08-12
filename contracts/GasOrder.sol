@@ -9,6 +9,7 @@ import {ERC1155ish} from "./base/ERC1155ish.sol";
 import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
 
 import "./common/Errors.sol" as Error;
+import "./common/Constants.sol" as Const;
 
 /**
  * @title GasOrder
@@ -31,8 +32,8 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
 
   mapping(uint256 => address) public executor;
 
-  event OrderCreate(uint256 id);
-  event OrderAccept(uint256 id, address executor);
+  event OrderCreate(uint256 indexed id, uint256 executionWindow);
+  event OrderAccept(uint256 indexed id, address indexed executor);
 
   modifier executionCallback() {
     if (execution != msg.sender) revert Error.Unauthorized(msg.sender, execution);
@@ -44,6 +45,17 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     _;
   }
 
+  modifier possibleExecutionWindow(uint256 window) {
+    if (window < Const.MIN_EXEC_WINDOW) revert Error.OverlowValue(window, Const.MIN_EXEC_WINDOW);
+    _;
+  }
+
+  modifier specificStatus(uint256 id, OrderStatus expected) {
+    OrderStatus real = status(id);
+    if (real != expected) revert Error.WrongOrderStatus(real, expected);
+    _;
+  }
+
   constructor(address executionEndpoint, string memory link) ERC1155ish(link) {
     execution = executionEndpoint;
   }
@@ -51,15 +63,25 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   function createOrder(
     uint256 maxGas,
     uint256 deadline,
+    uint256 acceptDeadline,
+    uint256 executionWindow,
     Payment calldata rewardValue,
     GasPayment calldata prepayValue,
     GasPayment calldata guaranteeValue,
     uint256 rewardTransfer,
     uint256 prepayTransfer
-  ) external deadlineNotMet(deadline) {
+  ) external deadlineNotMet(deadline) deadlineNotMet(acceptDeadline) possibleExecutionWindow(executionWindow) {
     uint256 id = orders++;
 
-    order[id] = Order({deadline: deadline});
+    if (acceptDeadline > deadline) acceptDeadline = deadline;
+
+    order[id] = Order({
+      creator: msg.sender,
+      maxGas: maxGas,
+      deadline: deadline,
+      acceptDeadline: acceptDeadline,
+      executionWindow: executionWindow
+    });
 
     reward[id] = rewardValue;
     prepay[id] = prepayValue;
@@ -68,20 +90,15 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     _acceptIncoming(rewardValue.token, msg.sender, rewardTransfer, rewardValue.amount);
     _acceptIncoming(prepayValue.token, msg.sender, prepayTransfer, prepayValue.gasPrice * maxGas);
 
-    /// @dev before mint is called entering to all the functions (for the id) is impossible
-    _mint(msg.sender, id, maxGas);
-
-    emit OrderCreate(id);
+    emit OrderCreate(id, executionWindow);
   }
 
-  function acceptOrder(uint256 id, uint256 guaranteeTransfer) public {
-    if (status(id) != OrderStatus.Pending) revert Error.WrongOrderStatus(status(id), OrderStatus.Pending);
-
+  function acceptOrder(uint256 id, uint256 guaranteeTransfer) public specificStatus(id, OrderStatus.Pending) {
     executor[id] = msg.sender;
+    _mint(order[id].creator, id, order[id].maxGas);
 
+    _distribute(msg.sender, reward[id].token, _takeFee(reward[id].token, reward[id].amount));
     _acceptIncoming(guarantee[id].token, msg.sender, guaranteeTransfer, totalSupply(id) * guarantee[id].gasPrice);
-
-    IERC20(reward[id].token).safeTransfer(msg.sender, _takeFee(reward[id].token, reward[id].amount));
 
     emit OrderAccept(id, msg.sender);
   }
@@ -89,15 +106,21 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   function retrievePrepay(address holder, uint256 id, uint256 amount) external {
     _utilizeOperator(holder, id, msg.sender, amount);
 
-    if (executor[id] != address(0)) _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * amount);
+    OrderStatus orderStatus = status(id);
+    if (orderStatus == OrderStatus.Active || orderStatus == OrderStatus.Exhausted)
+      _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * amount);
+
     IERC20(prepay[id].token).safeTransfer(holder, prepay[id].gasPrice * amount);
   }
 
-  function retrieveGuarantee(uint256 id) external {
-    if (status(id) != OrderStatus.Exhausted) revert Error.WrongOrderStatus(status(id), OrderStatus.Exhausted);
-
+  function retrieveGuarantee(uint256 id) external specificStatus(id, OrderStatus.Exhausted) {
+    _guaranteeAndRewardDelivered(id);
     _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * totalSupply(id));
-    executor[id] = address(0);
+  }
+
+  function retrieveReward(uint256 id) external specificStatus(id, OrderStatus.Untaken) {
+    _guaranteeAndRewardDelivered(id);
+    IERC20(reward[id].token).safeTransfer(order[id].creator, reward[id].amount);
   }
 
   function reportExecution(
@@ -107,12 +130,11 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     uint256 gasLimit,
     address fulfiller,
     uint256 gasSpent
-  ) external executionCallback {
-    if (status(id) != OrderStatus.Active) revert Error.WrongOrderStatus(status(id), OrderStatus.Active);
-
+  ) external executionCallback specificStatus(id, OrderStatus.Active) {
     uint256 balance = usable(onBehalf, id, signer);
     if (gasLimit > balance) revert Error.GasLimitExceedBalance(gasLimit, balance);
 
+    /// @dev should not happen in ordinary situations
     if (gasSpent > balance) gasSpent = balance;
     _utilizeAllowance(onBehalf, id, signer, gasSpent);
 
@@ -120,22 +142,31 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
 
     _distribute(fulfiller, prepay[id].token, prepay[id].gasPrice * gasSpent);
 
+    uint256 unlockAmount = guarantee[id].gasPrice * gasSpent;
     if (fulfiller == executor[id]) {
-      _distribute(fulfiller, guarantee[id].token, guarantee[id].gasPrice * gasSpent);
+      _distribute(fulfiller, guarantee[id].token, unlockAmount);
     } else {
       address unlockToken = guarantee[id].token;
-      _distribute(fulfiller, unlockToken, _takeFee(unlockToken, guarantee[id].gasPrice * gasSpent));
+      _distribute(fulfiller, unlockToken, _takeFee(unlockToken, unlockAmount));
     }
   }
 
   function status(uint256 id) public view returns (OrderStatus) {
-    if (totalSupply(id) == 0) return OrderStatus.Fulfilled;
-    if (executor[id] == address(0) && order[id].deadline < block.timestamp) return OrderStatus.Fulfilled;
+    if (order[id].creator == address(0)) return OrderStatus.Closed;
+    if (executor[id] == address(1)) return OrderStatus.Closed;
 
+    if (executor[id] == address(0)) {
+      if (order[id].acceptDeadline < block.timestamp) return OrderStatus.Untaken;
+      return OrderStatus.Pending;
+    }
+
+    if (totalSupply(id) == 0) return OrderStatus.Closed;
     if (order[id].deadline < block.timestamp) return OrderStatus.Exhausted;
 
-    if (executor[id] == address(0)) return OrderStatus.Pending;
-
     return OrderStatus.Active;
+  }
+
+  function _guaranteeAndRewardDelivered(uint256 id) private {
+    executor[id] = address(1);
   }
 }

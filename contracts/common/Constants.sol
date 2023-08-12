@@ -2,10 +2,12 @@
 pragma solidity 0.8.19;
 
 uint256 constant DENOM = 10000;
-uint256 constant MIN_THRESHOLD = 1;
 
 uint256 constant MAX_FEE = 1200;
 address constant TREASURY = address(bytes20(keccak256("TREASURY")));
+
+uint256 constant MIN_VALIDATIONS = 1;
+uint256 constant MIN_EXEC_WINDOW = 20;
 
 /// @dev execution gas limit should not be greater then liquidation one
 uint256 constant INFR_GAS_EXECUTE = 0;
