@@ -11,6 +11,9 @@ import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/I
 import "./common/Errors.sol" as Error;
 import "./common/Constants.sol" as Const;
 
+//@todo remove
+import "hardhat/console.sol";
+
 /**
  * @title GasOrder
  * @notice This contract manages the deposit for Gas orders
@@ -64,11 +67,11 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     uint256 maxGas,
     uint256 deadline,
     uint256 acceptDeadline,
-    uint256 executionWindow,
+    uint256 executionWindow, // @audit what is it?
     Payment calldata rewardValue,
     GasPayment calldata prepayValue,
     GasPayment calldata guaranteeValue,
-    uint256 rewardTransfer,
+    uint256 rewardTransfer, // @todo replace with rewardTransfer amount and prepayTransferAmount
     uint256 prepayTransfer
   ) external deadlineNotMet(deadline) deadlineNotMet(acceptDeadline) possibleExecutionWindow(executionWindow) {
     uint256 id = orders++;
@@ -92,6 +95,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     emit OrderCreate(id, executionWindow);
   }
 
+  // @dev function to avoid stack too deep issue
   function _acceptIncomingOrderCreate(
     uint256 maxGas,
     Payment calldata rewardValue,
@@ -129,8 +133,12 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   }
 
   function retrieveReward(uint256 id) external specificStatus(id, OrderStatus.Untaken) {
+    if (msg.sender != order[id].creator) revert Error.Unauthorized(msg.sender, order[id].creator);
+
     _guaranteeAndRewardDelivered(id);
     IERC20(reward[id].token).safeTransfer(order[id].creator, reward[id].amount);
+    // @notice prepay also should be withdrawn back to the creator
+    IERC20(prepay[id].token).safeTransfer(order[id].creator, prepay[id].gasPrice * order[id].maxGas);
   }
 
   function reportExecution(

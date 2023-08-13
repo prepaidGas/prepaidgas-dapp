@@ -15,7 +15,7 @@ enum OrderStatus {
   Untaken,
   Exhausted,
   Closed
-}
+} // @todo add none
 
 struct GasPayment {
   address token;
