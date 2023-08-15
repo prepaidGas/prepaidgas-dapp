@@ -133,6 +133,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   }
 
   function retrieveReward(uint256 id) external specificStatus(id, OrderStatus.Untaken) {
+    // @todo might be removed
     if (msg.sender != order[id].creator) revert Error.Unauthorized(msg.sender, order[id].creator);
 
     _guaranteeAndRewardDelivered(id);

@@ -151,14 +151,19 @@ describe("GasOrder", function () {
       await GasOrderContract.connect(accounts[0]).claim(TokenContract.target, withdrawableAmount);
 
       const tokensBalanceAfter = await TokenContract.balanceOf(accounts[0].address)
-
-      // @todo add more asserts statements
+      
+      const amountOfERC1155GasTokens = await GasOrderContract.balanceOf(admin.address, 0);
+      
       expect(
         tokensBalanceAfter
       ).to.equal(withdrawableAmount);
-    });
 
-    it("Should fail to retrive Gas from order if not enough tokens", async function () {
+      expect(
+        amountOfERC1155GasTokens
+      ).to.equal(GAS_AMOUNT);
+    });
+    // @todo fix the test
+    it("Should fail to retrive prepaid tokens from order if not enough ERC1155 Gas tokens on balance", async function () {
       const {accounts, admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
 
       await TokenContract.approve(GasOrderContract.target, INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
@@ -166,18 +171,30 @@ describe("GasOrder", function () {
       await GasOrderContract.createOrder(
         GAS_AMOUNT,
         Math.floor(Date.now() / 1000) + 864000,
+        Math.floor(Date.now() / 1000) + 36000,
+        40,
         [TokenContract.target, INITIAL_EXECUTOR_REWARD],
         [TokenContract.target, GAS_COST],
-        [TokenContract.target, LOCKED_GUARANTEE_PER_GAS]
+        [TokenContract.target, LOCKED_GUARANTEE_PER_GAS],
+        INITIAL_EXECUTOR_REWARD,
+        GAS_COST * GAS_AMOUNT
       )
 
-      await GasOrderContract.transfer(0, accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
+      await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
+      await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
 
-      await GasOrderContract.connect(accounts[0]).acceptOrder(0);
-      // @audit executor spends some tokens
-      /*expect(
-        retrievePrepayAction
-      ).to.be.reverted;*/
+      // Accepting order
+      await GasOrderContract.connect(accounts[0]).acceptOrder(0, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS);
+      let withdrawableAmount = INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)/10000;
+      await GasOrderContract.connect(accounts[0]).claim(TokenContract.target, withdrawableAmount);
+
+      await GasOrderContract.connect(admin).safeTransferFrom(admin.address, accounts[0].address, 0, GAS_AMOUNT, '0x');
+
+      const txToBeReverted = GasOrderContract.connect(admin).retrievePrepay(admin.address, 0, GAS_AMOUNT)
+
+      await expect(
+        txToBeReverted
+      ).to.be.reverted;
     });
   });
 });
