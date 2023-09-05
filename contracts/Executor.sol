@@ -5,10 +5,12 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import {Validators} from "./tools/Validators.sol";
 import {IGasOrder} from "./interfaces/IGasOrder.sol";
-import {ExecutionMessage, Message} from "./base/ExecutionMessage.sol";
+import {ExecutionMessage, MessageConfig} from "./base/ExecutionMessage.sol";
 
 import "./common/Errors.sol" as Error;
 import "./common/Constants.sol" as Const;
+//@todo remove
+import "hardhat/console.sol";
 
 contract Executor is ExecutionMessage, Validators {
   using ECDSA for bytes32;
@@ -44,34 +46,39 @@ contract Executor is ExecutionMessage, Validators {
     gasOrder = ordersManager;
   }
 
+  // @todo rethink msg struct for comapitibilty with EIP-712
+  // @todo it is possible to spend gas from any order
   function execute(
-    Message calldata message,
+    MessageConfig calldata messageConfig,
+    bytes calldata messageData,
     bytes calldata signature
-  ) external validNonce(message.signer, message.nonce) {
-    uint256 gasSpent = _execute(message, signature, false);
+  ) external validNonce(messageConfig.signer, messageConfig.nonce) {
+    uint256 gasSpent = _execute(messageConfig, messageData, signature, false);
 
     /// @dev address(0) means registered executor should be rewarded
-    _reportExecution(message, address(0), gasSpent, Const.INFR_GAS_EXECUTE);
+    _reportExecution(messageConfig, address(0), gasSpent, Const.INFR_GAS_EXECUTE);
   }
 
   function liquidate(
-    Message calldata message,
+    MessageConfig calldata messageConfig,
+    bytes calldata messageData,
     bytes calldata signature,
     bytes[] calldata validations
-  ) external deadlineMet(message.deadline) validNonce(message.signer, message.nonce) {
-    _checkValidations(message, validations);
+  ) external deadlineMet(messageConfig.deadline) validNonce(messageConfig.signer, messageConfig.nonce) {
+    _checkValidations(messageConfig, messageData, validations);
 
-    uint256 gasSpent = _execute(message, signature, true);
+    uint256 gasSpent = _execute(messageConfig, messageData, signature, true);
 
     uint256 infrastructureGas = Const.INFR_GAS_LIQUIDATE + Const.INFR_GAS_RECOVER_SIGNER * validatorThreshold();
-    _reportExecution(message, msg.sender, gasSpent, infrastructureGas);
+    _reportExecution(messageConfig, msg.sender, gasSpent, infrastructureGas);
   }
 
   function _checkValidations(
-    Message calldata message,
+    MessageConfig calldata messageConfig,
+    bytes calldata messageData,
     bytes[] calldata validations
   ) private view enoughValidations(validations.length) {
-    bytes32 digest = messageHash(message);
+    bytes32 digest = messageHash(messageConfig, messageData);
 
     address last;
     for (uint256 i = 0; i < validatorThreshold(); i++) {
@@ -82,25 +89,26 @@ contract Executor is ExecutionMessage, Validators {
   }
 
   function _execute(
-    Message calldata message,
+    MessageConfig calldata messageConfig,
+    bytes calldata messageData,
     bytes calldata signature,
     bool isLiquidation
   ) private returns (uint256 gasSpent) {
-    bytes32 digest = messageHash(message);
+    bytes32 digest = messageHash(messageConfig, messageData);
     address recovered = digest.recover(signature);
-    if (recovered != message.signer) revert Error.UnexpectedRecovered(recovered, message.signer);
+    if (recovered != messageConfig.signer) revert Error.UnexpectedRecovered(recovered, messageConfig.signer);
 
-    nonces[message.signer][message.nonce] = true;
+    nonces[messageConfig.signer][messageConfig.nonce] = true;
 
     uint256 gas = gasleft();
-    (bool success, bytes memory result) = address(message.endpoint).call{gas: message.gas}(message.data);
+    (bool success, bytes memory result) = address(messageConfig.endpoint).call{gas: messageConfig.gas}(messageData);
     gasSpent = gas - gasleft() - Const.INFR_GAS_GET_GAS_SPENT;
 
     emit Execution(
-      message.signer,
-      message.nonce,
-      message.gasOrder,
-      message.onBehalf,
+      messageConfig.signer,
+      messageConfig.nonce,
+      messageConfig.gasOrder,
+      messageConfig.onBehalf,
       success,
       result,
       block.timestamp,
@@ -110,16 +118,16 @@ contract Executor is ExecutionMessage, Validators {
   }
 
   function _reportExecution(
-    Message calldata message,
+    MessageConfig calldata messageConfig,
     address fulfiller,
     uint256 gasSpent,
     uint256 infrastructureGas
   ) private {
     IGasOrder(gasOrder).reportExecution(
-      message.gasOrder,
-      message.signer,
-      message.onBehalf,
-      message.gas + infrastructureGas,
+      messageConfig.gasOrder,
+      messageConfig.signer,
+      messageConfig.onBehalf,
+      messageConfig.gas + infrastructureGas,
       fulfiller,
       gasSpent + infrastructureGas
     );

@@ -162,7 +162,7 @@ describe("GasOrder", function () {
         amountOfERC1155GasTokens
       ).to.equal(GAS_AMOUNT);
     });
-    // @todo fix the test
+
     it("Should fail to retrive prepaid tokens from order if not enough ERC1155 Gas tokens on balance", async function () {
       const {accounts, admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
 

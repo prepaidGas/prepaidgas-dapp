@@ -1,4 +1,5 @@
 import { HardhatUserConfig } from "hardhat/config"
+import "@nomicfoundation/hardhat-ethers"
 import "@nomicfoundation/hardhat-toolbox"
 import "solidity-coverage"
 import "hardhat-gas-reporter"
@@ -14,7 +15,7 @@ const config: HardhatUserConfig = {
     },
   },
   gasReporter: {
-    enabled: false
+    enabled: true
   }
 }
 

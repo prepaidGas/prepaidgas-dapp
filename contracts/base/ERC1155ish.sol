@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 
 import "./../common/Errors.sol" as Error;
+//@todo remove
+import "hardhat/console.sol";
 
 contract ERC1155ish is ERC1155Supply, Ownable2Step {
   /// @dev holder => id => spender => amount

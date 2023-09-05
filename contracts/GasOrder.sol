@@ -67,7 +67,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     uint256 maxGas,
     uint256 deadline,
     uint256 acceptDeadline,
-    uint256 executionWindow, // @audit what is it?
+    uint256 executionWindow,
     Payment calldata rewardValue,
     GasPayment calldata prepayValue,
     GasPayment calldata guaranteeValue,
@@ -78,11 +78,11 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
 
     if (acceptDeadline > deadline) acceptDeadline = deadline;
 
-    order[id] = Order({
+    order[id] = Order({ // @todo add start date deadline
       creator: msg.sender,
       maxGas: maxGas,
       deadline: deadline,
-      acceptDeadline: acceptDeadline,
+      acceptDeadline: acceptDeadline, // @todo add ability to revoke any time
       executionWindow: executionWindow
     });
 
@@ -133,6 +133,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   }
 
   function retrieveReward(uint256 id) external specificStatus(id, OrderStatus.Untaken) {
+    // @todo add ability to revoke during Pending
     // @todo might be removed
     if (msg.sender != order[id].creator) revert Error.Unauthorized(msg.sender, order[id].creator);
 
