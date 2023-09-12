@@ -64,17 +64,22 @@ describe("GasOrder", function () {
 
     await TokenContract.approve(GasOrderContract.target, INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
 
+    const latestTime = await time.latest();
+
     await GasOrderContract.createOrder(
       GAS_AMOUNT,
-      Math.floor(Date.now() / 1000) + 864000,
-      Math.floor(Date.now() / 1000) + 36000,
+      latestTime + 36000,
+      latestTime + 864000,
       40,
+      true,
       [TokenContract.target, INITIAL_EXECUTOR_REWARD],
       [TokenContract.target, GAS_COST],
       [TokenContract.target, LOCKED_GUARANTEE_PER_GAS],
       INITIAL_EXECUTOR_REWARD,
       GAS_COST * GAS_AMOUNT
     )
+
+    await time.increase(36001);
 
     await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
     await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
@@ -146,8 +151,6 @@ describe("GasOrder", function () {
       console.log("msg hash", msgHash)
       console.log("verify typed data: ", ethers.verifyTypedData(domain, types, dataObject, signedTypedData))
       console.log(ethers.verifyMessage(msgHash, signedTypedData))// @todo properly generate msg Hash to be able to verify it afterwards
-      
-
 
       await ExecutorContract.connect(admin).execute([
         admin.address,

@@ -18,7 +18,7 @@ import "hardhat/console.sol";
  * @title GasOrder
  * @notice This contract manages the deposit for Gas orders
  * @dev It is recomended to deploy the contract to the cheep network
- * @author SteMak, markfender
+ * @author SteMak, web3skeptic (markfender)
  */
 
 contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
@@ -26,11 +26,11 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
 
   address public immutable execution;
 
-  uint256 public orders;
+  uint256 public ordersCount; // @todo update naming
   mapping(uint256 => Order) public order;
 
   mapping(uint256 => Payment) public reward;
-  mapping(uint256 => GasPayment) public prepay;
+  mapping(uint256 => GasPayment) public gasCost;
   mapping(uint256 => GasPayment) public guarantee;
 
   mapping(uint256 => address) public executor;
@@ -42,6 +42,13 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     if (execution != msg.sender) revert Error.Unauthorized(msg.sender, execution);
     _;
   }
+  /*
+  modifier orderExists(uint256 id) {
+    OrderStatus real = status(id); // @todo finish
+    if(real != )
+    //revert Error.WrongOrderStatus(real, expected);
+    _;
+  }*/
 
   modifier deadlineNotMet(uint256 deadline) {
     if (deadline <= block.timestamp) revert Error.DeadlineExpired(block.timestamp, deadline);
@@ -52,7 +59,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     if (window < Const.MIN_EXEC_WINDOW) revert Error.OverlowValue(window, Const.MIN_EXEC_WINDOW);
     _;
   }
-
+  // @todo add modifiyer which gets few statuses and checks if on of the is valid
   modifier specificStatus(uint256 id, OrderStatus expected) {
     OrderStatus real = status(id);
     if (real != expected) revert Error.WrongOrderStatus(real, expected);
@@ -63,34 +70,49 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     execution = executionEndpoint;
   }
 
+  // @todo add orderExist function
+  // @todo implement executionPeriodDeadline
+  // @todo add support of our _msgSender
+  // @todo gas optimization
+  // @todo start execution window
   function createOrder(
     uint256 maxGas,
-    uint256 deadline,
-    uint256 acceptDeadline,
+    //uint256 maxGasCost, // @todo add maxGasCost
+    uint256 executionPeriodStart,
+    uint256 executionPeriodDeadline,
     uint256 executionWindow,
+    bool revokable,
     Payment calldata rewardValue,
-    GasPayment calldata prepayValue,
+    GasPayment calldata gasCostValue,
     GasPayment calldata guaranteeValue,
-    uint256 rewardTransfer, // @todo replace with rewardTransfer amount and prepayTransferAmount
-    uint256 prepayTransfer
-  ) external deadlineNotMet(deadline) deadlineNotMet(acceptDeadline) possibleExecutionWindow(executionWindow) {
-    uint256 id = orders++;
+    uint256 rewardTransfer,
+    uint256 gasCostTransfer
+  )
+    external
+    deadlineNotMet(executionPeriodDeadline)
+    deadlineNotMet(executionPeriodStart)
+    possibleExecutionWindow(executionWindow)
+  {
+    require(executionPeriodStart + executionWindow < executionPeriodDeadline); // @todo add error msg
+    require(maxGas > 0); // @todo consider replacing `0` with the value which represents the minimum valuable value
 
-    if (acceptDeadline > deadline) acceptDeadline = deadline;
-
-    order[id] = Order({ // @todo add start date deadline
-      creator: msg.sender,
+    uint256 id = ordersCount++;
+    //@todo add link to callback in caue of wrong execution on backend
+    order[id] = Order({
+      creator: msg.sender, // @todo make transferable
       maxGas: maxGas,
-      deadline: deadline,
-      acceptDeadline: acceptDeadline, // @todo add ability to revoke any time
-      executionWindow: executionWindow
+      maxGasPrice: 1 ether, // @dev magic number, should be removed in the future
+      executionPeriodStart: executionPeriodStart, // @todo add ability to revoke any time
+      executionPeriodDeadline: executionPeriodDeadline,
+      executionWindow: executionWindow,
+      isRevokable: revokable
     });
 
     reward[id] = rewardValue;
-    prepay[id] = prepayValue;
+    gasCost[id] = gasCostValue;
     guarantee[id] = guaranteeValue;
 
-    _acceptIncomingOrderCreate(maxGas, rewardValue, prepayValue, rewardTransfer, prepayTransfer);
+    _acceptIncomingOrderCreate(maxGas, rewardValue, gasCostValue, rewardTransfer, gasCostTransfer);
 
     emit OrderCreate(id, executionWindow);
   }
@@ -99,12 +121,12 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   function _acceptIncomingOrderCreate(
     uint256 maxGas,
     Payment calldata rewardValue,
-    GasPayment calldata prepayValue,
+    GasPayment calldata gasCostValue,
     uint256 rewardTransfer,
-    uint256 prepayTransfer
+    uint256 gasCostTransfer
   ) private {
     _acceptIncoming(rewardValue.token, msg.sender, rewardTransfer, rewardValue.amount);
-    _acceptIncoming(prepayValue.token, msg.sender, prepayTransfer, prepayValue.gasPrice * maxGas);
+    _acceptIncoming(gasCostValue.token, msg.sender, gasCostTransfer, gasCostValue.gasPrice * maxGas);
   }
 
   function acceptOrder(uint256 id, uint256 guaranteeTransfer) external specificStatus(id, OrderStatus.Pending) {
@@ -117,30 +139,37 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     emit OrderAccept(id, msg.sender);
   }
 
-  function retrievePrepay(address holder, uint256 id, uint256 amount) external {
+  function retrieveGasCost(address holder, uint256 id, uint256 amount) external {
     _utilizeOperator(holder, id, msg.sender, amount);
 
     OrderStatus orderStatus = status(id);
-    if (orderStatus == OrderStatus.Active || orderStatus == OrderStatus.Exhausted)
+    if (orderStatus == OrderStatus.Active || orderStatus == OrderStatus.Inactive)
       _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * amount);
 
-    IERC20(prepay[id].token).safeTransfer(holder, prepay[id].gasPrice * amount);
+    IERC20(gasCost[id].token).safeTransfer(holder, gasCost[id].gasPrice * amount);
   }
 
-  function retrieveGuarantee(uint256 id) external specificStatus(id, OrderStatus.Exhausted) {
-    _guaranteeAndRewardDelivered(id);
+  function retrieveGuarantee(uint256 id) external specificStatus(id, OrderStatus.Inactive) {
+    _guaranteeAndRewardDelivered(id); // @todo it might be already
     _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * totalSupply(id));
   }
 
-  function retrieveReward(uint256 id) external specificStatus(id, OrderStatus.Untaken) {
-    // @todo add ability to revoke during Pending
-    // @todo might be removed
-    if (msg.sender != order[id].creator) revert Error.Unauthorized(msg.sender, order[id].creator);
+  function revokeOrder(uint256 id) external {
+    Order memory currentOrder = order[id];
+    if (msg.sender != currentOrder.creator) revert Error.Unauthorized(msg.sender, currentOrder.creator);
 
-    _guaranteeAndRewardDelivered(id);
-    IERC20(reward[id].token).safeTransfer(order[id].creator, reward[id].amount);
-    // @notice prepay also should be withdrawn back to the creator
-    IERC20(prepay[id].token).safeTransfer(order[id].creator, prepay[id].gasPrice * order[id].maxGas);
+    OrderStatus currentStatus = status(id);
+    if (
+      currentStatus == OrderStatus.Pending ||
+      (currentOrder.isRevokable && (currentStatus == OrderStatus.Accepted || currentStatus == OrderStatus.Active))
+    ) {
+      _guaranteeAndRewardDelivered(id);
+      IERC20(reward[id].token).safeTransfer(order[id].creator, reward[id].amount);
+      // @notice gasCost also should be withdrawn back to the creator
+      IERC20(gasCost[id].token).safeTransfer(order[id].creator, gasCost[id].gasPrice * order[id].maxGas);
+    } else {
+      revert Error.ImpossibleRevocation(currentStatus, currentOrder.isRevokable);
+    }
   }
 
   function reportExecution(
@@ -160,7 +189,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
 
     if (fulfiller == address(0)) fulfiller = executor[id];
 
-    _distribute(fulfiller, prepay[id].token, prepay[id].gasPrice * gasSpent);
+    _distribute(fulfiller, gasCost[id].token, gasCost[id].gasPrice * gasSpent);
 
     uint256 unlockAmount = guarantee[id].gasPrice * gasSpent;
     if (fulfiller == executor[id]) {
@@ -171,18 +200,20 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     }
   }
 
+  // @notice if the order is published and not accepted by any Executor it is still in `Pending` status
+  // until the `block.timestamp` excceds the `Order.executionPeriodDeadline`
+  // @todo verify the function and all the possible states
   function status(uint256 id) public view returns (OrderStatus) {
-    if (order[id].creator == address(0)) return OrderStatus.Closed;
+    if (order[id].creator == address(0)) return OrderStatus.None;
     if (executor[id] == address(1)) return OrderStatus.Closed;
 
-    if (executor[id] == address(0)) {
-      if (order[id].acceptDeadline < block.timestamp) return OrderStatus.Untaken;
+    if (executor[id] == address(0) && order[id].executionPeriodDeadline >= block.timestamp) {
       return OrderStatus.Pending;
     }
 
-    if (totalSupply(id) == 0) return OrderStatus.Closed;
-    if (order[id].deadline < block.timestamp) return OrderStatus.Exhausted;
+    if (executor[id] != address(0) && totalSupply(id) == 0) return OrderStatus.Inactive;
 
+    if (order[id].executionPeriodStart > block.timestamp) return OrderStatus.Accepted;
     return OrderStatus.Active;
   }
 

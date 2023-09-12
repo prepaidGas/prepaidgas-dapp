@@ -4,18 +4,21 @@ pragma solidity 0.8.19;
 struct Order {
   address creator;
   uint256 maxGas;
-  uint256 deadline;
-  uint256 acceptDeadline;
+  uint256 maxGasPrice;
+  uint256 executionPeriodStart;
+  uint256 executionPeriodDeadline;
   uint256 executionWindow;
+  bool isRevokable;
 }
 
 enum OrderStatus {
+  None,
   Pending,
+  Accepted,
   Active,
-  Untaken,
-  Exhausted,
+  Inactive, // @notice the order might be inactive duee to exhausted gas limit or execution time
   Closed
-} // @todo add none
+}
 
 struct GasPayment {
   address token;

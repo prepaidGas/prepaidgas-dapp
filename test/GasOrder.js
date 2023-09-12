@@ -70,11 +70,14 @@ describe("GasOrder", function () {
 
       const tokensBalanceBefore = await TokenContract.balanceOf(admin.address);
 
+      const latestTime = await time.latest();
+
       await GasOrderContract.createOrder(
         GAS_AMOUNT,
-        Math.floor(Date.now() / 1000) + 864000,
-        Math.floor(Date.now() / 1000) + 36000,
+        latestTime + 36000,
+        latestTime + 864000,
         40,
+        true,
         [TokenContract.target, INITIAL_EXECUTOR_REWARD],
         [TokenContract.target, GAS_COST],
         [TokenContract.target, LOCKED_GUARANTEE_PER_GAS],
@@ -97,22 +100,26 @@ describe("GasOrder", function () {
 
       const tokensBalanceBefore = await TokenContract.balanceOf(admin.address);
 
+      const latestTime = await time.latest();
+
       await GasOrderContract.createOrder(
         GAS_AMOUNT,
-        Math.floor(Date.now() / 1000) + 864000,
-        Math.floor(Date.now() / 1000) + 36000,
+        latestTime + 36000,
+        latestTime + 865000,
         40,
+        true,
         [TokenContract.target, INITIAL_EXECUTOR_REWARD],
         [TokenContract.target, GAS_COST],
         [TokenContract.target, LOCKED_GUARANTEE_PER_GAS],
         INITIAL_EXECUTOR_REWARD,
         GAS_COST * GAS_AMOUNT
       )
+
+      await time.increase(36001);
       
       const tokensBalanceAfter = await TokenContract.balanceOf(admin.address);
 
-      await time.increaseTo(Math.floor(Date.now() / 1000) + 36001);
-      await GasOrderContract.retrieveReward(0);
+      await GasOrderContract.revokeOrder(0);
 
       const tokensBalanceAfterRepay = await TokenContract.balanceOf(admin.address);
 
@@ -131,11 +138,14 @@ describe("GasOrder", function () {
 
       await TokenContract.approve(GasOrderContract.target, INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
 
+      const latestTime = await time.latest();
+
       await GasOrderContract.createOrder(
         GAS_AMOUNT,
-        Math.floor(Date.now() / 1000) + 864000,
-        Math.floor(Date.now() / 1000) + 36000,
+        latestTime + 36000,
+        latestTime + 864000,
         40,
+        true,
         [TokenContract.target, INITIAL_EXECUTOR_REWARD],
         [TokenContract.target, GAS_COST],
         [TokenContract.target, LOCKED_GUARANTEE_PER_GAS],
@@ -168,11 +178,13 @@ describe("GasOrder", function () {
 
       await TokenContract.approve(GasOrderContract.target, INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
 
+      const latestTime = await time.latest();
       await GasOrderContract.createOrder(
         GAS_AMOUNT,
-        Math.floor(Date.now() / 1000) + 864000,
-        Math.floor(Date.now() / 1000) + 36000,
+        latestTime + 36000,
+        latestTime + 864000,
         40,
+        true,
         [TokenContract.target, INITIAL_EXECUTOR_REWARD],
         [TokenContract.target, GAS_COST],
         [TokenContract.target, LOCKED_GUARANTEE_PER_GAS],
@@ -190,7 +202,7 @@ describe("GasOrder", function () {
 
       await GasOrderContract.connect(admin).safeTransferFrom(admin.address, accounts[0].address, 0, GAS_AMOUNT, '0x');
 
-      const txToBeReverted = GasOrderContract.connect(admin).retrievePrepay(admin.address, 0, GAS_AMOUNT)
+      const txToBeReverted = GasOrderContract.connect(admin).retrieveGasCost(admin.address, 0, GAS_AMOUNT)
 
       await expect(
         txToBeReverted

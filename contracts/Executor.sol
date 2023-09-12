@@ -73,6 +73,8 @@ contract Executor is ExecutionMessage, Validators {
     _reportExecution(messageConfig, msg.sender, gasSpent, infrastructureGas);
   }
 
+  // @todo add liquidation by order owner
+
   function _checkValidations(
     MessageConfig calldata messageConfig,
     bytes calldata messageData,
