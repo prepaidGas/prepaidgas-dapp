@@ -26,7 +26,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
 
   address public immutable execution;
 
-  uint256 public ordersCount; // @todo update naming
+  uint256 public ordersCount;
   mapping(uint256 => Order) public order;
 
   mapping(uint256 => Payment) public reward;
@@ -42,12 +42,9 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     if (execution != msg.sender) revert Error.Unauthorized(msg.sender, execution);
     _;
   }
-  /*
+  /* @todo implement modifier of getter
   modifier orderExists(uint256 id) {
-    OrderStatus real = status(id); // @todo finish
-    if(real != )
-    //revert Error.WrongOrderStatus(real, expected);
-    _;
+    
   }*/
 
   modifier deadlineNotMet(uint256 deadline) {
@@ -59,7 +56,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     if (window < Const.MIN_EXEC_WINDOW) revert Error.OverlowValue(window, Const.MIN_EXEC_WINDOW);
     _;
   }
-  // @todo add modifiyer which gets few statuses and checks if on of the is valid
+
   modifier specificStatus(uint256 id, OrderStatus expected) {
     OrderStatus real = status(id);
     if (real != expected) revert Error.WrongOrderStatus(real, expected);
@@ -71,10 +68,8 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   }
 
   // @todo add orderExist function
-  // @todo implement executionPeriodDeadline
   // @todo add support of our _msgSender
   // @todo gas optimization
-  // @todo start execution window
   function createOrder(
     uint256 maxGas,
     //uint256 maxGasCost, // @todo add maxGasCost
@@ -97,12 +92,12 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     require(maxGas > 0); // @todo consider replacing `0` with the value which represents the minimum valuable value
 
     uint256 id = ordersCount++;
-    //@todo add link to callback in caue of wrong execution on backend
+
     order[id] = Order({
-      creator: msg.sender, // @todo make transferable
+      creator: msg.sender, // @todo replace with `owner`, make transferable
       maxGas: maxGas,
       maxGasPrice: 1 ether, // @dev magic number, should be removed in the future
-      executionPeriodStart: executionPeriodStart, // @todo add ability to revoke any time
+      executionPeriodStart: executionPeriodStart,
       executionPeriodDeadline: executionPeriodDeadline,
       executionWindow: executionWindow,
       isRevokable: revokable

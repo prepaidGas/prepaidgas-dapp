@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import {Validators} from "./tools/Validators.sol";
 import {IGasOrder} from "./interfaces/IGasOrder.sol";
+import {IExecutor} from "./interfaces/IExecutor.sol";
 import {ExecutionMessage, MessageConfig} from "./base/ExecutionMessage.sol";
 
 import "./common/Errors.sol" as Error;
@@ -12,12 +13,16 @@ import "./common/Constants.sol" as Const;
 //@todo remove
 import "hardhat/console.sol";
 
-contract Executor is ExecutionMessage, Validators {
+contract Executor is
+  IExecutor,
+  ExecutionMessage,
+  Validators // @todo add interface
+{
   using ECDSA for bytes32;
 
   address public immutable gasOrder;
 
-  // @dev signer => nonce => isUsed
+  // @dev sender => nonce => isUsed
   mapping(address => mapping(uint256 => bool)) public nonces;
 
   event Execution(
@@ -46,8 +51,6 @@ contract Executor is ExecutionMessage, Validators {
     gasOrder = ordersManager;
   }
 
-  // @todo rethink msg struct for comapitibilty with EIP-712
-  // @todo it is possible to spend gas from any order
   function execute(
     MessageConfig calldata messageConfig,
     bytes calldata messageData,
@@ -73,7 +76,7 @@ contract Executor is ExecutionMessage, Validators {
     _reportExecution(messageConfig, msg.sender, gasSpent, infrastructureGas);
   }
 
-  // @todo add liquidation by order owner
+  // @todo add liquidation by order owner, which doesn't call the signed msg, however sends part of the lock to the order owner as a remuneration
 
   function _checkValidations(
     MessageConfig calldata messageConfig,
@@ -103,7 +106,12 @@ contract Executor is ExecutionMessage, Validators {
     nonces[messageConfig.signer][messageConfig.nonce] = true;
 
     uint256 gas = gasleft();
-    (bool success, bytes memory result) = address(messageConfig.endpoint).call{gas: messageConfig.gas}(messageData);
+    //@todo add ability to send native token value `msg.sender`
+    // @dev supported of meta transactions with `_msgSender()`
+    (bool success, bytes memory returndata) = messageConfig.to.call{gas: messageConfig.gas}(
+      abi.encodePacked(messageData, messageConfig.signer)
+    );
+
     gasSpent = gas - gasleft() - Const.INFR_GAS_GET_GAS_SPENT;
 
     emit Execution(
@@ -112,7 +120,7 @@ contract Executor is ExecutionMessage, Validators {
       messageConfig.gasOrder,
       messageConfig.onBehalf,
       success,
-      result,
+      returndata,
       block.timestamp,
       msg.sender,
       isLiquidation

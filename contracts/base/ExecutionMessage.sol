@@ -13,9 +13,8 @@ struct MessageConfig {
   uint256 gasOrder;
   address onBehalf;
   uint256 deadline;
-  address endpoint;
+  address to;
   uint256 gas;
-  //bytes data; // @todo should be hashed according to eip-712
 }
 
 contract ExecutionMessage is EIP712 {

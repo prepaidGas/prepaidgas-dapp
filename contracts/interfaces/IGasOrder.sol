@@ -16,7 +16,7 @@ enum OrderStatus {
   Pending,
   Accepted,
   Active,
-  Inactive, // @notice the order might be inactive duee to exhausted gas limit or execution time
+  Inactive, // @notice the order might be inactive due to exhausted gas limit or execution time
   Closed
 }
 
