@@ -68,8 +68,26 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   }
 
   // @todo add orderExist function
-  // @todo add support of our _msgSender
   // @todo gas optimization
+  /**
+   * @dev Creates an order with specified parameters.
+   *
+   * @param maxGas The amount of Gas to book for future calls executions.
+   * @param executionPeriodStart The start of the period when execution is possible.
+   * @param executionPeriodDeadline The last possible timestamp for execution.
+   * @param executionWindow The execution window duration specified as the number of blocks.
+   * @param revokable A flag indicating if the order is revokable.
+   * @param rewardValue The reward payment details.
+   * @param gasCostValue The cost of one Gas uint.
+   * @param guaranteeValue The guarantee payment details.
+   * @param rewardTransfer The the reward transfer amount, it is needed to verify the amount
+   * of tokens which should be transfered to the contract in order to support fee on transfer tokens.
+   * @param gasCostTransfer The gas cost transfer amount, it is needed to verify the total amount of tokens
+   * which should be transfered to the contract in order to support fee on transfer tokens.
+   *
+   * This function creates an order with the specified parameters. It ensures the validity
+   * of the order parameters and initializes the order's details.
+   */
   function createOrder(
     uint256 maxGas,
     //uint256 maxGasCost, // @todo add maxGasCost
@@ -124,6 +142,16 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     _acceptIncoming(gasCostValue.token, msg.sender, gasCostTransfer, gasCostValue.gasPrice * maxGas);
   }
 
+  /**
+   * @dev Accepts an order by an executor.
+   *
+   * @param id The ID of the order.
+   * @param guaranteeTransfer The guarantee transfer amount, it is needed to verify the amount
+   * of tokens which should be transfered to the contract in order to support fee on transfer tokens.
+   *
+   * This function accepts an order by an executor, transferring the necessary guarantees
+   * and rewards to the contract and updating the order's status.
+   */
   function acceptOrder(uint256 id, uint256 guaranteeTransfer) external specificStatus(id, OrderStatus.Pending) {
     executor[id] = msg.sender;
     _mint(order[id].creator, id, order[id].maxGas);
@@ -134,6 +162,15 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     emit OrderAccept(id, msg.sender);
   }
 
+  /**
+   * @dev Retrieves prepaid tokens form the order.
+   *
+   * @param holder The address of the Gas holder.
+   * @param id The ID of the order.
+   * @param amount The amount of gas tokens to retrieve.
+   *
+   * This function decreses the amout of Gas tokens in the order and repays the tokens ot the holder.
+   */
   function retrieveGasCost(address holder, uint256 id, uint256 amount) external {
     _utilizeOperator(holder, id, msg.sender, amount);
 
@@ -144,11 +181,26 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     IERC20(gasCost[id].token).safeTransfer(holder, gasCost[id].gasPrice * amount);
   }
 
+  /**
+   * @dev Retrieves guarantees from an order.
+   *
+   * @param id The ID of the order.
+   *
+   * This function retrieves guarantees from an order and distributes them to the executor after order is finally fulfilled.
+   */
   function retrieveGuarantee(uint256 id) external specificStatus(id, OrderStatus.Inactive) {
-    _guaranteeAndRewardDelivered(id); // @todo it might be already
+    _guaranteeAndRewardDelivered(id); // @todo it might be already applied
     _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * totalSupply(id));
   }
 
+  /**
+   * @dev Revokes an order.
+   *
+   * @param id The ID of the order.
+   *
+   * This function allows the creator to revoke an order if it is revokable
+   * or if it is not accepted by any Executor yet. It returns guarantees and rewards to the order creator.
+   */
   function revokeOrder(uint256 id) external {
     Order memory currentOrder = order[id];
     if (msg.sender != currentOrder.creator) revert Error.Unauthorized(msg.sender, currentOrder.creator);
@@ -167,6 +219,18 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     }
   }
 
+  /**
+   * @dev Verifies the execution of the order and updates the balance.
+   *
+   * @param id The ID of the order.
+   * @param signer The signer's address.
+   * @param onBehalf The address on behalf of which the order is executed.
+   * @param gasLimit The Gas restriction for the execution.
+   * @param fulfiller The fulfiller's address (executor or liquidator).
+   * @param gasSpent The amount of Gas spent during execution.
+   *
+   * This function verifies the execution of an order and handles gas costs, rewards, and guarantees.
+   */
   function reportExecution(
     uint256 id,
     address signer,
@@ -195,13 +259,23 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     }
   }
 
-  // @notice if the order is published and not accepted by any Executor it is still in `Pending` status
-  // until the `block.timestamp` excceds the `Order.executionPeriodDeadline`
   // @todo verify the function and all the possible states
+  /**
+   * @dev Gets the current status of an order with the given ID.
+   *
+   * @param id The ID of the order.
+   * @return status The current status of the order.
+   *
+   * This function returns the current status of an order based on various conditions
+   * such as the executor, execution deadlines, and more. It provides insight into the
+   * state of the order.
+   */
   function status(uint256 id) public view returns (OrderStatus) {
     if (order[id].creator == address(0)) return OrderStatus.None;
     if (executor[id] == address(1)) return OrderStatus.Closed;
 
+    // @notice if the order is published and not accepted by any Executor it is still in `Pending` status
+    // until the `block.timestamp` excceds the `Order.executionPeriodDeadline`
     if (executor[id] == address(0) && order[id].executionPeriodDeadline >= block.timestamp) {
       return OrderStatus.Pending;
     }
@@ -212,6 +286,12 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     return OrderStatus.Active;
   }
 
+  /**
+   * @dev Marks an order as completed by setting the executor to address(1).
+   *
+   * @param id The ID of the order to be marked as completed.
+   *
+   */
   function _guaranteeAndRewardDelivered(uint256 id) private {
     executor[id] = address(1);
   }

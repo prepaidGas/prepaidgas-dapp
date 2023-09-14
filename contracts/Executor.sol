@@ -51,6 +51,16 @@ contract Executor is
     gasOrder = ordersManager;
   }
 
+  /**
+   * @dev Executes the actions specified in the message.
+   *
+   * @param messageConfig The configuration of the message.
+   * @param messageData The message data.
+   * @param signature The senders signature of the message.
+   *
+   * This function verifies the validity of executing the message and performs the actions.
+   * After execution, if the executor's address is address(0), a registered executor will be rewarded.
+   */
   function execute(
     MessageConfig calldata messageConfig,
     bytes calldata messageData,
@@ -58,10 +68,21 @@ contract Executor is
   ) external validNonce(messageConfig.signer, messageConfig.nonce) {
     uint256 gasSpent = _execute(messageConfig, messageData, signature, false);
 
-    /// @dev address(0) means registered executor should be rewarded
+    /// @notice address(0) means registered executor should be rewarded
     _reportExecution(messageConfig, address(0), gasSpent, Const.INFR_GAS_EXECUTE);
   }
 
+  /**
+   * @dev Initiates the liquidation process.
+   *
+   * @param messageConfig The configuration of the message.
+   * @param messageData The message data.
+   * @param signature The signature of the message.
+   * @param validations An array of signature validations.
+   *
+   * This function verifies the validity of liquidation, checks the provided validators signatures,
+   * and performs the necessary actions.
+   */
   function liquidate(
     MessageConfig calldata messageConfig,
     bytes calldata messageData,
@@ -78,6 +99,15 @@ contract Executor is
 
   // @todo add liquidation by order owner, which doesn't call the signed msg, however sends part of the lock to the order owner as a remuneration
 
+  /**
+   * @dev Checks the validity of signature validations.
+   *
+   * @param messageConfig The configuration of the message.
+   * @param messageData The message data.
+   * @param validations An array of signature validations.
+   *
+   * This function ensures that all signatures are from valid validators.
+   */
   function _checkValidations(
     MessageConfig calldata messageConfig,
     bytes calldata messageData,
@@ -93,6 +123,18 @@ contract Executor is
     }
   }
 
+  /**
+   * @dev Executes the actions specified in the message.
+   *
+   * @param messageConfig The configuration of the message.
+   * @param messageData The message data.
+   * @param signature The signature of the message.
+   * @param isLiquidation A flag indicating when the execution is called by liquidator.
+   * @return gasSpent The amount of gas available during execution.
+   *
+   * This function verifies the validity of executing the message and performs the actions
+   * described in the message. It also updates nonces and emits an execution event.
+   */
   function _execute(
     MessageConfig calldata messageConfig,
     bytes calldata messageData,
@@ -107,7 +149,7 @@ contract Executor is
 
     uint256 gas = gasleft();
     //@todo add ability to send native token value `msg.sender`
-    // @dev supported of meta transactions with `_msgSender()`
+    // @notice support of meta transactions with `_msgSender()`
     (bool success, bytes memory returndata) = messageConfig.to.call{gas: messageConfig.gas}(
       abi.encodePacked(messageData, messageConfig.signer)
     );
@@ -127,6 +169,16 @@ contract Executor is
     );
   }
 
+  /**
+   * @dev Reports the execution of a message.
+   *
+   * @param messageConfig The configuration of the message.
+   * @param fulfiller The address of the fulfiller (executor of liquidator).
+   * @param gasSpent The amount of spent Gas.
+   * @param infrastructureGas The infrastructure Gas cost.
+   *
+   * This function reports the execution of a message, including gas usage and fulfillment details.
+   */
   function _reportExecution(
     MessageConfig calldata messageConfig,
     address fulfiller,
