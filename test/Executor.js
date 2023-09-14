@@ -112,8 +112,8 @@ describe("GasOrder", function () {
             1630000000,
             "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
             200000,
+            "0xabcdef"
         ],
-        "0xabcdef"
       );
 
 
@@ -125,23 +125,23 @@ describe("GasOrder", function () {
       };
       const types = {
         Message: [
-          {name: "signer", type: "address"},
+          {name: "from", type: "address"},
           {name: "nonce", type: "uint256"},
           {name: "gasOrder", type: "uint256"},
           {name: "onBehalf", type: "address"},
           {name: "deadline", type: "uint256"},
-          {name: "endpoint", type: "address"},
+          {name: "to", type: "address"},
           {name: "gas", type: "uint256"},
           {name: "data", type: "bytes"}
         ]
       };
       const dataObject = {
-        signer: admin.address,
+        from: admin.address,
         nonce: 1,
         gasOrder: 0,
         onBehalf: admin.address,
         deadline: 1630000000,
-        endpoint: "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
+        to: "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
         gas: 200000,
         data: "0xabcdef"
       };
@@ -150,7 +150,7 @@ describe("GasOrder", function () {
       console.log("signed typed data: ", signedTypedData)
       console.log("msg hash", msgHash)
       console.log("verify typed data: ", ethers.verifyTypedData(domain, types, dataObject, signedTypedData))
-      console.log(ethers.verifyMessage(msgHash, signedTypedData))// @todo properly generate msg Hash to be able to verify it afterwards
+      console.log(ethers.recoverAddress(msgHash, signedTypedData))// @todo properly generate msg Hash to be able to verify it afterwards
 
       await ExecutorContract.connect(admin).execute([
         admin.address,
@@ -160,7 +160,8 @@ describe("GasOrder", function () {
         1630000000,
         "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
         200000,
-      ], "0xabcdef", signedTypedData)
+        "0xabcdef",
+      ], signedTypedData)
 
 
     });
@@ -176,23 +177,23 @@ describe("GasOrder", function () {
       };
       const types = {
         Message: [
-          {name: "signer", type: "address"},
+          {name: "from", type: "address"},
           {name: "nonce", type: "uint256"},
           {name: "gasOrder", type: "uint256"},
           {name: "onBehalf", type: "address"},
           {name: "deadline", type: "uint256"},
-          {name: "endpoint", type: "address"},
+          {name: "to", type: "address"},
           {name: "gas", type: "uint256"},
           {name: "data", type: "bytes"}
         ]
       };
       const dataObject = {
-        signer: admin.address,
+        from: admin.address,
         nonce: 1,
         gasOrder: 0,
         onBehalf: admin.address,
         deadline: 1630000000,
-        endpoint: "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
+        to: "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
         gas: 200000,
         data: "0xabcdef"
       };
@@ -207,7 +208,8 @@ describe("GasOrder", function () {
         1630000000,
         "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
         200000,
-      ], "0xabcdef", signedTypedData)
+        "0xabcdef",
+      ], signedTypedData)
 
       const txWithExhaustedNonce = ExecutorContract.connect(admin).execute([
         admin.address,
@@ -217,7 +219,8 @@ describe("GasOrder", function () {
         1630000000,
         "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
         200000,
-      ], "0xabcdef", signedTypedData)
+        "0xabcdef",
+      ], signedTypedData)
 
       await expect(txWithExhaustedNonce).to.be.revertedWithCustomError(ExecutorContract, "NonceExhausted");
     });
