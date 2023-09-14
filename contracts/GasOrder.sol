@@ -4,15 +4,14 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import {FeeProcessor} from "./tools/FeeProcessor.sol";
 import {ERC1155ish} from "./base/ERC1155ish.sol";
+
+import {FeeProcessor} from "./tools/FeeProcessor.sol";
+
 import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
 
 import "./common/Errors.sol" as Error;
 import "./common/Constants.sol" as Const;
-
-//@todo remove
-import "hardhat/console.sol";
 
 /**
  * @title GasOrder
@@ -72,7 +71,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   // @todo gas optimization
   function createOrder(
     uint256 maxGas,
-    //uint256 maxGasCost, // @todo add maxGasCost
+    // uint256 maxGasCost, // @todo add maxGasCost
     uint256 executionPeriodStart,
     uint256 executionPeriodDeadline,
     uint256 executionWindow,
@@ -96,7 +95,8 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     order[id] = Order({
       creator: msg.sender, // @todo replace with `owner`, make transferable
       maxGas: maxGas,
-      maxGasPrice: 1 ether, // @dev magic number, should be removed in the future
+      /// @dev magic number, should be removed in the future
+      maxGasPrice: 1 ether,
       executionPeriodStart: executionPeriodStart,
       executionPeriodDeadline: executionPeriodDeadline,
       executionWindow: executionWindow,
@@ -112,7 +112,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     emit OrderCreate(id, executionWindow);
   }
 
-  // @dev function to avoid stack too deep issue
+  /// @dev function to avoid stack too deep issue
   function _acceptIncomingOrderCreate(
     uint256 maxGas,
     Payment calldata rewardValue,
@@ -160,27 +160,27 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     ) {
       _guaranteeAndRewardDelivered(id);
       IERC20(reward[id].token).safeTransfer(order[id].creator, reward[id].amount);
-      // @notice gasCost also should be withdrawn back to the creator
+      /// @notice gasCost also should be withdrawn back to the creator
       IERC20(gasCost[id].token).safeTransfer(order[id].creator, gasCost[id].gasPrice * order[id].maxGas);
     } else {
-      revert Error.ImpossibleRevocation(currentStatus, currentOrder.isRevokable);
+      revert Error.RevokeNotAllowed(currentOrder.isRevokable, currentStatus);
     }
   }
 
   function reportExecution(
     uint256 id,
-    address signer,
+    address from,
     address onBehalf,
     uint256 gasLimit,
     address fulfiller,
     uint256 gasSpent
   ) external executionCallback specificStatus(id, OrderStatus.Active) {
-    uint256 balance = usable(onBehalf, id, signer);
+    uint256 balance = usable(onBehalf, id, from);
     if (gasLimit > balance) revert Error.GasLimitExceedBalance(gasLimit, balance);
 
     /// @dev should not happen in ordinary situations
     if (gasSpent > balance) gasSpent = balance;
-    _utilizeAllowance(onBehalf, id, signer, gasSpent);
+    _utilizeAllowance(onBehalf, id, from, gasSpent);
 
     if (fulfiller == address(0)) fulfiller = executor[id];
 
@@ -195,8 +195,8 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     }
   }
 
-  // @notice if the order is published and not accepted by any Executor it is still in `Pending` status
-  // until the `block.timestamp` excceds the `Order.executionPeriodDeadline`
+  /// @notice if the order is published and not accepted by any Executor it is still in `Pending` status
+  /// until the `block.timestamp` excceds the `Order.executionPeriodDeadline`
   // @todo verify the function and all the possible states
   function status(uint256 id) public view returns (OrderStatus) {
     if (order[id].creator == address(0)) return OrderStatus.None;

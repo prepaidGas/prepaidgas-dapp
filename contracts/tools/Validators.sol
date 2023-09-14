@@ -10,6 +10,7 @@ import "./../common/Constants.sol" as Const;
 contract Validators is Ownable2Step {
   uint256 private _validatorThreshold;
 
+  // @todo make validators iteratable
   mapping(address => bool) private _isValidator;
   mapping(address => string) private _validatorURI;
 

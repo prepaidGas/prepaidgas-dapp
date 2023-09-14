@@ -11,8 +11,8 @@ contract Distributor {
 
   mapping(address => mapping(address => uint256)) private _balances;
 
-  event Distribute(address indexed receiver, address token, uint256 amount);
-  event Claim(address indexed holder, address token, uint256 amount);
+  event Distribute(address indexed receiver, address indexed token, uint256 amount);
+  event Claim(address indexed holder, address indexed token, uint256 amount);
 
   function claim(address token, uint256 amount) external {
     _claim(msg.sender, msg.sender, token, amount);

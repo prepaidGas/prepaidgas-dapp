@@ -16,7 +16,8 @@ enum OrderStatus {
   Pending,
   Accepted,
   Active,
-  Inactive, // @notice the order might be inactive due to exhausted gas limit or execution time
+  /// @notice the order might be inactive due to exhausted gas limit or execution time
+  Inactive,
   Closed
 }
 
@@ -33,7 +34,7 @@ struct Payment {
 interface IGasOrder {
   function reportExecution(
     uint256 id,
-    address signer,
+    address from,
     address onBehalf,
     uint256 gasLimit,
     address fulfiller,

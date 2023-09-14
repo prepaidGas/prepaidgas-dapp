@@ -10,7 +10,7 @@ contract ERC1155ish is ERC1155Supply, Ownable2Step {
   /// @dev holder => id => spender => amount
   mapping(address => mapping(uint256 => mapping(address => uint256))) private _allowance;
 
-  event Approval(address indexed holder, uint256 id, address indexed spender, uint256 amount);
+  event Approval(address indexed holder, uint256 indexed id, address indexed spender, uint256 amount);
   event URI(string value);
 
   constructor(string memory link) ERC1155(link) {}
