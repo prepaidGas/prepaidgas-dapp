@@ -5,8 +5,6 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 
 import "./../common/Errors.sol" as Error;
-//@todo remove
-import "hardhat/console.sol";
 
 contract ERC1155ish is ERC1155Supply, Ownable2Step {
   /// @dev holder => id => spender => amount
@@ -44,12 +42,16 @@ contract ERC1155ish is ERC1155Supply, Ownable2Step {
     uint256 possible = balanceOf(holder, id);
     uint256 boundary = allowance(holder, id, spender);
 
-    if (holder != spender && !isApprovedForAll(holder, spender) && possible > boundary) return boundary;
+    if (!isApprovedForAll(holder, spender) && possible > boundary) return boundary;
     return possible;
   }
 
   function allowance(address holder, uint256 id, address spender) public view returns (uint256) {
     return _allowance[holder][id][spender];
+  }
+
+  function isApprovedForAll(address holder, address spender) public view override returns (bool) {
+    return holder == spender || super.isApprovedForAll(holder, spender);
   }
 
   function _mint(address holder, uint256 id, uint256 amount) internal {
@@ -60,8 +62,7 @@ contract ERC1155ish is ERC1155Supply, Ownable2Step {
     uint256 balance = usable(holder, id, spender);
     if (balance < amount) revert Error.BalanceExhausted(amount, balance);
 
-    if (holder != spender && !isApprovedForAll(holder, spender))
-      _approve(holder, id, spender, allowance(holder, id, spender) - amount);
+    if (!isApprovedForAll(holder, spender)) _approve(holder, id, spender, allowance(holder, id, spender) - amount);
     _burn(holder, id, amount);
   }
 
@@ -69,7 +70,7 @@ contract ERC1155ish is ERC1155Supply, Ownable2Step {
     uint256 balance = balanceOf(holder, id);
     if (balance < amount) revert Error.BalanceExhausted(amount, balance);
 
-    if (holder != spender && !isApprovedForAll(holder, spender)) revert Error.NotOperator(holder, spender);
+    if (!isApprovedForAll(holder, spender)) revert Error.NotOperator(holder, spender);
     _burn(holder, id, amount);
   }
 
