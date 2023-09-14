@@ -47,6 +47,15 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     gasOrder = ordersManager;
   }
 
+  /**
+   * @dev Executes the actions specified in the message.
+   *
+   * @param message The message to execute with the platform metadata.
+   * @param signature The senders signature of the message.
+   *
+   * This function verifies the validity of executing the message and performs the actions.
+   * After execution the registered executor will be rewarded.
+   */
   function execute(
     Message calldata message,
     bytes calldata signature
@@ -58,6 +67,17 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
   }
 
   // @todo think about liquidation by the `from` without transaction execute with guarantee withdrawal
+  /**
+   * @dev Initiates the liquidation process.
+   *
+   * @param message The message to execute with the platform metadata.
+   * @param signature The senders signature of the message.
+   * @param validations An array of the message validations.
+   *
+   * This function verifies the validity of liquidation, checks the provided validator signatures,
+   * and performs the necessary actions.
+   * After execution the liquidator will be rewarded.
+   */
   function liquidate(
     Message calldata message,
     bytes calldata signature,
@@ -71,6 +91,14 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     _reportExecution(message, msg.sender, gasSpent, infrastructureGas);
   }
 
+  /**
+   * @dev Checks the validity of signature validations.
+   *
+   * @param message The message to execute with the platform metadata.
+   * @param validations An array of the message validations.
+   *
+   * This function ensures that all signatures are supplied by the authorized validators.
+   */
   function _checkValidations(
     Message calldata message,
     bytes[] calldata validations
@@ -85,6 +113,17 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     }
   }
 
+  /**
+   * @dev Executes the actions specified in the message.
+   *
+   * @param message The message to execute with the platform metadata.
+   * @param signature The senders signature of the message.
+   * @param liquidation A flag indicating when the execution is called by liquidator.
+   * @return gasSpent The amount of Gas used during execution.
+   *
+   * This function verifies the validity of executing the message and performs the actions
+   * described in the message. It also updates nonces and emits an execution event.
+   */
   function _execute(
     Message calldata message,
     bytes calldata signature,
@@ -117,6 +156,16 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     );
   }
 
+  /**
+   * @dev Reports the execution of a message.
+   *
+   * @param message The message to execute with the platform metadata.
+   * @param fulfiller The address of the fulfiller (executor of liquidator).
+   * @param gasSpent The amount of Gas used for message execution.
+   * @param infrastructureGas The amount of Gas used for the infrastructure needs.
+   *
+   * This function reports the execution of a message, including gas usage and gas order details.
+   */
   function _reportExecution(
     Message calldata message,
     address fulfiller,
