@@ -1,25 +1,12 @@
-const { time, loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
+const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { expect } = require("chai");
-const { config, ethers } = require("hardhat");
+const { ethers } = require("hardhat");
 
+const CONSTANTS = require("../scripts/constants/index.js");
+const orderHelper = require("../scripts/helpers/orderHelper.js");
 
 // @todo setup pretifier
-// common constants declaration
-// @todo convert to bignumber
-// @todo move to separate file
-let [
-    INITIAL_EXECUTOR_REWARD,
-    GAS_COST,
-    LOCKED_GUARANTEE_PER_GAS,
-    GAS_AMOUNT
-] = [
-    200,
-    100,
-    100,
-    200000
-];
-
-describe("GasOrder", function () {
+describe("Executor", function () {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
@@ -62,30 +49,23 @@ describe("GasOrder", function () {
 
     // Create and accept order
 
-    await TokenContract.approve(GasOrderContract.target, INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
+    await TokenContract.approve(GasOrderContract.target, CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT)
 
-    const latestTime = await time.latest();
+    await orderHelper.createOrder(
+      admin,
+      GasOrderContract,
+      TokenContract,
+      36000,
+      864000,
+      36001
+    );
 
-    await GasOrderContract.createOrder(
-      GAS_AMOUNT,
-      latestTime + 36000,
-      latestTime + 864000,
-      40,
-      true,
-      [TokenContract.target, INITIAL_EXECUTOR_REWARD],
-      [TokenContract.target, GAS_COST],
-      [TokenContract.target, LOCKED_GUARANTEE_PER_GAS],
-      INITIAL_EXECUTOR_REWARD,
-      GAS_COST * GAS_AMOUNT
-    )
+    await TokenContract.transfer(accounts[0].address, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
+    await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
 
-    await time.increase(36001);
+    await GasOrderContract.connect(accounts[0]).acceptOrder(0, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS);
 
-    await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-    await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-
-    await GasOrderContract.connect(accounts[0]).acceptOrder(0, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS);
-    let withdrawableAmount = INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)/10000;
+    let withdrawableAmount = CONSTANTS.INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)/10000;
     await GasOrderContract.connect(accounts[0]).claim(TokenContract.target, withdrawableAmount);
 
     return {accounts, admin, ExecutorContract, GasOrderContract, TokenContract};
@@ -95,14 +75,6 @@ describe("GasOrder", function () {
     it("Transaction should be executed", async function () {
       const {accounts, admin, ExecutorContract, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
 
-
-      /*
-      const verificationTest = ethers.verifyMessage(encodedMessage, signedMessage);
-      console.log("verification ", verificationTest)
-      console.log("v1: ", signedMessage)
-      console.log("true executor: ", accounts[1].address)
-      */
-      // increase allowance
       const msgHash = await ExecutorContract.messageHash(
         [
             admin.address,
@@ -111,11 +83,10 @@ describe("GasOrder", function () {
             admin.address,
             1630000000,
             "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-            200000,
+            CONSTANTS.GAS_AMOUNT,
             "0xabcdef"
         ],
       );
-
 
       const domain = {
         name: "Prepaid Gas",
@@ -142,7 +113,7 @@ describe("GasOrder", function () {
         onBehalf: admin.address,
         deadline: 1630000000,
         to: "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-        gas: 200000,
+        gas: CONSTANTS.GAS_AMOUNT,
         data: "0xabcdef"
       };
 
@@ -159,7 +130,7 @@ describe("GasOrder", function () {
         admin.address,
         1630000000,
         "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-        200000,
+        CONSTANTS.GAS_AMOUNT,
         "0xabcdef",
       ], signedTypedData)
 
@@ -194,7 +165,7 @@ describe("GasOrder", function () {
         onBehalf: admin.address,
         deadline: 1630000000,
         to: "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-        gas: 200000,
+        gas: CONSTANTS.GAS_AMOUNT,
         data: "0xabcdef"
       };
 
@@ -207,7 +178,7 @@ describe("GasOrder", function () {
         admin.address,
         1630000000,
         "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-        200000,
+        CONSTANTS.GAS_AMOUNT,
         "0xabcdef",
       ], signedTypedData)
 
@@ -218,7 +189,7 @@ describe("GasOrder", function () {
         admin.address,
         1630000000,
         "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-        200000,
+        CONSTANTS.GAS_AMOUNT,
         "0xabcdef",
       ], signedTypedData)
 

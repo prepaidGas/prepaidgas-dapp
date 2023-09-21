@@ -1,5 +1,8 @@
-const { time, loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
+const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { expect } = require("chai");
+
+const CONSTANTS = require("../scripts/constants/index.js");
+const orderHelper = require("../scripts/helpers/orderHelper.js");
 
 //@todo setup pretifier
 
@@ -48,74 +51,39 @@ describe("GasOrder", function () {
   }
 
   describe("Order operations", function () {
-    // common constants declaration
-    // @todo convert to bignumber
-    // @todo move to separate file
-    let [
-      INITIAL_EXECUTOR_REWARD,
-      GAS_COST,
-      LOCKED_GUARANTEE_PER_GAS,
-      GAS_AMOUNT
-    ] = [
-      200,
-      100,
-      100,
-      2000
-    ];
-    
     it("Should create a new order", async function () {
       const {admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
       // @todo move to helper
-      await TokenContract.approve(GasOrderContract.target, INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT )
+      await TokenContract.approve(GasOrderContract.target, CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT)
 
       const tokensBalanceBefore = await TokenContract.balanceOf(admin.address);
 
-      const latestTime = await time.latest();
+      await orderHelper.createOrder(admin, GasOrderContract, TokenContract);
 
-      await GasOrderContract.createOrder(
-        GAS_AMOUNT,
-        latestTime + 36000,
-        latestTime + 864000,
-        40,
-        true,
-        [TokenContract.target, INITIAL_EXECUTOR_REWARD],
-        [TokenContract.target, GAS_COST],
-        [TokenContract.target, LOCKED_GUARANTEE_PER_GAS],
-        INITIAL_EXECUTOR_REWARD,
-        GAS_COST * GAS_AMOUNT
-      )
       const tokensBalanceAfter = await TokenContract.balanceOf(admin.address);
 
       // @todo add more asserts statements
       expect(
         tokensBalanceBefore - tokensBalanceAfter
-      ).to.equal(INITIAL_EXECUTOR_REWARD + (GAS_COST * GAS_AMOUNT));
+      ).to.equal(CONSTANTS.INITIAL_EXECUTOR_REWARD + (CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT));
     });
 
     it("Should close order and send back prepaid fund for unspent Gas", async function () {
       const {admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
 
       // @todo move to helper
-      await TokenContract.approve(GasOrderContract.target, INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
+      await TokenContract.approve(GasOrderContract.target, CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT)
 
       const tokensBalanceBefore = await TokenContract.balanceOf(admin.address);
 
-      const latestTime = await time.latest();
-
-      await GasOrderContract.createOrder(
-        GAS_AMOUNT,
-        latestTime + 36000,
-        latestTime + 865000,
-        40,
-        true,
-        [TokenContract.target, INITIAL_EXECUTOR_REWARD],
-        [TokenContract.target, GAS_COST],
-        [TokenContract.target, LOCKED_GUARANTEE_PER_GAS],
-        INITIAL_EXECUTOR_REWARD,
-        GAS_COST * GAS_AMOUNT
-      )
-
-      await time.increase(36001);
+      await orderHelper.createOrder(
+        admin,
+        GasOrderContract,
+        TokenContract,
+        36000,
+        865000,
+        36001
+      );
       
       const tokensBalanceAfter = await TokenContract.balanceOf(admin.address);
 
@@ -126,7 +94,7 @@ describe("GasOrder", function () {
       // @todo add more asserts statements
       expect(
         tokensBalanceBefore - tokensBalanceAfter
-      ).to.equal(INITIAL_EXECUTOR_REWARD + (GAS_COST * GAS_AMOUNT));
+      ).to.equal(CONSTANTS.INITIAL_EXECUTOR_REWARD + (CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT));
 
       expect(
         tokensBalanceBefore
@@ -136,28 +104,21 @@ describe("GasOrder", function () {
     it("Executor should accept a new order", async function () {
       const {accounts, admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
 
-      await TokenContract.approve(GasOrderContract.target, INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
+      await TokenContract.approve(GasOrderContract.target, CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT)
 
-      const latestTime = await time.latest();
+      await orderHelper.createOrder(
+        admin,
+        GasOrderContract,
+        TokenContract,
+        36000,
+        865000
+      );
 
-      await GasOrderContract.createOrder(
-        GAS_AMOUNT,
-        latestTime + 36000,
-        latestTime + 864000,
-        40,
-        true,
-        [TokenContract.target, INITIAL_EXECUTOR_REWARD],
-        [TokenContract.target, GAS_COST],
-        [TokenContract.target, LOCKED_GUARANTEE_PER_GAS],
-        INITIAL_EXECUTOR_REWARD,
-        GAS_COST * GAS_AMOUNT
-      )
+      await TokenContract.transfer(accounts[0].address, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
+      await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
 
-      await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-      await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-
-      await GasOrderContract.connect(accounts[0]).acceptOrder(0, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS);
-      let withdrawableAmount = INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)/10000;
+      await GasOrderContract.connect(accounts[0]).acceptOrder(0, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS);
+      let withdrawableAmount = CONSTANTS.INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)/10000;
       await GasOrderContract.connect(accounts[0]).claim(TokenContract.target, withdrawableAmount);
 
       const tokensBalanceAfter = await TokenContract.balanceOf(accounts[0].address)
@@ -170,39 +131,33 @@ describe("GasOrder", function () {
 
       expect(
         amountOfERC1155GasTokens
-      ).to.equal(GAS_AMOUNT);
+      ).to.equal(CONSTANTS.GAS_AMOUNT);
     });
 
     it("Should fail to retrive prepaid tokens from order if not enough ERC1155 Gas tokens on balance", async function () {
       const {accounts, admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
 
-      await TokenContract.approve(GasOrderContract.target, INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
+      await TokenContract.approve(GasOrderContract.target, CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT)
 
-      const latestTime = await time.latest();
-      await GasOrderContract.createOrder(
-        GAS_AMOUNT,
-        latestTime + 36000,
-        latestTime + 864000,
-        40,
-        true,
-        [TokenContract.target, INITIAL_EXECUTOR_REWARD],
-        [TokenContract.target, GAS_COST],
-        [TokenContract.target, LOCKED_GUARANTEE_PER_GAS],
-        INITIAL_EXECUTOR_REWARD,
-        GAS_COST * GAS_AMOUNT
-      )
+      await orderHelper.createOrder(
+        admin,
+        GasOrderContract,
+        TokenContract,
+        36000,
+        865000
+      );
 
-      await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-      await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
+      await TokenContract.transfer(accounts[0].address, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
+      await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
 
       // Accepting order
-      await GasOrderContract.connect(accounts[0]).acceptOrder(0, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS);
-      let withdrawableAmount = INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)/10000;
+      await GasOrderContract.connect(accounts[0]).acceptOrder(0, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS);
+      let withdrawableAmount = CONSTANTS.INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)/10000;
       await GasOrderContract.connect(accounts[0]).claim(TokenContract.target, withdrawableAmount);
 
-      await GasOrderContract.connect(admin).safeTransferFrom(admin.address, accounts[0].address, 0, GAS_AMOUNT, '0x');
+      await GasOrderContract.connect(admin).safeTransferFrom(admin.address, accounts[0].address, 0, CONSTANTS.GAS_AMOUNT, '0x');
 
-      const txToBeReverted = GasOrderContract.connect(admin).retrieveGasCost(admin.address, 0, GAS_AMOUNT)
+      const txToBeReverted = GasOrderContract.connect(admin).retrieveGasCost(admin.address, 0, CONSTANTS.GAS_AMOUNT)
 
       await expect(
         txToBeReverted
