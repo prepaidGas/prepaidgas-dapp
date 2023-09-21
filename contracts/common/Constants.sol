@@ -14,3 +14,6 @@ uint256 constant INFR_GAS_EXECUTE = 0;
 uint256 constant INFR_GAS_LIQUIDATE = 0;
 uint256 constant INFR_GAS_RECOVER_SIGNER = 0;
 uint256 constant INFR_GAS_GET_GAS_SPENT = 0;
+
+// Max number of filtered orders to return
+uint256 constant MAX_FILTERED_ORDERS = 100;

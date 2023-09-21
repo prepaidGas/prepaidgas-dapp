@@ -8,10 +8,12 @@ import {ERC1155ish} from "./base/ERC1155ish.sol";
 
 import {FeeProcessor} from "./tools/FeeProcessor.sol";
 
-import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
+import {Order, FilteredOrder, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
 
 import "./common/Errors.sol" as Error;
 import "./common/Constants.sol" as Const;
+
+import "hardhat/console.sol";
 
 /**
  * @title GasOrder
@@ -295,5 +297,58 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
    */
   function _guaranteeAndRewardDelivered(uint256 id) private {
     executor[id] = address(1);
+  }
+
+  /// Getters function
+  // Getter function to filter and paginate orders
+  function getFilteredOrders(
+    address _creator,
+    OrderStatus _status,
+    uint256 _limit,
+    uint256 _start
+  ) external view returns (FilteredOrder[] memory) {
+    uint256 totalOrders = totalMatchingOrdersCount(_creator, _status);
+
+    // Ensure the limit does not exceed the maximum
+    uint256 limit = (_limit > Const.MAX_FILTERED_ORDERS) ? Const.MAX_FILTERED_ORDERS : _limit;
+    uint256 startIndex = (_start < totalOrders) ? _start : 0;
+
+    FilteredOrder[] memory result = new FilteredOrder[](totalOrders);
+
+    uint256 addedOrders = 0;
+    for (uint256 i = startIndex; i < ordersCount && addedOrders < limit; i++) {
+      if (
+        (_creator == address(0) || order[i].creator == _creator) &&
+        (_status == OrderStatus.None || status(i) == _status)
+      ) {
+        result[addedOrders] = FilteredOrder({
+          id: i,
+          creator: order[i].creator,
+          status: status(i),
+          maxGas: order[i].maxGas,
+          executionPeriodStart: order[i].executionPeriodStart,
+          executionPeriodDeadline: order[i].executionPeriodDeadline,
+          executionWindow: order[i].executionWindow,
+          isRevokable: order[i].isRevokable
+        });
+        addedOrders++;
+      }
+    }
+
+    return result;
+  }
+
+  // Function to calculate the total number of matching orders
+  function totalMatchingOrdersCount(address _creator, OrderStatus _status) public view returns (uint256) {
+    uint256 matchingCount = 0;
+    for (uint256 i = 0; i < ordersCount; i++) {
+      if (
+        (_creator == address(0) || order[i].creator == _creator) &&
+        (_status == OrderStatus.None || status(i) == _status)
+      ) {
+        matchingCount++;
+      }
+    }
+    return matchingCount;
   }
 }

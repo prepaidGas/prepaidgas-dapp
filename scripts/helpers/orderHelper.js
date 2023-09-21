@@ -11,6 +11,8 @@ async function createOrder(
     increaseTime = 0
 ) {
     const latestTime = await time.latest();
+
+    await tokenContract.connect(orderCreator).approve(gasContract.target, CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT)
     await gasContract.connect(orderCreator).createOrder(
         CONSTANTS.GAS_AMOUNT,
         latestTime + possibleExecutionStart,

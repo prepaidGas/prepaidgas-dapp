@@ -11,6 +11,18 @@ struct Order {
   bool isRevokable;
 }
 
+// @dev this structure is based on the `Order` structure, but has `id` and `status` extra fields
+struct FilteredOrder {
+  uint256 id;
+  address creator;
+  OrderStatus status;
+  uint256 maxGas;
+  uint256 executionPeriodStart;
+  uint256 executionPeriodDeadline;
+  uint256 executionWindow;
+  bool isRevokable;
+}
+
 enum OrderStatus {
   None,
   Pending,

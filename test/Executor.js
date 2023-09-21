@@ -49,8 +49,6 @@ describe("Executor", function () {
 
     // Create and accept order
 
-    await TokenContract.approve(GasOrderContract.target, CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT)
-
     await orderHelper.createOrder(
       admin,
       GasOrderContract,

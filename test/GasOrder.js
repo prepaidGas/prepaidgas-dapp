@@ -42,7 +42,10 @@ describe("GasOrder", function () {
     const TokenFactory = await ethers.getContractFactory(
       "MockToken"
     );
-    const TokenContract = await TokenFactory.deploy("MockUSD", "MUSD", "1000000000"); // @todo use ethers function to specify token amount
+    const TokenContract = await TokenFactory.deploy("MockUSD", "MUSD", "1000000000000"); // @todo use ethers function to specify token amount
+    await TokenContract.transfer(accounts[1], 20000000)
+    await TokenContract.transfer(accounts[2], 20000000)
+
     await TokenContract.deploymentTransaction().wait();
     
     await GasOrderContract.setFee(SYSTEM_FEE);
@@ -53,8 +56,6 @@ describe("GasOrder", function () {
   describe("Order operations", function () {
     it("Should create a new order", async function () {
       const {admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
-      // @todo move to helper
-      await TokenContract.approve(GasOrderContract.target, CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT)
 
       const tokensBalanceBefore = await TokenContract.balanceOf(admin.address);
 
@@ -70,9 +71,6 @@ describe("GasOrder", function () {
 
     it("Should close order and send back prepaid fund for unspent Gas", async function () {
       const {admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
-
-      // @todo move to helper
-      await TokenContract.approve(GasOrderContract.target, CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT)
 
       const tokensBalanceBefore = await TokenContract.balanceOf(admin.address);
 
@@ -103,8 +101,6 @@ describe("GasOrder", function () {
 
     it("Executor should accept a new order", async function () {
       const {accounts, admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
-
-      await TokenContract.approve(GasOrderContract.target, CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT)
 
       await orderHelper.createOrder(
         admin,
@@ -137,8 +133,6 @@ describe("GasOrder", function () {
     it("Should fail to retrive prepaid tokens from order if not enough ERC1155 Gas tokens on balance", async function () {
       const {accounts, admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
 
-      await TokenContract.approve(GasOrderContract.target, CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT)
-
       await orderHelper.createOrder(
         admin,
         GasOrderContract,
@@ -162,6 +156,36 @@ describe("GasOrder", function () {
       await expect(
         txToBeReverted
       ).to.be.reverted;
+    });
+  });
+  describe("Order getter", function () {
+    it("Should get orders with spesific owner", async function () {
+      const {accounts, admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
+      // @notice orders mockups
+      await orderHelper.createOrder(admin, GasOrderContract, TokenContract);
+      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract);
+      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract);
+      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract);
+      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract);
+      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract);
+
+      const totalAmountOfOrders = await GasOrderContract.totalMatchingOrdersCount(
+        ethers.ZeroAddress,
+        0 // OrderStatus.None
+      );
+
+      expect(totalAmountOfOrders).to.be.eq(6);
+
+      const ordersWithAccount2Owner = await GasOrderContract.getFilteredOrders(
+        accounts[2].address,
+        0, // OrderStatus.None
+        100,
+        0
+      );
+      // @todo rewrite expected statements for an array
+      expect(ordersWithAccount2Owner.length).to.be.eq(2);
+      expect(ordersWithAccount2Owner[0][0]).to.be.eq(4); // order number
+      expect(ordersWithAccount2Owner[0][3]).to.be.eq(2000); // order number
     });
   });
 });
