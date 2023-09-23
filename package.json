@@ -19,7 +19,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroicons/react": "^1.0.6",
     "@rainbow-me/rainbowkit": "^1.0.11",
+    "@tremor/react": "^3.7.9",
     "@types/node": "20.6.3",
     "@types/react": "18.2.22",
     "@types/react-dom": "18.2.7",

@@ -12,12 +12,13 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
 import {
+  hardhat,
   mainnet
 } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 
 const { chains, publicClient } = configureChains(
-  [mainnet],
+  [mainnet, hardhat],
   [
     publicProvider()
   ]
@@ -35,14 +36,10 @@ const wagmiConfig = createConfig({
   publicClient
 })
 
+import { Grid, Col } from "@tremor/react";
 
-
+// @todo add env var with the contracts addresses
 const inter = Inter({ subsets: ['latin'] })
-/*
-export const metadata: Metadata = {
-  title: 'PrepaidGas',
-  description: 'Buy Gas now use it later',
-}*/
 
 export default function RootLayout({
   children,
