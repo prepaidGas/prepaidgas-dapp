@@ -2,6 +2,14 @@
 
 prepaidgas.io
 
+## Installation
+
+Install the dependencies:
+
+```
+npm install
+```
+
 ## Test
 
 Command to run tests:
