@@ -1,8 +1,14 @@
 'use client'
+// @todo alphabetize order
+import { Card, Title, Text, TextInput, Grid, Select, SelectItem, Button } from "@tremor/react";
 
-import { Card, Title, Text, Grid } from "@tremor/react";
+import {MagnifyingGlassIcon} from "@heroicons/react/24/outline";
+
 import { useContractRead } from 'wagmi'
+import OrderCard from '../../../components/OrderCard';
 // @todo display first 100 items
+// @todo import abi properly
+// @todo update automaticaly
 const testABI = [
     {
       "inputs": [
@@ -1536,20 +1542,73 @@ const testABI = [
 
 //0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
 export default function SearchOrder() {
-    const { data, isError, isLoading } = useContractRead({
+    /*const { data, isError, isLoading } = useContractRead({
         address: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
         abi: testABI,
         functionName: 'getFilteredOrders',
         args: ['0x0000000000000000000000000000000000000000', 0, 100, 0],
-
-      })
+      })*/
   return (
     <>
-      <Title>Search</Title>
+      <Title>Search results: undefined</Title>
       <Text>You might find orders</Text>
+
+      <Card className="mt-6">
+        <div>
+          Manager:
+          {/* @todo Replace with a more sophisticated component, with error handling and input validation, or ens */}
+          <TextInput placeholder="0x1dA..." />
+        </div>
+        <div>
+          Status
+          <Select>
+            <SelectItem value="0">
+              Any
+            </SelectItem>
+            <SelectItem value="1">
+              Pending
+            </SelectItem>
+            <SelectItem value="2">
+              Accepted
+            </SelectItem>
+            <SelectItem value="3">
+              Active
+            </SelectItem>
+            <SelectItem value="4">
+              Inactive
+            </SelectItem>
+            <SelectItem value="5">
+              Closed
+            </SelectItem>
+          </Select>
+        </div>
+        <div>
+          Items per page
+          <Select>
+            <SelectItem value="10">
+              10
+            </SelectItem>
+            <SelectItem value="25">
+              25
+            </SelectItem>
+            <SelectItem value="50">
+              50
+            </SelectItem>
+            <SelectItem value="100">
+              100
+            </SelectItem>
+          </Select>
+        </div>
+        <div>
+          <Button icon={MagnifyingGlassIcon}>Search</Button>
+        </div>
+      </Card>
       {/* Main section */}
       <Card className="mt-6">
-        <div className="h-96">{data[0].status} {data[0].creator}</div>
+        {/*<div className="h-96">{data[0].status} {data[0].creator}</div>*/}
+        <div>
+            <OrderCard />
+        </div>
       </Card>
     </>
   );

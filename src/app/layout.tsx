@@ -1,4 +1,4 @@
-'use client'
+'use client' //@todo move it into child component 
 
 import './globals.css'
 import type { Metadata } from 'next'

@@ -1,10 +1,9 @@
-
 import { Button, Grid, Col, Card } from "@tremor/react";
-import Link from 'next/link'
+import Link from 'next/link';
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
-export default function OrderLayout({
+export default async function OrderLayout({
     children,
 }: {
     children: React.ReactNode
@@ -15,6 +14,7 @@ export default function OrderLayout({
                 <Col>
                     <Card className="space-x-2">
                         <Link href="/order/create">
+                            {/* @todo add icons */}
                             <Button>Create Order</Button>
                         </Link>
                         <Link href="/order/search">
@@ -27,9 +27,6 @@ export default function OrderLayout({
                             <Button>My Orders</Button>
                         </Link>
                     </Card>
-                </Col>
-                <Col>
-                    <ConnectButton />
                 </Col>
             </Grid>
             {children}
