@@ -28,6 +28,9 @@ export default async function OrderLayout({
                         </Link>
                     </Card>
                 </Col>
+                <Col>
+                    <ConnectButton />
+                </Col>
             </Grid>
             {children}
         </main>
