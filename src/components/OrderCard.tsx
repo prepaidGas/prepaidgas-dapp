@@ -9,6 +9,9 @@ import {
 } from "@heroicons/react/24/outline"
 import { startTransition, useEffect } from "react"
 
+import format from "date-fns/format"
+
+// @todo move to common intefaces
 interface Order {
   id: bigint
   creator: string
@@ -86,11 +89,11 @@ export default function OrderCard({
 
       {/* @dev Order Id */}
       <Metric>#{id.toString()}</Metric>
-      <Text>Sales: ${creator}</Text>
+      <Text>Manager ${creator}</Text>
       {/* @dev Order executionPeriodStart and executionPeriodDeadline */}
       <Text>
-        Execution timeframe: {new Date(Number(executionPeriodStart)).toLocaleString()} -
-        {new Date(Number(executionPeriodDeadline)).toLocaleString()}
+        Execution timeframe: {format(Number(executionPeriodStart), "yyyy.mm.dd hh:ss:mm")} -
+        {format(Number(executionPeriodDeadline), "yyyy.mm.dd hh:ss:mm")}
       </Text>
       {/* @dev Order executionWindow */}
       <Text>Execution window: {executionWindow.toString()}</Text>

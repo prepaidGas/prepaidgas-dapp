@@ -1542,19 +1542,25 @@ const testABI = [
   },
 ]
 
+interface Order {
+  id: bigint
+  creator: string
+  status: number
+  maxGas: bigint
+  executionPeriodStart: bigint
+  executionPeriodDeadline: bigint
+  executionWindow: bigint
+  isRevokable: boolean
+}
+
 //0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
 export default function SearchOrder() {
-  const {
-    data,
-    isError,
-    isLoading,
-  }: { data: any; isError: any; isLoading: any } /*: { data: any; isError: boolean; isLoading: boolean }*/ =
-    useContractRead({
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-      abi: testABI,
-      functionName: "getFilteredOrders",
-      args: ["0x0000000000000000000000000000000000000000", 0, 100, 0],
-    })
+  const { data, isError, isLoading } = useContractRead<unknown[], "getFilteredOrders", Order[]>({
+    address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    abi: testABI,
+    functionName: "getFilteredOrders",
+    args: ["0x0000000000000000000000000000000000000000", 0, 100, 0],
+  })
 
   return (
     <>
