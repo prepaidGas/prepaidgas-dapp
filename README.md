@@ -15,13 +15,13 @@ npm install
 Command to run tests:
 
 ```
-npx hardhat test
+npm run sc-test
 ```
 
 Command to check the test coverage:
 
 ```
-npx hardhat coverage
+npm run sc-coverage
 ```
 
 ## Local environment
@@ -29,5 +29,5 @@ npx hardhat coverage
 Deploy contracts on local hardhat network and create few orders for experiments
 
 ```
-npx hardhat run scripts/deploy/testDeploy.js --network localhost
+npm run sc-deploy-test
 ```

@@ -301,6 +301,8 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
 
   /// Getters function
   // Getter function to filter and paginate orders
+
+  // @todo add user field
   function getFilteredOrders(
     address _creator,
     OrderStatus _status,
@@ -330,6 +332,8 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
           executionPeriodDeadline: order[i].executionPeriodDeadline,
           executionWindow: order[i].executionWindow,
           isRevokable: order[i].isRevokable
+          //holding: balanceOf(i, clientAddress)
+          // @todo add guarantee tokens, reward, gasCost
         });
         addedOrders++;
       }
@@ -339,6 +343,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   }
 
   // Function to calculate the total number of matching orders
+  // @todo add user field
   function totalMatchingOrdersCount(address _creator, OrderStatus _status) public view returns (uint256) {
     uint256 matchingCount = 0;
     for (uint256 i = 0; i < ordersCount; i++) {
@@ -351,4 +356,6 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     }
     return matchingCount;
   }
+  // @todo get total balance
+  // @todo get allowance, holders array is an input
 }
