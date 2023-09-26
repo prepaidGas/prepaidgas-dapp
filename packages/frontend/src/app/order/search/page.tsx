@@ -2,12 +2,21 @@
 // @todo alphabetize order
 import { Card, Title, Text, TextInput, Grid, Select, SelectItem, Button } from "@tremor/react"
 
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline"
+import {
+  FunnelIcon,
+  XMarkIcon,
+  ArrowPathIcon,
+  CheckCircleIcon,
+  PlayIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/outline"
 
 import { useContractRead } from "wagmi"
 import OrderCard from "../../../components/OrderCard"
-import { ChangeEvent, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { isReadable } from "stream"
+
 // @todo display first 100 items
 // @todo import abi properly
 // @todo update automaticaly
@@ -1569,13 +1578,14 @@ export default function SearchOrder() {
   })
 
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/g
-
-  //Input values
-  const [inputValues, setInputValues] = useState({
+  const initialState = {
     manager: "",
     status: "0",
-    numberOfEntries: "100",
-  })
+    numberOfEntries: "50",
+  }
+
+  //Input values
+  const [inputValues, setInputValues] = useState({ ...initialState })
 
   //Validation state
   const [validationErrors, setValidationErrors] = useState({
@@ -1584,8 +1594,7 @@ export default function SearchOrder() {
     numberOfEntries: "",
   })
 
-  const validateSearchForm = () => {
-    console.log("Start of validation", inputValues)
+  const validateSearchForm = (isSubmitting?: boolean) => {
     const errors = { ...validationErrors }
     const noSpacesManager = inputValues.manager.replace(/\s/g, "")
     if (ethAddressRegex.test(noSpacesManager) || noSpacesManager === "") {
@@ -1595,7 +1604,12 @@ export default function SearchOrder() {
     }
 
     setValidationErrors(errors)
-    console.log("End of validation", errors)
+    const IsEverythingValid = Object.values(errors).every((x) => x === "")
+
+    if (isSubmitting && IsEverythingValid) {
+      console.log(inputValues)
+      //call search func
+    }
   }
 
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
@@ -1610,11 +1624,11 @@ export default function SearchOrder() {
 
   return (
     <>
-      <Title>Search results: undefined</Title>
+      <Title>Search results: {data?.length}</Title>
       <Text>You might find orders</Text>
 
       <Card className="mt-6">
-        <div>
+        <div className="mb-4">
           Manager:
           {/* @todo Replace with a more sophisticated component, with error handling and input validation, or ens */}
           <TextInput
@@ -1626,35 +1640,57 @@ export default function SearchOrder() {
             spellCheck={false}
           />
         </div>
-        <div>
+        <div className="mb-4">
           Status
           <Select
             value={inputValues.status}
             onValueChange={(value) => setInputValues({ ...inputValues, status: value })}
           >
             <SelectItem value="0">Any</SelectItem>
-            <SelectItem value="1">Pending</SelectItem>
-            <SelectItem value="2">Accepted</SelectItem>
-            <SelectItem value="3">Active</SelectItem>
-            <SelectItem value="4">Inactive</SelectItem>
-            <SelectItem value="5">Closed</SelectItem>
+            <SelectItem icon={ArrowPathIcon} value="1">
+              Pending
+            </SelectItem>
+            <SelectItem icon={CheckCircleIcon} value="2">
+              Accepted
+            </SelectItem>
+            <SelectItem icon={PlayIcon} value="3">
+              Active
+            </SelectItem>
+            <SelectItem icon={ExclamationTriangleIcon} value="4">
+              Inactive
+            </SelectItem>
+            <SelectItem icon={XCircleIcon} value="5">
+              Closed
+            </SelectItem>
           </Select>
         </div>
-        <div>
+        <div className="mb-4">
           Items per page
           <Select
             value={inputValues.numberOfEntries}
             onValueChange={(value) => setInputValues({ ...inputValues, numberOfEntries: value })}
           >
             <SelectItem value="10">10</SelectItem>
-            <SelectItem value="25">25</SelectItem>
+            <SelectItem value="20">20</SelectItem>
+            <SelectItem value="30">30</SelectItem>
             <SelectItem value="50">50</SelectItem>
-            <SelectItem value="100">100</SelectItem>
           </Select>
         </div>
-        <div>
-          <Button onClick={validateSearchForm} icon={MagnifyingGlassIcon}>
-            Search
+        <div className="flex flex-col lg:flex-row lg:justify-end">
+          <Button
+            className="w-full mb-2 lg:w-auto lg:mr-2 lg:mb-0"
+            onClick={() => validateSearchForm(true)}
+            icon={FunnelIcon}
+          >
+            Apply Filters
+          </Button>
+          <Button
+            className="w-full lg:w-auto lg:mr-2 lg:mb-0"
+            variant="secondary"
+            onClick={() => setInputValues({ ...initialState })}
+            icon={XMarkIcon}
+          >
+            Clear Filters
           </Button>
         </div>
       </Card>
