@@ -83,6 +83,7 @@ export default function SearchFiltersCard({
       <div className="">
         Status
         <Select
+          className="min-w-[8rem]"
           value={inputValues.status}
           onValueChange={(value) =>
             setInputValues({ ...inputValues, status: value as "0" | "1" | "2" | "3" | "4" | "5" })
@@ -109,6 +110,7 @@ export default function SearchFiltersCard({
       <div className="">
         Items per page
         <Select
+          className="min-w-[8rem]"
           value={inputValues.numberOfEntries}
           onValueChange={(value) => setInputValues({ ...inputValues, numberOfEntries: value })}
         >

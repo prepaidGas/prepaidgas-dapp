@@ -34,9 +34,30 @@ export default function OrderCard({
   executionWindow,
   isRevokable,
 }: Order) {
-  useEffect(() => {
-    console.log()
-  }, [])
+  const colors: (
+    | "yellow"
+    | "cyan"
+    | "green"
+    | "red"
+    | "slate"
+    | "gray"
+    | "zinc"
+    | "neutral"
+    | "stone"
+    | "orange"
+    | "amber"
+    | "lime"
+    | "emerald"
+    | "teal"
+    | "sky"
+    | "blue"
+    | "indigo"
+    | "violet"
+    | "purple"
+    | "fuchsia"
+    | "pink"
+    | "rose"
+  )[] = ["blue", "yellow", "cyan", "green", "red", "slate"]
 
   /* @dev Status bage */
   /* @todo Add explanation to all the statuses with a `tooltip attr` */
@@ -44,31 +65,31 @@ export default function OrderCard({
     switch (status) {
       case 1:
         return (
-          <Badge icon={ArrowPathIcon} color="yellow">
+          <Badge icon={ArrowPathIcon} color={colors[status]}>
             Pending
           </Badge>
         )
       case 2:
         return (
-          <Badge icon={CheckCircleIcon} color="cyan">
+          <Badge icon={CheckCircleIcon} color={colors[status]}>
             Accepted
           </Badge>
         )
       case 3:
         return (
-          <Badge icon={PlayIcon} color="green">
+          <Badge icon={PlayIcon} color={colors[status]}>
             Active
           </Badge>
         )
       case 4:
         return (
-          <Badge icon={ExclamationTriangleIcon} color="red">
+          <Badge icon={ExclamationTriangleIcon} color={colors[status]}>
             Inactive
           </Badge>
         )
       case 5:
         return (
-          <Badge icon={XCircleIcon} color="slate">
+          <Badge icon={XCircleIcon} color={colors[status]}>
             Closed
           </Badge>
         )
@@ -84,7 +105,7 @@ export default function OrderCard({
   }
 
   return (
-    <Card>
+    <Card className="mt-3" decoration="top" decorationColor={colors[status]}>
       {renderBadge()}
 
       {/* @dev Order Id */}
