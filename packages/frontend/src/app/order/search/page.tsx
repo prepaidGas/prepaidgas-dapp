@@ -1584,7 +1584,9 @@ export default function SearchOrder() {
     args: ["0x0000000000000000000000000000000000000000", 0, 100, 0],
   })
 
-  const executeSearch = (filterOptions: FilterOptions) => {}
+  const executeSearch = (filterOptions: FilterOptions) => {
+    console.log(filterOptions)
+  }
 
   return (
     <>

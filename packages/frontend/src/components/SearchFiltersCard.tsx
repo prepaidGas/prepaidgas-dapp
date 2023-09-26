@@ -67,8 +67,8 @@ export default function SearchFiltersCard({
   }, [inputValues])
 
   return (
-    <Card className="mt-6">
-      <div className="mb-4">
+    <Card className="mt-6 flex flex-col gap-3 lg:gap-4 lg:flex-row align-middle justify-center ">
+      <div className="flex flex-col grow align-middle">
         Manager:
         {/* @todo Replace with a more sophisticated component, with error handling and input validation, or ens */}
         <TextInput
@@ -80,7 +80,7 @@ export default function SearchFiltersCard({
           spellCheck={false}
         />
       </div>
-      <div className="mb-4">
+      <div className="">
         Status
         <Select
           value={inputValues.status}
@@ -106,7 +106,7 @@ export default function SearchFiltersCard({
           </SelectItem>
         </Select>
       </div>
-      <div className="mb-4">
+      <div className="">
         Items per page
         <Select
           value={inputValues.numberOfEntries}
@@ -118,22 +118,21 @@ export default function SearchFiltersCard({
           <SelectItem value="50">50</SelectItem>
         </Select>
       </div>
-      <div className="flex flex-col lg:flex-row lg:justify-end">
-        <Button
-          className="w-full mb-2 lg:w-auto lg:mr-2 lg:mb-0"
-          onClick={() => validateSearchForm(true)}
-          icon={FunnelIcon}
-        >
-          Apply Filters
-        </Button>
-        <Button
-          className="w-full lg:w-auto lg:mr-2 lg:mb-0"
-          variant="secondary"
-          onClick={() => setInputValues({ ...initialState })}
-          icon={XMarkIcon}
-        >
-          Clear Filters
-        </Button>
+      <div>
+        &nbsp;
+        <div className="flex flex-col lg:flex-row lg:my-auto gap-2">
+          <Button className="h-[38px] m-0" onClick={() => validateSearchForm(true)} icon={FunnelIcon}>
+            Apply
+          </Button>
+          <Button
+            className="h-[38px] m-0"
+            variant="secondary"
+            onClick={() => setInputValues({ ...initialState })}
+            icon={XMarkIcon}
+          >
+            Clear
+          </Button>
+        </div>
       </div>
     </Card>
   )
