@@ -13,6 +13,7 @@ import {
 } from "@heroicons/react/24/outline"
 
 import { useContractRead } from "wagmi"
+import SearchFiltersCard from "../../../components/SearchFiltersCard"
 import OrderCard from "../../../components/OrderCard"
 import { useEffect, useState } from "react"
 import { isReadable } from "stream"
@@ -1550,7 +1551,7 @@ const testABI = [
     type: "function",
   },
 ]
-
+//@todo move interfaces
 interface Order {
   id: bigint
   creator: string
@@ -1568,6 +1569,12 @@ interface ValidationError {
   value?: number | string
 }
 
+interface FilterOptions {
+  manager: string
+  status: "0" | "1" | "2" | "3" | "4" | "5"
+  numberOfEntries: "10" | "20" | "30" | "50"
+}
+
 //0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
 export default function SearchOrder() {
   const { data, isError, isLoading } = useContractRead<unknown[], "getFilteredOrders", Order[]>({
@@ -1577,129 +1584,19 @@ export default function SearchOrder() {
     args: ["0x0000000000000000000000000000000000000000", 0, 100, 0],
   })
 
-  const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/g
-  const initialState = {
-    manager: "",
-    status: "0",
-    numberOfEntries: "50",
-  }
-
-  //Input values
-  const [inputValues, setInputValues] = useState({ ...initialState })
-
-  //Validation state
-  const [validationErrors, setValidationErrors] = useState({
-    manager: "",
-    status: "",
-    numberOfEntries: "",
-  })
-
-  const validateSearchForm = (isSubmitting?: boolean) => {
-    const errors = { ...validationErrors }
-    const noSpacesManager = inputValues.manager.replace(/\s/g, "")
-    if (ethAddressRegex.test(noSpacesManager) || noSpacesManager === "") {
-      errors.manager = ""
-    } else {
-      errors.manager = "Incorrect address"
-    }
-
-    setValidationErrors(errors)
-    const IsEverythingValid = Object.values(errors).every((x) => x === "")
-
-    if (isSubmitting && IsEverythingValid) {
-      console.log(inputValues)
-      //call search func
-    }
-  }
-
-  const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
-
-  useEffect(() => {
-    if (validationTimer !== undefined) {
-      clearTimeout(validationTimer)
-    }
-    const timer = setTimeout(validateSearchForm, 500)
-    setValidationTimer(timer)
-  }, [inputValues])
+  const executeSearch = (filterOptions: FilterOptions) => {}
 
   return (
     <>
       <Title>Search results: {data?.length}</Title>
       <Text>You might find orders</Text>
-
-      <Card className="mt-6">
-        <div className="mb-4">
-          Manager:
-          {/* @todo Replace with a more sophisticated component, with error handling and input validation, or ens */}
-          <TextInput
-            onChange={(e) => setInputValues({ ...inputValues, manager: e.target.value })}
-            value={inputValues.manager}
-            error={!!validationErrors.manager}
-            errorMessage={validationErrors.manager}
-            placeholder="0x1dA..."
-            spellCheck={false}
-          />
-        </div>
-        <div className="mb-4">
-          Status
-          <Select
-            value={inputValues.status}
-            onValueChange={(value) => setInputValues({ ...inputValues, status: value })}
-          >
-            <SelectItem value="0">Any</SelectItem>
-            <SelectItem icon={ArrowPathIcon} value="1">
-              Pending
-            </SelectItem>
-            <SelectItem icon={CheckCircleIcon} value="2">
-              Accepted
-            </SelectItem>
-            <SelectItem icon={PlayIcon} value="3">
-              Active
-            </SelectItem>
-            <SelectItem icon={ExclamationTriangleIcon} value="4">
-              Inactive
-            </SelectItem>
-            <SelectItem icon={XCircleIcon} value="5">
-              Closed
-            </SelectItem>
-          </Select>
-        </div>
-        <div className="mb-4">
-          Items per page
-          <Select
-            value={inputValues.numberOfEntries}
-            onValueChange={(value) => setInputValues({ ...inputValues, numberOfEntries: value })}
-          >
-            <SelectItem value="10">10</SelectItem>
-            <SelectItem value="20">20</SelectItem>
-            <SelectItem value="30">30</SelectItem>
-            <SelectItem value="50">50</SelectItem>
-          </Select>
-        </div>
-        <div className="flex flex-col lg:flex-row lg:justify-end">
-          <Button
-            className="w-full mb-2 lg:w-auto lg:mr-2 lg:mb-0"
-            onClick={() => validateSearchForm(true)}
-            icon={FunnelIcon}
-          >
-            Apply Filters
-          </Button>
-          <Button
-            className="w-full lg:w-auto lg:mr-2 lg:mb-0"
-            variant="secondary"
-            onClick={() => setInputValues({ ...initialState })}
-            icon={XMarkIcon}
-          >
-            Clear Filters
-          </Button>
-        </div>
-      </Card>
+      <SearchFiltersCard executeSearch={executeSearch} />
       {/* Main section */}
-      <Card className="mt-6">
-        {data?.map((item: any) => (
-          <OrderCard {...item} key={`order-${item.id}`} />
-        ))}
-      </Card>
+      {/* <Card  className="mt-6"> */}
+      {data?.map((item: any) => (
+        <OrderCard {...item} key={`order-${item.id}`} />
+      ))}
+      {/* </Card> */}
     </>
   )
 }
