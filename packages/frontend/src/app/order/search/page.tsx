@@ -6,7 +6,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline"
 
 import { useContractRead } from "wagmi"
 import OrderCard from "../../../components/OrderCard"
-import { useEffect } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 import { isReadable } from "stream"
 // @todo display first 100 items
 // @todo import abi properly
@@ -1553,6 +1553,12 @@ interface Order {
   isRevokable: boolean
 }
 
+interface ValidationError {
+  isValid: boolean
+  errMsg: string
+  value?: number | string
+}
+
 //0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
 export default function SearchOrder() {
   const { data, isError, isLoading } = useContractRead<unknown[], "getFilteredOrders", Order[]>({
@@ -1561,6 +1567,46 @@ export default function SearchOrder() {
     functionName: "getFilteredOrders",
     args: ["0x0000000000000000000000000000000000000000", 0, 100, 0],
   })
+
+  const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/g
+
+  //Input values
+  const [inputValues, setInputValues] = useState({
+    manager: "",
+    status: "0",
+    numberOfEntries: "100",
+  })
+
+  //Validation state
+  const [validationErrors, setValidationErrors] = useState({
+    manager: "",
+    status: "",
+    numberOfEntries: "",
+  })
+
+  const validateSearchForm = () => {
+    console.log("Start of validation", inputValues)
+    const errors = { ...validationErrors }
+    const noSpacesManager = inputValues.manager.replace(/\s/g, "")
+    if (ethAddressRegex.test(noSpacesManager) || noSpacesManager === "") {
+      errors.manager = ""
+    } else {
+      errors.manager = "Incorrect address"
+    }
+
+    setValidationErrors(errors)
+    console.log("End of validation", errors)
+  }
+
+  const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
+
+  useEffect(() => {
+    if (validationTimer !== undefined) {
+      clearTimeout(validationTimer)
+    }
+    const timer = setTimeout(validateSearchForm, 500)
+    setValidationTimer(timer)
+  }, [inputValues])
 
   return (
     <>
@@ -1571,11 +1617,21 @@ export default function SearchOrder() {
         <div>
           Manager:
           {/* @todo Replace with a more sophisticated component, with error handling and input validation, or ens */}
-          <TextInput placeholder="0x1dA..." />
+          <TextInput
+            onChange={(e) => setInputValues({ ...inputValues, manager: e.target.value })}
+            value={inputValues.manager}
+            error={!!validationErrors.manager}
+            errorMessage={validationErrors.manager}
+            placeholder="0x1dA..."
+            spellCheck={false}
+          />
         </div>
         <div>
           Status
-          <Select>
+          <Select
+            value={inputValues.status}
+            onValueChange={(value) => setInputValues({ ...inputValues, status: value })}
+          >
             <SelectItem value="0">Any</SelectItem>
             <SelectItem value="1">Pending</SelectItem>
             <SelectItem value="2">Accepted</SelectItem>
@@ -1586,7 +1642,10 @@ export default function SearchOrder() {
         </div>
         <div>
           Items per page
-          <Select>
+          <Select
+            value={inputValues.numberOfEntries}
+            onValueChange={(value) => setInputValues({ ...inputValues, numberOfEntries: value })}
+          >
             <SelectItem value="10">10</SelectItem>
             <SelectItem value="25">25</SelectItem>
             <SelectItem value="50">50</SelectItem>
@@ -1594,18 +1653,16 @@ export default function SearchOrder() {
           </Select>
         </div>
         <div>
-          <Button icon={MagnifyingGlassIcon}>Search</Button>
+          <Button onClick={validateSearchForm} icon={MagnifyingGlassIcon}>
+            Search
+          </Button>
         </div>
       </Card>
       {/* Main section */}
       <Card className="mt-6">
-        {/* <div className="h-96">
-          {data[0].status} {data[0].creator} {data[0].maxGas.toString()}
-        </div> */}
         {data?.map((item: any) => (
           <OrderCard {...item} key={`order-${item.id}`} />
         ))}
-        {/* <OrderCard /> */}
       </Card>
     </>
   )
