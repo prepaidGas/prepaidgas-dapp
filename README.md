@@ -1,33 +1,26 @@
 # Prepaid Gas Platform
 
-prepaidgas.io
+[prepaidgas.io](https://prepaidgas.io/)
 
-## Installation
+## Getting Started
 
-Install the dependencies:
+```sh
+# Install dependencies
+npm i
 
-```
-npm install
-```
-
-## Test
-
-Command to run tests:
-
-```
+# Run frontend locally, any code changes causes immidiate effects
+npm run fe-dev
+# Run linter on the fronend code
+npm run fe-lint
+# Run local hardhat node with mock-up setup
+npm run sc-node-mock
+# Run smart contract tests
 npm run sc-test
-```
-
-Command to check the test coverage:
-
-```
+# Run smart contract coverage tool
 npm run sc-coverage
+
+# Execute both `fe-dev` and `sc-node-mock`
+npm run dev-setup
 ```
 
-## Local environment
-
-Deploy contracts on local hardhat network and create few orders for experiments
-
-```
-npm run sc-deploy-test
-```
+Note: `dev-setup` and `sc-node-mock` instructions are affected by [`node-mock` script](packages/contracts/package.json) contains `sleep 12` instuction which may need to be reconfigured in case of node start takes more than 10 seconds
