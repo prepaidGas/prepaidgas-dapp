@@ -9,6 +9,7 @@ import "./../common/Errors.sol" as Error;
 contract Distributor {
   using SafeERC20 for IERC20;
 
+  /// @dev holder => token => amount
   mapping(address => mapping(address => uint256)) private _balances;
 
   event Distribute(address indexed receiver, address indexed token, uint256 amount);

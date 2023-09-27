@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {ERC1155ish} from "./base/ERC1155ish.sol";
 
-import {FeeProcessor} from "./tools/FeeProcessor.sol";
+import {FeeProcessor, Fee} from "./tools/FeeProcessor.sol";
 
 import {Order, FilteredOrder, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
 
@@ -159,7 +159,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     executor[id] = msg.sender;
     _mint(order[id].creator, id, order[id].maxGas);
 
-    _distribute(msg.sender, reward[id].token, _takeFee(reward[id].token, reward[id].amount));
+    _distribute(msg.sender, reward[id].token, _takeFee(Fee.Reward, reward[id].token, reward[id].amount));
     _acceptIncoming(guarantee[id].token, msg.sender, guaranteeTransfer, totalSupply(id) * guarantee[id].gasPrice);
 
     emit OrderAccept(id, msg.sender);
@@ -258,7 +258,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
       _distribute(fulfiller, guarantee[id].token, unlockAmount);
     } else {
       address unlockToken = guarantee[id].token;
-      _distribute(fulfiller, unlockToken, _takeFee(unlockToken, unlockAmount));
+      _distribute(fulfiller, unlockToken, _takeFee(Fee.Guarantee, unlockToken, unlockAmount));
     }
   }
 
