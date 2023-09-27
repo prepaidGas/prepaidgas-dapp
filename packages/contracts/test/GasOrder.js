@@ -46,6 +46,8 @@ describe("GasOrder", function () {
     await TokenContract.transfer(accounts[1], 20000000)
     await TokenContract.transfer(accounts[2], 20000000)
 
+    await TokenContract.transfer(accounts[10], 20000000)
+
     await TokenContract.deploymentTransaction().wait();
     
     await GasOrderContract.setFee(SYSTEM_FEE);
@@ -78,6 +80,8 @@ describe("GasOrder", function () {
         admin,
         GasOrderContract,
         TokenContract,
+        false,
+        false,
         36000,
         865000,
         36001
@@ -106,6 +110,8 @@ describe("GasOrder", function () {
         admin,
         GasOrderContract,
         TokenContract,
+        false,
+        false,
         36000,
         865000
       );
@@ -137,6 +143,8 @@ describe("GasOrder", function () {
         admin,
         GasOrderContract,
         TokenContract,
+        false,
+        false,
         36000,
         865000
       );
@@ -186,6 +194,22 @@ describe("GasOrder", function () {
       expect(ordersWithAccount2Owner.length).to.be.eq(2);
       expect(ordersWithAccount2Owner[0][0]).to.be.eq(4); // order number
       expect(ordersWithAccount2Owner[0][3]).to.be.eq(2000); // order number
+    });
+
+    it("Should get user total gas holding", async function () {
+      const {accounts, admin, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
+
+      // @notice orders mockups
+      await orderHelper.createOrder(admin, GasOrderContract, TokenContract);
+      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10]);
+      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10]);
+      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract);
+      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract);
+      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract);
+
+      const totalUserGasHoldings = await GasOrderContract.getTotalBalance(accounts[1], []);
+
+      expect(totalUserGasHoldings).to.be.eq(4000);
     });
   });
 });

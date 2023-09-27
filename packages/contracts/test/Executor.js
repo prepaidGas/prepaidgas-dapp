@@ -53,6 +53,8 @@ describe("Executor", function () {
       admin,
       GasOrderContract,
       TokenContract,
+      false,
+      false,
       36000,
       864000,
       36001
