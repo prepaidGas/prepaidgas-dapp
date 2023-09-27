@@ -18,7 +18,7 @@ async function initDeploymentSetup() {
   const TOKEN_LINK = ""
   const SYSTEM_FEE = 1000 // 100 = 1%
 
-  const ExecutorContract = await ExecutorFactory.deploy(GAS_ORDER_ADDRESS, PROJECT_NAME, VERSION)
+  const ExecutorContract = await ExecutorFactory.deploy(GAS_ORDER_ADDRESS, PROJECT_NAME, VERSION, 1, [])
   await ExecutorContract.deploymentTransaction().wait()
   // @todo add deploy error handling
   console.log(`Executor contract deployed: ${ExecutorContract.target}`)
@@ -31,13 +31,15 @@ async function initDeploymentSetup() {
   const TokenContract = await TokenFactory.deploy("MockUSD", "MUSD", "1000000000") // @todo use ethers function to specify token amount
   await TokenContract.deploymentTransaction().wait()
 
-  await GasOrderContract.setFee(SYSTEM_FEE)
+  await GasOrderContract.setFee(0, SYSTEM_FEE)
+  await GasOrderContract.setFee(1, SYSTEM_FEE)
+  await GasOrderContract.setFee(2, SYSTEM_FEE)
 
   // Create and accept order
 
-  await orderHelper.createOrder(admin, GasOrderContract, TokenContract, 36000, 864000)
-  await orderHelper.createOrder(admin, GasOrderContract, TokenContract, 16000, 1264000)
-  await orderHelper.createOrder(admin, GasOrderContract, TokenContract, 26000, 464000)
+  await orderHelper.createOrder(admin, GasOrderContract, TokenContract, false, false, 36000, 864000)
+  await orderHelper.createOrder(admin, GasOrderContract, TokenContract, false, false, 16000, 1264000)
+  await orderHelper.createOrder(admin, GasOrderContract, TokenContract, false, false, 26000, 464000)
 
   await TokenContract.transfer(accounts[0].address, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
   await TokenContract.connect(accounts[0]).approve(
