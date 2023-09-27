@@ -2,12 +2,22 @@
 // @todo alphabetize order
 import { Card, Title, Text, TextInput, Grid, Select, SelectItem, Button } from "@tremor/react"
 
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline"
+import {
+  FunnelIcon,
+  XMarkIcon,
+  ArrowPathIcon,
+  CheckCircleIcon,
+  PlayIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/outline"
 
 import { useContractRead } from "wagmi"
+import SearchFiltersCard from "../../../components/SearchFiltersCard"
 import OrderCard from "../../../components/OrderCard"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { isReadable } from "stream"
+
 // @todo display first 100 items
 // @todo import abi properly
 // @todo update automaticaly
@@ -1541,7 +1551,7 @@ const testABI = [
     type: "function",
   },
 ]
-
+//@todo move interfaces
 interface Order {
   id: bigint
   creator: string
@@ -1553,6 +1563,18 @@ interface Order {
   isRevokable: boolean
 }
 
+interface ValidationError {
+  isValid: boolean
+  errMsg: string
+  value?: number | string
+}
+
+interface FilterOptions {
+  manager: string
+  status: "0" | "1" | "2" | "3" | "4" | "5"
+  numberOfEntries: "10" | "20" | "30" | "50"
+}
+
 //0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
 export default function SearchOrder() {
   const { data, isError, isLoading } = useContractRead<unknown[], "getFilteredOrders", Order[]>({
@@ -1562,51 +1584,21 @@ export default function SearchOrder() {
     args: ["0x0000000000000000000000000000000000000000", 0, 100, 0],
   })
 
+  const executeSearch = (filterOptions: FilterOptions) => {
+    console.log(filterOptions)
+  }
+
   return (
     <>
-      <Title>Search results: undefined</Title>
+      <Title>Search results: {data?.length}</Title>
       <Text>You might find orders</Text>
-
-      <Card className="mt-6">
-        <div>
-          Manager:
-          {/* @todo Replace with a more sophisticated component, with error handling and input validation, or ens */}
-          <TextInput placeholder="0x1dA..." />
-        </div>
-        <div>
-          Status
-          <Select>
-            <SelectItem value="0">Any</SelectItem>
-            <SelectItem value="1">Pending</SelectItem>
-            <SelectItem value="2">Accepted</SelectItem>
-            <SelectItem value="3">Active</SelectItem>
-            <SelectItem value="4">Inactive</SelectItem>
-            <SelectItem value="5">Closed</SelectItem>
-          </Select>
-        </div>
-        <div>
-          Items per page
-          <Select>
-            <SelectItem value="10">10</SelectItem>
-            <SelectItem value="25">25</SelectItem>
-            <SelectItem value="50">50</SelectItem>
-            <SelectItem value="100">100</SelectItem>
-          </Select>
-        </div>
-        <div>
-          <Button icon={MagnifyingGlassIcon}>Search</Button>
-        </div>
-      </Card>
+      <SearchFiltersCard executeSearch={executeSearch} />
       {/* Main section */}
-      <Card className="mt-6">
-        {/* <div className="h-96">
-          {data[0].status} {data[0].creator} {data[0].maxGas.toString()}
-        </div> */}
-        {data?.map((item: any) => (
-          <OrderCard {...item} key={`order-${item.id}`} />
-        ))}
-        {/* <OrderCard /> */}
-      </Card>
+      {/* <Card  className="mt-6"> */}
+      {data?.map((item: any) => (
+        <OrderCard {...item} key={`order-${item.id}`} />
+      ))}
+      {/* </Card> */}
     </>
   )
 }
