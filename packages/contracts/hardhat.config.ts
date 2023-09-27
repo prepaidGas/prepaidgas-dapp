@@ -2,6 +2,7 @@ import { HardhatUserConfig } from "hardhat/config"
 import "@nomicfoundation/hardhat-ethers"
 import "@nomicfoundation/hardhat-toolbox"
 import "solidity-coverage"
+import "hardhat-contract-sizer"
 
 const config: HardhatUserConfig = {
   solidity: {

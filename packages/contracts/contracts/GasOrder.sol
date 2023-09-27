@@ -71,6 +71,8 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   // @todo add orderExist function
   // @todo add support of our _msgSender
   // @todo gas optimization
+  // - rewrite loops with an unchecked increment
+
   /**
    * @dev Creates an order with specified parameters.
    *
@@ -131,6 +133,9 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     _acceptIncomingOrderCreate(maxGas, rewardValue, gasCostValue, rewardTransfer, gasCostTransfer);
 
     emit OrderCreate(id, executionWindow);
+    // @todo return the created order id to handle the case when it is created from
+    // the third party contract and it is needed to store it somewhere
+    // return id;
   }
 
   /// @dev function to avoid stack too deep issue
@@ -309,6 +314,16 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     uint256 _limit,
     uint256 _start
   ) external view returns (FilteredOrder[] memory) {
+    return getFilteredOrders(_creator, address(0), _status, _limit, _start);
+  }
+
+  function getFilteredOrders(
+    address _creator,
+    address _user,
+    OrderStatus _status,
+    uint256 _limit,
+    uint256 _start
+  ) public view returns (FilteredOrder[] memory) {
     uint256 totalOrders = totalMatchingOrdersCount(_creator, _status);
 
     // Ensure the limit does not exceed the maximum
@@ -318,21 +333,25 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     FilteredOrder[] memory result = new FilteredOrder[](totalOrders);
 
     uint256 addedOrders = 0;
-    for (uint256 i = startIndex; i < ordersCount && addedOrders < limit; i++) {
+    for (uint256 orderId = startIndex; orderId < ordersCount && addedOrders < limit; orderId++) {
       if (
-        (_creator == address(0) || order[i].creator == _creator) &&
-        (_status == OrderStatus.None || status(i) == _status)
+        (_creator == address(0) || order[orderId].creator == _creator) &&
+        (_status == OrderStatus.None || status(orderId) == _status)
       ) {
         result[addedOrders] = FilteredOrder({
-          id: i,
-          creator: order[i].creator,
-          status: status(i),
-          maxGas: order[i].maxGas,
-          executionPeriodStart: order[i].executionPeriodStart,
-          executionPeriodDeadline: order[i].executionPeriodDeadline,
-          executionWindow: order[i].executionWindow,
-          isRevokable: order[i].isRevokable
-          //holding: balanceOf(i, clientAddress)
+          id: orderId,
+          creator: order[orderId].creator,
+          status: status(orderId),
+          maxGas: order[orderId].maxGas,
+          executionPeriodStart: order[orderId].executionPeriodStart,
+          executionPeriodDeadline: order[orderId].executionPeriodDeadline,
+          executionWindow: order[orderId].executionWindow,
+          isRevokable: order[orderId].isRevokable,
+          reward: reward[orderId], // @dev type `Payment | GasPayment`
+          gasCost: gasCost[orderId],
+          guaranteeLocked: guarantee[orderId],
+          availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0 // @todo implemen `_user` calculations
+          //holdings: balanceOf(i, clientAddress)
           // @todo add guarantee tokens, reward, gasCost
         });
         addedOrders++;
@@ -343,19 +362,33 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   }
 
   // Function to calculate the total number of matching orders
-  // @todo add user field
   function totalMatchingOrdersCount(address _creator, OrderStatus _status) public view returns (uint256) {
     uint256 matchingCount = 0;
-    for (uint256 i = 0; i < ordersCount; i++) {
+    for (uint256 orderId = 0; orderId < ordersCount; orderId++) {
       if (
-        (_creator == address(0) || order[i].creator == _creator) &&
-        (_status == OrderStatus.None || status(i) == _status)
+        (_creator == address(0) || order[orderId].creator == _creator) &&
+        (_status == OrderStatus.None || status(orderId) == _status)
       ) {
         matchingCount++;
       }
     }
     return matchingCount;
   }
-  // @todo get total balance
-  // @todo get allowance, holders array is an input
+
+  // @todo disallow approving gasTokens to yourself
+  // @todo test what is the limit on the amount of orders to return value successfuly
+  function getTotalBalance(address _user, address[] memory _holders) external view returns (uint256) {
+    //@todo limit holders length
+    uint256 totalGasBalance = 0;
+    uint256 holdersAmount = _holders.length;
+    for (uint256 orderId = 0; orderId < ordersCount; orderId++) {
+      uint256 holdersAllowance = 0;
+
+      for (uint256 i_holder = 0; i_holder < holdersAmount; i_holder++) {
+        holdersAllowance += allowance(_holders[i_holder], orderId, _user);
+      }
+      totalGasBalance += balanceOf(_user, orderId) + holdersAllowance;
+    }
+    return totalGasBalance;
+  }
 }

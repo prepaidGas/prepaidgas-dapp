@@ -8,7 +8,8 @@
     "coverage": "npx hardhat coverage",
     "node": "npx hardhat node",
     "deploy-test": "npx hardhat run scripts/deploy/testDeploy.js --network localhost",
-    "node-mock": "npm run node & (sleep 12 && npm run deploy-test); wait"
+    "node-mock": "npm run node & (sleep 12 && npm run deploy-test); wait",
+    "size-calc": "npx hardhat size-contracts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.4",
@@ -18,6 +19,7 @@
     "date-fns": "^2.30.0",
     "ethers": "^6.7.1",
     "hardhat": "2.17.0",
+    "hardhat-contract-sizer": "^2.10.0",
     "hardhat-gas-reporter": "^1.0.9",
     "solidity-coverage": "^0.8.4",
     "ts-node": "^10.9.1"
