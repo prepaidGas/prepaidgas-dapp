@@ -2,8 +2,7 @@ import { HardhatUserConfig } from "hardhat/config"
 import "@nomicfoundation/hardhat-ethers"
 import "@nomicfoundation/hardhat-toolbox"
 import "solidity-coverage"
-import "hardhat-gas-reporter"
-import "hardhat-contract-sizer";
+import "hardhat-contract-sizer"
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -11,13 +10,13 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
+        runs: 200,
       },
     },
   },
   gasReporter: {
-    enabled: false
-  }
+    enabled: false,
+  },
 }
 
 export default config

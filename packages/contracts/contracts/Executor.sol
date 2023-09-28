@@ -43,7 +43,13 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     _;
   }
 
-  constructor(address ordersManager, string memory name, string memory version) ExecutionMessage(name, version) {
+  constructor(
+    address ordersManager,
+    string memory name,
+    string memory version,
+    uint256 minValidations,
+    address[] memory initialValidators
+  ) ExecutionMessage(name, version) Validators(minValidations, initialValidators) {
     gasOrder = ordersManager;
   }
 
@@ -66,7 +72,6 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     _reportExecution(message, address(0), gasSpent, Const.INFR_GAS_EXECUTE);
   }
 
-  // @todo think about liquidation by the `from` without transaction execute with guarantee withdrawal
   /**
    * @dev Initiates the liquidation process.
    *
@@ -110,6 +115,7 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
       address recovered = digest.recover(validations[i]);
       if (last >= recovered) revert Error.IncorrectSignatureOrder(last, recovered);
       if (!isValidator(recovered)) revert Error.UnknownRecovered(recovered);
+      last = recovered;
     }
   }
 
@@ -131,6 +137,7 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
   ) private returns (uint256 gasSpent) {
     bytes32 digest = messageHash(message);
     address recovered = digest.recover(signature);
+    /// @dev recovered could not be 0x0 due to `ECDSA.recover` design
     if (recovered != message.from) revert Error.UnexpectedRecovered(recovered, message.from);
 
     nonces[message.from][message.nonce] = true;

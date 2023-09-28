@@ -20,7 +20,10 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "paths": {
+      "helpers/*": ["./src/helpers/*"]
+    }
   },
   "include": [
     "next-env.d.ts",

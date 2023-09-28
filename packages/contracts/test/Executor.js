@@ -1,199 +1,469 @@
-const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers")
+const { expect } = require("chai")
+const { ethers } = require("hardhat")
 
-const CONSTANTS = require("../scripts/constants/index.js");
-const orderHelper = require("../scripts/helpers/orderHelper.js");
+const {
+  PROJECT_NAME,
+  PROJECT_VERSION,
+  CHAIN_ID,
+  VALIDATOR_THRESHOLD,
+  VALIDATORS,
+} = require("../scripts/constants/executor.js")
+const { randomBytes, randomNumber } = require("../scripts/helpers/random.js")
+const { domain, messageType } = require("../scripts/helpers/eip712.js")
 
-// @todo setup pretifier
 describe("Executor", function () {
-  // We define a fixture to reuse the same setup in every test.
-  // We use loadFixture to run this setup once, snapshot that state,
-  // and reset Hardhat Network to that snapshot in every test.
-  // @todo move init setup to helpers
-  // @todo make it test/deployment agnostic
-  const SYSTEM_FEE = 1000; // 100 = 1%
   async function initialSetup() {
-    const [admin, ...accounts] = await ethers.getSigners();
+    const [admin, ...accounts] = await ethers.getSigners()
 
-    const ExecutorFactory = await ethers.getContractFactory(
-        "Executor"
-    );
-    const GasOrderFactory = await ethers.getContractFactory(
-      "GasOrder"
-    );
-    // @todo precalculate it automaticaly
-    const GAS_ORDER_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
-    // @todo move to constants file
-    const PROJECT_NAME = "Prepaid Gas";
-    const VERSION = "0.0.1";
-    const TOKEN_LINK = "";
+    const ExecutorFactory = await ethers.getContractFactory("Executor")
+    const GasOrderFactory = await ethers.getContractFactory("MockFallback")
 
-    const ExecutorContract = await ExecutorFactory.deploy(GAS_ORDER_ADDRESS, PROJECT_NAME, VERSION);
-    await ExecutorContract.deploymentTransaction().wait();
-    // @todo add deploy error handling
-    console.log(`Executor contract deployed: ${ExecutorContract.target}`);
+    const GasOrderContract = await GasOrderFactory.deploy()
+    await GasOrderContract.deploymentTransaction().wait()
 
-    
-    const GasOrderContract = await GasOrderFactory.deploy(ExecutorContract.target, TOKEN_LINK);
-    await GasOrderContract.deploymentTransaction().wait();
-    console.log(`GasOrder contract deployed: ${GasOrderContract.target}`);
+    const ExecutorContract = await ExecutorFactory.deploy(
+      GasOrderContract.target,
+      PROJECT_NAME,
+      PROJECT_VERSION,
+      VALIDATOR_THRESHOLD,
+      VALIDATORS,
+    )
+    await ExecutorContract.deploymentTransaction().wait()
 
-    const TokenFactory = await ethers.getContractFactory(
-      "MockToken"
-    );
-    const TokenContract = await TokenFactory.deploy("MockUSD", "MUSD", "1000000000"); // @todo use ethers function to specify token amount
-    await TokenContract.deploymentTransaction().wait();
-    
-    await GasOrderContract.setFee(SYSTEM_FEE);
-
-    // Create and accept order
-
-    await orderHelper.createOrder(
-      admin,
-      GasOrderContract,
-      TokenContract,
-      false,
-      false,
-      36000,
-      864000,
-      36001
-    );
-
-    await TokenContract.transfer(accounts[0].address, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
-    await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
-
-    await GasOrderContract.connect(accounts[0]).acceptOrder(0, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS);
-
-    let withdrawableAmount = CONSTANTS.INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)/10000;
-    await GasOrderContract.connect(accounts[0]).claim(TokenContract.target, withdrawableAmount);
-
-    return {accounts, admin, ExecutorContract, GasOrderContract, TokenContract};
+    return { accounts, admin, ExecutorContract, GasOrderContract }
   }
 
-  describe("Execution contract", function () {
-    it("Transaction should be executed", async function () {
-      const {accounts, admin, ExecutorContract, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
+  describe("Validate message execution", function () {
+    it("execute arbitrary message", async function () {
+      for (let i = 0; i < 15; i++) {
+        const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
 
-      const msgHash = await ExecutorContract.messageHash(
-        [
-            admin.address,
-            1,
-            0,
-            admin.address,
-            1630000000,
-            "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-            CONSTANTS.GAS_AMOUNT,
-            "0xabcdef"
-        ],
-      );
+        const signer = accounts[randomNumber(7)],
+          from = signer.address,
+          nonce = randomNumber(100),
+          gasOrder = randomNumber(100),
+          onBehalf = randomBytes(20),
+          deadline = randomNumber(1000000),
+          to = randomBytes(20),
+          gas = randomNumber(10000),
+          data = randomBytes(randomNumber(200))
 
-      const domain = {
-        name: "Prepaid Gas",
-        version: "0.0.1",
-        chainId: 31337,
-        verifyingContract: ExecutorContract.target
-      };
-      const types = {
-        Message: [
-          {name: "from", type: "address"},
-          {name: "nonce", type: "uint256"},
-          {name: "gasOrder", type: "uint256"},
-          {name: "onBehalf", type: "address"},
-          {name: "deadline", type: "uint256"},
-          {name: "to", type: "address"},
-          {name: "gas", type: "uint256"},
-          {name: "data", type: "bytes"}
-        ]
-      };
-      const dataObject = {
-        from: admin.address,
-        nonce: 1,
-        gasOrder: 0,
-        onBehalf: admin.address,
-        deadline: 1630000000,
-        to: "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-        gas: CONSTANTS.GAS_AMOUNT,
-        data: "0xabcdef"
-      };
+        const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+        const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
 
-      const signedTypedData = await admin.signTypedData(domain, types, dataObject);
-      console.log("signed typed data: ", signedTypedData)
-      console.log("msg hash", msgHash)
-      console.log("verify typed data: ", ethers.verifyTypedData(domain, types, dataObject, signedTypedData))
-      console.log(ethers.recoverAddress(msgHash, signedTypedData))// @todo properly generate msg Hash to be able to verify it afterwards
+        const signedMessage = await signer.signTypedData(
+          domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+          { Message: messageType },
+          messageStruct,
+        )
 
-      await ExecutorContract.connect(admin).execute([
-        admin.address,
-        1,
-        0,
-        admin.address,
-        1630000000,
-        "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-        CONSTANTS.GAS_AMOUNT,
-        "0xabcdef",
-      ], signedTypedData)
+        await ExecutorContract.execute(messageTuple, signedMessage)
+      }
+    })
 
+    it("execute empty message", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
 
-    });
+      const signer = accounts[randomNumber(7)],
+        from = signer.address,
+        nonce = 0,
+        gasOrder = 0,
+        onBehalf = "0x0000000000000000000000000000000000000000",
+        deadline = 0,
+        to = "0x0000000000000000000000000000000000000000",
+        gas = 0,
+        data = "0x"
 
-    it("Transaction should revert due to executed nonce", async function () {
-      const {admin, ExecutorContract, GasOrderContract, TokenContract} = await loadFixture(initialSetup);
+      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
 
-      const domain = {
-        name: "Prepaid Gas",
-        version: "0.0.1",
-        chainId: 31337,
-        verifyingContract: ExecutorContract.target
-      };
-      const types = {
-        Message: [
-          {name: "from", type: "address"},
-          {name: "nonce", type: "uint256"},
-          {name: "gasOrder", type: "uint256"},
-          {name: "onBehalf", type: "address"},
-          {name: "deadline", type: "uint256"},
-          {name: "to", type: "address"},
-          {name: "gas", type: "uint256"},
-          {name: "data", type: "bytes"}
-        ]
-      };
-      const dataObject = {
-        from: admin.address,
-        nonce: 1,
-        gasOrder: 0,
-        onBehalf: admin.address,
-        deadline: 1630000000,
-        to: "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-        gas: CONSTANTS.GAS_AMOUNT,
-        data: "0xabcdef"
-      };
+      const signedMessage = await signer.signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
 
-      const signedTypedData = await admin.signTypedData(domain, types, dataObject);      
+      await ExecutorContract.execute(messageTuple, signedMessage)
+    })
 
-      await ExecutorContract.connect(admin).execute([
-        admin.address,
-        1,
-        0,
-        admin.address,
-        1630000000,
-        "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-        CONSTANTS.GAS_AMOUNT,
-        "0xabcdef",
-      ], signedTypedData)
+    it("message replay", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
 
-      const txWithExhaustedNonce = ExecutorContract.connect(admin).execute([
-        admin.address,
-        1,
-        0,
-        admin.address,
-        1630000000,
-        "0x1ABC7154748D1CE5144478CDEB574AE244B939B5",
-        CONSTANTS.GAS_AMOUNT,
-        "0xabcdef",
-      ], signedTypedData)
+      const signer = accounts[randomNumber(7)],
+        from = signer.address,
+        nonce = 0,
+        gasOrder = 0,
+        onBehalf = "0x00222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+        deadline = 0,
+        to = "0xfb071837728455c581f370704b225ac9eabdfa4a",
+        gas = 0,
+        data = "0xbe08ee9e57050c"
 
-      await expect(txWithExhaustedNonce).to.be.revertedWithCustomError(ExecutorContract, "NonceExhausted");
-    });
-  });
-});
+      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+      const signedMessage = await signer.signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      await ExecutorContract.execute(messageTuple, signedMessage)
+      await expect(ExecutorContract.execute(messageTuple, signedMessage)).to.be.revertedWithCustomError(
+        ExecutorContract,
+        "NonceExhausted",
+      )
+    })
+
+    it("same nonce", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
+      const signer = accounts[randomNumber(7)]
+      {
+        const from = signer.address,
+          nonce = 555,
+          gasOrder = 0,
+          onBehalf = "0x00222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+          deadline = 0,
+          to = "0xfb071837728455c581f370704b225ac9eabdfa4a",
+          gas = 0,
+          data = "0xbe08ee9e57050c"
+
+        const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+        const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+        const signedMessage = await signer.signTypedData(
+          domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+          { Message: messageType },
+          messageStruct,
+        )
+
+        await ExecutorContract.execute(messageTuple, signedMessage)
+      }
+      {
+        const from = signer.address,
+          nonce = 555,
+          gasOrder = 10,
+          onBehalf = "0x00172290dd7278aa3ddd389cc1e1d165cc4bafff",
+          deadline = 0,
+          to = "0xfb07183ff28455c581f370704b225ac9eabdffff",
+          gas = 110,
+          data = "0x17181009be08ee9e57050c17181009be08ee9e57050c17181009be08ee9e57050c17181009be08ee9e57050c"
+
+        const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+        const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+        const signedMessage = await signer.signTypedData(
+          domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+          { Message: messageType },
+          messageStruct,
+        )
+
+        await expect(ExecutorContract.execute(messageTuple, signedMessage)).to.be.revertedWithCustomError(
+          ExecutorContract,
+          "NonceExhausted",
+        )
+      }
+    })
+
+    it("signed by someone", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
+
+      const signer = accounts[randomNumber(7)],
+        from = signer.address,
+        nonce = 0,
+        gasOrder = 0,
+        onBehalf = "0x00222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+        deadline = 0,
+        to = "0xfb071837728455c581f370704b225ac9eabdfa4a",
+        gas = 1000,
+        data = "0xbe08ee9e57050c"
+
+      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+      const signedMessage = await accounts[8].signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      await expect(ExecutorContract.execute(messageTuple, signedMessage)).to.be.revertedWithCustomError(
+        ExecutorContract,
+        "UnexpectedRecovered",
+      )
+    })
+  })
+
+  describe("Validate message liquidation", function () {
+    it("liquidate arbitrary message", async function () {
+      for (let i = 0; i < 15; i++) {
+        const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
+        await ExecutorContract.setValidatorThreshold(1)
+        await ExecutorContract.setValidatorStatus(accounts[0].address, true)
+
+        const signer = accounts[randomNumber(7)],
+          from = signer.address,
+          nonce = randomNumber(100),
+          gasOrder = randomNumber(100),
+          onBehalf = randomBytes(20),
+          deadline = randomNumber(Math.floor(new Date().getTime() / 1000)),
+          to = randomBytes(20),
+          gas = randomNumber(10000),
+          data = randomBytes(randomNumber(200))
+
+        const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+        const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+        const signedMessage = await signer.signTypedData(
+          domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+          { Message: messageType },
+          messageStruct,
+        )
+
+        const validation = await accounts[0].signTypedData(
+          domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+          { Message: messageType },
+          messageStruct,
+        )
+
+        await ExecutorContract.liquidate(messageTuple, signedMessage, [validation])
+      }
+    })
+
+    it("liquidate executed message", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
+      await ExecutorContract.setValidatorThreshold(1)
+      await ExecutorContract.setValidatorStatus(accounts[0].address, true)
+
+      const signer = accounts[randomNumber(7)],
+        from = signer.address,
+        nonce = randomNumber(100),
+        gasOrder = randomNumber(100),
+        onBehalf = randomBytes(20),
+        deadline = randomNumber(Math.floor(new Date().getTime() / 1000 - 1000)),
+        to = randomBytes(20),
+        gas = randomNumber(10000),
+        data = randomBytes(randomNumber(200))
+
+      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+      const signedMessage = await signer.signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      await ExecutorContract.execute(messageTuple, signedMessage)
+
+      const validation = await accounts[0].signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      await expect(ExecutorContract.liquidate(messageTuple, signedMessage, [validation])).to.be.revertedWithCustomError(
+        ExecutorContract,
+        "NonceExhausted",
+      )
+    })
+
+    it("liquidate before deadline", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
+      await ExecutorContract.setValidatorThreshold(1)
+      await ExecutorContract.setValidatorStatus(accounts[0].address, true)
+
+      const signer = accounts[randomNumber(7)],
+        from = signer.address,
+        nonce = randomNumber(100),
+        gasOrder = randomNumber(100),
+        onBehalf = randomBytes(20),
+        deadline = Math.floor(new Date().getTime() / 1000) + 1000,
+        to = randomBytes(20),
+        gas = randomNumber(10000),
+        data = randomBytes(randomNumber(200))
+
+      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+      const signedMessage = await signer.signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      await ExecutorContract.execute(messageTuple, signedMessage)
+
+      const validation = await accounts[0].signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      await expect(ExecutorContract.liquidate(messageTuple, signedMessage, [validation])).to.be.revertedWithCustomError(
+        ExecutorContract,
+        "DeadlineNotMet",
+      )
+    })
+
+    it("liquidate under threshold", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
+      await ExecutorContract.setValidatorThreshold(3)
+      await ExecutorContract.setValidatorStatus(accounts[0].address, true)
+      await ExecutorContract.setValidatorStatus(accounts[1].address, true)
+      await ExecutorContract.setValidatorStatus(accounts[2].address, true)
+      await ExecutorContract.setValidatorStatus(accounts[3].address, true)
+
+      const signer = accounts[randomNumber(7)],
+        from = signer.address,
+        nonce = randomNumber(100),
+        gasOrder = randomNumber(100),
+        onBehalf = randomBytes(20),
+        deadline = Math.floor(new Date().getTime() / 1000) - 1000,
+        to = randomBytes(20),
+        gas = randomNumber(10000),
+        data = randomBytes(randomNumber(200))
+
+      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+      const signedMessage = await signer.signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      const validations = [
+        await accounts[0].signTypedData(
+          domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+          { Message: messageType },
+          messageStruct,
+        ),
+        await accounts[1].signTypedData(
+          domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+          { Message: messageType },
+          messageStruct,
+        ),
+      ]
+
+      await expect(ExecutorContract.liquidate(messageTuple, signedMessage, validations)).to.be.revertedWithCustomError(
+        ExecutorContract,
+        "FewValidations",
+      )
+    })
+
+    it("liquidate same validation", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
+      await ExecutorContract.setValidatorThreshold(2)
+      await ExecutorContract.setValidatorStatus(accounts[0].address, true)
+
+      const signer = accounts[randomNumber(7)],
+        from = signer.address,
+        nonce = randomNumber(100),
+        gasOrder = randomNumber(100),
+        onBehalf = randomBytes(20),
+        deadline = Math.floor(new Date().getTime() / 1000) - 1000,
+        to = randomBytes(20),
+        gas = randomNumber(10000),
+        data = randomBytes(randomNumber(200))
+
+      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+      const signedMessage = await signer.signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      const validation = await accounts[0].signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      await expect(
+        ExecutorContract.liquidate(messageTuple, signedMessage, [validation, validation]),
+      ).to.be.revertedWithCustomError(ExecutorContract, "IncorrectSignatureOrder")
+    })
+
+    it("liquidate validations order", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
+      await ExecutorContract.setValidatorThreshold(2)
+      await ExecutorContract.setValidatorStatus(accounts[0].address, true)
+      await ExecutorContract.setValidatorStatus(accounts[1].address, true)
+
+      const signer = accounts[randomNumber(7)],
+        from = signer.address,
+        nonce = randomNumber(100),
+        gasOrder = randomNumber(100),
+        onBehalf = randomBytes(20),
+        deadline = Math.floor(new Date().getTime() / 1000) - 1000,
+        to = randomBytes(20),
+        gas = randomNumber(10000),
+        data = randomBytes(randomNumber(200))
+
+      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+      const signedMessage = await signer.signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      const validations = [accounts[0], accounts[1]]
+        .sort((a, b) => (a.address > b.address ? -1 : a.address < b.address ? 1 : 0))
+        .map(
+          async (c) =>
+            await c.signTypedData(
+              domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+              { Message: messageType },
+              messageStruct,
+            ),
+        )
+
+      await expect(ExecutorContract.liquidate(messageTuple, signedMessage, validations)).to.be.revertedWithCustomError(
+        ExecutorContract,
+        "IncorrectSignatureOrder",
+      )
+    })
+
+    it("liquidate wrong validation", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
+      await ExecutorContract.setValidatorThreshold(1)
+      await ExecutorContract.setValidatorStatus(accounts[0].address, true)
+
+      const signer = accounts[randomNumber(7)],
+        from = signer.address,
+        nonce = randomNumber(100),
+        gasOrder = randomNumber(100),
+        onBehalf = randomBytes(20),
+        deadline = Math.floor(new Date().getTime() / 1000) - 1000,
+        to = randomBytes(20),
+        gas = randomNumber(10000),
+        data = randomBytes(randomNumber(200))
+
+      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+      const signedMessage = await signer.signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      const validation = await accounts[1].signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      await expect(ExecutorContract.liquidate(messageTuple, signedMessage, [validation])).to.be.revertedWithCustomError(
+        ExecutorContract,
+        "UnknownRecovered",
+      )
+    })
+  })
+})
