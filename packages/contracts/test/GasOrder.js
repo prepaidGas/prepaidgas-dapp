@@ -1,29 +1,36 @@
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers")
 const { expect } = require("chai")
 
-const CONSTANTS = require("../scripts/constants/index.js")
+const {
+  SYSTEM_FEE,
+  GAS_AMOUNT,
+  GAS_COST,
+  INITIAL_EXECUTOR_REWARD,
+  LOCKED_GUARANTEE_PER_GAS,
+  PROJECT_NAME,
+  PROJECT_VERSION,
+  TOKEN_LINK,
+  VALIDATOR_THRESHOLD,
+  VALIDATORS,
+} = require("../scripts/constants/index.js")
+
 const orderHelper = require("../scripts/helpers/orderHelper.js")
-
-const { PROJECT_NAME, PROJECT_VERSION, VALIDATOR_THRESHOLD, VALIDATORS } = require("../scripts/constants/executor.js")
-
-//@todo setup pretifier
+const { precalculateAddress } = require("../scripts/helpers/index.js")
 
 describe("GasOrder", function () {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
-  const SYSTEM_FEE = 1000 // 100 = 1%
   async function initialSetup() {
     const [admin, ...accounts] = await ethers.getSigners()
 
     const ExecutorFactory = await ethers.getContractFactory("Executor")
     const GasOrderFactory = await ethers.getContractFactory("GasOrder")
-    // @todo precalculate it automaticaly
-    const GAS_ORDER_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-    const TOKEN_LINK = ""
+
+    const GasOrderContractAddress = await precalculateAddress(admin, 1)
 
     const ExecutorContract = await ExecutorFactory.deploy(
-      GAS_ORDER_ADDRESS,
+      GasOrderContractAddress,
       PROJECT_NAME,
       PROJECT_VERSION,
       VALIDATOR_THRESHOLD,
@@ -66,9 +73,7 @@ describe("GasOrder", function () {
       const tokensBalanceAfter = await TokenContract.balanceOf(admin.address)
 
       // @todo add more asserts statements
-      expect(tokensBalanceBefore - tokensBalanceAfter).to.equal(
-        CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT,
-      )
+      expect(tokensBalanceBefore - tokensBalanceAfter).to.equal(INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
     })
 
     it("Should close order and send back prepaid fund for unspent Gas", async function () {
@@ -85,9 +90,7 @@ describe("GasOrder", function () {
       const tokensBalanceAfterRepay = await TokenContract.balanceOf(admin.address)
 
       // @todo add more asserts statements
-      expect(tokensBalanceBefore - tokensBalanceAfter).to.equal(
-        CONSTANTS.INITIAL_EXECUTOR_REWARD + CONSTANTS.GAS_COST * CONSTANTS.GAS_AMOUNT,
-      )
+      expect(tokensBalanceBefore - tokensBalanceAfter).to.equal(INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
 
       expect(tokensBalanceBefore).to.equal(tokensBalanceAfterRepay)
     })
@@ -97,17 +100,11 @@ describe("GasOrder", function () {
 
       await orderHelper.createOrder(admin, GasOrderContract, TokenContract, false, false, 36000, 865000)
 
-      await TokenContract.transfer(accounts[0].address, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
-      await TokenContract.connect(accounts[0]).approve(
-        GasOrderContract.target,
-        CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS,
-      )
+      await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
+      await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
 
-      await GasOrderContract.connect(accounts[0]).acceptOrder(
-        0,
-        CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS,
-      )
-      let withdrawableAmount = (CONSTANTS.INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)) / 10000
+      await GasOrderContract.connect(accounts[0]).acceptOrder(0, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
+      let withdrawableAmount = (INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)) / 10000
       await GasOrderContract.connect(accounts[0]).claim(TokenContract.target, withdrawableAmount)
 
       const tokensBalanceAfter = await TokenContract.balanceOf(accounts[0].address)
@@ -116,7 +113,7 @@ describe("GasOrder", function () {
 
       expect(tokensBalanceAfter).to.equal(withdrawableAmount)
 
-      expect(amountOfERC1155GasTokens).to.equal(CONSTANTS.GAS_AMOUNT)
+      expect(amountOfERC1155GasTokens).to.equal(GAS_AMOUNT)
     })
 
     it("Should fail to retrive prepaid tokens from order if not enough ERC1155 Gas tokens on balance", async function () {
@@ -124,29 +121,17 @@ describe("GasOrder", function () {
 
       await orderHelper.createOrder(admin, GasOrderContract, TokenContract, false, false, 36000, 865000)
 
-      await TokenContract.transfer(accounts[0].address, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
-      await TokenContract.connect(accounts[0]).approve(
-        GasOrderContract.target,
-        CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS,
-      )
+      await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
+      await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
 
       // Accepting order
-      await GasOrderContract.connect(accounts[0]).acceptOrder(
-        0,
-        CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS,
-      )
-      let withdrawableAmount = (CONSTANTS.INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)) / 10000
+      await GasOrderContract.connect(accounts[0]).acceptOrder(0, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
+      let withdrawableAmount = (INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)) / 10000
       await GasOrderContract.connect(accounts[0]).claim(TokenContract.target, withdrawableAmount)
 
-      await GasOrderContract.connect(admin).safeTransferFrom(
-        admin.address,
-        accounts[0].address,
-        0,
-        CONSTANTS.GAS_AMOUNT,
-        "0x",
-      )
+      await GasOrderContract.connect(admin).safeTransferFrom(admin.address, accounts[0].address, 0, GAS_AMOUNT, "0x")
 
-      const txToBeReverted = GasOrderContract.connect(admin).retrieveGasCost(admin.address, 0, CONSTANTS.GAS_AMOUNT)
+      const txToBeReverted = GasOrderContract.connect(admin).retrieveGasCost(admin.address, 0, GAS_AMOUNT)
 
       await expect(txToBeReverted).to.be.reverted
     })
@@ -161,7 +146,7 @@ describe("GasOrder", function () {
       await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract)
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
-
+      // @audit add arbitrary address test
       const totalAmountOfOrders = await GasOrderContract.totalMatchingOrdersCount(
         ethers.ZeroAddress,
         0, // OrderStatus.None

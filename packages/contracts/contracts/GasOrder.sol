@@ -350,9 +350,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
           reward: reward[orderId], // @dev type `Payment | GasPayment`
           gasCost: gasCost[orderId],
           guaranteeLocked: guarantee[orderId],
-          availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0 // @todo implemen `_user` calculations
-          //holdings: balanceOf(i, clientAddress)
-          // @todo add guarantee tokens, reward, gasCost
+          availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0
         });
         addedOrders++;
       }

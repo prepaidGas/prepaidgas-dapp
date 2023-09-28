@@ -1,37 +1,38 @@
-// @todo specify the lists of possible values instead of `string`
+// @todo replace with some lib for ABI types generator
+interface FieldEntry {
+  indexed?: boolean;
+  internalType: string;
+  name?: string;
+  type?: string;
+  components?: FieldEntry[];
+}
+
 interface ABIEntry {
-  inputs?: {
-    internalType: string;
-    name: string;
-    type: string;
-  }[];
-  outputs?: {
-    internalType: string;
-    name: string;
-    type: string;
-  }[];
+  inputs?: FieldEntry[];
+  outputs?: FieldEntry[];
+  anonymous?: boolean;
   stateMutability?: string;
   type: string;
   name?: string; // Optional if it's a function
 }
 
 const GasOrderABI: ABIEntry[] = [
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "executionEndpoint",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "link",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
+    { 
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "executionEndpoint",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "link",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
   {
     "inputs": [
       {

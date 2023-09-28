@@ -1,5 +1,12 @@
-const CONSTANTS = require("../constants/index.js")
+const {
+  TOTAL_TEST_ORDERS_AMOUNT,
+  SYSTEM_FEE,
+  PROJECT_NAME,
+  PROJECT_VERSION,
+  TOKEN_LINK,
+} = require("../constants/index.js")
 const orderHelper = require("../helpers/orderHelper.js")
+const { precalculateAddress } = require("../helpers/index.js")
 
 async function initDeploymentSetup() {
   const [admin, ...accounts] = await ethers.getSigners()
@@ -10,15 +17,9 @@ async function initDeploymentSetup() {
 
   const ExecutorFactory = await ethers.getContractFactory("Executor")
   const GasOrderFactory = await ethers.getContractFactory("GasOrder")
-  // @todo precalculate it automaticaly
-  const GAS_ORDER_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-  // @todo move to constants file
-  const PROJECT_NAME = "Prepaid Gas"
-  const VERSION = "0.0.1"
-  const TOKEN_LINK = ""
-  const SYSTEM_FEE = 1000 // 100 = 1%
 
-  const ExecutorContract = await ExecutorFactory.deploy(GAS_ORDER_ADDRESS, PROJECT_NAME, VERSION, 1, [])
+  const GasOrderContractAddress = await precalculateAddress(admin, 1)
+  const ExecutorContract = await ExecutorFactory.deploy(GasOrderContractAddress, PROJECT_NAME, PROJECT_VERSION, 1, [])
   await ExecutorContract.deploymentTransaction().wait()
   // @todo add deploy error handling
   console.log(`Executor contract deployed: ${ExecutorContract.target}`)
@@ -36,21 +37,21 @@ async function initDeploymentSetup() {
   await GasOrderContract.setFee(2, SYSTEM_FEE)
 
   // Create and accept order
-
-  await orderHelper.createOrder(admin, GasOrderContract, TokenContract, false, false, 36000, 864000)
-  await orderHelper.createOrder(admin, GasOrderContract, TokenContract, false, false, 16000, 1264000)
-  await orderHelper.createOrder(admin, GasOrderContract, TokenContract, false, false, 26000, 464000)
-
-  await TokenContract.transfer(accounts[0].address, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
-  await TokenContract.connect(accounts[0]).approve(
-    GasOrderContract.target,
-    CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS,
-  )
-
-  await GasOrderContract.connect(accounts[0]).acceptOrder(0, CONSTANTS.GAS_AMOUNT * CONSTANTS.LOCKED_GUARANTEE_PER_GAS)
-
-  let withdrawableAmount = (CONSTANTS.INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)) / 10000
-  await GasOrderContract.connect(accounts[0]).claim(TokenContract.target, withdrawableAmount)
+  await TokenContract.transfer(accounts[10].address, "500000000")
+  for (let i = 0; i < TOTAL_TEST_ORDERS_AMOUNT; i++) {
+    let isAccepted = Math.random() < 0.5
+    await orderHelper.createOrder(
+      admin,
+      GasOrderContract,
+      TokenContract,
+      isAccepted,
+      isAccepted ? accounts[10] : false,
+      36000,
+      864000,
+    )
+  }
+  // fruitsToGet.map(fruit => getNumFruit(fruit))
+  // const numFruits = await Promise.all(promises)
 
   return { accounts, admin, ExecutorContract, GasOrderContract, TokenContract }
 }
