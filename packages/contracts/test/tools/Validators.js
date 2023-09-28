@@ -163,7 +163,7 @@ describe("Validators", function () {
     })
   })
 
-  describe("validator URI", function () {
+  describe("Validator URI", function () {
     it("set URI", async function () {
       const { accounts, validators, admin, ValidatorsContract } = await loadFixture(initialSetup)
 

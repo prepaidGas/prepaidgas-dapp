@@ -353,6 +353,41 @@ describe("Executor", function () {
       )
     })
 
+    it("liquidate same validation", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
+      await ExecutorContract.setValidatorThreshold(2)
+      await ExecutorContract.setValidatorStatus(accounts[0].address, true)
+
+      const signer = accounts[randomNumber(7)],
+        from = signer.address,
+        nonce = randomNumber(100),
+        gasOrder = randomNumber(100),
+        onBehalf = randomBytes(20),
+        deadline = Math.floor(new Date().getTime() / 1000) - 1000,
+        to = randomBytes(20),
+        gas = randomNumber(10000),
+        data = randomBytes(randomNumber(200))
+
+      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+      const signedMessage = await signer.signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      const validation = await accounts[0].signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      await expect(
+        ExecutorContract.liquidate(messageTuple, signedMessage, [validation, validation]),
+      ).to.be.revertedWithCustomError(ExecutorContract, "IncorrectSignatureOrder")
+    })
+
     it("liquidate validations order", async function () {
       const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
       await ExecutorContract.setValidatorThreshold(2)
