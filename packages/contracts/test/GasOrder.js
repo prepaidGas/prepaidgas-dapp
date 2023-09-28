@@ -146,7 +146,7 @@ describe("GasOrder", function () {
       await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract)
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
-      // @audit add arbitrary address test
+
       const totalAmountOfOrders = await GasOrderContract.totalMatchingOrdersCount(
         ethers.ZeroAddress,
         0, // OrderStatus.None
@@ -160,10 +160,36 @@ describe("GasOrder", function () {
         100,
         0,
       )
-      // @todo rewrite expected statements for an array
+
       expect(ordersWithAccount2Owner.length).to.be.eq(2)
       expect(ordersWithAccount2Owner[0][0]).to.be.eq(4) // order number
       expect(ordersWithAccount2Owner[0][3]).to.be.eq(2000) // order number
+
+      const ordersWithRandomOwner = await GasOrderContract.getFilteredOrders(
+        "0x0000000000000000000000000000000000000001",
+        0, // OrderStatus.None
+        100,
+        0,
+      )
+      expect(ordersWithRandomOwner.length).to.be.eq(0)
+
+      const bigOffset = await GasOrderContract.getFilteredOrders(
+        accounts[2].address,
+        0, // OrderStatus.None
+        100,
+        100,
+      )
+
+      expect(bigOffset.length).to.be.eq(0)
+
+      const normalOffset = await GasOrderContract.getFilteredOrders(
+        accounts[2].address,
+        0, // OrderStatus.None
+        100,
+        1,
+      )
+
+      expect(normalOffset.length).to.be.eq(1)
     })
 
     it("Should get user total gas holding", async function () {
