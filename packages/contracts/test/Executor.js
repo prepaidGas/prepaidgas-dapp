@@ -35,6 +35,39 @@ describe("Executor", function () {
   }
 
   describe("Validate message execution", function () {
+    it("execute message", async function () {
+      const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
+
+      const EndpointFactory = await ethers.getContractFactory("MockEndpoint")
+      const EndpointContract = await EndpointFactory.deploy()
+
+      const v1 = randomNumber(10)
+      const v2 = randomNumber(9) + 1
+
+      const signer = accounts[randomNumber(7)],
+        from = signer.address,
+        nonce = randomNumber(100),
+        gasOrder = randomNumber(100),
+        onBehalf = randomBytes(20),
+        deadline = 1695924066,
+        to = EndpointContract.target,
+        gas = 10000000,
+        data = "0x6057361d00000000000000000000000000000000000000000000000000000000000000" + v1 + v2
+
+      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
+      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+
+      const signedMessage = await signer.signTypedData(
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+        { Message: messageType },
+        messageStruct,
+      )
+
+      console.log(await ExecutorContract.execute(messageTuple, signedMessage))
+
+      expect(await EndpointContract.retrieve()).to.equal(v1 * 16 + v2)
+    })
+
     it("execute arbitrary message", async function () {
       for (let i = 0; i < 15; i++) {
         const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
