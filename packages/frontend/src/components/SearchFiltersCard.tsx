@@ -13,8 +13,8 @@ import { useEffect, useState } from "react"
 //@todo move interfaces
 export interface FilterOptions {
   manager: string
-  status: "0" | "1" | "2" | "3" | "4" | "5"
-  numberOfEntries: string
+  status: 0 | 1 | 2 | 3 | 4 | 5
+  numberOfEntries: 10 | 20 | 30 | 50 | 100
 }
 
 export default function SearchFiltersCard({ setFilterState }: any) {
@@ -23,8 +23,8 @@ export default function SearchFiltersCard({ setFilterState }: any) {
 
   const initialState: FilterOptions = {
     manager: "",
-    status: "0",
-    numberOfEntries: "50",
+    status: 0,
+    numberOfEntries: 50,
   }
 
   //Input values
@@ -88,10 +88,8 @@ export default function SearchFiltersCard({ setFilterState }: any) {
         Status
         <Select
           className="min-w-[8rem]"
-          value={inputValues.status}
-          onValueChange={(value) =>
-            setInputValues({ ...inputValues, status: value as "0" | "1" | "2" | "3" | "4" | "5" })
-          }
+          value={inputValues.status.toString()}
+          onValueChange={(value) => setInputValues({ ...inputValues, status: Number(value) as 0 | 1 | 2 | 3 | 4 | 5 })}
         >
           <SelectItem value="0">Any</SelectItem>
           <SelectItem icon={ArrowPathIcon} value="1">
@@ -115,13 +113,16 @@ export default function SearchFiltersCard({ setFilterState }: any) {
         Items per page
         <Select
           className="min-w-[8rem]"
-          value={inputValues.numberOfEntries}
-          onValueChange={(value) => setInputValues({ ...inputValues, numberOfEntries: value })}
+          value={inputValues.numberOfEntries.toString()}
+          onValueChange={(value) =>
+            setInputValues({ ...inputValues, numberOfEntries: Number(value) as 10 | 20 | 30 | 50 | 100 })
+          }
         >
           <SelectItem value="10">10</SelectItem>
           <SelectItem value="20">20</SelectItem>
           <SelectItem value="30">30</SelectItem>
           <SelectItem value="50">50</SelectItem>
+          <SelectItem value="100">100</SelectItem>
         </Select>
       </div>
       <div>

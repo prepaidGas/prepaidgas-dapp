@@ -26,15 +26,11 @@ export interface Order {
   isRevokable: boolean
 }
 
-interface SearchState {
-  data: undefined | Order[]
-}
-
 export default function SearchOrder() {
   const initialState = {
     manager: "0x0000000000000000000000000000000000000000",
     status: 0,
-    numberOfEntries: 20,
+    numberOfEntries: 50,
   }
   const [filterState, setFilterState] = useState({ ...initialState })
   const [data, setOrdersData] = useState<any>()
@@ -47,7 +43,12 @@ export default function SearchOrder() {
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
         functionName: "getFilteredOrders",
-        args: [filterState.manager, filterState.status, filterState.numberOfEntries, 0],
+        args: [
+          filterState.manager,
+          filterState.status,
+          filterState.numberOfEntries,
+          (currentPage - 1) * filterState.numberOfEntries,
+        ],
       })
       console.log("DATA", data)
       setOrdersData(data)
@@ -57,11 +58,12 @@ export default function SearchOrder() {
   }
 
   useEffect(() => {
-    executeSearch()
+    console.log("FilterState: ", filterState)
+    setCurrentPage(1)
   }, [filterState])
 
   useEffect(() => {
-    console.log("OnPageChange", currentPage)
+    executeSearch()
   }, [currentPage])
 
   useEffect(() => {
@@ -76,7 +78,12 @@ export default function SearchOrder() {
       {/* Main section */}
       {data && (
         <div className="flex justify-center align-middle mt-4">
-          <Pagination onPageChange={setCurrentPage} currentPage={currentPage} totalCount={400} pageSize={10} />
+          <Pagination
+            onPageChange={setCurrentPage}
+            currentPage={currentPage}
+            totalCount={data?.length}
+            pageSize={filterState.numberOfEntries}
+          />
         </div>
       )}
       {data?.map((item: any) => (

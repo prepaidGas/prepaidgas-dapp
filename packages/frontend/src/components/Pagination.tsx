@@ -41,32 +41,31 @@ export default function Pagination(props: PaginationProps) {
   let lastPage = paginationRange[paginationRange.length - 1]
   return (
     <ul className="flex gap-2 flex-row ">
-      <li
-        className={`${currentPage === 1 ? "hidden" : "flex justify-center align-middle cursor-pointer"}`}
-        onClick={onPrevious}
-      >
+      <li className={`${currentPage === 1 ? "hidden" : ""}`} onClick={onPrevious}>
         <Icon icon={ArrowLongLeftIcon}></Icon>
       </li>
-      {paginationRange.map((pageNumber) => {
+      {paginationRange.map((pageNumber, index) => {
         if (pageNumber === DOTS) {
-          return <li className="pagination-item dots">&#8230;</li>
+          return (
+            <li key={`dots-${index}`} className="text-gray-400 flex align-middle justify-center items-center">
+              &#8230;
+            </li>
+          )
         }
 
         return (
-          <li className="flex justify-center align-middle" onClick={() => onPageChange(pageNumber)}>
-            <Text
-              className="flex justify-center align-middle"
-              color={`${pageNumber === currentPage ? "blue" : "neutral"}`}
-            >
-              {pageNumber}
-            </Text>
+          <li
+            className={`flex align-middle justify-center items-center ${
+              pageNumber === currentPage ? "text-blue-500" : "text-white"
+            }`}
+            key={`pageBtt-${index}`}
+            onClick={() => onPageChange(pageNumber)}
+          >
+            {pageNumber}
           </li>
         )
       })}
-      <li
-        className={`${currentPage === lastPage ? "hidden" : "flex justify-center align-middle cursor-pointer"}`}
-        onClick={onNext}
-      >
+      <li className={`${currentPage === lastPage ? "hidden" : ""}`} onClick={onNext}>
         <Icon icon={ArrowLongRightIcon}></Icon>
       </li>
     </ul>
