@@ -317,42 +317,52 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     return getFilteredOrders(_creator, address(0), _status, _limit, _start);
   }
 
+  // @todo add comments
   function getFilteredOrders(
     address _creator,
     address _user,
     OrderStatus _status,
-    uint256 _limit,
-    uint256 _start
+    uint256 _limit, // amount of items to get after start
+    uint256 _offset
   ) public view returns (FilteredOrder[] memory) {
-    uint256 totalOrders = totalMatchingOrdersCount(_creator, _status);
-
     // Ensure the limit does not exceed the maximum
     uint256 limit = (_limit > Const.MAX_FILTERED_ORDERS) ? Const.MAX_FILTERED_ORDERS : _limit;
-    uint256 startIndex = (_start < totalOrders) ? _start : 0;
 
-    FilteredOrder[] memory result = new FilteredOrder[](totalOrders);
+    FilteredOrder[] memory result = new FilteredOrder[](limit);
 
     uint256 addedOrders = 0;
-    for (uint256 orderId = startIndex; orderId < ordersCount && addedOrders < limit; orderId++) {
+    for (uint256 orderId = 0; orderId < ordersCount && addedOrders < limit; orderId++) {
       if (
         (_creator == address(0) || order[orderId].creator == _creator) &&
         (_status == OrderStatus.None || status(orderId) == _status)
       ) {
-        result[addedOrders] = FilteredOrder({
-          id: orderId,
-          creator: order[orderId].creator,
-          status: status(orderId),
-          maxGas: order[orderId].maxGas,
-          executionPeriodStart: order[orderId].executionPeriodStart,
-          executionPeriodDeadline: order[orderId].executionPeriodDeadline,
-          executionWindow: order[orderId].executionWindow,
-          isRevokable: order[orderId].isRevokable,
-          reward: reward[orderId], // @dev type `Payment | GasPayment`
-          gasCost: gasCost[orderId],
-          guaranteeLocked: guarantee[orderId],
-          availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0
-        });
-        addedOrders++;
+        if (_offset > 0) _offset--;
+        else {
+          result[addedOrders] = FilteredOrder({
+            id: orderId,
+            creator: order[orderId].creator,
+            status: status(orderId),
+            maxGas: order[orderId].maxGas,
+            executionPeriodStart: order[orderId].executionPeriodStart,
+            executionPeriodDeadline: order[orderId].executionPeriodDeadline,
+            executionWindow: order[orderId].executionWindow,
+            isRevokable: order[orderId].isRevokable,
+            reward: reward[orderId], // @dev type `Payment | GasPayment`
+            gasCost: gasCost[orderId],
+            guaranteeLocked: guarantee[orderId],
+            availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0
+          });
+
+          addedOrders++;
+        }
+      }
+    }
+
+    if (addedOrders < limit) {
+      // @dev cut array size
+      /// @solidity memory-safe-assembly
+      assembly {
+        mstore(result, addedOrders)
       }
     }
 

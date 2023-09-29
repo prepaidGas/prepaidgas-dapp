@@ -21,7 +21,7 @@ contract MockToken is ERC20, Ownable {
     _burn(target, amount);
   }
 
-  function setFee(uint256 value) external {
+  function setFee(uint256 value) external onlyOwner {
     fee = value;
   }
 
