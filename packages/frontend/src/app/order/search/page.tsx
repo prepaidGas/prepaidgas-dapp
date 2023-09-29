@@ -1,6 +1,6 @@
 "use client"
 // @todo alphabetize order
-import { Card, Title, Text, TextInput, Grid, Select, SelectItem, Button } from "@tremor/react"
+import { Card, Title, Text, TextInput, Grid, Select, SelectItem, Button, Metric } from "@tremor/react"
 
 import { useContractRead } from "wagmi"
 import { readContract } from "@wagmi/core"
@@ -33,10 +33,12 @@ export default function SearchOrder() {
     numberOfEntries: 50,
   }
   const [filterState, setFilterState] = useState({ ...initialState })
-  const [data, setOrdersData] = useState<any>()
+  const [data, setOrdersData] = useState<any>(undefined)
   const [currentPage, setCurrentPage] = useState(1)
+  const [totalEntries, setTotalEntries] = useState<undefined | number>(undefined)
 
-  const executeSearch = async () => {
+  const executeSearch = async (pageNumber: number) => {
+    await getTotalEntriesNumber()
     console.log("starting search")
     try {
       const data = await readContract({
@@ -47,7 +49,7 @@ export default function SearchOrder() {
           filterState.manager,
           filterState.status,
           filterState.numberOfEntries,
-          (currentPage - 1) * filterState.numberOfEntries,
+          (pageNumber - 1) * filterState.numberOfEntries,
         ],
       })
       console.log("DATA", data)
@@ -57,13 +59,32 @@ export default function SearchOrder() {
     }
   }
 
+  const getTotalEntriesNumber = async () => {
+    try {
+      const data = await readContract({
+        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        abi: GasOrderABI,
+        functionName: "totalMatchingOrdersCount",
+        args: [filterState.manager, filterState.status],
+      })
+      console.log("getMaxEntriesNumber", data)
+      console.log("getMaxEntriesNumber2", Number(data))
+
+      setTotalEntries(Number(data))
+    } catch (e) {
+      console.log("ERROR: ", e)
+    }
+  }
+
   useEffect(() => {
     console.log("FilterState: ", filterState)
+    executeSearch(1)
     setCurrentPage(1)
   }, [filterState])
 
   useEffect(() => {
-    executeSearch()
+    console.log("Current Page: ", currentPage)
+    executeSearch(currentPage)
   }, [currentPage])
 
   useEffect(() => {
@@ -81,7 +102,7 @@ export default function SearchOrder() {
           <Pagination
             onPageChange={setCurrentPage}
             currentPage={currentPage}
-            totalCount={data?.length}
+            totalCount={totalEntries && totalEntries}
             pageSize={filterState.numberOfEntries}
           />
         </div>
@@ -89,6 +110,7 @@ export default function SearchOrder() {
       {data?.map((item: any) => (
         <OrderCard {...item} key={`order-${item.id}`} />
       ))}
+      {data?.length === 0 ? <Metric className="self-center">Sorry, we couldn't find any results</Metric> : null}
     </>
   )
 }
