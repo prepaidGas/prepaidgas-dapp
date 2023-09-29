@@ -1,44 +1,74 @@
 import { useEffect, useState } from "react"
 import { Order } from "../app/order/search/page"
 import OrderCard from "./OrderCard"
-import { Button } from "@tremor/react"
+import { Badge, Button, Text } from "@tremor/react"
 import { useContractRead } from "wagmi"
+import { usePagination, DOTS } from "../usePagination"
+import { ArrowLeftIcon, ArrowLongLeftIcon, ArrowLongRightIcon } from "@heroicons/react/24/outline"
+import { Icon } from "@tremor/react"
+import { randomInt } from "crypto"
 
-export default function Pagination({ testABI }: { testABI: any }) {
-  const [currentPage, setCurrentPage] = useState(0)
-  const [totalPages, setTotalPages] = useState(10)
+interface PaginationProps {
+  onPageChange: any
+  totalCount: number
+  siblingCount?: number
+  currentPage: number
+  pageSize: number
+}
 
-  const { data, isError, isLoading } = useContractRead({
-    address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    abi: testABI,
-    functionName: "totalMatchingOrdersCount",
-    args: ["0x0000000000000000000000000000000000000000", 0],
+export default function Pagination(props: PaginationProps) {
+  const { onPageChange, totalCount, siblingCount = 2, currentPage, pageSize } = props
+
+  const paginationRange = usePagination({
+    currentPage,
+    totalCount,
+    siblingCount,
+    pageSize,
   })
 
-  const OnPageChange = () => {}
+  if (currentPage === 0 || paginationRange.length < 2) {
+    return null
+  }
 
-  useEffect(() => {
-    console.log(data)
-  }, [data])
+  const onNext = () => {
+    onPageChange(currentPage + 1)
+  }
 
+  const onPrevious = () => {
+    onPageChange(currentPage - 1)
+  }
+
+  let lastPage = paginationRange[paginationRange.length - 1]
   return (
-    <div>
-      {currentPage > 3 ? (
-        <div>
-          <Button variant="secondary">1</Button>
-          ...
-        </div>
-      ) : null}
-      <Button variant="secondary">1</Button>
-      <Button variant="secondary">2</Button>
-      <Button variant="secondary">3</Button>
-      <Button variant="secondary">3</Button>
-      {currentPage < totalPages - 3 ? (
-        <div>
-          <Button variant="secondary">{totalPages}</Button>
-          ...
-        </div>
-      ) : null}
-    </div>
+    <ul className="flex gap-2 flex-row ">
+      <li
+        className={`${currentPage === 1 ? "hidden" : "flex justify-center align-middle cursor-pointer"}`}
+        onClick={onPrevious}
+      >
+        <Icon icon={ArrowLongLeftIcon}></Icon>
+      </li>
+      {paginationRange.map((pageNumber) => {
+        if (pageNumber === DOTS) {
+          return <li className="pagination-item dots">&#8230;</li>
+        }
+
+        return (
+          <li className="flex justify-center align-middle" onClick={() => onPageChange(pageNumber)}>
+            <Text
+              className="flex justify-center align-middle"
+              color={`${pageNumber === currentPage ? "blue" : "neutral"}`}
+            >
+              {pageNumber}
+            </Text>
+          </li>
+        )
+      })}
+      <li
+        className={`${currentPage === lastPage ? "hidden" : "flex justify-center align-middle cursor-pointer"}`}
+        onClick={onNext}
+      >
+        <Icon icon={ArrowLongRightIcon}></Icon>
+      </li>
+    </ul>
   )
 }
