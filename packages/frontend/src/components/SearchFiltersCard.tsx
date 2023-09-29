@@ -11,24 +11,20 @@ import { Card, TextInput, Select, SelectItem, Button } from "@tremor/react"
 import { useEffect, useState } from "react"
 
 //@todo move interfaces
-interface FilterOptions {
+export interface FilterOptions {
   manager: string
-  status: "0" | "1" | "2" | "3" | "4" | "5"
-  numberOfEntries: string
+  status: 0 | 1 | 2 | 3 | 4 | 5
+  numberOfEntries: 10 | 20 | 30 | 50 | 100
 }
 
-export default function SearchFiltersCard({
-  executeSearch,
-}: {
-  executeSearch: (filterOptions: FilterOptions) => void
-}) {
+export default function SearchFiltersCard({ setFilterState }: any) {
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/g
 
   const initialState: FilterOptions = {
     manager: "",
-    status: "0",
-    numberOfEntries: "50",
+    status: 0,
+    numberOfEntries: 50,
   }
 
   //Input values
@@ -54,7 +50,11 @@ export default function SearchFiltersCard({
     const IsEverythingValid = Object.values(errors).every((x) => x === "")
 
     if (isSubmitting && IsEverythingValid) {
-      executeSearch({ ...inputValues })
+      if (inputValues.manager === "") {
+        setFilterState({ ...inputValues, manager: "0x0000000000000000000000000000000000000000" })
+      } else {
+        setFilterState({ ...inputValues })
+      }
     }
   }
 
@@ -65,6 +65,10 @@ export default function SearchFiltersCard({
     const timer = setTimeout(validateSearchForm, 500)
     setValidationTimer(timer)
   }, [inputValues])
+
+  useEffect(() => {
+    validateSearchForm(true)
+  }, [])
 
   return (
     <Card className="mt-6 flex flex-col gap-3 lg:gap-4 lg:flex-row align-middle justify-center ">
@@ -84,10 +88,8 @@ export default function SearchFiltersCard({
         Status
         <Select
           className="min-w-[8rem]"
-          value={inputValues.status}
-          onValueChange={(value) =>
-            setInputValues({ ...inputValues, status: value as "0" | "1" | "2" | "3" | "4" | "5" })
-          }
+          value={inputValues.status.toString()}
+          onValueChange={(value) => setInputValues({ ...inputValues, status: Number(value) as 0 | 1 | 2 | 3 | 4 | 5 })}
         >
           <SelectItem value="0">Any</SelectItem>
           <SelectItem icon={ArrowPathIcon} value="1">
@@ -111,13 +113,16 @@ export default function SearchFiltersCard({
         Items per page
         <Select
           className="min-w-[8rem]"
-          value={inputValues.numberOfEntries}
-          onValueChange={(value) => setInputValues({ ...inputValues, numberOfEntries: value })}
+          value={inputValues.numberOfEntries.toString()}
+          onValueChange={(value) =>
+            setInputValues({ ...inputValues, numberOfEntries: Number(value) as 10 | 20 | 30 | 50 | 100 })
+          }
         >
           <SelectItem value="10">10</SelectItem>
           <SelectItem value="20">20</SelectItem>
           <SelectItem value="30">30</SelectItem>
           <SelectItem value="50">50</SelectItem>
+          <SelectItem value="100">100</SelectItem>
         </Select>
       </div>
       <div>
