@@ -6,7 +6,7 @@ import { Inter } from "next/font/google"
 
 import "@rainbow-me/rainbowkit/styles.css"
 
-import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit"
+import { getDefaultWallets, lightTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit"
 import { configureChains, createConfig, WagmiConfig } from "wagmi"
 import { hardhat, mainnet } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
@@ -36,7 +36,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={inter.className}>
         <WagmiConfig config={wagmiConfig}>
-          <RainbowKitProvider chains={chains}>{children}</RainbowKitProvider>
+          <RainbowKitProvider chains={chains} theme={lightTheme({ accentColor: "#f97316" })}>
+            {children}
+          </RainbowKitProvider>
         </WagmiConfig>
         <CookieBanner />
       </body>
