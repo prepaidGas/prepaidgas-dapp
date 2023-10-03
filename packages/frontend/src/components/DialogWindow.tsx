@@ -20,7 +20,7 @@ export default function DialogWindow({
   onClose = null,
 }: DialogWindowProps) {
   return (
-    <div className="fixed left-0 top-0 w-full h-full bg-black/30 z-50 flex justify-center items-center p-10">
+    <div className="fixed left-0 top-0 w-full h-full bg-black/80 z-50 flex justify-center items-center p-10">
       <div className="w-full h-full flex flex-col justify-center items-center md:w-auto md:h-auto">
         <Card decoration="top" decorationColor="orange">
           {isClosable ? (
