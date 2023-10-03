@@ -1,8 +1,6 @@
 "use client"
 import React, { ReactNode } from "react"
 
-import { ConnectButton } from "@rainbow-me/rainbowkit"
-
 import { Card, Divider, Icon, Metric, Title, Subtitle } from "@tremor/react"
 import { WalletIcon, XCircleIcon } from "@heroicons/react/24/outline"
 
@@ -15,23 +13,18 @@ interface DialogWindowProps {
 }
 
 export default function DialogWindow({
-  isClosable = true,
+  isClosable = false,
   title = "Title",
   description = "Description",
   actionButtons = null,
-  onClose,
+  onClose = null,
 }: DialogWindowProps) {
-  const consoleKek = () => {
-    let i: ReactNode = <Card></Card>
-    console.log(typeof i)
-    return null
-  }
   return (
     <div className="fixed left-0 top-0 w-full h-full bg-black/30 z-50 flex justify-center items-center p-10">
       <div className="w-full h-full flex flex-col justify-center items-center md:w-auto md:h-auto">
         <Card decoration="top" decorationColor="orange">
           {isClosable ? (
-            <Icon onClick={consoleKek} className="absolute right-1 top-1" size="lg" icon={XCircleIcon}></Icon>
+            <Icon onClick={onClose} className="absolute right-1 top-1" size="lg" icon={XCircleIcon}></Icon>
           ) : null}
           <div className="flex flex-row items-center">
             <Icon color="orange" variant="outlined" size="lg" icon={WalletIcon}></Icon>
@@ -40,11 +33,7 @@ export default function DialogWindow({
           <Divider />
           {typeof description === "object" ? description : <Subtitle> {description}</Subtitle>}
           <Divider />
-          {consoleKek()}
-          <div className="flex justify-center items-center flex-row gap-2">
-            {/* {Array.isArray(actionButtons) ? act} */}
-            {actionButtons}
-          </div>
+          <div className="flex justify-center items-center flex-col gap-2">{actionButtons}</div>
         </Card>
       </div>
     </div>

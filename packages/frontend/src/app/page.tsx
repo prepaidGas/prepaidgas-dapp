@@ -1,26 +1,35 @@
 "use client"
+import { redirect } from "next/navigation"
+
 import Image from "next/image"
 import Link from "next/link"
 
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import DialogWindow from "../components/DialogWindow"
 
-import { Card, Icon } from "@tremor/react"
-import { BookOpenIcon } from "@heroicons/react/24/outline"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useAccount } from "wagmi"
 
 export default function Home() {
   const [showDialogWindow, setShowDialogWindow] = useState(true)
 
-  // const OnDialogWindowClose = () => {}
+  const { address, isConnecting, isDisconnected } = useAccount()
+
+  useEffect(() => {
+    console.log("ADDRESS: ", address)
+    if (typeof address !== "undefined") {
+      redirect("/order/search")
+    }
+  }, [address])
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       {showDialogWindow ? (
         <DialogWindow
+          isClosable={false}
           title="Wallet Connection"
           description="Please connect your wallet"
-          actionButtons={[<ConnectButton />, <ConnectButton />]}
+          actionButtons={<ConnectButton />}
           onClose={() => setShowDialogWindow(false)}
         />
       ) : null}
