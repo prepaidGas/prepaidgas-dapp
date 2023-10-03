@@ -36,8 +36,10 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
 
   mapping(uint256 => address) public executor;
 
+  // @todo move events to a separate file, probably to interface
   event OrderCreate(uint256 indexed id, uint256 executionWindow);
   event OrderAccept(uint256 indexed id, address indexed executor);
+  event OrderManagerChanged(uint256 indexed id, address indexed oldManager, address indexed newManager);
 
   modifier executionCallback() {
     if (execution != msg.sender) revert Error.Unauthorized(msg.sender, execution);
@@ -116,7 +118,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     uint256 id = ordersCount++;
 
     order[id] = Order({
-      creator: msg.sender, // @todo replace with `owner`, make transferable
+      manager: msg.sender, // @todo replace with `owner`, make transferable
       maxGas: maxGas,
       /// @dev magic number, should be removed in the future
       maxGasPrice: 1 ether,
@@ -162,7 +164,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
    */
   function acceptOrder(uint256 id, uint256 guaranteeTransfer) external specificStatus(id, OrderStatus.Pending) {
     executor[id] = msg.sender;
-    _mint(order[id].creator, id, order[id].maxGas);
+    _mint(order[id].manager, id, order[id].maxGas);
 
     _distribute(msg.sender, reward[id].token, _takeFee(Fee.Reward, reward[id].token, reward[id].amount));
     _acceptIncoming(guarantee[id].token, msg.sender, guaranteeTransfer, totalSupply(id) * guarantee[id].gasPrice);
@@ -206,12 +208,12 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
    *
    * @param id The ID of the order.
    *
-   * This function allows the creator to revoke an order if it is revokable
-   * or if it is not accepted by any Executor yet. It returns guarantees and rewards to the order creator.
+   * This function allows the manager to revoke an order if it is revokable
+   * or if it is not accepted by any Executor yet. It returns guarantees and rewards to the order manager.
    */
   function revokeOrder(uint256 id) external {
     Order memory currentOrder = order[id];
-    if (msg.sender != currentOrder.creator) revert Error.Unauthorized(msg.sender, currentOrder.creator);
+    if (msg.sender != currentOrder.manager) revert Error.Unauthorized(msg.sender, currentOrder.manager);
 
     OrderStatus currentStatus = status(id);
     if (
@@ -219,9 +221,9 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
       (currentOrder.isRevokable && (currentStatus == OrderStatus.Accepted || currentStatus == OrderStatus.Active))
     ) {
       _guaranteeAndRewardDelivered(id);
-      IERC20(reward[id].token).safeTransfer(order[id].creator, reward[id].amount);
-      /// @notice gasCost also should be withdrawn back to the creator
-      IERC20(gasCost[id].token).safeTransfer(order[id].creator, gasCost[id].gasPrice * order[id].maxGas);
+      IERC20(reward[id].token).safeTransfer(order[id].manager, reward[id].amount);
+      /// @notice gasCost also should be withdrawn back to the manager
+      IERC20(gasCost[id].token).safeTransfer(order[id].manager, gasCost[id].gasPrice * order[id].maxGas);
     } else {
       revert Error.RevokeNotAllowed(currentOrder.isRevokable, currentStatus);
     }
@@ -279,7 +281,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
    * state of the order.
    */
   function status(uint256 id) public view returns (OrderStatus) {
-    if (order[id].creator == address(0)) return OrderStatus.None;
+    if (order[id].manager == address(0)) return OrderStatus.None;
     if (executor[id] == address(1)) return OrderStatus.Closed;
 
     /// @notice if the order is published and not accepted by any Executor it is still in `Pending` status
@@ -304,22 +306,39 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     executor[id] = address(1);
   }
 
+  /**
+   * @dev Order management transfer
+   *
+   * @param _orderId The ID of the order which management should be transfered.
+   * @param _newManager The addres to which order is trying to be transfered.
+   *
+   */
+  function transferOrderManagement(uint256 _orderId, address _newManager) external {
+    address oldManager = order[_orderId].manager;
+    if (msg.sender != oldManager) revert Error.Unauthorized(msg.sender, oldManager);
+    if (oldManager == _newManager) revert Error.IncorrectAddressArgument(_newManager);
+
+    order[_orderId].manager = _newManager;
+
+    emit OrderManagerChanged(_orderId, oldManager, _newManager);
+  }
+
   /// Getters function
   // Getter function to filter and paginate orders
 
   // @todo add user field
   function getFilteredOrders(
-    address _creator,
+    address _manager,
     OrderStatus _status,
     uint256 _limit,
     uint256 _start
   ) external view returns (FilteredOrder[] memory) {
-    return getFilteredOrders(_creator, address(0), _status, _limit, _start);
+    return getFilteredOrders(_manager, address(0), _status, _limit, _start);
   }
 
   // @todo add comments
   function getFilteredOrders(
-    address _creator,
+    address _manager,
     address _user,
     OrderStatus _status,
     uint256 _limit, // amount of items to get after start
@@ -333,14 +352,14 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     uint256 addedOrders = 0;
     for (uint256 orderId = 0; orderId < ordersCount && addedOrders < limit; orderId++) {
       if (
-        (_creator == address(0) || order[orderId].creator == _creator) &&
+        (_manager == address(0) || order[orderId].manager == _manager) &&
         (_status == OrderStatus.None || status(orderId) == _status)
       ) {
         if (_offset > 0) _offset--;
         else {
           result[addedOrders] = FilteredOrder({
             id: orderId,
-            creator: order[orderId].creator,
+            manager: order[orderId].manager,
             status: status(orderId),
             maxGas: order[orderId].maxGas,
             executionPeriodStart: order[orderId].executionPeriodStart,
@@ -370,11 +389,11 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   }
 
   // Function to calculate the total number of matching orders
-  function totalMatchingOrdersCount(address _creator, OrderStatus _status) public view returns (uint256) {
+  function totalMatchingOrdersCount(address _manager, OrderStatus _status) public view returns (uint256) {
     uint256 matchingCount = 0;
     for (uint256 orderId = 0; orderId < ordersCount; orderId++) {
       if (
-        (_creator == address(0) || order[orderId].creator == _creator) &&
+        (_manager == address(0) || order[orderId].manager == _manager) &&
         (_status == OrderStatus.None || status(orderId) == _status)
       ) {
         matchingCount++;

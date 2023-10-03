@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 struct Order {
-  address creator;
+  address manager;
   uint256 maxGas;
   uint256 maxGasPrice;
   uint256 executionPeriodStart;
@@ -14,7 +14,7 @@ struct Order {
 // @dev this structure is based on the `Order` structure, but has `id` and `status` extra fields
 struct FilteredOrder {
   uint256 id;
-  address creator;
+  address manager;
   OrderStatus status;
   uint256 maxGas;
   uint256 executionPeriodStart;

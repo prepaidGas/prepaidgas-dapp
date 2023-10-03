@@ -63,7 +63,7 @@ describe("Executor", function () {
         messageStruct,
       )
 
-      console.log(await ExecutorContract.execute(messageTuple, signedMessage))
+      await ExecutorContract.execute(messageTuple, signedMessage)
 
       expect(await EndpointContract.retrieve()).to.equal(v1 * 16 + v2)
     })

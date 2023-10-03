@@ -26,3 +26,4 @@ error UnknownRecovered(address recovered);
 error IncorrectSignatureOrder(address lower, address higher);
 
 error RevokeNotAllowed(bool revokable, OrderStatus status);
+error IncorrectAddressArgument(address received);

@@ -3,7 +3,7 @@ const { time } = require("@nomicfoundation/hardhat-network-helpers")
 const { GAS_COST, GAS_AMOUNT, INITIAL_EXECUTOR_REWARD, LOCKED_GUARANTEE_PER_GAS } = require("../constants/index.js")
 // @notice `executor` should has tokens on the balance
 async function createOrder(
-  orderCreator,
+  orderManager,
   gasContract,
   tokenContract,
   isAccepted = false,
@@ -13,9 +13,9 @@ async function createOrder(
   increaseTime = 0,
 ) {
   const latestTime = await time.latest()
-  await tokenContract.connect(orderCreator).approve(gasContract.target, INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
+  await tokenContract.connect(orderManager).approve(gasContract.target, INITIAL_EXECUTOR_REWARD + GAS_COST * GAS_AMOUNT)
   await gasContract
-    .connect(orderCreator)
+    .connect(orderManager)
     .createOrder(
       GAS_AMOUNT,
       latestTime + possibleExecutionStart,

@@ -135,6 +135,37 @@ describe("GasOrder", function () {
 
       await expect(txToBeReverted).to.be.reverted
     })
+    it("Should transfer order management", async function () {
+      const { admin, accounts, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
+
+      await orderHelper.createOrder(admin, GasOrderContract, TokenContract)
+
+      await GasOrderContract.transferOrderManagement(0, accounts[5].address)
+
+      const orderData = await GasOrderContract.order(0)
+      expect(orderData[0]).to.be.eq(accounts[5].address)
+    })
+
+    it("Should fail transfering order management due to the same manager", async function () {
+      const { admin, accounts, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
+
+      await orderHelper.createOrder(admin, GasOrderContract, TokenContract)
+
+      await expect(GasOrderContract.transferOrderManagement(0, admin.address)).to.be.revertedWithCustomError(
+        GasOrderContract,
+        "IncorrectAddressArgument",
+      )
+    })
+
+    it("Should fail transfering order management if access is unauthorized", async function () {
+      const { admin, accounts, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
+
+      await orderHelper.createOrder(admin, GasOrderContract, TokenContract)
+
+      await expect(
+        GasOrderContract.connect(accounts[2]).transferOrderManagement(0, admin.address),
+      ).to.be.revertedWithCustomError(GasOrderContract, "Unauthorized")
+    })
   })
   describe("Order getter", function () {
     it("Should get orders with spesific owner", async function () {
