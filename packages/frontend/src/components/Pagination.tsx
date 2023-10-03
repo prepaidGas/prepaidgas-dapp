@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react"
-import { Order } from "../app/order/search/page"
-import OrderCard from "./OrderCard"
 import { Badge, Button, Text } from "@tremor/react"
 import { useContractRead } from "wagmi"
 import { usePagination, DOTS } from "../usePagination"

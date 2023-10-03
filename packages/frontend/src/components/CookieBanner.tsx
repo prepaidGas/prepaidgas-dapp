@@ -27,7 +27,7 @@ export default function CookieBanner() {
       <Card decoration="top" className="fixed z-10 p-4 bottom-0 left-0 w-full lg:bottom-6 lg:left-6 lg:w-auto ">
         <Title className="mb-2">We value your privacy</Title>
         <Text className="mb-3">
-          PreaidGas.io doesn't use third party cookies - only a single in-house cookie. No data is sent to a third
+          PreaidGas.io doesn&#39;t use third party cookies - only a single in-house cookie. No data is sent to a third
           party.
         </Text>
         <Button onClick={onReject} size="xl" variant="secondary" className="mr-2">

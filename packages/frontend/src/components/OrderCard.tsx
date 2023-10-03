@@ -1,5 +1,7 @@
 import { Badge, BadgeDelta, Card, Text, Metric, Flex, ProgressBar } from "@tremor/react"
 
+import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
+
 import {
   ArrowPathIcon,
   CheckCircleIcon,
@@ -11,29 +13,17 @@ import { startTransition, useEffect } from "react"
 
 import format from "date-fns/format"
 
-// @todo move to common intefaces
-interface Order {
-  id: bigint
-  creator: string
-  status: number
-  maxGas: bigint
-  executionPeriodStart: bigint
-  executionPeriodDeadline: bigint
-  executionWindow: bigint
-  isRevokable: boolean
-}
-
 // @todo display order data
 export default function OrderCard({
   id,
-  creator,
+  manager,
   status,
   maxGas,
   executionPeriodStart,
   executionPeriodDeadline,
   executionWindow,
   isRevokable,
-}: Order) {
+}: FilteredOrderStructOutput) {
   const colors: (
     | "yellow"
     | "cyan"
@@ -110,7 +100,7 @@ export default function OrderCard({
 
       {/* @dev Order Id */}
       <Metric>#{id.toString()}</Metric>
-      <Text>Manager ${creator}</Text>
+      <Text>Manager ${manager}</Text>
       {/* @dev Order executionPeriodStart and executionPeriodDeadline */}
       <Text>
         Execution timeframe: {format(Number(executionPeriodStart), "yyyy.mm.dd hh:ss:mm")} -
@@ -128,38 +118,3 @@ export default function OrderCard({
     </Card>
   )
 }
-/*
-    id: i,
-    creator: order[i].creator,
-    status: status(i),
-    maxGas: order[i].maxGas,
-    executionPeriodStart: order[i].executionPeriodStart,
-    executionPeriodDeadline: order[i].executionPeriodDeadline,
-    executionWindow: order[i].executionWindow,
-    isRevokable
-    enum OrderStatus {
-
-  None, - none
-  Pending, - yellow
-  Accepted, - white green
-  Active, - green
-  /// @notice the order might be inactive due to exhausted gas limit or execution time
-  Inactive, - gray
-  Closed - black
-}
-
- <Badge icon={ArrowPathIcon} color="yellow">
-        Pending
-      </Badge>
-      <Badge icon={CheckCircleIcon} color="cyan">
-        Accepted
-      </Badge>
-      <Badge icon={PlayIcon} color="green">
-        Active
-      </Badge>
-      <Badge icon={ExclamationTriangleIcon} color="red">
-        Inactive
-      </Badge>
-      <Badge icon={XCircleIcon} color="slate">
-        Closed
-      </Badge> */

@@ -11,20 +11,7 @@ import { isReadable } from "stream"
 import Pagination from "../../../components/Pagination"
 
 // @todo display first 100 items
-// @todo write script to update ABI automaticaly
 import { GasOrderABI } from "helpers/abi"
-
-//@todo move interfaces
-export interface Order {
-  id: bigint
-  creator: string
-  status: number
-  maxGas: bigint
-  executionPeriodStart: bigint
-  executionPeriodDeadline: bigint
-  executionWindow: bigint
-  isRevokable: boolean
-}
 
 export default function SearchOrder() {
   const initialState = {
@@ -110,7 +97,7 @@ export default function SearchOrder() {
       {data?.map((item: any) => (
         <OrderCard {...item} key={`order-${item.id}`} />
       ))}
-      {data?.length === 0 ? <Metric className="self-center">Sorry, we couldn't find any results</Metric> : null}
+      {data?.length === 0 ? <Metric className="self-center">Sorry, we couldn&#39;t find any results</Metric> : null}
     </>
   )
 }
