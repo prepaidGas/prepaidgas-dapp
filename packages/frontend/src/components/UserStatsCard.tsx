@@ -102,7 +102,7 @@ export default function UserStatsCard() {
           </div>
         </div>
 
-        <Grid numItems={2} numItemsSm={3} numItemsLg={5} className="mt-4 gap-2">
+        <Grid numItems={2} numItemsSm={3} numItemsLg={5} className="mt-4 gap-2 flex flex-wrap">
           <Badge icon={ArrowPathIcon} color={STATUS_COLORS[1]}>
             Pending {ordersCount.pending}
           </Badge>
