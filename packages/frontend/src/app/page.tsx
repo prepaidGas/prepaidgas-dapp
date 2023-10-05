@@ -6,6 +6,7 @@ import Link from "next/link"
 
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import DialogWindow from "../components/DialogWindow"
+import UserAgreement from "../components/UserAgreement"
 
 import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
@@ -27,9 +28,14 @@ export default function Home() {
       {showDialogWindow ? (
         <DialogWindow
           isClosable={false}
+          withoutDescription={true}
           title="Wallet Connection"
           description="Please connect your wallet"
-          actionButtons={<ConnectButton />}
+          actionButtons={[
+            <UserAgreement>
+              <ConnectButton />
+            </UserAgreement>,
+          ]}
           onClose={() => setShowDialogWindow(false)}
         />
       ) : null}
