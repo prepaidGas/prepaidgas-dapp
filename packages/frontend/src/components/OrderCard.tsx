@@ -17,7 +17,7 @@ import {
 // @todo display order data
 export default function OrderCard({
   id,
-  creator,
+  manager,
   status,
   maxGas,
   executionPeriodStart,
@@ -78,7 +78,7 @@ export default function OrderCard({
 
       {/* @dev Order Id */}
       <Metric>#{id.toString()}</Metric>
-      <Text>Manager ${creator}</Text>
+      <Text>Manager ${manager}</Text>
       {/* @dev Order executionPeriodStart and executionPeriodDeadline */}
       <Text>
         Execution timeframe: {format(Number(executionPeriodStart), "yyyy.mm.dd hh:ss:mm")} -
