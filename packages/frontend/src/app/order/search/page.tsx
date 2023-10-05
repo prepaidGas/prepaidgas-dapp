@@ -1,26 +1,26 @@
 "use client"
 // @todo alphabetize order
-import { Card, Title, Text, TextInput, Grid, Select, SelectItem, Button, Metric } from "@tremor/react"
+import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 
-import { useContractRead } from "wagmi"
+import { Title, Text, Metric } from "@tremor/react"
+
 import { readContract } from "@wagmi/core"
 import SearchFiltersCard, { FilterOptions } from "../../../components/SearchFiltersCard"
 import OrderCard from "../../../components/OrderCard"
 import { useEffect, useState } from "react"
-import { isReadable } from "stream"
 import Pagination from "../../../components/Pagination"
 
 // @todo display first 100 items
 import { GasOrderABI } from "helpers/abi"
 
 export default function SearchOrder() {
-  const initialState = {
+  const initialState: FilterOptions = {
     manager: "0x0000000000000000000000000000000000000000",
     status: 0,
     numberOfEntries: 50,
   }
   const [filterState, setFilterState] = useState({ ...initialState })
-  const [data, setOrdersData] = useState<any>(undefined)
+  const [data, setOrdersData] = useState<undefined | FilteredOrderStructOutput[]>(undefined)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalEntries, setTotalEntries] = useState<undefined | number>(undefined)
 
@@ -40,7 +40,7 @@ export default function SearchOrder() {
         ],
       })
       console.log("DATA", data)
-      setOrdersData(data)
+      setOrdersData(data as FilteredOrderStructOutput[])
     } catch (e) {
       console.log("ERROR: ", e)
     }
