@@ -4,7 +4,7 @@ import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 
 import { STATUS_COLORS } from "../themeConstants"
 
-import { Badge, Card, Text, Metric, Flex, ProgressBar } from "@tremor/react"
+import { Badge, Card, Text, Metric, Flex, ProgressBar, Icon, Button } from "@tremor/react"
 
 import {
   ArrowPathIcon,
@@ -12,7 +12,9 @@ import {
   PlayIcon,
   ExclamationTriangleIcon,
   XCircleIcon,
+  StarIcon,
 } from "@heroicons/react/24/outline"
+import { useState } from "react"
 
 // @todo display order data
 export default function OrderCard({
@@ -27,9 +29,27 @@ export default function OrderCard({
 }: FilteredOrderStructOutput) {
   const colors = STATUS_COLORS
 
+  const checkIfIsFavorite = () => {
+    let favOrders = localStorage.getItem("FAVORITE_ORDERS")
+    if (favOrders === null) {
+      return false
+    }
+
+    favOrders = JSON.parse(favOrders)
+    const index = favOrders.indexOf(id.toString())
+    if (index > -1) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  const [isFavorite, setIsFavorite] = useState<boolean>(checkIfIsFavorite())
+
   /* @dev Status bage */
   /* @todo Add explanation to all the statuses with a `tooltip attr` */
   const renderBadge = () => {
+    console.log("KEKLOL", localStorage.getItem("KekLol"))
     switch (Number(status)) {
       case 1:
         return (
@@ -66,18 +86,49 @@ export default function OrderCard({
     }
   }
 
-  const renderDate = () => {
-    const startDate = new Date(Number(executionPeriodStart))
-    const endDate = new Date(Number(executionPeriodStart))
-    const result = `$`
+  const addToFavorites = () => {
+    let favOrders: any = localStorage.getItem("FAVORITE_ORDERS")
+    if (favOrders !== null) {
+      favOrders = JSON.parse(favOrders)
+      favOrders.push(id.toString())
+      localStorage.setItem("FAVORITE_ORDERS", JSON.stringify(favOrders))
+    } else {
+      const newArr = []
+      newArr.push(id.toString())
+      localStorage.setItem("FAVORITE_ORDERS", JSON.stringify(newArr))
+    }
+
+    setIsFavorite(true)
+  }
+
+  const removeFromFavorites = () => {
+    let favOrders: any = localStorage.getItem("FAVORITE_ORDERS")
+    console.log("KEKLOL: ", typeof favOrders)
+    if (favOrders !== null) {
+      favOrders = JSON.parse(favOrders)
+      const index = favOrders.indexOf(id.toString())
+      if (index > -1) {
+        favOrders.splice(index, 1)
+        localStorage.setItem("FAVORITE_ORDERS", JSON.stringify(favOrders))
+        setIsFavorite(false)
+      }
+    }
   }
 
   return (
     <Card className="mt-3" decoration="top" decorationColor={colors[Number(status)]}>
-      {renderBadge()}
+      <Flex>
+        {renderBadge()}
+        {isFavorite ? (
+          <Button onClick={removeFromFavorites} color="amber" icon={StarIcon}></Button>
+        ) : (
+          <Button onClick={addToFavorites} variant="secondary" color="amber" icon={StarIcon}></Button>
+        )}
+      </Flex>
 
       {/* @dev Order Id */}
       <Metric>#{id.toString()}</Metric>
+
       <Text>Manager ${manager}</Text>
       {/* @dev Order executionPeriodStart and executionPeriodDeadline */}
       <Text>
