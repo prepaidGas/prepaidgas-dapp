@@ -26,6 +26,9 @@ export default function OrderCard({
   executionPeriodDeadline,
   executionWindow,
   isRevokable,
+  gasCost,
+  reward,
+  guarantee
 }: FilteredOrderStructOutput) {
   const colors = STATUS_COLORS
 
@@ -129,7 +132,7 @@ export default function OrderCard({
       {/* @dev Order Id */}
       <Metric>#{id.toString()}</Metric>
 
-      <Text>Manager ${manager}</Text>
+      <Text>Manager: {manager}</Text>
       {/* @dev Order executionPeriodStart and executionPeriodDeadline */}
       <Text>
         Execution timeframe: {format(Number(executionPeriodStart), "yyyy.mm.dd hh:ss:mm")} -
@@ -139,6 +142,10 @@ export default function OrderCard({
       <Text>Execution window: {executionWindow.toString()}</Text>
       {/* @dev Order executionWindow */}
       <Text>Revokable: {isRevokable.toString()}</Text>
+      {/* @dev Order data, the details might be found in `TokenAmountWithDetails` structure */}
+      <Text>{`Reward: ${reward.value} ${reward.symbol}`}</Text>
+      <Text>{`Gas Cost: ${gasCost.value} ${gasCost.symbol}`}</Text>
+      <Text>{`Guarantee: ${guarantee.value} ${guarantee.symbol}`}</Text>
       {/* @dev Gas left (maxGas) */}
       <Flex className="mt-4">
         <Text>Used: 0 / {maxGas.toString()}</Text>

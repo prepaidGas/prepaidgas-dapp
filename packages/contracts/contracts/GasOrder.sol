@@ -2,13 +2,14 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {ERC1155ish} from "./base/ERC1155ish.sol";
 
 import {FeeProcessor, Fee} from "./tools/FeeProcessor.sol";
 
-import {Order, FilteredOrder, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
+import {Order, FilteredOrder, OrderStatus, GasPayment, Payment, IGasOrder, TokenAmountWithDetails} from "./interfaces/IGasOrder.sol";
 
 import "./common/Errors.sol" as Error;
 import "./common/Constants.sol" as Const;
@@ -366,10 +367,28 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
             executionPeriodDeadline: order[orderId].executionPeriodDeadline,
             executionWindow: order[orderId].executionWindow,
             isRevokable: order[orderId].isRevokable,
-            reward: reward[orderId], // @dev type `Payment | GasPayment`
-            gasCost: gasCost[orderId],
-            guaranteeLocked: guarantee[orderId],
-            availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0
+            availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0,
+            reward: TokenAmountWithDetails(
+              IERC20Metadata(reward[orderId].token).name(),
+              IERC20Metadata(reward[orderId].token).symbol(),
+              IERC20Metadata(reward[orderId].token).decimals(),
+              reward[orderId].token,
+              reward[orderId].amount
+            ),
+            gasCost: TokenAmountWithDetails(
+              IERC20Metadata(gasCost[orderId].token).name(),
+              IERC20Metadata(gasCost[orderId].token).symbol(),
+              IERC20Metadata(gasCost[orderId].token).decimals(),
+              gasCost[orderId].token,
+              gasCost[orderId].gasPrice
+            ),
+            guarantee: TokenAmountWithDetails(
+              IERC20Metadata(guarantee[orderId].token).name(),
+              IERC20Metadata(guarantee[orderId].token).symbol(),
+              IERC20Metadata(guarantee[orderId].token).decimals(),
+              guarantee[orderId].token,
+              guarantee[orderId].gasPrice
+            )
           });
 
           addedOrders++;
@@ -385,6 +404,46 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
       }
     }
 
+    return result;
+  }
+
+  function getOrdersById(uint256[] calldata ids, address _user) public view returns (FilteredOrder[] memory) {
+    FilteredOrder[] memory result = new FilteredOrder[](ids.length);
+    for (uint256 resultIndex = 0; resultIndex < ids.length; resultIndex++) {
+      uint256 orderId = ids[resultIndex];
+      result[resultIndex] = FilteredOrder({
+        id: orderId,
+        manager: order[orderId].manager,
+        status: status(orderId),
+        maxGas: order[orderId].maxGas,
+        executionPeriodStart: order[orderId].executionPeriodStart,
+        executionPeriodDeadline: order[orderId].executionPeriodDeadline,
+        executionWindow: order[orderId].executionWindow,
+        isRevokable: order[orderId].isRevokable,
+        availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0,
+        reward: TokenAmountWithDetails(
+          IERC20Metadata(reward[orderId].token).name(),
+          IERC20Metadata(reward[orderId].token).symbol(),
+          IERC20Metadata(reward[orderId].token).decimals(),
+          reward[orderId].token,
+          reward[orderId].amount
+        ),
+        gasCost: TokenAmountWithDetails(
+          IERC20Metadata(gasCost[orderId].token).name(),
+          IERC20Metadata(gasCost[orderId].token).symbol(),
+          IERC20Metadata(gasCost[orderId].token).decimals(),
+          gasCost[orderId].token,
+          gasCost[orderId].gasPrice
+        ),
+        guarantee: TokenAmountWithDetails(
+          IERC20Metadata(guarantee[orderId].token).name(),
+          IERC20Metadata(guarantee[orderId].token).symbol(),
+          IERC20Metadata(guarantee[orderId].token).decimals(),
+          guarantee[orderId].token,
+          guarantee[orderId].gasPrice
+        )
+      });
+    }
     return result;
   }
 

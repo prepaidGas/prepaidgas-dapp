@@ -21,10 +21,18 @@ struct FilteredOrder {
   uint256 executionPeriodDeadline;
   uint256 executionWindow;
   bool isRevokable;
-  Payment reward;
-  GasPayment gasCost;
-  GasPayment guaranteeLocked;
   uint256 availableGasHoldings;
+  TokenAmountWithDetails reward;
+  TokenAmountWithDetails gasCost;
+  TokenAmountWithDetails guarantee;
+}
+
+struct TokenAmountWithDetails {
+  string name;
+  string symbol;
+  uint256 decimals;
+  address token;
+  uint256 value;
 }
 
 enum OrderStatus {

@@ -238,5 +238,21 @@ describe("GasOrder", function () {
 
       expect(totalUserGasHoldings).to.be.eq(4000)
     })
+
+    it("Should get orders by ids", async function () {
+      const { accounts, admin, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
+
+      // @notice orders mockups
+      await orderHelper.createOrder(admin, GasOrderContract, TokenContract)
+      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10])
+      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10])
+      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract)
+      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
+      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
+
+      const totalUserGasHoldings = await GasOrderContract.getOrdersById([1, 2, 3], ethers.ZeroAddress)
+
+      expect(totalUserGasHoldings.length).to.be.eq(3)
+    })
   })
 })
