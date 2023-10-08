@@ -1,4 +1,5 @@
-import { Card, Title, Text, Grid } from "@tremor/react";
+import { Card, Title, Text, Grid } from "@tremor/react"
+import CreateOrderCard from "../../../components/CreateOrderCard"
 
 export default function CreateOrder() {
   return (
@@ -6,9 +7,7 @@ export default function CreateOrder() {
       <Title>Create Order</Title>
       <Text>You might create order on this page</Text>
       {/* Main section */}
-      <Card className="mt-6">
-        <div className="h-96" />
-      </Card>
+      <CreateOrderCard />
 
       {/* KPI section */}
       <Grid numItemsMd={2} className="mt-6 gap-6">
@@ -22,6 +21,5 @@ export default function CreateOrder() {
         </Card>
       </Grid>
     </>
-  );
+  )
 }
-
