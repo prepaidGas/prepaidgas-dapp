@@ -25,7 +25,6 @@ export default function OrderCard({
   executionPeriodStart,
   executionPeriodDeadline,
   executionWindow,
-  isRevokable,
   gasCost,
   reward,
   guarantee
@@ -141,7 +140,6 @@ export default function OrderCard({
       {/* @dev Order executionWindow */}
       <Text>Execution window: {executionWindow.toString()}</Text>
       {/* @dev Order executionWindow */}
-      <Text>Revokable: {isRevokable.toString()}</Text>
       {/* @dev Order data, the details might be found in `TokenAmountWithDetails` structure */}
       <Text>{`Reward: ${reward.value} ${reward.symbol}`}</Text>
       <Text>{`Gas Cost: ${gasCost.value} ${gasCost.symbol}`}</Text>

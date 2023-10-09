@@ -83,7 +83,6 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
    * @param executionPeriodStart The start of the period when execution is possible.
    * @param executionPeriodDeadline The last possible timestamp for execution.
    * @param executionWindow The execution window duration specified as the number of blocks.
-   * @param revokable A flag indicating if the order is revokable.
    * @param rewardValue The reward payment details.
    * @param gasCostValue The cost of one Gas uint.
    * @param guaranteeValue The guarantee payment details.
@@ -95,13 +94,13 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
    * This function creates an order with the specified parameters. It ensures the validity
    * of the order parameters and initializes the order's details.
    */
+  // @todo-backlog add `revocable` functionality
   function createOrder(
     uint256 maxGas,
     // uint256 maxGasCost, // @todo add maxGasCost
     uint256 executionPeriodStart,
     uint256 executionPeriodDeadline,
     uint256 executionWindow,
-    bool revokable,
     Payment calldata rewardValue,
     GasPayment calldata gasCostValue,
     GasPayment calldata guaranteeValue,
@@ -125,8 +124,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
       maxGasPrice: 1 ether,
       executionPeriodStart: executionPeriodStart,
       executionPeriodDeadline: executionPeriodDeadline,
-      executionWindow: executionWindow,
-      isRevokable: revokable
+      executionWindow: executionWindow
     });
 
     reward[id] = rewardValue;
@@ -219,14 +217,12 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     OrderStatus currentStatus = status(id);
     if (
       currentStatus == OrderStatus.Pending ||
-      (currentOrder.isRevokable && (currentStatus == OrderStatus.Accepted || currentStatus == OrderStatus.Active))
+      (currentStatus == OrderStatus.Accepted || currentStatus == OrderStatus.Active)
     ) {
       _guaranteeAndRewardDelivered(id);
       IERC20(reward[id].token).safeTransfer(order[id].manager, reward[id].amount);
       /// @notice gasCost also should be withdrawn back to the manager
       IERC20(gasCost[id].token).safeTransfer(order[id].manager, gasCost[id].gasPrice * order[id].maxGas);
-    } else {
-      revert Error.RevokeNotAllowed(currentOrder.isRevokable, currentStatus);
     }
   }
 
@@ -366,7 +362,6 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
             executionPeriodStart: order[orderId].executionPeriodStart,
             executionPeriodDeadline: order[orderId].executionPeriodDeadline,
             executionWindow: order[orderId].executionWindow,
-            isRevokable: order[orderId].isRevokable,
             availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0,
             reward: TokenAmountWithDetails(
               IERC20Metadata(reward[orderId].token).name(),
@@ -419,7 +414,6 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
         executionPeriodStart: order[orderId].executionPeriodStart,
         executionPeriodDeadline: order[orderId].executionPeriodDeadline,
         executionWindow: order[orderId].executionWindow,
-        isRevokable: order[orderId].isRevokable,
         availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0,
         reward: TokenAmountWithDetails(
           IERC20Metadata(reward[orderId].token).name(),
