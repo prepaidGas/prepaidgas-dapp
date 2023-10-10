@@ -1,6 +1,8 @@
 "use client"
 
 import format from "date-fns/format"
+import { readContract } from "@wagmi/core"
+
 import { parse, getHours, getMinutes, getSeconds } from "date-fns"
 import { DatePickerValue } from "@tremor/react"
 import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
@@ -24,11 +26,14 @@ import {
   Button,
 } from "@tremor/react"
 import { useEffect, useState } from "react"
+import { GasOrderABI } from "helpers/abi"
 
 interface CreateOrderState {
   gasAmount: number
-  executionPeriodStart: Date
-  executionPeriodEnd: Date
+  executionPeriodStartDate: Date
+  executionPeriodStartTime: string
+  executionPeriodEndDate: Date
+  executionPeriodEndTime: string
   isRevocable: boolean
   executionWindow: number
 }
@@ -38,12 +43,15 @@ const timeStringRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
 export default function CreateOrderCard() {
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
 
-  const [startDate, setStartDate] = useState<DatePickerValue>()
-  const [startTime, setStartTime] = useState<string>("")
-  const [endDate, setEndDate] = useState<DatePickerValue>()
-  const [endTime, setEndTime] = useState<string>("")
-
-  const [isRevocable, setIsRevocable] = useState(true)
+  const [validationErrors, setValidationErrors] = useState({
+    gasAmount: "",
+    executionPeriodStartDate: "",
+    executionPeriodStartTime: "",
+    executionPeriodEndDate: "",
+    executionPeriodEndTime: "",
+    isRevocable: "",
+    executionWindow: "",
+  })
 
   const getTomorrowStartDate = () => {
     const date = new Date()
@@ -58,16 +66,67 @@ export default function CreateOrderCard() {
     return new Date(date.getTime() + 30 * 60000)
   }
 
+  const parseTime = (timeString: string) => {
+    const parsedTime = parse(timeString, "HH:mm:ss", new Date())
+    const hours = getHours(parsedTime)
+    const minutes = getMinutes(parsedTime)
+    const seconds = getSeconds(parsedTime)
+    return [hours, minutes, seconds]
+  }
+
+  const combineDateAndTime = (date: Date, time: string) => {
+    const hoursMinutesSeconds = parseTime(time)
+    const combinedDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      hoursMinutesSeconds[0],
+      hoursMinutesSeconds[1],
+      hoursMinutesSeconds[2],
+    )
+    return combinedDate
+  }
+
+  const getUnixTimestampInSeconds = (date: Date) => {
+    return Math.floor(date.getTime() / 1000)
+  }
+
   const initialState: CreateOrderState = {
     gasAmount: 0,
-    executionPeriodStart: getTomorrowStartDate(),
-    executionPeriodEnd: getTomorrowEndDate(),
+    executionPeriodStartDate: getTomorrowStartDate(),
+    executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
+    executionPeriodEndDate: getTomorrowEndDate(),
+    executionPeriodEndTime: format(getTomorrowStartDate(), "HH:mm:ss"),
     isRevocable: true,
     executionWindow: 1000,
   }
 
   //Input values
   const [inputValues, setInputValues] = useState({ ...initialState })
+
+  const createOrder = async () => {
+    try {
+      const data = await readContract({
+        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        abi: GasOrderABI,
+        functionName: "createOrder",
+        args: [
+          inputValues.gasAmount,
+          getUnixTimestampInSeconds(
+            combineDateAndTime(inputValues.executionPeriodStartDate, inputValues.executionPeriodStartTime),
+          ),
+          getUnixTimestampInSeconds(
+            combineDateAndTime(inputValues.executionPeriodEndDate, inputValues.executionPeriodEndTime),
+          ),
+          inputValues.executionWindow,
+          inputValues.isRevocable,
+        ],
+      })
+      console.log("DATA", data)
+    } catch (e) {
+      console.log("ERROR: ", e)
+    }
+  }
 
   const clampNumber = (value, minNum, maxNum) => {
     console.log("Clamped: ", value)
@@ -84,14 +143,6 @@ export default function CreateOrderCard() {
     }
   }
 
-  const [validationErrors, setValidationErrors] = useState({
-    gasAmount: "",
-    executionPeriodStart: "",
-    executionPeriodEnd: "",
-    isRevocable: "",
-    executionWindow: "",
-  })
-
   const validateSearchForm = (isSubmitting?: boolean) => {
     // //TODO: Validations here
     // //Setting Errors after validation
@@ -100,6 +151,11 @@ export default function CreateOrderCard() {
     // if (isSubmitting && IsEverythingValid) {
     //   //TODO: CreateOrder here
     // }
+
+    if (isSubmitting) {
+      //TODO: CreateOrder here
+      createOrder()
+    }
   }
 
   useEffect(() => {
@@ -108,14 +164,7 @@ export default function CreateOrderCard() {
     }
     const timer = setTimeout(validateSearchForm, 500)
     setValidationTimer(timer)
-  }, [inputValues, startDate, startTime, endDate, endTime])
-
-  const parseTime = (timeString: string) => {
-    const parsedTime = parse(timeString, "HH:mm:ss", new Date())
-    const hours = getHours(parsedTime)
-    const minutes = getMinutes(parsedTime)
-    const seconds = getSeconds(parsedTime)
-  }
+  }, [inputValues])
 
   return (
     <Card className="mt-6 flex flex-col w-full">
@@ -138,17 +187,17 @@ export default function CreateOrderCard() {
           <div className="flex flex-row mt-2">
             <Icon icon={CalendarDaysIcon}></Icon>
             <DatePicker
-              onValueChange={setStartDate}
-              placeholder={format(inputValues.executionPeriodStart, "MMM d, y")}
-              minDate={inputValues.executionPeriodStart}
+              onValueChange={(value) => setInputValues({ ...inputValues, executionPeriodStartDate: value })}
+              placeholder={format(inputValues.executionPeriodStartDate, "MMM d, y")}
+              minDate={inputValues.executionPeriodStartDate}
             />
           </div>
           <div className="flex flex-row mt-2">
             <Icon icon={ClockIcon}></Icon>
             <TextInput
-              onChange={(e) => setStartTime(e.target.value)}
+              onChange={(e) => setInputValues({ ...inputValues, executionPeriodStartTime: e.target.value })}
               pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
-              placeholder={format(inputValues.executionPeriodStart, "HH:mm:ss")}
+              placeholder={inputValues.executionPeriodStartTime}
             ></TextInput>
           </div>
         </div>
@@ -157,17 +206,17 @@ export default function CreateOrderCard() {
           <div className="flex flex-row mt-2">
             <Icon icon={CalendarDaysIcon}></Icon>
             <DatePicker
-              onValueChange={setEndDate}
-              placeholder={format(inputValues.executionPeriodEnd, "MMM d, y")}
-              minDate={startDate}
+              onValueChange={(value) => setInputValues({ ...inputValues, executionPeriodEndDate: value })}
+              placeholder={format(inputValues.executionPeriodEndDate, "MMM d, y")}
+              minDate={inputValues.executionPeriodStartDate}
             />
           </div>
           <div className="flex flex-row mt-2">
             <Icon icon={ClockIcon}></Icon>
             <TextInput
-              onChange={(e) => setEndTime(e.target.value)}
+              onChange={(e) => setInputValues({ ...inputValues, executionPeriodEndTime: e.target.value })}
               pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
-              placeholder={format(inputValues.executionPeriodEnd, "HH:mm:ss")}
+              placeholder={inputValues.executionPeriodEndTime}
             ></TextInput>
           </div>
         </div>
@@ -180,10 +229,12 @@ export default function CreateOrderCard() {
               <Text>Is order revocable?</Text>
               <div className="flex flex-row mt-2">
                 <Select
-                  icon={isRevocable ? CheckIcon : NoSymbolIcon}
+                  icon={inputValues.isRevocable ? CheckIcon : NoSymbolIcon}
                   className="min-w-[8rem]"
-                  value={isRevocable ? "1" : "0"}
-                  onValueChange={(value) => setIsRevocable(value === "0" ? false : true)}
+                  value={inputValues.isRevocable ? "1" : "0"}
+                  onValueChange={(value) =>
+                    setInputValues({ ...inputValues, isRevocable: value === "0" ? false : true })
+                  }
                 >
                   <SelectItem icon={NoSymbolIcon} value="0">
                     No
@@ -216,7 +267,7 @@ export default function CreateOrderCard() {
         </AccordionBody>
       </Accordion>
       <div className="flex flex-row justify-end mt-4">
-        <Button>Create</Button>
+        <Button onClick={() => validateSearchForm(true)}>Create</Button>
       </div>
     </Card>
   )
