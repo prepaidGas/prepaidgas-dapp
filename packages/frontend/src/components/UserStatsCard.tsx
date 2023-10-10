@@ -14,7 +14,7 @@ import {
 } from "@heroicons/react/24/outline"
 import { Card, Grid, Text, Metric, Badge, Title, Icon, Button } from "@tremor/react"
 import { useEffect, useState } from "react"
-import { STATUS_COLORS } from "../themeConstants"
+import { STATUS_COLORS } from "../constants/themeConstants"
 import { useAccount } from "wagmi"
 
 export default function UserStatsCard() {
