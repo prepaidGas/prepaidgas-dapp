@@ -8,7 +8,6 @@ struct Order {
   uint256 executionPeriodStart;
   uint256 executionPeriodDeadline;
   uint256 executionWindow;
-  bool isRevokable;
 }
 
 // @dev this structure is based on the `Order` structure, but has `id` and `status` extra fields
@@ -20,11 +19,18 @@ struct FilteredOrder {
   uint256 executionPeriodStart;
   uint256 executionPeriodDeadline;
   uint256 executionWindow;
-  bool isRevokable;
-  Payment reward;
-  GasPayment gasCost;
-  GasPayment guaranteeLocked;
   uint256 availableGasHoldings;
+  TokenAmountWithDetails reward;
+  TokenAmountWithDetails gasCost;
+  TokenAmountWithDetails guarantee;
+}
+
+struct TokenAmountWithDetails {
+  string name;
+  string symbol;
+  uint256 decimals;
+  address token;
+  uint256 value;
 }
 
 enum OrderStatus {
