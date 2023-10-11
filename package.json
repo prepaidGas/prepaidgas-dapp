@@ -13,5 +13,8 @@
     "sc-test": "npm run test -w prepaidgas-contracts",
     "sc-coverage": "npm run coverage -w prepaidgas-contracts",
     "dev-setup": "npm run fe-dev & npm run sc-node-mock; wait"
+  },
+  "dependencies": {
+    "react-loader-spinner": "^5.4.5"
   }
 }

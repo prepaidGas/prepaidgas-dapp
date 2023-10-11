@@ -1,25 +1,26 @@
-const Executor  = require("abi/Executor.sol/Executor.json");
-const GasOrder  = require("abi/GasOrder.sol/GasOrder.json");
+const Executor = require("abi/Executor.sol/Executor.json")
+const GasOrder = require("abi/GasOrder.sol/GasOrder.json")
+const MockToken = require("abi/mock/MockToken.sol/MockToken.json")
 
 interface FieldEntry {
-  indexed?: boolean;
-  internalType: string;
-  name?: string;
-  type?: string;
-  components?: FieldEntry[];
+  indexed?: boolean
+  internalType: string
+  name?: string
+  type?: string
+  components?: FieldEntry[]
 }
 
 interface ABIEntry {
-  inputs?: FieldEntry[];
-  outputs?: FieldEntry[];
-  anonymous?: boolean;
-  stateMutability?: string;
-  type: string;
-  name?: string; // Optional if it's a function
+  inputs?: FieldEntry[]
+  outputs?: FieldEntry[]
+  anonymous?: boolean
+  stateMutability?: string
+  type: string
+  name?: string // Optional if it's a function
 }
 
+const ExecutorABI: ABIEntry[] = Executor.abi
+const GasOrderABI: ABIEntry[] = GasOrder.abi
+const MockTokenABI: ABIEntry[] = MockToken.abi
 
-const ExecutorABI: ABIEntry[] = Executor.abi;
-const GasOrderABI: ABIEntry[] = GasOrder.abi;
-
-export { ExecutorABI, GasOrderABI };
+export { ExecutorABI, GasOrderABI, MockTokenABI }

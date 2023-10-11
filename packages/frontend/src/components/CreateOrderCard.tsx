@@ -1,7 +1,8 @@
 "use client"
 
 import format from "date-fns/format"
-import { readContract } from "@wagmi/core"
+import { readContract, writeContract } from "@wagmi/core"
+import { MockTokenABI, GasOrderABI } from "helpers/abi"
 
 import { parse, getHours, getMinutes, getSeconds } from "date-fns"
 import { DatePickerValue, Flex } from "@tremor/react"
@@ -23,7 +24,6 @@ import {
   Button,
 } from "@tremor/react"
 import { useEffect, useState } from "react"
-import { GasOrderABI } from "helpers/abi"
 import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX } from "../constants/regexConstants"
 
 interface CreateOrderState {
@@ -71,7 +71,6 @@ export default function CreateOrderCard() {
   const getTomorrowStartDate = () => {
     const date = new Date()
     date.setDate(date.getDate() + 1)
-    console.log("ISOString: ", date.toISOString())
     return date
   }
 
@@ -128,32 +127,79 @@ export default function CreateOrderCard() {
   const [inputValues, setInputValues] = useState({ ...initialState })
 
   const createOrder = async () => {
-    try {
-      const data = await readContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-        abi: GasOrderABI,
-        functionName: "createOrder",
-        args: [
-          inputValues.gasAmount,
-          getUnixTimestampInSeconds(
-            combineDateAndTime(inputValues.executionPeriodStartDate, inputValues.executionPeriodStartTime),
-          ),
-          getUnixTimestampInSeconds(
-            combineDateAndTime(inputValues.executionPeriodEndDate, inputValues.executionPeriodEndTime),
-          ),
-          inputValues.executionWindow,
-          inputValues.isRevocable,
-          { token: inputValues.rewardValueToken, amount: inputValues.rewardValueAmount } as PaymentStruct,
-          { token: inputValues.gasCostValueToken, gasPrice: inputValues.gasCostValueGasPrice } as GasPaymentStruct,
-          { token: inputValues.guaranteeValueToken, gasPrice: inputValues.guaranteeValueGasPrice } as GasPaymentStruct,
-          inputValues.rewardTransfer,
-          inputValues.gasCostTransfer,
-        ],
-      })
-      console.log("CreateOrderData: ", data)
-    } catch (e) {
-      console.log("CreateOrderError: ", e)
+    console.log("CreateOrderTestArr: START")
+    const testArr = [
+      inputValues.gasAmount,
+      getUnixTimestampInSeconds(
+        combineDateAndTime(inputValues.executionPeriodStartDate, inputValues.executionPeriodStartTime),
+      ),
+      getUnixTimestampInSeconds(
+        combineDateAndTime(inputValues.executionPeriodEndDate, inputValues.executionPeriodEndTime),
+      ),
+      inputValues.executionWindow,
+      { token: inputValues.rewardValueToken, amount: inputValues.rewardValueAmount } as PaymentStruct,
+      { token: inputValues.gasCostValueToken, gasPrice: inputValues.gasCostValueGasPrice } as GasPaymentStruct,
+      { token: inputValues.guaranteeValueToken, gasPrice: inputValues.guaranteeValueGasPrice } as GasPaymentStruct,
+      inputValues.rewardTransfer,
+      inputValues.gasCostTransfer,
+    ]
+    console.log("CreateOrderTestArr: ", testArr)
+
+    //Approve both reward and GasCost * GasAmount
+    if (inputValues.rewardValueToken === inputValues.gasCostValueToken) {
+      try {
+        const data = await writeContract({
+          address: inputValues.rewardValueToken as `0x${string}`,
+          abi: MockTokenABI,
+          functionName: "approve",
+          args: ["0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", 10],
+        })
+        console.log("CreateOrderData: ", data)
+      } catch (e) {
+        console.log("CreateOrderError: ", e)
+      }
+    } else {
+      //Approve reward
+      try {
+        const data = await writeContract({
+          address: inputValues.rewardValueToken as `0x${string}`,
+          abi: MockTokenABI,
+          functionName: "approve",
+          args: ["0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", inputValues.rewardValueAmount],
+        })
+        console.log("CreateOrderData: ", data)
+      } catch (e) {
+        console.log("CreateOrderError: ", e)
+      }
     }
+
+    //Create Order
+    // try {
+    //   const data = await writeContract({
+    //     address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    //     abi: GasOrderABI,
+    //     functionName: "createOrder",
+    //     args: [
+    //       inputValues.gasAmount,
+    //       getUnixTimestampInSeconds(
+    //         combineDateAndTime(inputValues.executionPeriodStartDate, inputValues.executionPeriodStartTime),
+    //       ),
+    //       getUnixTimestampInSeconds(
+    //         combineDateAndTime(inputValues.executionPeriodEndDate, inputValues.executionPeriodEndTime),
+    //       ),
+    //       inputValues.executionWindow,
+    //       { token: inputValues.rewardValueToken, amount: inputValues.rewardValueAmount } as PaymentStruct,
+    //       { token: inputValues.gasCostValueToken, gasPrice: inputValues.gasCostValueGasPrice } as GasPaymentStruct,
+    //       { token: inputValues.guaranteeValueToken, gasPrice: inputValues.guaranteeValueGasPrice } as GasPaymentStruct,
+    //       inputValues.rewardTransfer,
+    //       inputValues.gasCostTransfer,
+    //     ],
+    //   })
+    //   console.log("CreateOrderData: ", data)
+    // } catch (e) {
+    //   console.log("CreateOrderError: ", e)
+    // }
+    console.log("CreateOrderTestArr: START")
   }
 
   const clampNumber = (value, minNum, maxNum) => {
@@ -182,17 +228,17 @@ export default function CreateOrderCard() {
       errors.gasAmount = "Must be greater than zero"
     }
 
-    if (!TIME_STRING_REGEX.test(inputValues.executionPeriodStartTime)) {
-      errors.executionPeriodStartTime = "Invalid time format"
-    }
+    // if (!TIME_STRING_REGEX.test(inputValues.executionPeriodStartTime)) {
+    //   errors.executionPeriodStartTime = "Invalid time format"
+    // }
 
-    if (!TIME_STRING_REGEX.test(inputValues.executionPeriodEndTime)) {
-      errors.executionPeriodEndTime = "Invalid time format"
-    }
+    // if (!TIME_STRING_REGEX.test(inputValues.executionPeriodEndTime)) {
+    //   errors.executionPeriodEndTime = "Invalid time format"
+    // }
 
-    if (!ETH_ADDRESS_REGEX.test(inputValues.rewardValueToken)) {
-      errors.rewardValueToken = "Incorrect address"
-    }
+    // if (!ETH_ADDRESS_REGEX.test(inputValues.rewardValueToken)) {
+    //   errors.rewardValueToken = "Incorrect address"
+    // }
     if (inputValues.rewardValueToken === "") {
       errors.rewardValueToken = "This field is required"
     }
@@ -230,10 +276,10 @@ export default function CreateOrderCard() {
     // //TODO: Validations here
     // //Setting Errors after validation
     setValidationErrors(errors)
-    // const IsEverythingValid = Object.values(errors).every((x) => x === "")
-    // if (isSubmitting && IsEverythingValid) {
-    //   //TODO: CreateOrder here
-    // }
+    const IsEverythingValid = Object.values(errors).every((x) => x === "")
+    if (isSubmitting && IsEverythingValid) {
+      createOrder()
+    }
 
     // if (isSubmitting) {
     //   //TODO: CreateOrder here

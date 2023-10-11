@@ -27,7 +27,7 @@ export default function OrderCard({
   executionWindow,
   gasCost,
   reward,
-  guarantee
+  guarantee,
 }: FilteredOrderStructOutput) {
   const colors = STATUS_COLORS
 
