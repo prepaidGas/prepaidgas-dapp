@@ -1,3 +1,5 @@
+"use client"
+
 import { readContract } from "@wagmi/core"
 import { GasOrderABI } from "helpers/abi"
 
@@ -12,7 +14,7 @@ import {
 } from "@heroicons/react/24/outline"
 import { Card, Grid, Text, Metric, Badge, Title, Icon, Button } from "@tremor/react"
 import { useEffect, useState } from "react"
-import { STATUS_COLORS } from "../themeConstants"
+import { STATUS_COLORS } from "../constants/themeConstants"
 import { useAccount } from "wagmi"
 
 export default function UserStatsCard() {
@@ -37,7 +39,7 @@ export default function UserStatsCard() {
       console.log("getTotalBalance", data)
       console.log("getTotalBalance", Number(data))
 
-      setTotalGas(Number(data))
+      return Number(data)
     } catch (e) {
       console.log("ERROR: ", e)
     }
@@ -60,7 +62,7 @@ export default function UserStatsCard() {
   }
 
   const fetchData = async () => {
-    getTotalGas()
+    setTotalGas(await getTotalGas())
 
     const pending = await getOdersCount(1)
     console.log("OrdersCount Pending: ", pending)
@@ -72,6 +74,9 @@ export default function UserStatsCard() {
     console.log("OrdersCount Inactive: ", inactive)
     const closed = await getOdersCount(5)
     console.log("OrdersCount Closed: ", closed)
+
+    const all = await getOdersCount(0)
+    console.log("OrdersCount All: ", all)
 
     setOrdersCount({ pending, accepted, active, inactive, closed })
   }
@@ -104,16 +109,16 @@ export default function UserStatsCard() {
 
         <Grid numItems={2} numItemsSm={3} numItemsLg={5} className="mt-4 gap-2 flex flex-wrap">
           <Badge icon={ArrowPathIcon} color={STATUS_COLORS[1]}>
-            Pending {ordersCount.pending}
+            Pending: {ordersCount.pending}
           </Badge>
           <Badge icon={CheckCircleIcon} color={STATUS_COLORS[2]}>
-            Accepted {ordersCount.accepted}
+            Accepted: {ordersCount.accepted}
           </Badge>
           <Badge icon={PlayIcon} color={STATUS_COLORS[3]}>
-            Active {ordersCount.active}
+            Active: {ordersCount.active}
           </Badge>
           <Badge icon={ExclamationTriangleIcon} color={STATUS_COLORS[4]}>
-            Inactive {ordersCount.inactive}
+            Inactive: {ordersCount.inactive}
           </Badge>
           <Badge icon={XCircleIcon} color={STATUS_COLORS[5]}>
             Closed: {ordersCount.closed}

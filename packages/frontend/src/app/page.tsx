@@ -10,6 +10,8 @@ import UserAgreement from "../components/UserAgreement"
 
 import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
+import { WalletIcon } from "@heroicons/react/24/outline"
+import { Icon, Title } from "@tremor/react"
 
 export default function Home() {
   const [showDialogWindow, setShowDialogWindow] = useState(true)
@@ -29,7 +31,12 @@ export default function Home() {
         <DialogWindow
           isClosable={false}
           withoutDescription={true}
-          title="Wallet Connection"
+          title={
+            <div className="flex flex-row items-center">
+              <Icon color="orange" variant="outlined" size="lg" icon={WalletIcon}></Icon>
+              <Title className="ml-4">Wallet Connection</Title>
+            </div>
+          }
           description="Please connect your wallet"
           actionButtons={[
             <UserAgreement>

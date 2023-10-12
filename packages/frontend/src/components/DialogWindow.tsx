@@ -10,7 +10,7 @@ interface DialogWindowProps {
   title?: ReactNode | string
   description?: ReactNode | string
   actionButtons?: null | ReactNode | ReactNode[]
-  onClose: () => void
+  onClose?: () => void
 }
 
 export default function DialogWindow({
@@ -24,14 +24,13 @@ export default function DialogWindow({
   return (
     <div className="fixed left-0 top-0 w-full h-full bg-black/80 z-50 flex justify-center items-center p-10">
       <div className="w-full h-full flex flex-col justify-center items-center md:w-auto md:h-auto ">
-        <Card decoration="top" decorationColor="orange">
+        <Card className="pt-10 pr-10" decoration="top" decorationColor="orange">
           {isClosable ? (
             <Icon onClick={onClose} className="absolute right-1 top-1" size="lg" icon={XCircleIcon}></Icon>
           ) : null}
-          <div className="flex flex-row items-center">
-            <Icon color="orange" variant="outlined" size="lg" icon={WalletIcon}></Icon>
-            {typeof title === "object" ? title : <Title className="ml-4">{title}</Title>}
-          </div>
+
+          {typeof title === "object" ? title : <Title>{title}</Title>}
+
           <Divider />
           {withoutDescription ? null : typeof description === "object" ? (
             description

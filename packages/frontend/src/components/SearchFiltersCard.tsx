@@ -10,6 +10,8 @@ import {
 import { Card, TextInput, Select, SelectItem, Button } from "@tremor/react"
 import { useEffect, useState } from "react"
 
+import { ETH_ADDRESS_REGEX } from "../constants/regexConstants"
+
 //@todo move interfaces
 export interface FilterOptions {
   manager: string
@@ -19,7 +21,6 @@ export interface FilterOptions {
 
 export default function SearchFiltersCard({ setFilterState }: any) {
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
-  const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/g
 
   const initialState: FilterOptions = {
     manager: "",
@@ -40,7 +41,7 @@ export default function SearchFiltersCard({ setFilterState }: any) {
   const validateSearchForm = (isSubmitting?: boolean) => {
     const errors = { ...validationErrors }
     const noSpacesManager = inputValues.manager.replace(/\s/g, "")
-    if (ethAddressRegex.test(noSpacesManager) || noSpacesManager === "") {
+    if (ETH_ADDRESS_REGEX.test(noSpacesManager) || noSpacesManager === "") {
       errors.manager = ""
     } else {
       errors.manager = "Incorrect address"

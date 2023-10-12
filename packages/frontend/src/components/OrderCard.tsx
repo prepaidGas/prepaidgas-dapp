@@ -2,7 +2,7 @@ import format from "date-fns/format"
 
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 
-import { STATUS_COLORS } from "../themeConstants"
+import { STATUS_COLORS } from "../constants/themeConstants"
 
 import { Badge, Card, Text, Metric, Flex, ProgressBar, Icon, Button } from "@tremor/react"
 
@@ -27,7 +27,7 @@ export default function OrderCard({
   executionWindow,
   gasCost,
   reward,
-  guarantee
+  guarantee,
 }: FilteredOrderStructOutput) {
   const colors = STATUS_COLORS
 
@@ -51,7 +51,6 @@ export default function OrderCard({
   /* @dev Status bage */
   /* @todo Add explanation to all the statuses with a `tooltip attr` */
   const renderBadge = () => {
-    console.log("KEKLOL", localStorage.getItem("KekLol"))
     switch (Number(status)) {
       case 1:
         return (
@@ -105,7 +104,6 @@ export default function OrderCard({
 
   const removeFromFavorites = () => {
     let favOrders: any = localStorage.getItem("FAVORITE_ORDERS")
-    console.log("KEKLOL: ", typeof favOrders)
     if (favOrders !== null) {
       favOrders = JSON.parse(favOrders)
       const index = favOrders.indexOf(id.toString())
@@ -133,9 +131,10 @@ export default function OrderCard({
 
       <Text>Manager: {manager}</Text>
       {/* @dev Order executionPeriodStart and executionPeriodDeadline */}
+      {/*"yyyy.mm.dd hh:ss:mm"*/}
       <Text>
-        Execution timeframe: {format(Number(executionPeriodStart), "yyyy.mm.dd hh:ss:mm")} -
-        {format(Number(executionPeriodDeadline), "yyyy.mm.dd hh:ss:mm")}
+        Execution timeframe: {format(new Date(Number(executionPeriodStart) * 1000), "MMM d y, HH:mm:ss")} -{" "}
+        {format(new Date(Number(executionPeriodDeadline) * 1000), "MMM d y, HH:mm:ss")}
       </Text>
       {/* @dev Order executionWindow */}
       <Text>Execution window: {executionWindow.toString()}</Text>
