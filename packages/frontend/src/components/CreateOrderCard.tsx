@@ -1,11 +1,10 @@
 "use client"
 
 import format from "date-fns/format"
-import { readContract, writeContract } from "@wagmi/core"
+import { writeContract, waitForTransaction } from "@wagmi/core"
 import { MockTokenABI, GasOrderABI } from "helpers/abi"
 
 import { parse, getHours, getMinutes, getSeconds } from "date-fns"
-import { DatePickerValue, Flex } from "@tremor/react"
 import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
 
 import { CalendarDaysIcon, CheckIcon, ClockIcon, FireIcon, NoSymbolIcon } from "@heroicons/react/24/outline"
@@ -22,9 +21,12 @@ import {
   Select,
   SelectItem,
   Button,
+  DatePickerValue,
 } from "@tremor/react"
-import { useEffect, useState } from "react"
+import { TailSpin } from "react-loader-spinner"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX } from "../constants/regexConstants"
+import { SPINNER_COLOR } from "../constants/themeConstants"
 
 interface CreateOrderState {
   gasAmount: number
@@ -44,9 +46,16 @@ interface CreateOrderState {
   gasCostTransfer: number
 }
 
-export default function CreateOrderCard() {
+export default function CreateOrderCard({
+  setShowDialogWindow,
+  setTransactionDetails,
+}: {
+  setShowDialogWindow: Dispatch<SetStateAction<boolean>>
+  setTransactionDetails: Dispatch<SetStateAction<{}>>
+}) {
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
   const [isValidating, setIsValidating] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const initialValidationErrors = {
     gasAmount: "",
@@ -105,22 +114,41 @@ export default function CreateOrderCard() {
     return Math.floor(date.getTime() / 1000)
   }
 
+  // const initialState: CreateOrderState = {
+  //   gasAmount: 0,
+  //   executionPeriodStartDate: getTomorrowStartDate(),
+  //   executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
+  //   executionPeriodEndDate: getTomorrowEndDate(),
+  //   executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
+  //   isRevocable: true,
+  //   rewardValueToken: "",
+  //   rewardValueAmount: 0,
+  //   gasCostValueToken: "",
+  //   gasCostValueGasPrice: 0,
+  //   guaranteeValueToken: "",
+  //   guaranteeValueGasPrice: 0,
+  //   executionWindow: 1000,
+  //   rewardTransfer: 0,
+  //   gasCostTransfer: 0,
+  // }
+
+  //TODO: this initial state is for tests only, remove in production
   const initialState: CreateOrderState = {
-    gasAmount: 0,
+    gasAmount: 10,
     executionPeriodStartDate: getTomorrowStartDate(),
     executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
     executionPeriodEndDate: getTomorrowEndDate(),
     executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
     isRevocable: true,
-    rewardValueToken: "",
-    rewardValueAmount: 0,
-    gasCostValueToken: "",
-    gasCostValueGasPrice: 0,
-    guaranteeValueToken: "",
-    guaranteeValueGasPrice: 0,
+    rewardValueToken: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    rewardValueAmount: 10,
+    gasCostValueToken: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    gasCostValueGasPrice: 10,
+    guaranteeValueToken: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    guaranteeValueGasPrice: 10,
     executionWindow: 1000,
-    rewardTransfer: 0,
-    gasCostTransfer: 0,
+    rewardTransfer: 10,
+    gasCostTransfer: 100,
   }
 
   //Input values
@@ -145,6 +173,9 @@ export default function CreateOrderCard() {
     ]
     console.log("CreateOrderTestArr: ", testArr)
 
+    setShowDialogWindow(true)
+    setIsLoading(true)
+
     //Approve both reward and GasCost * GasAmount
     if (inputValues.rewardValueToken === inputValues.gasCostValueToken) {
       try {
@@ -152,9 +183,14 @@ export default function CreateOrderCard() {
           address: inputValues.rewardValueToken as `0x${string}`,
           abi: MockTokenABI,
           functionName: "approve",
-          args: ["0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", 10],
+          args: [
+            "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+            inputValues.gasCostValueGasPrice * inputValues.gasAmount + inputValues.rewardValueAmount,
+          ],
         })
         console.log("CreateOrderData: ", data)
+        const txData = await waitForTransaction({ hash: data.hash })
+        console.log("CreateOrderTXData: ", txData)
       } catch (e) {
         console.log("CreateOrderError: ", e)
       }
@@ -171,35 +207,56 @@ export default function CreateOrderCard() {
       } catch (e) {
         console.log("CreateOrderError: ", e)
       }
+      //Approve gasCost * gasAmount
+      try {
+        const data = await writeContract({
+          address: inputValues.gasCostValueToken as `0x${string}`,
+          abi: MockTokenABI,
+          functionName: "approve",
+          args: [
+            "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+            inputValues.gasCostValueGasPrice * inputValues.gasAmount,
+          ],
+        })
+        console.log("CreateOrderData: ", data)
+      } catch (e) {
+        console.log("CreateOrderError: ", e)
+      }
     }
 
-    //Create Order
-    // try {
-    //   const data = await writeContract({
-    //     address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    //     abi: GasOrderABI,
-    //     functionName: "createOrder",
-    //     args: [
-    //       inputValues.gasAmount,
-    //       getUnixTimestampInSeconds(
-    //         combineDateAndTime(inputValues.executionPeriodStartDate, inputValues.executionPeriodStartTime),
-    //       ),
-    //       getUnixTimestampInSeconds(
-    //         combineDateAndTime(inputValues.executionPeriodEndDate, inputValues.executionPeriodEndTime),
-    //       ),
-    //       inputValues.executionWindow,
-    //       { token: inputValues.rewardValueToken, amount: inputValues.rewardValueAmount } as PaymentStruct,
-    //       { token: inputValues.gasCostValueToken, gasPrice: inputValues.gasCostValueGasPrice } as GasPaymentStruct,
-    //       { token: inputValues.guaranteeValueToken, gasPrice: inputValues.guaranteeValueGasPrice } as GasPaymentStruct,
-    //       inputValues.rewardTransfer,
-    //       inputValues.gasCostTransfer,
-    //     ],
-    //   })
-    //   console.log("CreateOrderData: ", data)
-    // } catch (e) {
-    //   console.log("CreateOrderError: ", e)
-    // }
-    console.log("CreateOrderTestArr: START")
+    // Create Order
+    try {
+      const data = await writeContract({
+        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        abi: GasOrderABI,
+        functionName: "createOrder",
+        args: [
+          inputValues.gasAmount,
+          getUnixTimestampInSeconds(
+            combineDateAndTime(inputValues.executionPeriodStartDate, inputValues.executionPeriodStartTime),
+          ),
+          getUnixTimestampInSeconds(
+            combineDateAndTime(inputValues.executionPeriodEndDate, inputValues.executionPeriodEndTime),
+          ),
+          inputValues.executionWindow,
+          { token: inputValues.rewardValueToken, amount: inputValues.rewardValueAmount } as PaymentStruct,
+          { token: inputValues.gasCostValueToken, gasPrice: inputValues.gasCostValueGasPrice } as GasPaymentStruct,
+          { token: inputValues.guaranteeValueToken, gasPrice: inputValues.guaranteeValueGasPrice } as GasPaymentStruct,
+          inputValues.rewardTransfer,
+          inputValues.gasCostTransfer,
+        ],
+      })
+      console.log("CreateOrderData: ", data)
+      const txData = await waitForTransaction({ hash: data.hash })
+      console.log("CreateOrderTXData: ", txData)
+      setTransactionDetails(txData)
+    } catch (e) {
+      console.log(e)
+      setTransactionDetails({ error: e })
+      console.log("CreateOrderError: ", e)
+    }
+    setIsLoading(false)
+    console.log("CreateOrderTestArr: END")
   }
 
   const clampNumber = (value, minNum, maxNum) => {
@@ -524,7 +581,20 @@ export default function CreateOrderCard() {
         </AccordionBody>
       </Accordion>
       <div className="flex flex-row justify-end mt-4">
-        <Button onClick={OnFormSubmit}>Create</Button>
+        <Button disabled={isLoading} onClick={OnFormSubmit}>
+          {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+          <TailSpin
+            height={20}
+            width={20}
+            color={SPINNER_COLOR}
+            ariaLabel="tail-spin-loading"
+            radius="0"
+            wrapperStyle={{}}
+            wrapperClass=""
+            visible={isLoading}
+          />
+          {isLoading ? "" : "Create"}
+        </Button>
       </div>
     </Card>
   )
