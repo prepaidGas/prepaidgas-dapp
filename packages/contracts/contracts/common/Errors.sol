@@ -4,8 +4,8 @@ pragma solidity 0.8.19;
 import {OrderStatus} from "./../interfaces/IGasOrder.sol";
 
 error Unauthorized(address received, address expected);
-error OverlowValue(uint256 value, uint256 min);
-error OverhighValue(uint256 value, uint256 max);
+error UnderflowValue(uint256 value, uint256 min);
+error OverflowValue(uint256 value, uint256 max);
 error BalanceExhausted(uint256 requested, uint256 allowed);
 
 error DeadlineNotMet(uint256 timestamp, uint256 deadline);

@@ -20,7 +20,7 @@ contract FeeProcessor is Ownable2Step, Distributor {
   event UpdateProtocolFee(Fee fee, uint256 old, uint256 current);
 
   function setFee(Fee id, uint256 value) public onlyOwner {
-    if (value > Const.MAX_FEE) revert Error.OverhighValue(value, Const.MAX_FEE);
+    if (value > Const.MAX_FEE) revert Error.OverflowValue(value, Const.MAX_FEE);
 
     uint256 old = _fee[id];
     _fee[id] = value;
