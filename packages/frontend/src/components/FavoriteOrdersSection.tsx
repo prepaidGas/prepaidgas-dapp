@@ -8,7 +8,11 @@ import { GasOrderABI } from "helpers/abi"
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 import { useAccount } from "wagmi"
 
-export default function FavoriteOrdersSection() {
+interface FavoriteOrdersSectionProps {
+  onFavorited(favorited: boolean): void
+}
+
+export default function FavoriteOrdersSection({ onFavorited }: FavoriteOrdersSectionProps) {
   const [favoriteOrderIds, setFavoriteOrdersids] = useState<null | string[]>(
     JSON.parse(localStorage.getItem("FAVORITE_ORDERS")),
   )
@@ -39,5 +43,5 @@ export default function FavoriteOrdersSection() {
     console.log("OnChange: ", favoriteOrders)
   }, [favoriteOrders])
 
-  return favoriteOrders?.map((item: any) => <OrderCard {...item} key={`order-${item.id}`} />)
+  return favoriteOrders?.map((item: any) => <OrderCard {...item} onFavorited={onFavorited} key={`order-${item.id}`} />)
 }

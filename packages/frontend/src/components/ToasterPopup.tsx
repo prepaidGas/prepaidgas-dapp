@@ -17,7 +17,7 @@ export default function ToasterPopup({
 }) {
   return (
     <Callout
-      color="blue"
+      color={color}
       className="shadow-2xl fixed z-10 bottom-0 left-0 w-full md:bottom-6 md:left-6 md:w-auto"
       title={msgTitle}
       icon={ExclamationCircleIcon}

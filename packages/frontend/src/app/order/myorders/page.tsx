@@ -20,11 +20,11 @@ export default function MyOrdersOrder() {
       setPopupProps({
         msgTitle: "Order was added to favorites",
         msgBody: "",
-        color: "blue",
+        color: "green",
       })
     } else {
       setPopupProps({
-        msgTitle: "Order was removed from to favorites",
+        msgTitle: "Order was removed from favorites",
         msgBody: "",
         color: "amber",
       })
@@ -45,7 +45,7 @@ export default function MyOrdersOrder() {
       <UserStatsCard />
 
       <Text className="mt-6">Favorite Orders</Text>
-      <FavoriteOrdersSection />
+      <FavoriteOrdersSection onFavorited={onOrderCardAction} />
 
       {showPopup ? (
         <ToasterPopup

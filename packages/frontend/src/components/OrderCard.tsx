@@ -16,6 +16,10 @@ import {
 } from "@heroicons/react/24/outline"
 import { useState } from "react"
 
+interface OrderCard extends FilteredOrderStructOutput {
+  onFavorited(favorited: boolean): void
+}
+
 // @todo display order data
 export default function OrderCard({
   id,
@@ -28,7 +32,8 @@ export default function OrderCard({
   gasCost,
   reward,
   guarantee,
-}: FilteredOrderStructOutput) {
+  onFavorited = () => {},
+}: OrderCard) {
   const colors = STATUS_COLORS
 
   const checkIfIsFavorite = () => {
@@ -120,9 +125,24 @@ export default function OrderCard({
       <Flex>
         {renderBadge()}
         {isFavorite ? (
-          <Button onClick={removeFromFavorites} color="amber" icon={StarIcon}></Button>
+          <Button
+            onClick={() => {
+              removeFromFavorites()
+              onFavorited(false)
+            }}
+            color="amber"
+            icon={StarIcon}
+          ></Button>
         ) : (
-          <Button onClick={addToFavorites} variant="secondary" color="amber" icon={StarIcon}></Button>
+          <Button
+            onClick={() => {
+              addToFavorites()
+              onFavorited(true)
+            }}
+            variant="secondary"
+            color="amber"
+            icon={StarIcon}
+          ></Button>
         )}
       </Flex>
 
