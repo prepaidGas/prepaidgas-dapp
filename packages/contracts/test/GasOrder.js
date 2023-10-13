@@ -85,7 +85,7 @@ describe("GasOrder", function () {
 
       const tokensBalanceAfter = await TokenContract.balanceOf(admin.address)
 
-      await GasOrderContract.withdrawDeposit(0)
+      await GasOrderContract.revokeOrder(0)
 
       const tokensBalanceAfterRepay = await TokenContract.balanceOf(admin.address)
 

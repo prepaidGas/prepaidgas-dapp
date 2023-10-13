@@ -203,7 +203,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   }
 
   /**
-   * @dev Revokes an order if it is pending.
+   * @dev Revokes an order if it is pending or untaken.
    *
    * @param id The ID of the order.
    *
@@ -215,26 +215,11 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     if (msg.sender != currentOrder.manager) revert Error.Unauthorized(msg.sender, currentOrder.manager);
 
     OrderStatus currentStatus = status(id);
-    if (currentStatus != OrderStatus.Pending) revert Error.WrongOrderStatus(currentStatus, OrderStatus.Pending);
+    // @notice it throws an error which states that `Untaken` status is an expectable,
+    // but it also expects a `Pending` status
+    if (currentStatus != OrderStatus.Pending && currentStatus != OrderStatus.Untaken)
+      revert Error.WrongOrderStatus(currentStatus, OrderStatus.Untaken);
 
-    _returnDepositToManager(id);
-  }
-
-  /**
-   * @dev Return deposited funds to order the manager if order is `Untaken`.
-   *
-   * @param id The ID of the order.
-   *
-   */
-  function withdrawDeposit(uint256 id) external {
-    OrderStatus currentStatus = status(id);
-    if (currentStatus != OrderStatus.Untaken) revert Error.WrongOrderStatus(currentStatus, OrderStatus.Untaken);
-
-    _returnDepositToManager(id);
-  }
-
-  // @dev returns funds to the  order manager
-  function _returnDepositToManager(uint256 id) private {
     executor[id] = address(1);
 
     IERC20(reward[id].token).safeTransfer(order[id].manager, reward[id].amount);
