@@ -2,6 +2,7 @@
 
 import { Card, Title, Text, Grid } from "@tremor/react"
 import UserStatsCard from "../../../components/UserStatsCard"
+import FavoriteOrdersSection from "../../../components/FavoriteOrdersSection"
 
 export default function MyOrdersOrder() {
   return (
@@ -12,9 +13,8 @@ export default function MyOrdersOrder() {
 
       <UserStatsCard />
 
-      <Card className="mt-6">
-        <div className="h-96" />
-      </Card>
+      <Text className="mt-6">Favorite Orders</Text>
+      <FavoriteOrdersSection />
     </>
   )
 }
