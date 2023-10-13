@@ -1,22 +1,30 @@
 "use client"
 
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
-import { Callout, Button } from "@tremor/react"
+import { Callout, Button, Color } from "@tremor/react"
 import { Dispatch } from "react"
 
-export default function ToasterPopup({ msg, onClose }: { msg: string; onClose: () => void }) {
+export default function ToasterPopup({
+  msgTitle,
+  msgBody,
+  onClose,
+  color,
+}: {
+  msgTitle: string
+  msgBody: string
+  color: Color
+  onClose: () => void
+}) {
   return (
-    // <div className="w-screen top-0 left-0 fixed flex justify-center z-[60]">
-    // <div className="fixed z-10 p-4 bottom-0 left-0 w-full lg:bottom-6 lg:left-6 lg:w-auto ">
     <Callout
       color="blue"
       className="shadow-2xl fixed z-10 bottom-0 left-0 w-full md:bottom-6 md:left-6 md:w-auto"
-      title={msg}
+      title={msgTitle}
       icon={ExclamationCircleIcon}
     >
       <div className="flex flex-col break-normal">
-        {msg}
-        <Button onClick={onClose} color="blue" className="mt-4 self-end">
+        {msgBody}
+        <Button onClick={onClose} color={color} className="mt-4 self-end">
           OK
         </Button>
       </div>
