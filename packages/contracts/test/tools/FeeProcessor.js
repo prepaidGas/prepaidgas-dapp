@@ -47,12 +47,12 @@ describe("FeeProcessor", function () {
       expect(await FeeProcessorContract.fee(2)).to.equal(200)
     })
 
-    it("update overhigh", async function () {
+    it("update overflow", async function () {
       const { accounts, admin, FeeProcessorContract } = await loadFixture(initialSetup)
 
       await expect(FeeProcessorContract.setFee(0, 25000)).to.be.revertedWithCustomError(
         FeeProcessorContract,
-        "OverhighValue",
+        "OverflowValue",
       )
     })
 

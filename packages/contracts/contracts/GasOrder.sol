@@ -57,12 +57,13 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   }
 
   modifier possibleExecutionWindow(uint256 window) {
-    if (window < Const.MIN_EXEC_WINDOW) revert Error.OverlowValue(window, Const.MIN_EXEC_WINDOW);
+    if (window < Const.MIN_EXEC_WINDOW) revert Error.UnderflowValue(window, Const.MIN_EXEC_WINDOW);
     _;
   }
 
   modifier specificStatus(uint256 id, OrderStatus expected) {
     OrderStatus real = status(id);
+
     if (real != expected) revert Error.WrongOrderStatus(real, expected);
     _;
   }
@@ -198,32 +199,32 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
    * This function retrieves guarantees from an order and distributes them to the executor after order is finally fulfilled.
    */
   function retrieveGuarantee(uint256 id) external specificStatus(id, OrderStatus.Inactive) {
-    _guaranteeAndRewardDelivered(id); // @todo it might be already applied
     _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * totalSupply(id));
   }
 
   /**
-   * @dev Revokes an order.
+   * @dev Revokes an order if it is pending or untaken.
    *
    * @param id The ID of the order.
    *
-   * This function allows the manager to revoke an order if it is revokable
-   * or if it is not accepted by any Executor yet. It returns guarantees and rewards to the order manager.
+   * This function allows the manager to revoke an order if it is not accepted by any Executor.
+   * It returns rewards to the order manager.
    */
   function revokeOrder(uint256 id) external {
     Order memory currentOrder = order[id];
     if (msg.sender != currentOrder.manager) revert Error.Unauthorized(msg.sender, currentOrder.manager);
 
     OrderStatus currentStatus = status(id);
-    if (
-      currentStatus == OrderStatus.Pending ||
-      (currentStatus == OrderStatus.Accepted || currentStatus == OrderStatus.Active)
-    ) {
-      _guaranteeAndRewardDelivered(id);
-      IERC20(reward[id].token).safeTransfer(order[id].manager, reward[id].amount);
-      /// @notice gasCost also should be withdrawn back to the manager
-      IERC20(gasCost[id].token).safeTransfer(order[id].manager, gasCost[id].gasPrice * order[id].maxGas);
-    }
+    // @notice it throws an error which states that `Untaken` status is an expectable,
+    // but it also expects a `Pending` status
+    if (currentStatus != OrderStatus.Pending && currentStatus != OrderStatus.Untaken)
+      revert Error.WrongOrderStatus(currentStatus, OrderStatus.Untaken);
+
+    executor[id] = address(1);
+
+    IERC20(reward[id].token).safeTransfer(order[id].manager, reward[id].amount);
+    /// @notice gasCost also should be withdrawn back to the manager
+    IERC20(gasCost[id].token).safeTransfer(order[id].manager, gasCost[id].gasPrice * order[id].maxGas);
   }
 
   /**
@@ -279,28 +280,13 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
    */
   function status(uint256 id) public view returns (OrderStatus) {
     if (order[id].manager == address(0)) return OrderStatus.None;
-    if (executor[id] == address(1)) return OrderStatus.Closed;
-
-    /// @notice if the order is published and not accepted by any Executor it is still in `Pending` status
-    /// until the `block.timestamp` excceds the `Order.executionPeriodDeadline`
-    if (executor[id] == address(0) && order[id].executionPeriodDeadline >= block.timestamp) {
-      return OrderStatus.Pending;
-    }
-
-    if (executor[id] != address(0) && totalSupply(id) == 0) return OrderStatus.Inactive;
-
-    if (order[id].executionPeriodStart > block.timestamp) return OrderStatus.Accepted;
-    return OrderStatus.Active;
-  }
-
-  /**
-   * @dev Marks an order as completed by setting the executor to address(1).
-   *
-   * @param id The ID of the order to be marked as completed.
-   *
-   */
-  function _guaranteeAndRewardDelivered(uint256 id) private {
-    executor[id] = address(1);
+    else if (executor[id] != address(0)) {
+      if (totalSupply(id) == 0) return OrderStatus.Closed;
+      else if (order[id].executionPeriodDeadline <= block.timestamp) return OrderStatus.Inactive;
+      else if (order[id].executionPeriodStart <= block.timestamp) return OrderStatus.Active;
+      else return OrderStatus.Accepted;
+    } else if (order[id].executionPeriodStart < block.timestamp) return OrderStatus.Untaken;
+    else return OrderStatus.Pending;
   }
 
   /**
@@ -313,7 +299,9 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   function transferOrderManagement(uint256 _orderId, address _newManager) external {
     address oldManager = order[_orderId].manager;
     if (msg.sender != oldManager) revert Error.Unauthorized(msg.sender, oldManager);
-    if (oldManager == _newManager) revert Error.IncorrectAddressArgument(_newManager);
+    // @dev disallow setting manager address to zero, zero manager address is used to detect that the order is not created
+    // if it is needed to set empty manager, it is recomended to set another dead address
+    if (oldManager == _newManager || _newManager == address(0)) revert Error.IncorrectAddressArgument(_newManager);
 
     order[_orderId].manager = _newManager;
 
