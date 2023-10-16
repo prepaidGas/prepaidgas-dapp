@@ -1,32 +1,19 @@
 import { useEffect, useState } from "react"
-import { z } from "zod"
+import { ZodIssue, z } from "zod"
 
-import {
-  ArrowPathIcon,
-  CheckCircleIcon,
-  PlayIcon,
-  ExclamationTriangleIcon,
-  XCircleIcon,
-  FunnelIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline"
+import { FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import { Card, TextInput, Select, SelectItem, Button } from "@tremor/react"
 
-import { ETH_ADDRESS_REGEX } from "../constants/regexConstants"
+import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX } from "../constants/regexConstants"
 import { ICON_BY_STATUS } from "../constants/themeConstants"
 
 const schema = z.object({
-  manager: z.string().regex(ETH_ADDRESS_REGEX),
-  status: z.number().lte(0).gte(5),
+  manager: z.string().regex(ETH_ADDRESS_OR_EMPTY_STRING_REGEX, { message: "Incorrect address" }),
+  status: z.number().lte(5).gte(0),
   numberOfEntries: z.number(),
 })
 
-//@todo move interfaces
-export interface FilterOptions {
-  manager: string
-  status: number
-  numberOfEntries: number
-}
+export type FilterOptions = z.infer<typeof schema>
 
 export default function SearchFiltersCard({ setFilterState }: any) {
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
@@ -39,32 +26,30 @@ export default function SearchFiltersCard({ setFilterState }: any) {
 
   //Input values
   const [inputValues, setInputValues] = useState({ ...initialState })
+  const [validationErrors, setValidationErrors] = useState<null | { [key: string]: string[] }>(null)
 
-  //Validation state
-  const [validationErrors, setValidationErrors] = useState({
-    manager: "",
-    status: "",
-    numberOfEntries: "",
-  })
+  const validateSearchForm = () => {
+    setValidationErrors(null)
 
-  const validateSearchForm = (isSubmitting?: boolean) => {
-    const errors = { ...validationErrors }
-    const noSpacesManager = inputValues.manager.replace(/\s/g, "")
-    if (ETH_ADDRESS_REGEX.test(noSpacesManager) || noSpacesManager === "") {
-      errors.manager = ""
-    } else {
-      errors.manager = "Incorrect address"
+    const result = schema.safeParse(inputValues)
+    if (result.success === false) {
+      setValidationErrors(result.error.flatten().fieldErrors)
+      return false
     }
+    return true
+  }
 
-    setValidationErrors(errors)
-    const IsEverythingValid = Object.values(errors).every((x) => x === "")
-
-    if (isSubmitting && IsEverythingValid) {
+  const handleSubmit = () => {
+    if (validateSearchForm()) {
+      // Process the form data
+      console.log("Form submitted successfully:", inputValues)
       if (inputValues.manager === "") {
         setFilterState({ ...inputValues, manager: "0x0000000000000000000000000000000000000000" })
       } else {
         setFilterState({ ...inputValues })
       }
+    } else {
+      console.log("Form has errors. Please fix them before submitting.")
     }
   }
 
@@ -77,7 +62,7 @@ export default function SearchFiltersCard({ setFilterState }: any) {
   }, [inputValues])
 
   useEffect(() => {
-    validateSearchForm(true)
+    validateSearchForm()
   }, [])
 
   return (
@@ -88,8 +73,8 @@ export default function SearchFiltersCard({ setFilterState }: any) {
         <TextInput
           onChange={(e) => setInputValues({ ...inputValues, manager: e.target.value })}
           value={inputValues.manager}
-          error={!!validationErrors.manager}
-          errorMessage={validationErrors.manager}
+          error={!!validationErrors?.manager}
+          errorMessage={validationErrors?.manager[0]}
           placeholder="0x1dA..."
           spellCheck={false}
         />
@@ -103,19 +88,19 @@ export default function SearchFiltersCard({ setFilterState }: any) {
           // icon={ICON_BY_STATUS[inputValues.status]}
         >
           <SelectItem value="0">Any</SelectItem>
-          <SelectItem icon={ArrowPathIcon} value="1">
+          <SelectItem icon={ICON_BY_STATUS[1]} value="1">
             Pending
           </SelectItem>
-          <SelectItem icon={CheckCircleIcon} value="2">
+          <SelectItem icon={ICON_BY_STATUS[2]} value="2">
             Accepted
           </SelectItem>
-          <SelectItem icon={PlayIcon} value="3">
+          <SelectItem icon={ICON_BY_STATUS[3]} value="3">
             Active
           </SelectItem>
-          <SelectItem icon={ExclamationTriangleIcon} value="4">
+          <SelectItem icon={ICON_BY_STATUS[4]} value="4">
             Inactive
           </SelectItem>
-          <SelectItem icon={XCircleIcon} value="5">
+          <SelectItem icon={ICON_BY_STATUS[5]} value="5">
             Closed
           </SelectItem>
         </Select>
@@ -139,7 +124,7 @@ export default function SearchFiltersCard({ setFilterState }: any) {
       <div>
         &nbsp;
         <div className="flex flex-col lg:flex-row lg:my-auto gap-2">
-          <Button className="h-[38px] m-0" onClick={() => validateSearchForm(true)} icon={FunnelIcon}>
+          <Button className="h-[38px] m-0" onClick={handleSubmit} icon={FunnelIcon}>
             Apply
           </Button>
           <Button
