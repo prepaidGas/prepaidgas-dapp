@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react"
+import { z } from "zod"
+
 import {
   ArrowPathIcon,
   CheckCircleIcon,
@@ -8,15 +11,21 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline"
 import { Card, TextInput, Select, SelectItem, Button } from "@tremor/react"
-import { useEffect, useState } from "react"
 
 import { ETH_ADDRESS_REGEX } from "../constants/regexConstants"
+import { ICON_BY_STATUS } from "../constants/themeConstants"
+
+const schema = z.object({
+  manager: z.string().regex(ETH_ADDRESS_REGEX),
+  status: z.number().lte(0).gte(5),
+  numberOfEntries: z.number(),
+})
 
 //@todo move interfaces
 export interface FilterOptions {
   manager: string
-  status: 0 | 1 | 2 | 3 | 4 | 5
-  numberOfEntries: 10 | 20 | 30 | 50 | 100
+  status: number
+  numberOfEntries: number
 }
 
 export default function SearchFiltersCard({ setFilterState }: any) {
@@ -90,7 +99,8 @@ export default function SearchFiltersCard({ setFilterState }: any) {
         <Select
           className="min-w-[8rem]"
           value={inputValues.status.toString()}
-          onValueChange={(value) => setInputValues({ ...inputValues, status: Number(value) as 0 | 1 | 2 | 3 | 4 | 5 })}
+          onValueChange={(value) => setInputValues({ ...inputValues, status: Number(value) })}
+          // icon={ICON_BY_STATUS[inputValues.status]}
         >
           <SelectItem value="0">Any</SelectItem>
           <SelectItem icon={ArrowPathIcon} value="1">

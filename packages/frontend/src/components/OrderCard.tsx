@@ -2,7 +2,7 @@ import format from "date-fns/format"
 
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 
-import { STATUS_COLORS } from "../constants/themeConstants"
+import { COLOR_BY_STATUS } from "../constants/themeConstants"
 
 import { Badge, Card, Text, Metric, Flex, ProgressBar, Icon, Button } from "@tremor/react"
 
@@ -15,7 +15,7 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline"
 import { useState } from "react"
-import { renderBadge } from "../utils/utils"
+import StatusBadge from "./StatusBadge"
 
 interface OrderCard extends FilteredOrderStructOutput {
   onFavorited(favorited: boolean): void
@@ -81,9 +81,9 @@ export default function OrderCard({
   }
 
   return (
-    <Card className="mt-3" decoration="top" decorationColor={STATUS_COLORS[Number(status)]}>
+    <Card className="mt-3" decoration="top" decorationColor={COLOR_BY_STATUS[Number(status)]}>
       <Flex>
-        {renderBadge(status)}
+        <StatusBadge status={Number(status)} />
         {isFavorite ? (
           <Button
             onClick={() => {
