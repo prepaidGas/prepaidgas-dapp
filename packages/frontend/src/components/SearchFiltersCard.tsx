@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { ZodIssue, z } from "zod"
 
 import { FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline"
@@ -15,7 +15,7 @@ const schema = z.object({
 
 export type FilterOptions = z.infer<typeof schema>
 
-export default function SearchFiltersCard({ setFilterState }: any) {
+export default function SearchFiltersCard({ setFilterState }: { setFilterState: Dispatch<SetStateAction<{}>> }) {
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
 
   const initialState: FilterOptions = {

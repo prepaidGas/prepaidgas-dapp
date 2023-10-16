@@ -27,24 +27,27 @@ import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX } from "../constants/regexConstants"
 import { SPINNER_COLOR } from "../constants/themeConstants"
+import { z } from "zod"
 
-interface CreateOrderState {
-  gasAmount: number
-  executionPeriodStartDate: DatePickerValue
-  executionPeriodStartTime: string
-  executionPeriodEndDate: DatePickerValue
-  executionPeriodEndTime: string
-  isRevocable: boolean
-  rewardValueToken: string
-  rewardValueAmount: number
-  gasCostValueToken: string
-  gasCostValueGasPrice: number
-  guaranteeValueToken: string
-  guaranteeValueGasPrice: number
-  executionWindow: number
-  rewardTransfer: number
-  gasCostTransfer: number
-}
+const schema = z.object({
+  gasAmount: z.number().int().gt(0),
+  executionPeriodStartDate: z.date(),
+  executionPeriodStartTime: z.string(),
+  executionPeriodEndDate: z.date(),
+  executionPeriodEndTime: z.string(),
+  isRevocable: z.boolean(),
+  rewardValueToken: z.string(),
+  rewardValueAmount: z.number().int().gt(0),
+  gasCostValueToken: z.string(),
+  gasCostValueGasPrice: z.number().int().gt(0),
+  guaranteeValueToken: z.string(),
+  guaranteeValueGasPrice: z.number().int().gt(0),
+  executionWindow: z.number().int().gt(0),
+  rewardTransfer: z.number().int().gt(0),
+  gasCostTransfer: z.number().int().gt(0),
+})
+
+type CreateOrderState = z.infer<typeof schema>
 
 export default function CreateOrderCard({
   setShowDialogWindow,
@@ -57,25 +60,7 @@ export default function CreateOrderCard({
   const [isValidating, setIsValidating] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const initialValidationErrors = {
-    gasAmount: "",
-    executionPeriodStartDate: "",
-    executionPeriodStartTime: "",
-    executionPeriodEndDate: "",
-    executionPeriodEndTime: "",
-    isRevocable: "",
-    rewardValueToken: "",
-    rewardValueAmount: "",
-    gasCostValueToken: "",
-    gasCostValueGasPrice: "",
-    guaranteeValueToken: "",
-    guaranteeValueGasPrice: "",
-    executionWindow: "",
-    rewardTransfer: "",
-    gasCostTransfer: "",
-  }
-
-  const [validationErrors, setValidationErrors] = useState({ ...initialValidationErrors })
+  const [validationErrors, setValidationErrors] = useState<null | { [key: string]: string }>(null)
 
   const getTomorrowStartDate = () => {
     const date = new Date()
@@ -274,79 +259,30 @@ export default function CreateOrderCard({
     }
   }
 
-  const validateSearchForm = (isSubmitting?: boolean) => {
-    const errors = { ...initialValidationErrors }
+  const validateSearchForm = () => {
+    setValidationErrors(null)
 
-    console.log(errors)
-
-    // const clearedErrors = Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: "" }), {})
-
-    if (inputValues.gasAmount === 0) {
-      errors.gasAmount = "Must be greater than zero"
+    const result = schema.safeParse(inputValues)
+    if (result.success === false) {
+      const formatedErrors = Object.entries(result.error.flatten().fieldErrors).reduce((acc, curr) => {
+        const [error, errorTexts] = curr
+        acc[error] = errorTexts[0]
+        return acc
+      }, {})
+      setValidationErrors(formatedErrors)
+      return false
     }
-
-    // if (!TIME_STRING_REGEX.test(inputValues.executionPeriodStartTime)) {
-    //   errors.executionPeriodStartTime = "Invalid time format"
-    // }
-
-    // if (!TIME_STRING_REGEX.test(inputValues.executionPeriodEndTime)) {
-    //   errors.executionPeriodEndTime = "Invalid time format"
-    // }
-
-    // if (!ETH_ADDRESS_REGEX.test(inputValues.rewardValueToken)) {
-    //   errors.rewardValueToken = "Incorrect address"
-    // }
-    if (inputValues.rewardValueToken === "") {
-      errors.rewardValueToken = "This field is required"
-    }
-
-    if (inputValues.rewardValueAmount === 0) {
-      errors.rewardValueAmount = "Must be greater than zero"
-    }
-
-    if (inputValues.gasCostValueToken === "") {
-      errors.gasCostValueToken = "This field is required"
-    }
-    if (inputValues.gasCostValueGasPrice === 0) {
-      errors.gasCostValueGasPrice = "Must be greater than zero"
-    }
-
-    if (inputValues.guaranteeValueToken === "") {
-      errors.guaranteeValueToken = "This field is required"
-    }
-    if (inputValues.guaranteeValueGasPrice === 0) {
-      errors.guaranteeValueGasPrice = "Must be greater than zero"
-    }
-
-    if (inputValues.executionWindow === 0) {
-      errors.executionWindow = "Must be greater than zero"
-    }
-
-    if (inputValues.rewardTransfer === 0) {
-      errors.rewardTransfer = "Must be greater than zero"
-    }
-
-    if (inputValues.gasCostTransfer === 0) {
-      errors.gasCostTransfer = "Must be greater than zero"
-    }
-
-    // //TODO: Validations here
-    // //Setting Errors after validation
-    setValidationErrors(errors)
-    const IsEverythingValid = Object.values(errors).every((x) => x === "")
-    if (isSubmitting && IsEverythingValid) {
-      createOrder()
-    }
-
-    // if (isSubmitting) {
-    //   //TODO: CreateOrder here
-    //   createOrder()
-    // }
+    return true
   }
 
-  const OnFormSubmit = () => {
+  const handleSubmit = () => {
     setIsValidating(true)
-    validateSearchForm(true)
+
+    if (validateSearchForm()) {
+      createOrder()
+    } else {
+      console.log("Form has errors. Please fix them before submitting.")
+    }
   }
 
   useEffect(() => {
@@ -367,15 +303,15 @@ export default function CreateOrderCard({
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex flex-col">
           <Text>Gas</Text>
-          <div className="flex flex-row mt-2">
-            <Icon icon={FireIcon}></Icon>
+          <div className="flex flex-col mt-2">
             <NumberInput
+              icon={FireIcon}
               value={inputValues.gasAmount.toString()}
               onChange={(e) =>
                 setInputValues({ ...inputValues, gasAmount: clampNumber(Number(e.target.value), 0, 100000) })
               }
-              error={!!validationErrors.gasAmount}
-              errorMessage={validationErrors.gasAmount}
+              error={!!validationErrors?.gasAmount}
+              errorMessage={validationErrors?.gasAmount}
               spellCheck={false}
             />
           </div>
@@ -385,6 +321,7 @@ export default function CreateOrderCard({
           <div className="flex flex-row mt-2">
             <Icon icon={CalendarDaysIcon}></Icon>
             <DatePicker
+              color="red"
               value={inputValues.executionPeriodStartDate}
               onValueChange={(value) => setInputValues({ ...inputValues, executionPeriodStartDate: value })}
               minDate={inputValues.executionPeriodStartDate}
@@ -396,8 +333,8 @@ export default function CreateOrderCard({
               value={inputValues.executionPeriodStartTime}
               onChange={(e) => setInputValues({ ...inputValues, executionPeriodStartTime: e.target.value })}
               placeholder={inputValues.executionPeriodStartTime}
-              error={!!validationErrors.executionPeriodStartTime}
-              errorMessage={validationErrors.executionPeriodStartTime}
+              error={!!validationErrors?.executionPeriodStartTime}
+              errorMessage={validationErrors?.executionPeriodStartTime}
               spellCheck={false}
             ></TextInput>
           </div>
@@ -418,8 +355,8 @@ export default function CreateOrderCard({
               value={inputValues.executionPeriodEndTime}
               onChange={(e) => setInputValues({ ...inputValues, executionPeriodEndTime: e.target.value })}
               placeholder={inputValues.executionPeriodEndTime}
-              error={!!validationErrors.executionPeriodEndTime}
-              errorMessage={validationErrors.executionPeriodEndTime}
+              error={!!validationErrors?.executionPeriodEndTime}
+              errorMessage={validationErrors?.executionPeriodEndTime}
               spellCheck={false}
             ></TextInput>
           </div>
@@ -434,8 +371,8 @@ export default function CreateOrderCard({
             className="mt-2"
             value={inputValues.rewardValueToken}
             onChange={(e) => setInputValues({ ...inputValues, rewardValueToken: e.target.value })}
-            error={!!validationErrors.rewardValueToken}
-            errorMessage={validationErrors.rewardValueToken}
+            error={!!validationErrors?.rewardValueToken}
+            errorMessage={validationErrors?.rewardValueToken}
             spellCheck={false}
             placeholder="0x1dA..."
           />
@@ -448,8 +385,8 @@ export default function CreateOrderCard({
             onChange={(e) =>
               setInputValues({ ...inputValues, rewardValueAmount: clampNumber(Number(e.target.value), 0, 100000) })
             }
-            error={!!validationErrors.rewardValueAmount}
-            errorMessage={validationErrors.rewardValueAmount}
+            error={!!validationErrors?.rewardValueAmount}
+            errorMessage={validationErrors?.rewardValueAmount}
             spellCheck={false}
           />
         </div>
@@ -463,8 +400,8 @@ export default function CreateOrderCard({
             className="mt-2"
             value={inputValues.gasCostValueToken}
             onChange={(e) => setInputValues({ ...inputValues, gasCostValueToken: e.target.value })}
-            error={!!validationErrors.gasCostValueToken}
-            errorMessage={validationErrors.gasCostValueToken}
+            error={!!validationErrors?.gasCostValueToken}
+            errorMessage={validationErrors?.gasCostValueToken}
             spellCheck={false}
             placeholder="0x1dA..."
           />
@@ -477,8 +414,8 @@ export default function CreateOrderCard({
             onChange={(e) =>
               setInputValues({ ...inputValues, gasCostValueGasPrice: clampNumber(Number(e.target.value), 0, 100000) })
             }
-            error={!!validationErrors.gasCostValueGasPrice}
-            errorMessage={validationErrors.gasCostValueGasPrice}
+            error={!!validationErrors?.gasCostValueGasPrice}
+            errorMessage={validationErrors?.gasCostValueGasPrice}
             spellCheck={false}
           />
         </div>
@@ -492,8 +429,8 @@ export default function CreateOrderCard({
             className=" mt-2"
             value={inputValues.guaranteeValueToken}
             onChange={(e) => setInputValues({ ...inputValues, guaranteeValueToken: e.target.value })}
-            error={!!validationErrors.guaranteeValueToken}
-            errorMessage={validationErrors.guaranteeValueToken}
+            error={!!validationErrors?.guaranteeValueToken}
+            errorMessage={validationErrors?.guaranteeValueToken}
             spellCheck={false}
             placeholder="0x1dA..."
           />
@@ -506,8 +443,8 @@ export default function CreateOrderCard({
             onChange={(e) =>
               setInputValues({ ...inputValues, guaranteeValueGasPrice: clampNumber(Number(e.target.value), 0, 100000) })
             }
-            error={!!validationErrors.guaranteeValueGasPrice}
-            errorMessage={validationErrors.guaranteeValueGasPrice}
+            error={!!validationErrors?.guaranteeValueGasPrice}
+            errorMessage={validationErrors?.guaranteeValueGasPrice}
             spellCheck={false}
           />
         </div>
@@ -546,8 +483,8 @@ export default function CreateOrderCard({
                 onChange={(e) =>
                   setInputValues({ ...inputValues, executionWindow: clampNumber(Number(e.target.value), 0, 100000) })
                 }
-                error={!!validationErrors.executionWindow}
-                errorMessage={validationErrors.executionWindow}
+                error={!!validationErrors?.executionWindow}
+                errorMessage={validationErrors?.executionWindow}
                 spellCheck={false}
               />
             </div>
@@ -559,8 +496,8 @@ export default function CreateOrderCard({
                 onChange={(e) =>
                   setInputValues({ ...inputValues, rewardTransfer: clampNumber(Number(e.target.value), 0, 100000) })
                 }
-                error={!!validationErrors.rewardTransfer}
-                errorMessage={validationErrors.rewardTransfer}
+                error={!!validationErrors?.rewardTransfer}
+                errorMessage={validationErrors?.rewardTransfer}
                 spellCheck={false}
               />
             </div>
@@ -572,8 +509,8 @@ export default function CreateOrderCard({
                 onChange={(e) =>
                   setInputValues({ ...inputValues, gasCostTransfer: clampNumber(Number(e.target.value), 0, 100000) })
                 }
-                error={!!validationErrors.gasCostTransfer}
-                errorMessage={validationErrors.gasCostTransfer}
+                error={!!validationErrors?.gasCostTransfer}
+                errorMessage={validationErrors?.gasCostTransfer}
                 spellCheck={false}
               />
             </div>
@@ -581,7 +518,7 @@ export default function CreateOrderCard({
         </AccordionBody>
       </Accordion>
       <div className="flex flex-row justify-end mt-4">
-        <Button disabled={isLoading} onClick={OnFormSubmit}>
+        <Button disabled={isLoading} onClick={handleSubmit}>
           {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
           <TailSpin
             height={20}
