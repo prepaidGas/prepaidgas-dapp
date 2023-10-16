@@ -38,7 +38,7 @@ describe("Validators", function () {
 
       await expect(ValidatorsContract.setValidatorThreshold(0)).to.be.revertedWithCustomError(
         ValidatorsContract,
-        "OverlowValue",
+        "UnderflowValue",
       )
     })
 

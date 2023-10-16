@@ -2,7 +2,7 @@
 // @todo alphabetize order
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 
-import { Title, Text, Metric } from "@tremor/react"
+import { Title, Text, Metric, Color } from "@tremor/react"
 
 import { readContract } from "@wagmi/core"
 import SearchFiltersCard, { FilterOptions } from "../../../components/SearchFiltersCard"
@@ -12,6 +12,7 @@ import Pagination from "../../../components/Pagination"
 
 // @todo display first 100 items
 import { GasOrderABI } from "helpers/abi"
+import ToasterPopup from "../../../components/ToasterPopup"
 
 export default function SearchOrder() {
   const initialState: FilterOptions = {
@@ -78,6 +79,36 @@ export default function SearchOrder() {
     console.log("Data", data)
   }, [data])
 
+  const [showPopup, setShowPopup] = useState(false)
+  const [popupTimer, setPopupTimer] = useState<NodeJS.Timeout | undefined>()
+  const [popupProps, setPopupProps] = useState<{ msgTitle: string; msgBody: string; color: Color }>({
+    msgTitle: "",
+    msgBody: "",
+    color: "blue",
+  })
+
+  const onOrderCardAction = (favorited: boolean) => {
+    if (favorited) {
+      setPopupProps({
+        msgTitle: "Order was added to favorites",
+        msgBody: "",
+        color: "green",
+      })
+    } else {
+      setPopupProps({
+        msgTitle: "Order was removed from favorites",
+        msgBody: "",
+        color: "amber",
+      })
+    }
+    setShowPopup(true)
+    if (popupTimer !== undefined) {
+      clearTimeout(popupTimer)
+    }
+    const timer = setTimeout(() => setShowPopup(false), 5000)
+    setPopupTimer(timer)
+  }
+
   return (
     <>
       <Title>Search results: {data?.length}</Title>
@@ -95,9 +126,18 @@ export default function SearchOrder() {
         </div>
       )}
       {data?.map((item: any) => (
-        <OrderCard {...item} key={`order-${item.id}`} />
+        <OrderCard {...item} onFavorited={onOrderCardAction} key={`order-${item.id}`} />
       ))}
       {data?.length === 0 ? <Metric className="self-center">Sorry, we couldn&#39;t find any results</Metric> : null}
+
+      {showPopup ? (
+        <ToasterPopup
+          msgTitle={popupProps.msgTitle}
+          msgBody={popupProps.msgBody}
+          onClose={() => setShowPopup(false)}
+          color={popupProps.color}
+        />
+      ) : null}
     </>
   )
 }

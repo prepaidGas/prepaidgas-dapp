@@ -15,6 +15,11 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline"
 import { useState } from "react"
+import { renderBadge } from "../utils/utils"
+
+interface OrderCard extends FilteredOrderStructOutput {
+  onFavorited(favorited: boolean): void
+}
 
 // @todo display order data
 export default function OrderCard({
@@ -28,9 +33,8 @@ export default function OrderCard({
   gasCost,
   reward,
   guarantee,
-}: FilteredOrderStructOutput) {
-  const colors = STATUS_COLORS
-
+  onFavorited = () => {},
+}: OrderCard) {
   const checkIfIsFavorite = () => {
     let favOrders = localStorage.getItem("FAVORITE_ORDERS")
     if (favOrders === null) {
@@ -47,45 +51,6 @@ export default function OrderCard({
   }
 
   const [isFavorite, setIsFavorite] = useState<boolean>(checkIfIsFavorite())
-
-  /* @dev Status bage */
-  /* @todo Add explanation to all the statuses with a `tooltip attr` */
-  const renderBadge = () => {
-    switch (Number(status)) {
-      case 1:
-        return (
-          <Badge icon={ArrowPathIcon} color={colors[Number(status)]}>
-            Pending
-          </Badge>
-        )
-      case 2:
-        return (
-          <Badge icon={CheckCircleIcon} color={colors[Number(status)]}>
-            Accepted
-          </Badge>
-        )
-      case 3:
-        return (
-          <Badge icon={PlayIcon} color={colors[Number(status)]}>
-            Active
-          </Badge>
-        )
-      case 4:
-        return (
-          <Badge icon={ExclamationTriangleIcon} color={colors[Number(status)]}>
-            Inactive
-          </Badge>
-        )
-      case 5:
-        return (
-          <Badge icon={XCircleIcon} color={colors[Number(status)]}>
-            Closed
-          </Badge>
-        )
-      default:
-        return null
-    }
-  }
 
   const addToFavorites = () => {
     let favOrders: any = localStorage.getItem("FAVORITE_ORDERS")
@@ -116,13 +81,28 @@ export default function OrderCard({
   }
 
   return (
-    <Card className="mt-3" decoration="top" decorationColor={colors[Number(status)]}>
+    <Card className="mt-3" decoration="top" decorationColor={STATUS_COLORS[Number(status)]}>
       <Flex>
-        {renderBadge()}
+        {renderBadge(status)}
         {isFavorite ? (
-          <Button onClick={removeFromFavorites} color="amber" icon={StarIcon}></Button>
+          <Button
+            onClick={() => {
+              removeFromFavorites()
+              onFavorited(false)
+            }}
+            color="amber"
+            icon={StarIcon}
+          ></Button>
         ) : (
-          <Button onClick={addToFavorites} variant="secondary" color="amber" icon={StarIcon}></Button>
+          <Button
+            onClick={() => {
+              addToFavorites()
+              onFavorited(true)
+            }}
+            variant="secondary"
+            color="amber"
+            icon={StarIcon}
+          ></Button>
         )}
       </Flex>
 
