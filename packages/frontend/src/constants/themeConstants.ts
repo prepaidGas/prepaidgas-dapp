@@ -13,7 +13,8 @@ type StatusNameType = {
   Accepted: 2
   Active: 3
   Inactive: 4
-  Closed: 5
+  Untaken: 5
+  Closed: 6
 }
 
 export const STATUS: StatusNameType = {
@@ -22,7 +23,8 @@ export const STATUS: StatusNameType = {
   Accepted: 2,
   Active: 3,
   Inactive: 4,
-  Closed: 5,
+  Untaken: 5,
+  Closed: 6,
 }
 
 type ValuesOf<T> = T[keyof T]
@@ -35,6 +37,7 @@ export const COLOR_BY_STATUS: { [key: number]: Color } = {
   [STATUS.Accepted]: "cyan",
   [STATUS.Active]: "green",
   [STATUS.Inactive]: "red",
+  [STATUS.Untaken]: "amber",
   [STATUS.Closed]: "slate",
 }
 
@@ -44,6 +47,7 @@ export const ICON_BY_STATUS = {
   [STATUS.Accepted]: CheckCircleIcon,
   [STATUS.Active]: PlayIcon,
   [STATUS.Inactive]: ExclamationTriangleIcon,
+  [STATUS.Untaken]: null,
   [STATUS.Closed]: XCircleIcon,
 }
 

@@ -16,6 +16,8 @@ import {
 } from "@heroicons/react/24/outline"
 import { useState } from "react"
 import StatusBadge from "./StatusBadge"
+import { redirect } from "next/navigation"
+import Link from "next/link"
 
 interface OrderCard extends FilteredOrderStructOutput {
   onFavorited(favorited: boolean): void
@@ -128,6 +130,11 @@ export default function OrderCard({
         <Text>Used: 0 / {maxGas.toString()}</Text>
       </Flex>
       <ProgressBar value={32} className="mt-2" />
+      <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
+        <Link href={`/order/${id}`}>
+          <Button variant="secondary">Manage Order</Button>
+        </Link>
+      </div>
     </Card>
   )
 }

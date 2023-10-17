@@ -1,17 +1,17 @@
 "use client"
 
 // @todo fill the page with the basic order information
-import { readContract, writeContract } from "@wagmi/core"
+import { readContract, writeContract, waitForTransaction } from "@wagmi/core"
 import { useEffect, useState } from "react"
 import format from "date-fns/format"
 
 import { Title, Text, Card, Metric, Flex, ProgressBar, Icon, Button } from "@tremor/react"
 import { GasOrderABI } from "helpers/abi"
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
-import { renderBadge } from "../../../utils/utils"
 import { useAccount } from "wagmi"
-import { STATUS_COLORS } from "../../../constants/themeConstants"
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
+import StatusBadge from "../../../components/StatusBadge"
+import { COLOR_BY_STATUS, STATUS } from "../../../constants/themeConstants"
 
 export default function Page({ params }: { params: { slug: string } }) {
   const [isLoading, setIsLoading] = useState(true)
@@ -19,7 +19,9 @@ export default function Page({ params }: { params: { slug: string } }) {
   const { address, isConnecting, isDisconnected } = useAccount()
   const [isError, setIsError] = useState(false)
 
-  const isManger = orderData?.manager === address && (Number(orderData.status) === 0 || Number(orderData.status) === 1)
+  const isRevocable =
+    orderData?.manager === address &&
+    (Number(orderData.status) === STATUS.Pending || Number(orderData.status) === STATUS.Untaken)
 
   const fetchOrderData = async () => {
     try {
@@ -38,18 +40,19 @@ export default function Page({ params }: { params: { slug: string } }) {
   }
 
   const revokeOrder = async () => {
-    if ((orderData.status = STAT))
-      try {
-        const data = await writeContract({
-          address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-          abi: GasOrderABI,
-          functionName: "revokeOrder",
-          args: [params.slug],
-        })
-        console.log("SingleOrderPage Revoke Order DATA", data)
-      } catch (e) {
-        console.log("SingleOrderPage Revoke Order ERROR", e)
-      }
+    try {
+      const data = await writeContract({
+        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        abi: GasOrderABI,
+        functionName: "revokeOrder",
+        args: [params.slug],
+      })
+      console.log("SingleOrderPage Revoke Order DATA", data)
+      const txData = await waitForTransaction({ hash: data.hash })
+      console.log("SingleOrderPageTXData: ", txData)
+    } catch (e) {
+      console.log("SingleOrderPage Revoke Order ERROR", e)
+    }
   }
 
   const retrieveGuarantee = async () => {
@@ -60,9 +63,11 @@ export default function Page({ params }: { params: { slug: string } }) {
         functionName: "retrieveGuarantee",
         args: [params.slug],
       })
-      console.log("SingleOrderPage Revoke Order DATA", data)
+      console.log("SingleOrderPage Retrieve Guarantee DATA", data)
+      const txData = await waitForTransaction({ hash: data.hash })
+      console.log("SingleOrderPageTXData: ", txData)
     } catch (e) {
-      console.log("SingleOrderPage Revoke Order ERROR", e)
+      console.log("SingleOrderPage Retrieve Guarantee ERROR", e)
     }
   }
 
@@ -71,12 +76,14 @@ export default function Page({ params }: { params: { slug: string } }) {
       const data = await writeContract({
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
-        functionName: "getOrdersById",
-        args: [params.slug],
+        functionName: "retrieveGasCost",
+        args: [address, params.slug, orderData.availableGasHoldings],
       })
-      console.log("SingleOrderPage Revoke Order DATA", data)
+      console.log("SingleOrderPage Retrieve Gas DATA", data)
+      const txData = await waitForTransaction({ hash: data.hash })
+      console.log("SingleOrderPageTXData: ", txData)
     } catch (e) {
-      console.log("SingleOrderPage Revoke Order ERROR", e)
+      console.log("SingleOrderPage Retrieve Gas ERROR", e)
     }
   }
 
@@ -87,10 +94,9 @@ export default function Page({ params }: { params: { slug: string } }) {
   return (
     <>
       <Title>Order number: {params.slug}</Title>
-      {orderData && renderBadge(orderData.status)}
       {orderData && (
-        <Card className="mt-3" decoration="top" decorationColor={STATUS_COLORS[Number(orderData.status)]}>
-          {renderBadge(orderData.status)}
+        <Card className="mt-3" decoration="top" decorationColor={COLOR_BY_STATUS[Number(orderData.status)]}>
+          <StatusBadge status={Number(orderData.status)} />
 
           {/* @dev Order Id */}
           <Metric>#{orderData.id.toString()}</Metric>
@@ -109,17 +115,22 @@ export default function Page({ params }: { params: { slug: string } }) {
           <Text>{`Reward: ${orderData.reward.value} ${orderData.reward.symbol}`}</Text>
           <Text>{`Gas Cost: ${orderData.gasCost.value} ${orderData.gasCost.symbol}`}</Text>
           <Text>{`Guarantee: ${orderData.guarantee.value} ${orderData.guarantee.symbol}`}</Text>
+          <Text>{`Available Gas Holdings: ${orderData.availableGasHoldings}`}</Text>
+
           {/* @dev Gas left (maxGas) */}
           <Flex className="mt-4">
             <Text>Used: 0 / {orderData.maxGas.toString()}</Text>
           </Flex>
           <ProgressBar value={32} className="mt-2" />
           <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
-            {isManger && <Button onClick={retrieveGasCost}>Revoke</Button>}
-            {orderData.availableGasHoldings > 0 ? <Button onClick={retrieveGasCost}>Revoke</Button> : null}
-            {orderData.availableGasHoldings > 0 ? <Button onClick={retrieveGasCost}>Revoke</Button> : null}
-
-            <Button onClick={retrieveGuarantee}>Revoke</Button>
+            {isRevocable && <Button onClick={revokeOrder}>Revoke</Button>}
+            {Number(orderData.status) === STATUS.Inactive && (
+              <Button onClick={retrieveGuarantee}>Retrieve Guarantee</Button>
+            )}
+            {Number(orderData.availableGasHoldings) > 0 && <Button onClick={retrieveGasCost}>Retrieve Gas</Button>}
+            <Button onClick={revokeOrder}>Revoke</Button>
+            <Button onClick={retrieveGuarantee}>Retrieve Guarantee</Button>
+            <Button onClick={retrieveGasCost}>Retrieve Gas</Button>
           </div>
         </Card>
       )}
