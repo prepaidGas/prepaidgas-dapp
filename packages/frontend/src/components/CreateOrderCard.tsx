@@ -319,7 +319,6 @@ export default function CreateOrderCard({
         <div className="flex flex-col justify-between">
           <Text>Execution period Start</Text>
           <div className="flex flex-row mt-2">
-            <Icon icon={CalendarDaysIcon}></Icon>
             <DatePicker
               color="red"
               value={inputValues.executionPeriodStartDate}
@@ -328,8 +327,8 @@ export default function CreateOrderCard({
             />
           </div>
           <div className="flex flex-row mt-2">
-            <Icon icon={ClockIcon}></Icon>
             <TextInput
+              icon={ClockIcon}
               value={inputValues.executionPeriodStartTime}
               onChange={(e) => setInputValues({ ...inputValues, executionPeriodStartTime: e.target.value })}
               placeholder={inputValues.executionPeriodStartTime}
@@ -342,7 +341,6 @@ export default function CreateOrderCard({
         <div className="flex flex-col justify-between">
           <Text>Execution period End</Text>
           <div className="flex flex-row mt-2">
-            <Icon icon={CalendarDaysIcon}></Icon>
             <DatePicker
               value={inputValues.executionPeriodEndDate}
               onValueChange={(value) => setInputValues({ ...inputValues, executionPeriodEndDate: value })}
@@ -350,8 +348,8 @@ export default function CreateOrderCard({
             />
           </div>
           <div className="flex flex-row mt-2">
-            <Icon icon={ClockIcon}></Icon>
             <TextInput
+              icon={ClockIcon}
               value={inputValues.executionPeriodEndTime}
               onChange={(e) => setInputValues({ ...inputValues, executionPeriodEndTime: e.target.value })}
               placeholder={inputValues.executionPeriodEndTime}
