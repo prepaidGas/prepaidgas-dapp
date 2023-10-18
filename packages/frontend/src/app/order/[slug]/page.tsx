@@ -11,7 +11,8 @@ import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 import { useAccount } from "wagmi"
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
 import StatusBadge from "../../../components/StatusBadge"
-import { COLOR_BY_STATUS, STATUS } from "../../../constants/themeConstants"
+import { COLOR_BY_STATUS, SPINNER_COLOR, STATUS } from "../../../constants/themeConstants"
+import { TailSpin } from "react-loader-spinner"
 
 export default function Page({ params }: { params: { slug: string } }) {
   const [isLoading, setIsLoading] = useState(true)
@@ -33,6 +34,7 @@ export default function Page({ params }: { params: { slug: string } }) {
       })
       console.log("GetOrdersById DATA", data)
       setOrderData(data[0] as FilteredOrderStructOutput)
+      setIsLoading(false)
     } catch (e) {
       console.log("GetOrdersById ERROR: ", e)
       setIsError(true)
@@ -93,46 +95,63 @@ export default function Page({ params }: { params: { slug: string } }) {
 
   return (
     <>
-      <Title>Order number: {params.slug}</Title>
-      {orderData && (
-        <Card className="mt-3" decoration="top" decorationColor={COLOR_BY_STATUS[Number(orderData.status)]}>
-          <StatusBadge status={Number(orderData.status)} />
+      {isLoading && (
+        <div className="flex justify-center my-4">
+          <TailSpin
+            height={40}
+            width={40}
+            color={SPINNER_COLOR}
+            ariaLabel="tail-spin-loading"
+            radius="0"
+            wrapperStyle={{}}
+            wrapperClass=""
+            visible={true}
+          />
+        </div>
+      )}
+      {orderData && !isLoading && (
+        <>
+          <Title>Order number: {params.slug}</Title>
+          <Card className="mt-3" decoration="top" decorationColor={COLOR_BY_STATUS[Number(orderData.status)]}>
+            <StatusBadge status={Number(orderData.status)} />
 
-          {/* @dev Order Id */}
-          <Metric>#{orderData.id.toString()}</Metric>
+            {/* @dev Order Id */}
+            <Metric>#{orderData.id.toString()}</Metric>
 
-          <Text>Manager: {orderData.manager}</Text>
-          {/* @dev Order executionPeriodStart and executionPeriodDeadline */}
-          {/*"yyyy.mm.dd hh:ss:mm"*/}
-          <Text>
-            Execution timeframe: {format(new Date(Number(orderData.executionPeriodStart) * 1000), "MMM d y, HH:mm:ss")}{" "}
-            - {format(new Date(Number(orderData.executionPeriodDeadline) * 1000), "MMM d y, HH:mm:ss")}
-          </Text>
-          {/* @dev Order executionWindow */}
-          <Text>Execution window: {orderData.executionWindow.toString()}</Text>
-          {/* @dev Order executionWindow */}
-          {/* @dev Order data, the details might be found in `TokenAmountWithDetails` structure */}
-          <Text>{`Reward: ${orderData.reward.value} ${orderData.reward.symbol}`}</Text>
-          <Text>{`Gas Cost: ${orderData.gasCost.value} ${orderData.gasCost.symbol}`}</Text>
-          <Text>{`Guarantee: ${orderData.guarantee.value} ${orderData.guarantee.symbol}`}</Text>
-          <Text>{`Available Gas Holdings: ${orderData.availableGasHoldings}`}</Text>
+            <Text>Manager: {orderData.manager}</Text>
+            {/* @dev Order executionPeriodStart and executionPeriodDeadline */}
+            {/*"yyyy.mm.dd hh:ss:mm"*/}
+            <Text>
+              Execution timeframe:{" "}
+              {format(new Date(Number(orderData.executionPeriodStart) * 1000), "MMM d y, HH:mm:ss")} -{" "}
+              {format(new Date(Number(orderData.executionPeriodDeadline) * 1000), "MMM d y, HH:mm:ss")}
+            </Text>
+            {/* @dev Order executionWindow */}
+            <Text>Execution window: {orderData.executionWindow.toString()}</Text>
+            {/* @dev Order executionWindow */}
+            {/* @dev Order data, the details might be found in `TokenAmountWithDetails` structure */}
+            <Text>{`Reward: ${orderData.reward.value} ${orderData.reward.symbol}`}</Text>
+            <Text>{`Gas Cost: ${orderData.gasCost.value} ${orderData.gasCost.symbol}`}</Text>
+            <Text>{`Guarantee: ${orderData.guarantee.value} ${orderData.guarantee.symbol}`}</Text>
+            <Text>{`Available Gas Holdings: ${orderData.availableGasHoldings}`}</Text>
 
-          {/* @dev Gas left (maxGas) */}
-          <Flex className="mt-4">
-            <Text>Used: 0 / {orderData.maxGas.toString()}</Text>
-          </Flex>
-          <ProgressBar value={32} className="mt-2" />
-          <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
-            {isRevocable && <Button onClick={revokeOrder}>Revoke</Button>}
-            {Number(orderData.status) === STATUS.Inactive && (
+            {/* @dev Gas left (maxGas) */}
+            <Flex className="mt-4">
+              <Text>Used: 0 / {orderData.maxGas.toString()}</Text>
+            </Flex>
+            <ProgressBar value={32} className="mt-2" />
+            <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
+              {isRevocable && <Button onClick={revokeOrder}>Revoke</Button>}
+              {Number(orderData.status) === STATUS.Inactive && (
+                <Button onClick={retrieveGuarantee}>Retrieve Guarantee</Button>
+              )}
+              {Number(orderData.availableGasHoldings) > 0 && <Button onClick={retrieveGasCost}>Retrieve Gas</Button>}
+              <Button onClick={revokeOrder}>Revoke</Button>
               <Button onClick={retrieveGuarantee}>Retrieve Guarantee</Button>
-            )}
-            {Number(orderData.availableGasHoldings) > 0 && <Button onClick={retrieveGasCost}>Retrieve Gas</Button>}
-            <Button onClick={revokeOrder}>Revoke</Button>
-            <Button onClick={retrieveGuarantee}>Retrieve Guarantee</Button>
-            <Button onClick={retrieveGasCost}>Retrieve Gas</Button>
-          </div>
-        </Card>
+              <Button onClick={retrieveGasCost}>Retrieve Gas</Button>
+            </div>
+          </Card>
+        </>
       )}
       {isError && (
         <Card className="mt-4" decoration="top" decorationColor="red">
