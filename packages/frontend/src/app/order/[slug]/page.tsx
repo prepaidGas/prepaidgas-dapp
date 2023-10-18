@@ -77,7 +77,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
         functionName: "retrieveGasCost",
-        args: [address, params.slug, orderData.availableGasHoldings],
+        args: [address, params.slug, orderData.gasCost.value],
       })
       console.log("SingleOrderPage Retrieve Gas DATA", data)
       const txData = await waitForTransaction({ hash: data.hash })
