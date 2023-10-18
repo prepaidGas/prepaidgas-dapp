@@ -33,8 +33,8 @@ const inter = Inter({ subsets: ["latin"] })
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className="h-full">
+      <body className={inter.className + " min-h-[100%]"}>
         <WagmiConfig config={wagmiConfig}>
           <RainbowKitProvider chains={chains} theme={lightTheme({ accentColor: "#f97316" })}>
             {children}

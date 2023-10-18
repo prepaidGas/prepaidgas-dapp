@@ -26,7 +26,7 @@ export default function Home() {
   }, [address])
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex flex-col items-center justify-between p-24">
       {showDialogWindow ? (
         <DialogWindow
           isClosable={false}

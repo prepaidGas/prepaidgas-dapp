@@ -12,7 +12,6 @@ interface PaginationProps {
   siblingCount?: number
   currentPage: number
   pageSize: number
-  children?: React.ReactNode
   className?: string
 }
 
@@ -22,7 +21,6 @@ export default function Pagination({
   siblingCount,
   currentPage,
   pageSize,
-  children,
   className,
 }: PaginationProps) {
   const paginationRange = usePagination({
@@ -44,47 +42,41 @@ export default function Pagination({
     onPageChange(currentPage - 1)
   }
 
-  const renderPaginationPages = () => (
-    <ul className="flex flex-row self-center items-center my-4">
-      <li className={`${currentPage === 1 ? "invisible" : "cursor-pointer"}`} onClick={onPrevious}>
-        <Icon icon={ArrowLongLeftIcon}></Icon>
-      </li>
-      {paginationRange.map((pageNumber, index) => {
-        if (pageNumber === DOTS) {
-          return (
-            <li
-              key={`dots-${index}`}
-              className="text-gray-400 flex align-middle justify-center items-center cursor-default"
-            >
-              &#8230;
-            </li>
-          )
-        }
-
-        return (
-          <li
-            className={`flex align-middle justify-center items-center cursor-pointer p-2 text-base  ${
-              pageNumber === currentPage ? "text-blue-500" : "text-white"
-            }`}
-            key={`pageBtt-${index}`}
-            onClick={() => onPageChange(pageNumber)}
-          >
-            {pageNumber}
-          </li>
-        )
-      })}
-      <li className={`${currentPage === lastPage ? "invisible" : ""}`} onClick={onNext}>
-        <Icon icon={ArrowLongRightIcon}></Icon>
-      </li>
-    </ul>
-  )
-
   let lastPage = paginationRange[paginationRange.length - 1]
   return (
     <div className={className}>
-      {renderPaginationPages()}
-      {children}
-      {renderPaginationPages()}
+      <ul className="flex flex-row self-center items-center my-4">
+        <li className={`${currentPage === 1 ? "invisible" : "cursor-pointer"}`} onClick={onPrevious}>
+          <Icon icon={ArrowLongLeftIcon}></Icon>
+        </li>
+        {paginationRange.map((pageNumber, index) => {
+          if (pageNumber === DOTS) {
+            return (
+              <li
+                key={`dots-${index}`}
+                className="text-gray-400 flex align-middle justify-center items-center cursor-default"
+              >
+                &#8230;
+              </li>
+            )
+          }
+
+          return (
+            <li
+              className={`flex align-middle justify-center items-center cursor-pointer p-2 text-base  ${
+                pageNumber === currentPage ? "text-blue-500" : "text-white"
+              }`}
+              key={`pageBtt-${index}`}
+              onClick={() => onPageChange(pageNumber)}
+            >
+              {pageNumber}
+            </li>
+          )
+        })}
+        <li className={`${currentPage === lastPage ? "invisible" : ""}`} onClick={onNext}>
+          <Icon icon={ArrowLongRightIcon}></Icon>
+        </li>
+      </ul>
     </div>
   )
 }

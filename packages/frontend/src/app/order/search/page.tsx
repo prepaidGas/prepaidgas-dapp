@@ -2,7 +2,7 @@
 // @todo alphabetize order
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 
-import { Title, Text, Metric, Color } from "@tremor/react"
+import { Title, Text, Metric, Color, Icon, Card } from "@tremor/react"
 
 import { readContract } from "@wagmi/core"
 import SearchFiltersCard, { FilterOptions } from "../../../components/SearchFiltersCard"
@@ -13,6 +13,9 @@ import Pagination from "../../../components/Pagination"
 // @todo display first 100 items
 import { GasOrderABI } from "helpers/abi"
 import ToasterPopup from "../../../components/ToasterPopup"
+import { TailSpin } from "react-loader-spinner"
+import { SPINNER_COLOR } from "../../../constants/themeConstants"
+import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
 
 export default function SearchOrder() {
   const initialState: FilterOptions = {
@@ -24,41 +27,44 @@ export default function SearchOrder() {
   const [data, setOrdersData] = useState<undefined | FilteredOrderStructOutput[]>(undefined)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalEntries, setTotalEntries] = useState<undefined | number>(undefined)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [showError, setShowError] = useState<boolean>(false)
 
   const defaultManager = "0x0000000000000000000000000000000000000000"
 
-  const executeSearch = async (pageNumber: number) => {
+  const executeSearch = async (filterOptions: FilterOptions, pageNumber: number) => {
+    setIsLoading(true)
+    setShowError(false)
     console.log("executeSearch", { pageNumber })
-    await getTotalEntriesNumber()
+    await getTotalEntriesNumber(filterOptions)
 
     console.log("starting search")
+    const { manager, status, numberOfEntries } = filterOptions
     try {
       const data = await readContract({
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
         functionName: "getFilteredOrders",
-        args: [
-          filterState.manager || defaultManager,
-          filterState.status,
-          filterState.numberOfEntries,
-          (pageNumber - 1) * filterState.numberOfEntries,
-        ],
+        args: [manager || defaultManager, status, numberOfEntries, (pageNumber - 1) * numberOfEntries],
       })
       // console.log("DATA", data)
       setOrdersData(data as FilteredOrderStructOutput[])
     } catch (e) {
       console.log("ERROR: ", e)
+      setShowError(true)
     }
+    setIsLoading(false)
   }
 
-  const getTotalEntriesNumber = async () => {
+  const getTotalEntriesNumber = async (filterOptions) => {
     try {
       const data = await readContract({
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
         functionName: "totalMatchingOrdersCount",
-        args: [filterState.manager || defaultManager, filterState.status],
+        args: [filterOptions.manager || defaultManager, filterOptions.status],
       })
+      console.log("getTotalEntriesNumber", { filterOptions })
       console.log("getMaxEntriesNumber", data)
       console.log("getMaxEntriesNumber2", Number(data))
 
@@ -68,19 +74,9 @@ export default function SearchOrder() {
     }
   }
 
-  // useEffect(() => {
-  //   console.log("FilterState: ", filterState)
-  //   executeSearch(currentPage)
-  // }, [])
-
   useEffect(() => {
-    console.log("Current Page: ", currentPage)
-    executeSearch(currentPage)
-  }, [currentPage, filterState])
-
-  useEffect(() => {
-    console.log("Data", data)
-  }, [data])
+    executeSearch(filterState, currentPage)
+  }, [])
 
   const [showPopup, setShowPopup] = useState(false)
   const [popupTimer, setPopupTimer] = useState<NodeJS.Timeout | undefined>()
@@ -112,34 +108,96 @@ export default function SearchOrder() {
     setPopupTimer(timer)
   }
 
+  const handleFilterSubmit = (filterOptions: FilterOptions) => {
+    setFilterState(filterOptions)
+    setCurrentPage(1)
+    executeSearch(filterOptions, 1)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    executeSearch(filterState, page)
+  }
+
+  useEffect(() => {
+    if (data?.length === 0) {
+      setShowError(true)
+    }
+  }, [data])
+
   return (
     <>
       <Title>Search results: {data?.length}</Title>
       <Text>You might find orders</Text>
-      <SearchFiltersCard initialValue={initialState} onSubmit={setFilterState} />
+      <SearchFiltersCard initialValue={initialState} onSubmit={handleFilterSubmit} />
       {/* Main section */}
+      {/* {isLoading && (
+        <div className="flex h-full items-center justify-center mt-4">
+          <TailSpin
+            height={40}
+            width={40}
+            color={SPINNER_COLOR}
+            ariaLabel="tail-spin-loading"
+            radius="0"
+            wrapperStyle={{}}
+            wrapperClass=""
+            visible={true}
+          />
+        </div>
+      )} */}
+
       {data && (
-        // <div className="flex justify-center align-middle mt-4">
         <Pagination
           className="flex flex-col"
-          onPageChange={setCurrentPage}
+          onPageChange={handlePageChange}
           currentPage={currentPage}
           totalCount={totalEntries && totalEntries}
           pageSize={filterState.numberOfEntries}
-        >
-          {data?.map((item: any, index) => (
-            <OrderCard
-              {...item}
-              className={index === 0 ? "mt-0" : "mt-3"}
-              onFavorited={onOrderCardAction}
-              key={`order-${item.id}`}
-            />
-          ))}
-        </Pagination>
-        // </div>
+        />
       )}
 
-      {data?.length === 0 ? <Metric className="self-center">Sorry, we couldn&#39;t find any results</Metric> : null}
+      {isLoading ? (
+        <div className="flex justify-center my-4">
+          <TailSpin
+            height={40}
+            width={40}
+            color={SPINNER_COLOR}
+            ariaLabel="tail-spin-loading"
+            radius="0"
+            wrapperStyle={{}}
+            wrapperClass=""
+            visible={true}
+          />
+        </div>
+      ) : (
+        data?.map((item: any, index) => (
+          <OrderCard
+            {...item}
+            className={index === 0 ? "mt-0" : "mt-4"}
+            onFavorited={onOrderCardAction}
+            key={`order-${item.id}`}
+          />
+        ))
+      )}
+
+      {data && (
+        <Pagination
+          className="flex flex-col"
+          onPageChange={handlePageChange}
+          currentPage={currentPage}
+          totalCount={totalEntries && totalEntries}
+          pageSize={filterState.numberOfEntries}
+        />
+      )}
+
+      {showError && (
+        <Card className="mt-4" decoration="top" decorationColor="red">
+          <div className="flex flex-row gap-4 justify-center items-center">
+            <Icon icon={ExclamationCircleIcon} size="xl"></Icon>
+            <Title>Sorry, we couldn&#39;t find any results</Title>
+          </div>
+        </Card>
+      )}
 
       {showPopup ? (
         <ToasterPopup

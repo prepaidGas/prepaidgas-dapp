@@ -62,7 +62,7 @@ export default function SearchFiltersCard({
   return (
     <Card className="mt-6 flex flex-col gap-3 lg:gap-4 lg:flex-row align-middle justify-center ">
       <div className="flex flex-col grow align-middle">
-        Manager:
+        Manager
         {/* @todo Replace with a more sophisticated component, with error handling and input validation, or ens */}
         <TextInput
           onChange={(e) => setInputValues({ ...inputValues, manager: e.target.value })}
@@ -76,12 +76,13 @@ export default function SearchFiltersCard({
       <div className="">
         Status
         <Select
-          className="min-w-[8rem]"
           value={inputValues.status.toString()}
           onValueChange={(value) => setInputValues({ ...inputValues, status: Number(value) })}
-          // icon={ICON_BY_STATUS[inputValues.status]}
+          icon={ICON_BY_STATUS[inputValues.status]}
         >
-          <SelectItem value="0">Any</SelectItem>
+          <SelectItem icon={ICON_BY_STATUS[0]} value="0">
+            Any
+          </SelectItem>
           <SelectItem icon={ICON_BY_STATUS[1]} value="1">
             Pending
           </SelectItem>
@@ -95,6 +96,9 @@ export default function SearchFiltersCard({
             Inactive
           </SelectItem>
           <SelectItem icon={ICON_BY_STATUS[5]} value="5">
+            Untaken
+          </SelectItem>
+          <SelectItem icon={ICON_BY_STATUS[6]} value="6">
             Closed
           </SelectItem>
         </Select>
