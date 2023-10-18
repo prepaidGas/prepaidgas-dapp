@@ -16,7 +16,7 @@ import ToasterPopup from "../../../components/ToasterPopup"
 
 export default function SearchOrder() {
   const initialState: FilterOptions = {
-    manager: "0x0000000000000000000000000000000000000000",
+    manager: "",
     status: 0,
     numberOfEntries: 50,
   }
@@ -25,8 +25,12 @@ export default function SearchOrder() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalEntries, setTotalEntries] = useState<undefined | number>(undefined)
 
+  const defaultManager = "0x0000000000000000000000000000000000000000"
+
   const executeSearch = async (pageNumber: number) => {
+    console.log("executeSearch", { pageNumber })
     await getTotalEntriesNumber()
+
     console.log("starting search")
     try {
       const data = await readContract({
@@ -34,13 +38,13 @@ export default function SearchOrder() {
         abi: GasOrderABI,
         functionName: "getFilteredOrders",
         args: [
-          filterState.manager,
+          filterState.manager || defaultManager,
           filterState.status,
           filterState.numberOfEntries,
           (pageNumber - 1) * filterState.numberOfEntries,
         ],
       })
-      console.log("DATA", data)
+      // console.log("DATA", data)
       setOrdersData(data as FilteredOrderStructOutput[])
     } catch (e) {
       console.log("ERROR: ", e)
@@ -53,7 +57,7 @@ export default function SearchOrder() {
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
         functionName: "totalMatchingOrdersCount",
-        args: [filterState.manager, filterState.status],
+        args: [filterState.manager || defaultManager, filterState.status],
       })
       console.log("getMaxEntriesNumber", data)
       console.log("getMaxEntriesNumber2", Number(data))
@@ -64,16 +68,15 @@ export default function SearchOrder() {
     }
   }
 
-  useEffect(() => {
-    console.log("FilterState: ", filterState)
-    executeSearch(1)
-    setCurrentPage(1)
-  }, [filterState])
+  // useEffect(() => {
+  //   console.log("FilterState: ", filterState)
+  //   executeSearch(currentPage)
+  // }, [])
 
   useEffect(() => {
     console.log("Current Page: ", currentPage)
     executeSearch(currentPage)
-  }, [currentPage])
+  }, [currentPage, filterState])
 
   useEffect(() => {
     console.log("Data", data)
@@ -113,7 +116,7 @@ export default function SearchOrder() {
     <>
       <Title>Search results: {data?.length}</Title>
       <Text>You might find orders</Text>
-      <SearchFiltersCard setFilterState={setFilterState} />
+      <SearchFiltersCard initialValue={initialState} onSubmit={setFilterState} />
       {/* Main section */}
       {data && (
         // <div className="flex justify-center align-middle mt-4">

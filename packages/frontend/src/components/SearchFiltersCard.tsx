@@ -19,17 +19,17 @@ export interface FilterOptions {
   numberOfEntries: 10 | 20 | 30 | 50 | 100
 }
 
-export default function SearchFiltersCard({ setFilterState }: any) {
+export default function SearchFiltersCard({
+  initialValue,
+  onSubmit,
+}: {
+  initialValue: FilterOptions
+  onSubmit: (x: FilterOptions) => void
+}) {
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
 
-  const initialState: FilterOptions = {
-    manager: "",
-    status: 0,
-    numberOfEntries: 50,
-  }
-
   //Input values
-  const [inputValues, setInputValues] = useState({ ...initialState })
+  const [inputValues, setInputValues] = useState({ ...initialValue })
 
   //Validation state
   const [validationErrors, setValidationErrors] = useState({
@@ -38,9 +38,10 @@ export default function SearchFiltersCard({ setFilterState }: any) {
     numberOfEntries: "",
   })
 
-  const validateSearchForm = (isSubmitting?: boolean) => {
+  const validateSearchForm = () => {
     const errors = { ...validationErrors }
     const noSpacesManager = inputValues.manager.replace(/\s/g, "")
+
     if (ETH_ADDRESS_REGEX.test(noSpacesManager) || noSpacesManager === "") {
       errors.manager = ""
     } else {
@@ -48,14 +49,17 @@ export default function SearchFiltersCard({ setFilterState }: any) {
     }
 
     setValidationErrors(errors)
-    const IsEverythingValid = Object.values(errors).every((x) => x === "")
 
-    if (isSubmitting && IsEverythingValid) {
-      if (inputValues.manager === "") {
-        setFilterState({ ...inputValues, manager: "0x0000000000000000000000000000000000000000" })
-      } else {
-        setFilterState({ ...inputValues })
-      }
+    const IsEverythingValid = Object.values(errors).every((x) => x === "")
+    return IsEverythingValid
+  }
+
+  const handleSubmit = () => {
+    const isValidForm = validateSearchForm()
+    if (!isValidForm) return
+
+    if (inputValues.manager === "") {
+      onSubmit({ ...inputValues })
     }
   }
 
@@ -68,7 +72,7 @@ export default function SearchFiltersCard({ setFilterState }: any) {
   }, [inputValues])
 
   useEffect(() => {
-    validateSearchForm(true)
+    validateSearchForm()
   }, [])
 
   return (
@@ -129,13 +133,13 @@ export default function SearchFiltersCard({ setFilterState }: any) {
       <div>
         &nbsp;
         <div className="flex flex-col lg:flex-row lg:my-auto gap-2">
-          <Button className="h-[38px] m-0" onClick={() => validateSearchForm(true)} icon={FunnelIcon}>
+          <Button className="h-[38px] m-0" onClick={handleSubmit} icon={FunnelIcon}>
             Apply
           </Button>
           <Button
             className="h-[38px] m-0"
             variant="secondary"
-            onClick={() => setInputValues({ ...initialState })}
+            onClick={() => setInputValues({ ...initialValue })}
             icon={XMarkIcon}
           >
             Clear
