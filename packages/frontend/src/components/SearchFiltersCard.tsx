@@ -1,23 +1,18 @@
-import {
-  ArrowPathIcon,
-  CheckCircleIcon,
-  PlayIcon,
-  ExclamationTriangleIcon,
-  XCircleIcon,
-  FunnelIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { ZodIssue, z } from "zod"
+
+import { FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import { Card, TextInput, Select, SelectItem, Button } from "@tremor/react"
-import { useEffect, useState } from "react"
 
-import { ETH_ADDRESS_REGEX } from "../constants/regexConstants"
+import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX } from "../constants/regexConstants"
+import { ICON_BY_STATUS } from "../constants/themeConstants"
 
-//@todo move interfaces
-export interface FilterOptions {
-  manager: string
-  status: 0 | 1 | 2 | 3 | 4 | 5
-  numberOfEntries: 10 | 20 | 30 | 50 | 100
-}
+const schema = z.object({
+  manager: z.string().regex(ETH_ADDRESS_OR_EMPTY_STRING_REGEX, { message: "Incorrect address" }),
+  status: z.number().lte(5).gte(0),
+  numberOfEntries: z.number(),
+})
+export type FilterOptions = z.infer<typeof schema>
 
 export default function SearchFiltersCard({
   initialValue,
@@ -30,28 +25,17 @@ export default function SearchFiltersCard({
 
   //Input values
   const [inputValues, setInputValues] = useState({ ...initialValue })
-
-  //Validation state
-  const [validationErrors, setValidationErrors] = useState({
-    manager: "",
-    status: "",
-    numberOfEntries: "",
-  })
+  const [validationErrors, setValidationErrors] = useState<null | { [key: string]: string[] }>(null)
 
   const validateSearchForm = () => {
-    const errors = { ...validationErrors }
-    const noSpacesManager = inputValues.manager.replace(/\s/g, "")
+    setValidationErrors(null)
 
-    if (ETH_ADDRESS_REGEX.test(noSpacesManager) || noSpacesManager === "") {
-      errors.manager = ""
-    } else {
-      errors.manager = "Incorrect address"
+    const result = schema.safeParse(inputValues)
+    if (result.success === false) {
+      setValidationErrors(result.error.flatten().fieldErrors)
+      return false
     }
-
-    setValidationErrors(errors)
-
-    const IsEverythingValid = Object.values(errors).every((x) => x === "")
-    return IsEverythingValid
+    return true
   }
 
   const handleSubmit = () => {
@@ -83,8 +67,8 @@ export default function SearchFiltersCard({
         <TextInput
           onChange={(e) => setInputValues({ ...inputValues, manager: e.target.value })}
           value={inputValues.manager}
-          error={!!validationErrors.manager}
-          errorMessage={validationErrors.manager}
+          error={!!validationErrors?.manager}
+          errorMessage={validationErrors?.manager[0]}
           placeholder="0x1dA..."
           spellCheck={false}
         />
@@ -94,22 +78,23 @@ export default function SearchFiltersCard({
         <Select
           className="min-w-[8rem]"
           value={inputValues.status.toString()}
-          onValueChange={(value) => setInputValues({ ...inputValues, status: Number(value) as 0 | 1 | 2 | 3 | 4 | 5 })}
+          onValueChange={(value) => setInputValues({ ...inputValues, status: Number(value) })}
+          // icon={ICON_BY_STATUS[inputValues.status]}
         >
           <SelectItem value="0">Any</SelectItem>
-          <SelectItem icon={ArrowPathIcon} value="1">
+          <SelectItem icon={ICON_BY_STATUS[1]} value="1">
             Pending
           </SelectItem>
-          <SelectItem icon={CheckCircleIcon} value="2">
+          <SelectItem icon={ICON_BY_STATUS[2]} value="2">
             Accepted
           </SelectItem>
-          <SelectItem icon={PlayIcon} value="3">
+          <SelectItem icon={ICON_BY_STATUS[3]} value="3">
             Active
           </SelectItem>
-          <SelectItem icon={ExclamationTriangleIcon} value="4">
+          <SelectItem icon={ICON_BY_STATUS[4]} value="4">
             Inactive
           </SelectItem>
-          <SelectItem icon={XCircleIcon} value="5">
+          <SelectItem icon={ICON_BY_STATUS[5]} value="5">
             Closed
           </SelectItem>
         </Select>
