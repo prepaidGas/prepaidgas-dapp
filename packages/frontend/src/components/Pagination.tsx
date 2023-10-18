@@ -12,11 +12,19 @@ interface PaginationProps {
   siblingCount?: number
   currentPage: number
   pageSize: number
+  children?: React.ReactNode
+  className?: string
 }
 
-export default function Pagination(props: PaginationProps) {
-  const { onPageChange, totalCount, siblingCount = 2, currentPage, pageSize } = props
-
+export default function Pagination({
+  onPageChange,
+  totalCount,
+  siblingCount,
+  currentPage,
+  pageSize,
+  children,
+  className,
+}: PaginationProps) {
   const paginationRange = usePagination({
     currentPage,
     totalCount,
@@ -36,16 +44,18 @@ export default function Pagination(props: PaginationProps) {
     onPageChange(currentPage - 1)
   }
 
-  let lastPage = paginationRange[paginationRange.length - 1]
-  return (
-    <ul className="flex gap-2 flex-row ">
-      <li className={`${currentPage === 1 ? "hidden" : ""}`} onClick={onPrevious}>
+  const renderPaginationPages = () => (
+    <ul className="flex flex-row self-center items-center my-4">
+      <li className={`${currentPage === 1 ? "invisible" : "cursor-pointer"}`} onClick={onPrevious}>
         <Icon icon={ArrowLongLeftIcon}></Icon>
       </li>
       {paginationRange.map((pageNumber, index) => {
         if (pageNumber === DOTS) {
           return (
-            <li key={`dots-${index}`} className="text-gray-400 flex align-middle justify-center items-center">
+            <li
+              key={`dots-${index}`}
+              className="text-gray-400 flex align-middle justify-center items-center cursor-default"
+            >
               &#8230;
             </li>
           )
@@ -53,7 +63,7 @@ export default function Pagination(props: PaginationProps) {
 
         return (
           <li
-            className={`flex align-middle justify-center items-center ${
+            className={`flex align-middle justify-center items-center cursor-pointer p-2 text-base  ${
               pageNumber === currentPage ? "text-blue-500" : "text-white"
             }`}
             key={`pageBtt-${index}`}
@@ -63,9 +73,23 @@ export default function Pagination(props: PaginationProps) {
           </li>
         )
       })}
-      <li className={`${currentPage === lastPage ? "hidden" : ""}`} onClick={onNext}>
+      <li className={`${currentPage === lastPage ? "invisible" : ""}`} onClick={onNext}>
         <Icon icon={ArrowLongRightIcon}></Icon>
       </li>
     </ul>
   )
+
+  let lastPage = paginationRange[paginationRange.length - 1]
+  return (
+    <div className={className}>
+      {renderPaginationPages()}
+      {children}
+      {renderPaginationPages()}
+    </div>
+  )
+}
+
+Pagination.defaultProps = {
+  siblingCount: 2,
+  className: "",
 }

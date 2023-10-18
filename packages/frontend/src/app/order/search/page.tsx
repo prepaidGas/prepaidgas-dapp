@@ -116,18 +116,26 @@ export default function SearchOrder() {
       <SearchFiltersCard setFilterState={setFilterState} />
       {/* Main section */}
       {data && (
-        <div className="flex justify-center align-middle mt-4">
-          <Pagination
-            onPageChange={setCurrentPage}
-            currentPage={currentPage}
-            totalCount={totalEntries && totalEntries}
-            pageSize={filterState.numberOfEntries}
-          />
-        </div>
+        // <div className="flex justify-center align-middle mt-4">
+        <Pagination
+          className="flex flex-col"
+          onPageChange={setCurrentPage}
+          currentPage={currentPage}
+          totalCount={totalEntries && totalEntries}
+          pageSize={filterState.numberOfEntries}
+        >
+          {data?.map((item: any, index) => (
+            <OrderCard
+              {...item}
+              className={index === 0 ? "mt-0" : "mt-3"}
+              onFavorited={onOrderCardAction}
+              key={`order-${item.id}`}
+            />
+          ))}
+        </Pagination>
+        // </div>
       )}
-      {data?.map((item: any) => (
-        <OrderCard {...item} onFavorited={onOrderCardAction} key={`order-${item.id}`} />
-      ))}
+
       {data?.length === 0 ? <Metric className="self-center">Sorry, we couldn&#39;t find any results</Metric> : null}
 
       {showPopup ? (

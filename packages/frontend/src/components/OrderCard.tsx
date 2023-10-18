@@ -19,6 +19,7 @@ import { renderBadge } from "../utils/utils"
 
 interface OrderCard extends FilteredOrderStructOutput {
   onFavorited(favorited: boolean): void
+  className?: string
 }
 
 // @todo display order data
@@ -34,6 +35,7 @@ export default function OrderCard({
   reward,
   guarantee,
   onFavorited = () => {},
+  className = "",
 }: OrderCard) {
   const checkIfIsFavorite = () => {
     let favOrders = localStorage.getItem("FAVORITE_ORDERS")
@@ -81,7 +83,7 @@ export default function OrderCard({
   }
 
   return (
-    <Card className="mt-3" decoration="top" decorationColor={STATUS_COLORS[Number(status)]}>
+    <Card className={className} decoration="top" decorationColor={STATUS_COLORS[Number(status)]}>
       <Flex>
         {renderBadge(status)}
         {isFavorite ? (
