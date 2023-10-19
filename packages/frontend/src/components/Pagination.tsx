@@ -63,9 +63,8 @@ export default function Pagination({
 
           return (
             <li
-              className={`flex align-middle justify-center items-center cursor-pointer p-2 text-base  ${
-                pageNumber === currentPage ? "text-blue-500" : "text-white"
-              }`}
+              className={`flex align-middle justify-center items-center cursor-pointer p-2 text-base box-border border-transparent border hover:border-blue-500 rounded 
+              ${pageNumber === currentPage ? "text-blue-500" : "text-white"}`}
               key={`pageBtt-${index}`}
               onClick={() => onPageChange(pageNumber)}
             >
@@ -73,7 +72,7 @@ export default function Pagination({
             </li>
           )
         })}
-        <li className={`${currentPage === lastPage ? "invisible" : ""}`} onClick={onNext}>
+        <li className={`${currentPage === lastPage ? "invisible" : "cursor-pointer"}`} onClick={onNext}>
           <Icon icon={ArrowLongRightIcon}></Icon>
         </li>
       </ul>
