@@ -2,7 +2,7 @@ import format from "date-fns/format"
 
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 
-import { STATUS_COLORS } from "../constants/themeConstants"
+import { COLOR_BY_STATUS } from "../constants/themeConstants"
 
 import { Badge, Card, Text, Metric, Flex, ProgressBar, Icon, Button } from "@tremor/react"
 
@@ -15,10 +15,13 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline"
 import { useState } from "react"
-import { renderBadge } from "../utils/utils"
+import StatusBadge from "./StatusBadge"
+import { redirect } from "next/navigation"
+import Link from "next/link"
 
 interface OrderCard extends FilteredOrderStructOutput {
   onFavorited(favorited: boolean): void
+  className?: string
 }
 
 // @todo display order data
@@ -34,6 +37,7 @@ export default function OrderCard({
   reward,
   guarantee,
   onFavorited = () => {},
+  className = "",
 }: OrderCard) {
   const checkIfIsFavorite = () => {
     let favOrders = localStorage.getItem("FAVORITE_ORDERS")
@@ -81,9 +85,9 @@ export default function OrderCard({
   }
 
   return (
-    <Card className="mt-3" decoration="top" decorationColor={STATUS_COLORS[Number(status)]}>
+    <Card className={className} decoration="top" decorationColor={COLOR_BY_STATUS[Number(status)]}>
       <Flex>
-        {renderBadge(status)}
+        <StatusBadge status={Number(status)} />
         {isFavorite ? (
           <Button
             onClick={() => {
@@ -128,6 +132,11 @@ export default function OrderCard({
         <Text>Used: 0 / {maxGas.toString()}</Text>
       </Flex>
       <ProgressBar value={32} className="mt-2" />
+      <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
+        <Link href={`/order/${id}`}>
+          <Button variant="secondary">Manage Order</Button>
+        </Link>
+      </div>
     </Card>
   )
 }
