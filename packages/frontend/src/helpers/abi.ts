@@ -10,7 +10,7 @@ interface FieldEntry {
   components?: FieldEntry[]
 }
 
-interface ABIEntry {
+export interface ABIEntry {
   inputs?: FieldEntry[]
   outputs?: FieldEntry[]
   anonymous?: boolean
