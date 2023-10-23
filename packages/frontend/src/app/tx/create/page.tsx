@@ -1,9 +1,10 @@
 "use client"
 import { useEffect, useState } from "react"
 import { z } from "zod"
-import { ABIEntry } from "helpers/abi"
+import { readContract, writeContract, waitForTransaction } from "@wagmi/core"
+import { ABIEntry, FieldEntry } from "helpers/abi"
 
-import { Button, Card, NumberInput, SearchSelect, SearchSelectItem, Text, TextInput } from "@tremor/react"
+import { Button, Card, NumberInput, SearchSelect, SearchSelectItem, Text, TextInput, Title } from "@tremor/react"
 
 import { SPINNER_COLOR } from "../../../constants/themeConstants"
 import { TailSpin } from "react-loader-spinner"
@@ -13,8 +14,6 @@ const schema = z.object({
   gasLimit: z.number(),
   smartContractAddress: z.string(),
   userAbi: z.string(),
-  funcSelect: z.string(),
-  args: z.array(z.object({ name: z.string(), type: z.string(), value: z.any() })),
 })
 
 type TransactionFormState = z.infer<typeof schema>
@@ -32,116 +31,12 @@ export default function TransactionCreate() {
     gasLimit: 0,
     smartContractAddress: "",
     userAbi: "",
-    funcSelect: "",
   }
 
   //Input values
   const [inputValues, setInputValues] = useState<TransactionFormState>({ ...initialState })
-
-  // const createOrder = async () => {
-  //   console.log("CreateOrderTestArr: START")
-  //   const testArr = [
-  //     inputValues.gasAmount,
-  //     getUnixTimestampInSeconds(
-  //       combineDateAndTime(inputValues.executionPeriodStartDate, inputValues.executionPeriodStartTime),
-  //     ),
-  //     getUnixTimestampInSeconds(
-  //       combineDateAndTime(inputValues.executionPeriodEndDate, inputValues.executionPeriodEndTime),
-  //     ),
-  //     inputValues.executionWindow,
-  //     { token: inputValues.rewardValueToken, amount: inputValues.rewardValueAmount } as PaymentStruct,
-  //     { token: inputValues.gasCostValueToken, gasPrice: inputValues.gasCostValueGasPrice } as GasPaymentStruct,
-  //     { token: inputValues.guaranteeValueToken, gasPrice: inputValues.guaranteeValueGasPrice } as GasPaymentStruct,
-  //     inputValues.rewardTransfer,
-  //     inputValues.gasCostTransfer,
-  //   ]
-  //   console.log("CreateOrderTestArr: ", testArr)
-
-  //   setShowDialogWindow(true)
-  //   setIsLoading(true)
-
-  //   //Approve both reward and GasCost * GasAmount
-  //   if (inputValues.rewardValueToken === inputValues.gasCostValueToken) {
-  //     try {
-  //       const data = await writeContract({
-  //         address: inputValues.rewardValueToken as `0x${string}`,
-  //         abi: MockTokenABI,
-  //         functionName: "approve",
-  //         args: [
-  //           "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-  //           inputValues.gasCostValueGasPrice * inputValues.gasAmount + inputValues.rewardValueAmount,
-  //         ],
-  //       })
-  //       console.log("CreateOrderData: ", data)
-  //       const txData = await waitForTransaction({ hash: data.hash })
-  //       console.log("CreateOrderTXData: ", txData)
-  //     } catch (e) {
-  //       console.log("CreateOrderError: ", e)
-  //     }
-  //   } else {
-  //     //Approve reward
-  //     try {
-  //       const data = await writeContract({
-  //         address: inputValues.rewardValueToken as `0x${string}`,
-  //         abi: MockTokenABI,
-  //         functionName: "approve",
-  //         args: ["0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", inputValues.rewardValueAmount],
-  //       })
-  //       console.log("CreateOrderData: ", data)
-  //     } catch (e) {
-  //       console.log("CreateOrderError: ", e)
-  //     }
-  //     //Approve gasCost * gasAmount
-  //     try {
-  //       const data = await writeContract({
-  //         address: inputValues.gasCostValueToken as `0x${string}`,
-  //         abi: MockTokenABI,
-  //         functionName: "approve",
-  //         args: [
-  //           "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-  //           inputValues.gasCostValueGasPrice * inputValues.gasAmount,
-  //         ],
-  //       })
-  //       console.log("CreateOrderData: ", data)
-  //     } catch (e) {
-  //       console.log("CreateOrderError: ", e)
-  //     }
-  //   }
-
-  //   // Create Order
-  //   try {
-  //     const data = await writeContract({
-  //       address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-  //       abi: GasOrderABI,
-  //       functionName: "createOrder",
-  //       args: [
-  //         inputValues.gasAmount,
-  //         getUnixTimestampInSeconds(
-  //           combineDateAndTime(inputValues.executionPeriodStartDate, inputValues.executionPeriodStartTime),
-  //         ),
-  //         getUnixTimestampInSeconds(
-  //           combineDateAndTime(inputValues.executionPeriodEndDate, inputValues.executionPeriodEndTime),
-  //         ),
-  //         inputValues.executionWindow,
-  //         { token: inputValues.rewardValueToken, amount: inputValues.rewardValueAmount } as PaymentStruct,
-  //         { token: inputValues.gasCostValueToken, gasPrice: inputValues.gasCostValueGasPrice } as GasPaymentStruct,
-  //         { token: inputValues.guaranteeValueToken, gasPrice: inputValues.guaranteeValueGasPrice } as GasPaymentStruct,
-  //         inputValues.rewardTransfer,
-  //         inputValues.gasCostTransfer,
-  //       ],
-  //     })
-  //     console.log("CreateOrderData: ", data)
-  //     const txData = await waitForTransaction({ hash: data.hash })
-  //     console.log("CreateOrderTXData: ", txData)
-  //     setTransactionDetails(txData)
-  //   } catch (e) {
-  //     console.log(e)
-  //     setTransactionDetails({ error: e })
-  //     console.log("CreateOrderError: ", e)
-  //   }
-  //   setIsLoading(false)
-  //   console.log("CreateOrderTestArr: END")
-  // }
+  const [selectedFunction, setSelectedFunction] = useState<string>("")
+  const [argInputs, setArgInputs] = useState<any>([])
 
   const clampNumber = (value, minNum, maxNum) => {
     console.log("Clamped: ", value)
@@ -163,13 +58,74 @@ export default function TransactionCreate() {
   const parseAbi = () => {
     setIsAbiParsed(false)
     try {
-      const parsed = JSON.parse(inputValues.userAbi)
+      let parsed = JSON.parse(inputValues.userAbi)
+      console.log("Parsed ABI: ", parsed)
+      parsed = parsed.filter((item) => item.type === "function")
+      console.log("Filtered ABI: ", parsed)
+
       setParsedAbi(parsed)
       setIsAbiParsed(true)
     } catch (e) {
       console.log("parseAbi Error: ", e)
     }
   }
+
+  const resolveComponent = (comp: FieldEntry) => {
+    console.log("Comp: ", comp)
+
+    if (comp.components) {
+      return <div>{comp.components.map(resolveComponent)}</div>
+    }
+
+    switch (comp.type) {
+      case "string":
+        return (
+          <div className="flex flex-col">
+            <Text className="mt-4">{comp.name}</Text>
+            <TextInput></TextInput>
+          </div>
+        )
+      case "address":
+        return (
+          <div className="flex flex-col">
+            <Text className="mt-4">{comp.name}</Text>
+            <TextInput></TextInput>
+          </div>
+        )
+      case "uint256":
+        return (
+          <div className="flex flex-col">
+            <Text className="mt-4">{comp.name}</Text>
+            <NumberInput></NumberInput>
+          </div>
+        )
+      default:
+        return (
+          <div className="flex flex-col">
+            <Text className="mt-4">{comp.name}</Text>
+            <TextInput></TextInput>
+          </div>
+        )
+    }
+  }
+
+  const renderArgInputs = () => {
+    const foundEntry = parsedAbi.find((item) => item.name === selectedFunction)
+    console.log("Found Entry: ", foundEntry)
+    const inputs = []
+    foundEntry.inputs.map((item) => inputs.push(resolveComponent(item)))
+    console.log("Inputs: ", inputs)
+    setArgInputs(inputs)
+  }
+
+  useEffect(() => {
+    if (selectedFunction === "") return
+    renderArgInputs()
+  }, [selectedFunction])
+
+  useEffect(() => {
+    console.log("Arg Inuts: ", argInputs)
+  }, [argInputs])
 
   const validateSearchForm = () => {
     setValidationErrors(null)
@@ -191,9 +147,25 @@ export default function TransactionCreate() {
     setIsValidating(true)
 
     if (validateSearchForm()) {
-      // createOrder()
+      executeFunction()
     } else {
       console.log("Form has errors. Please fix them before submitting.")
+    }
+  }
+
+  const executeFunction = async () => {
+    try {
+      const data = await writeContract({
+        address: /* TODO what address to use?*/ "",
+        abi: JSON.parse(inputValues.userAbi),
+        functionName: selectedFunction,
+        args: [],
+      })
+      console.log("CreateOrderData: ", data)
+      const txData = await waitForTransaction({ hash: data.hash })
+      console.log("CreateOrderTXData: ", txData)
+    } catch (e) {
+      console.log("CreateOrderError: ", e)
     }
   }
 
@@ -285,33 +257,15 @@ export default function TransactionCreate() {
         </Button>
       </div>
 
-      {/* <div className="flex flex-col lg:flex-row gap-6 mt-4">
-        <div className="flex flex-col grow">
-          <Text>Function</Text>
-          <div className="flex flex-col mt-2">
-            <Select value="none">
-              {GasOrderABI.filter((item) => item.type === "function").map((item, index) => {
-                console.log("ITEM: ", item)
-                return <SelectItem value={item.name}>{item.name}</SelectItem>
-              })}
-            </Select>
-          </div>
-        </div>
-      </div> */}
-
       {isAbiParsed && (
         <div className="flex flex-col lg:flex-row gap-6 mt-4">
           <div className="flex flex-col grow">
             <Text>Function</Text>
             <div className="flex flex-col mt-2">
-              <SearchSelect
-                value={inputValues.funcSelect}
-                onValueChange={(value) => setInputValues({ ...inputValues, funcSelect: value })}
-              >
+              <SearchSelect value={selectedFunction} onValueChange={setSelectedFunction}>
                 {parsedAbi
                   .filter((item) => item.type === "function")
                   .map((item, index) => {
-                    console.log("Parsed ABI ITEM: ", item)
                     return <SearchSelectItem value={item.name}>{item.name}</SearchSelectItem>
                   })}
               </SearchSelect>
@@ -320,8 +274,11 @@ export default function TransactionCreate() {
         </div>
       )}
 
-      {isAbiParsed && inputValues.funcSelect && (
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">Function Args Should Be Here</div>
+      {isAbiParsed && selectedFunction && argInputs.length !== 0 && (
+        <div className="mt-8 flex flex-col">
+          <Title>Function Arguments</Title>
+          {argInputs}
+        </div>
       )}
 
       {isAbiParsed && (
