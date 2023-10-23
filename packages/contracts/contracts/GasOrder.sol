@@ -1,18 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
+
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+import "./Executor.sol";
+import "./base/GasOrderGetters.sol";
 import {ERC1155ish} from "./base/ERC1155ish.sol";
-
+import {Message} from "./base/ExecutionMessage.sol";
 import {FeeProcessor, Fee} from "./tools/FeeProcessor.sol";
-
 import {Order, FilteredOrder, OrderStatus, GasPayment, Payment, IGasOrder, TokenAmountWithDetails} from "./interfaces/IGasOrder.sol";
 
-import "./common/Errors.sol" as Error;
-import "./common/Constants.sol" as Const;
+import "./common/Errors.sol";
+import "./common/Constants.sol";
 
 import "hardhat/console.sol";
 
@@ -23,27 +26,15 @@ import "hardhat/console.sol";
  * @author SteMak, web3skeptic (markfender)
  */
 
-contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
+contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
   using SafeERC20 for IERC20;
+  using ECDSA for bytes32;
 
   address public immutable execution;
 
-  uint256 public ordersCount;
-  mapping(uint256 => Order) public order;
-
-  mapping(uint256 => Payment) public reward;
-  mapping(uint256 => GasPayment) public gasCost;
-  mapping(uint256 => GasPayment) public guarantee;
-
-  mapping(uint256 => address) public executor;
-
   // @todo move events to a separate file, probably to interface
-  event OrderCreate(uint256 indexed id, uint256 executionWindow);
-  event OrderAccept(uint256 indexed id, address indexed executor);
-  event OrderManagerChanged(uint256 indexed id, address indexed oldManager, address indexed newManager);
-
   modifier executionCallback() {
-    if (execution != msg.sender) revert Error.Unauthorized(msg.sender, execution);
+    if (execution != msg.sender) revert Unauthorized(msg.sender, execution);
     _;
   }
   /* @todo implement modifier of getter
@@ -52,24 +43,41 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
   }*/
 
   modifier deadlineNotMet(uint256 deadline) {
-    if (deadline <= block.timestamp) revert Error.DeadlineExpired(block.timestamp, deadline);
+    if (deadline <= block.timestamp) revert DeadlineExpired(block.timestamp, deadline);
     _;
   }
 
   modifier possibleExecutionWindow(uint256 window) {
-    if (window < Const.MIN_EXEC_WINDOW) revert Error.UnderflowValue(window, Const.MIN_EXEC_WINDOW);
+    if (window < MIN_EXEC_WINDOW) revert UnderflowValue(window, MIN_EXEC_WINDOW);
     _;
   }
 
   modifier specificStatus(uint256 id, OrderStatus expected) {
     OrderStatus real = status(id);
 
-    if (real != expected) revert Error.WrongOrderStatus(real, expected);
+    if (real != expected) revert WrongOrderStatus(real, expected);
     _;
   }
 
   constructor(address executionEndpoint, string memory link) ERC1155ish(link) {
     execution = executionEndpoint;
+  }
+
+  function addTransactionSignature(bytes calldata _signature, Message calldata transactionData) public {
+    if (txSignatures[_signature]) revert InvalidSignature(_signature);
+
+    bytes32 digest = Executor(execution).messageHash(transactionData);
+    address recovered = digest.recover(_signature);
+    if (recovered != transactionData.from) revert UnknownRecovered(recovered);
+
+    txSignatures[_signature] = true;
+    lockedTokens[transactionData.gasOrder][_signature] = transactionData.gas;
+
+    uint256 balance = usable(transactionData.onBehalf, transactionData.gasOrder, transactionData.from);
+    if (transactionData.gas > balance) revert GasLimitExceedBalance(transactionData.gas, balance);
+    // @todo check if user might spend gas
+    // @todo lock gas Tokens
+    // @todo should we utilize onrecive hook?
   }
 
   // @todo add orderExist function
@@ -212,13 +220,13 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
    */
   function revokeOrder(uint256 id) external {
     Order memory currentOrder = order[id];
-    if (msg.sender != currentOrder.manager) revert Error.Unauthorized(msg.sender, currentOrder.manager);
+    if (msg.sender != currentOrder.manager) revert Unauthorized(msg.sender, currentOrder.manager);
 
     OrderStatus currentStatus = status(id);
     // @notice it throws an error which states that `Untaken` status is an expectable,
     // but it also expects a `Pending` status
     if (currentStatus != OrderStatus.Pending && currentStatus != OrderStatus.Untaken)
-      revert Error.WrongOrderStatus(currentStatus, OrderStatus.Untaken);
+      revert WrongOrderStatus(currentStatus, OrderStatus.Untaken);
 
     executor[id] = address(1);
 
@@ -248,7 +256,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     uint256 gasSpent
   ) external executionCallback specificStatus(id, OrderStatus.Active) {
     uint256 balance = usable(onBehalf, id, from);
-    if (gasLimit > balance) revert Error.GasLimitExceedBalance(gasLimit, balance);
+    if (gasLimit > balance) revert GasLimitExceedBalance(gasLimit, balance);
 
     /// @dev should not happen in ordinary situations
     if (gasSpent > balance) gasSpent = balance;
@@ -267,28 +275,6 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
     }
   }
 
-  // @todo verify the function and all the possible states
-  /**
-   * @dev Gets the current status of an order with the given ID.
-   *
-   * @param id The ID of the order.
-   * @return status The current status of the order.
-   *
-   * This function returns the current status of an order based on various conditions
-   * such as the executor, execution deadlines, and more. It provides insight into the
-   * state of the order.
-   */
-  function status(uint256 id) public view returns (OrderStatus) {
-    if (order[id].manager == address(0)) return OrderStatus.None;
-    else if (executor[id] != address(0)) {
-      if (totalSupply(id) == 0) return OrderStatus.Closed;
-      else if (order[id].executionPeriodDeadline <= block.timestamp) return OrderStatus.Inactive;
-      else if (order[id].executionPeriodStart <= block.timestamp) return OrderStatus.Active;
-      else return OrderStatus.Accepted;
-    } else if (order[id].executionPeriodStart < block.timestamp) return OrderStatus.Untaken;
-    else return OrderStatus.Pending;
-  }
-
   /**
    * @dev Order management transfer
    *
@@ -298,165 +284,13 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish {
    */
   function transferOrderManagement(uint256 _orderId, address _newManager) external {
     address oldManager = order[_orderId].manager;
-    if (msg.sender != oldManager) revert Error.Unauthorized(msg.sender, oldManager);
+    if (msg.sender != oldManager) revert Unauthorized(msg.sender, oldManager);
     // @dev disallow setting manager address to zero, zero manager address is used to detect that the order is not created
     // if it is needed to set empty manager, it is recomended to set another dead address
-    if (oldManager == _newManager || _newManager == address(0)) revert Error.IncorrectAddressArgument(_newManager);
+    if (oldManager == _newManager || _newManager == address(0)) revert IncorrectAddressArgument(_newManager);
 
     order[_orderId].manager = _newManager;
 
     emit OrderManagerChanged(_orderId, oldManager, _newManager);
-  }
-
-  /// Getters function
-  // Getter function to filter and paginate orders
-
-  // @todo add user field
-  function getFilteredOrders(
-    address _manager,
-    OrderStatus _status,
-    uint256 _limit,
-    uint256 _start
-  ) external view returns (FilteredOrder[] memory) {
-    return getFilteredOrders(_manager, address(0), _status, _limit, _start);
-  }
-
-  // @todo add comments
-  function getFilteredOrders(
-    address _manager,
-    address _user,
-    OrderStatus _status,
-    uint256 _limit, // amount of items to get after start
-    uint256 _offset
-  ) public view returns (FilteredOrder[] memory) {
-    // Ensure the limit does not exceed the maximum
-    uint256 limit = (_limit > Const.MAX_FILTERED_ORDERS) ? Const.MAX_FILTERED_ORDERS : _limit;
-
-    FilteredOrder[] memory result = new FilteredOrder[](limit);
-
-    uint256 addedOrders = 0;
-    for (uint256 orderId = 0; orderId < ordersCount && addedOrders < limit; orderId++) {
-      if (
-        (_manager == address(0) || order[orderId].manager == _manager) &&
-        (_status == OrderStatus.None || status(orderId) == _status)
-      ) {
-        if (_offset > 0) _offset--;
-        else {
-          result[addedOrders] = FilteredOrder({
-            id: orderId,
-            manager: order[orderId].manager,
-            status: status(orderId),
-            maxGas: order[orderId].maxGas,
-            executionPeriodStart: order[orderId].executionPeriodStart,
-            executionPeriodDeadline: order[orderId].executionPeriodDeadline,
-            executionWindow: order[orderId].executionWindow,
-            availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0,
-            reward: TokenAmountWithDetails(
-              IERC20Metadata(reward[orderId].token).name(),
-              IERC20Metadata(reward[orderId].token).symbol(),
-              IERC20Metadata(reward[orderId].token).decimals(),
-              reward[orderId].token,
-              reward[orderId].amount
-            ),
-            gasCost: TokenAmountWithDetails(
-              IERC20Metadata(gasCost[orderId].token).name(),
-              IERC20Metadata(gasCost[orderId].token).symbol(),
-              IERC20Metadata(gasCost[orderId].token).decimals(),
-              gasCost[orderId].token,
-              gasCost[orderId].gasPrice
-            ),
-            guarantee: TokenAmountWithDetails(
-              IERC20Metadata(guarantee[orderId].token).name(),
-              IERC20Metadata(guarantee[orderId].token).symbol(),
-              IERC20Metadata(guarantee[orderId].token).decimals(),
-              guarantee[orderId].token,
-              guarantee[orderId].gasPrice
-            )
-          });
-
-          addedOrders++;
-        }
-      }
-    }
-
-    if (addedOrders < limit) {
-      // @dev cut array size
-      /// @solidity memory-safe-assembly
-      assembly {
-        mstore(result, addedOrders)
-      }
-    }
-
-    return result;
-  }
-
-  function getOrdersById(uint256[] calldata ids, address _user) public view returns (FilteredOrder[] memory) {
-    FilteredOrder[] memory result = new FilteredOrder[](ids.length);
-    for (uint256 resultIndex = 0; resultIndex < ids.length; resultIndex++) {
-      uint256 orderId = ids[resultIndex];
-      result[resultIndex] = FilteredOrder({
-        id: orderId,
-        manager: order[orderId].manager,
-        status: status(orderId),
-        maxGas: order[orderId].maxGas,
-        executionPeriodStart: order[orderId].executionPeriodStart,
-        executionPeriodDeadline: order[orderId].executionPeriodDeadline,
-        executionWindow: order[orderId].executionWindow,
-        availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0,
-        reward: TokenAmountWithDetails(
-          IERC20Metadata(reward[orderId].token).name(),
-          IERC20Metadata(reward[orderId].token).symbol(),
-          IERC20Metadata(reward[orderId].token).decimals(),
-          reward[orderId].token,
-          reward[orderId].amount
-        ),
-        gasCost: TokenAmountWithDetails(
-          IERC20Metadata(gasCost[orderId].token).name(),
-          IERC20Metadata(gasCost[orderId].token).symbol(),
-          IERC20Metadata(gasCost[orderId].token).decimals(),
-          gasCost[orderId].token,
-          gasCost[orderId].gasPrice
-        ),
-        guarantee: TokenAmountWithDetails(
-          IERC20Metadata(guarantee[orderId].token).name(),
-          IERC20Metadata(guarantee[orderId].token).symbol(),
-          IERC20Metadata(guarantee[orderId].token).decimals(),
-          guarantee[orderId].token,
-          guarantee[orderId].gasPrice
-        )
-      });
-    }
-    return result;
-  }
-
-  // Function to calculate the total number of matching orders
-  function totalMatchingOrdersCount(address _manager, OrderStatus _status) public view returns (uint256) {
-    uint256 matchingCount = 0;
-    for (uint256 orderId = 0; orderId < ordersCount; orderId++) {
-      if (
-        (_manager == address(0) || order[orderId].manager == _manager) &&
-        (_status == OrderStatus.None || status(orderId) == _status)
-      ) {
-        matchingCount++;
-      }
-    }
-    return matchingCount;
-  }
-
-  // @todo disallow approving gasTokens to yourself
-  // @todo test what is the limit on the amount of orders to return value successfuly
-  function getTotalBalance(address _user, address[] memory _holders) external view returns (uint256) {
-    //@todo limit holders length
-    uint256 totalGasBalance = 0;
-    uint256 holdersAmount = _holders.length;
-    for (uint256 orderId = 0; orderId < ordersCount; orderId++) {
-      uint256 holdersAllowance = 0;
-
-      for (uint256 i_holder = 0; i_holder < holdersAmount; i_holder++) {
-        holdersAllowance += allowance(_holders[i_holder], orderId, _user);
-      }
-      totalGasBalance += balanceOf(_user, orderId) + holdersAllowance;
-    }
-    return totalGasBalance;
   }
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
@@ -10,8 +10,8 @@ import {Validators} from "./tools/Validators.sol";
 import {IGasOrder} from "./interfaces/IGasOrder.sol";
 import {IExecutor} from "./interfaces/IExecutor.sol";
 
-import "./common/Errors.sol" as Error;
-import "./common/Constants.sol" as Const;
+import "./common/Errors.sol";
+import "./common/Constants.sol";
 
 contract Executor is IExecutor, ExecutionMessage, Validators {
   using ECDSA for bytes32;
@@ -34,12 +34,12 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
   );
 
   modifier validNonce(address from, uint256 nonce) {
-    if (nonces[from][nonce]) revert Error.NonceExhausted(from, nonce);
+    if (nonces[from][nonce]) revert NonceExhausted(from, nonce);
     _;
   }
 
   modifier deadlineMet(uint256 deadline) {
-    if (deadline > block.timestamp) revert Error.DeadlineNotMet(block.timestamp, deadline);
+    if (deadline > block.timestamp) revert DeadlineNotMet(block.timestamp, deadline);
     _;
   }
 
@@ -69,7 +69,7 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     uint256 gasSpent = _execute(message, signature, false);
 
     /// @dev address(0) means registered executor should be rewarded
-    _reportExecution(message, address(0), gasSpent, Const.INFR_GAS_EXECUTE);
+    _reportExecution(message, address(0), gasSpent, INFR_GAS_EXECUTE);
   }
 
   /**
@@ -92,7 +92,7 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
 
     uint256 gasSpent = _execute(message, signature, true);
 
-    uint256 infrastructureGas = Const.INFR_GAS_LIQUIDATE + Const.INFR_GAS_RECOVER_SIGNER * validatorThreshold();
+    uint256 infrastructureGas = INFR_GAS_LIQUIDATE + INFR_GAS_RECOVER_SIGNER * validatorThreshold();
     _reportExecution(message, msg.sender, gasSpent, infrastructureGas);
   }
 
@@ -113,8 +113,8 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     address last;
     for (uint256 i = 0; i < validatorThreshold(); i++) {
       address recovered = digest.recover(validations[i]);
-      if (last >= recovered) revert Error.IncorrectSignatureOrder(last, recovered);
-      if (!isValidator(recovered)) revert Error.UnknownRecovered(recovered);
+      if (last >= recovered) revert IncorrectSignatureOrder(last, recovered);
+      if (!isValidator(recovered)) revert UnknownRecovered(recovered);
       last = recovered;
     }
   }
@@ -138,7 +138,7 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     bytes32 digest = messageHash(message);
     address recovered = digest.recover(signature);
     /// @dev recovered could not be 0x0 due to `ECDSA.recover` design
-    if (recovered != message.from) revert Error.UnexpectedRecovered(recovered, message.from);
+    if (recovered != message.from) revert UnexpectedRecovered(recovered, message.from);
 
     nonces[message.from][message.nonce] = true;
 
@@ -148,7 +148,7 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
       abi.encodePacked(message.data, message.from)
     );
 
-    gasSpent = gas - gasleft() - Const.INFR_GAS_GET_GAS_SPENT;
+    gasSpent = gas - gasleft() - INFR_GAS_GET_GAS_SPENT;
 
     emit Execution(
       message.from,

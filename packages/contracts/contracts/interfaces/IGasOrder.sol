@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 struct Order {
   address manager;
@@ -63,4 +63,8 @@ interface IGasOrder {
     address fulfiller,
     uint256 gasSpent
   ) external;
+
+  event OrderCreate(uint256 indexed id, uint256 executionWindow);
+  event OrderAccept(uint256 indexed id, address indexed executor);
+  event OrderManagerChanged(uint256 indexed id, address indexed oldManager, address indexed newManager);
 }

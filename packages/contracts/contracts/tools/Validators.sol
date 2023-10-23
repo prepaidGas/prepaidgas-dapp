@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
@@ -24,7 +24,7 @@ contract Validators is Ownable2Step {
     _;
   }
 
-  constructor(uint256 minValidations, address[] memory initialValidators) {
+  constructor(uint256 minValidations, address[] memory initialValidators) Ownable(msg.sender) {
     setValidatorThreshold(minValidations);
 
     for (uint256 i = 0; i < initialValidators.length; i++) {
