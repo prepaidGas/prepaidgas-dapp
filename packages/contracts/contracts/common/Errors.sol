@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 import {OrderStatus} from "./../interfaces/IGasOrder.sol";
 
@@ -23,6 +23,7 @@ error NotOperator(address holder, address spender);
 
 error UnexpectedRecovered(address recovered, address expected);
 error UnknownRecovered(address recovered);
+error InvalidSignature(bytes signature);
 error IncorrectSignatureOrder(address lower, address higher);
 
 error IncorrectAddressArgument(address received);

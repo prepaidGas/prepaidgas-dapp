@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
@@ -14,7 +14,7 @@ enum Fee {
   Guarantee
 }
 
-contract FeeProcessor is Ownable2Step, Distributor {
+abstract contract FeeProcessor is Ownable2Step, Distributor {
   mapping(Fee => uint256) private _fee;
 
   event UpdateProtocolFee(Fee fee, uint256 old, uint256 current);

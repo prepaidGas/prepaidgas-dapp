@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -14,7 +14,7 @@ import {IExecutor} from "../interfaces/IExecutor.sol";
  *
  */
 // @todo add multiple trusted forewarders
-contract PrepaidGasForewarder is ERC2771Context, Ownable {
+abstract contract PrepaidGasForewarder is ERC2771Context, Ownable {
   using EnumerableSet for EnumerableSet.AddressSet;
 
   EnumerableSet.AddressSet internal _trustedForewarders;
