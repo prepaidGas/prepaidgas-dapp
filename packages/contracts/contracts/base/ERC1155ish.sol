@@ -81,8 +81,17 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
   function _approve(address from, uint256 id, address spender, uint256 amount) private {
     // @todo add error invalid spender
     if (from != spender) revert("");
+
+    if (_allowance[id][from][spender] > amount) {
+      uint256 diffDecrease = _allowance[id][from][spender] - amount;
+      _totalAllowance[id][from] -= diffDecrease;
+    } else if (_allowance[id][from][spender] < amount) {
+      uint256 diffIncrease = amount - _allowance[id][from][spender];
+      _totalAllowance[id][from] += diffIncrease;
+    }
     // @todo it should be impossible to transfer more than `balance - allowed`
     _allowance[id][from][spender] = amount;
+
     emit Approval(from, id, spender, amount);
   }
 
