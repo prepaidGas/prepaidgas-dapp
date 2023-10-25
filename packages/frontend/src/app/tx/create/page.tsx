@@ -198,15 +198,23 @@ export default function TransactionCreate() {
   }
 
   const handleArgInputChange = (value: any, index: number) => {
-    console.log("argValues: ", argValues)
-    console.log("INDEX: ", index)
+    // console.log("argValues: ", argValues)
+    // console.log("INDEX: ", index)
 
-    const newArgValues = [...argValues]
-    console.log("newArgValues: ", newArgValues)
-    newArgValues[index] = value
-    console.log("newArgValues: ", newArgValues)
-    setArgValues(newArgValues)
+    // const newArgValues = [...argValues]
+
+    // console.log("newArgValues: ", newArgValues)
+    // newArgValues[index] = value
+
+    // console.log("newArgValues: ", newArgValues)
+    setArgValues((prevState) => {
+      const nextState = [...prevState]
+      nextState[index] = value
+      return nextState
+    })
   }
+
+  console.log(argValues)
 
   const renderArgInputs = () => {
     const foundEntry = parsedAbi.find((item) => item.name === selectedFunction)
