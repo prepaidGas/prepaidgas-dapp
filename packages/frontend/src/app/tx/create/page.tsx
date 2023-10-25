@@ -4,10 +4,24 @@ import { z } from "zod"
 import { readContract, writeContract, waitForTransaction } from "@wagmi/core"
 import { ABIEntry, FieldEntry } from "helpers/abi"
 
-import { Button, Card, NumberInput, SearchSelect, SearchSelectItem, Text, TextInput, Title } from "@tremor/react"
+import {
+  Button,
+  Card,
+  NumberInput,
+  SearchSelect,
+  SearchSelectItem,
+  Select,
+  SelectItem,
+  Subtitle,
+  Text,
+  TextInput,
+  Title,
+} from "@tremor/react"
 
 import { SPINNER_COLOR } from "../../../constants/themeConstants"
 import { TailSpin } from "react-loader-spinner"
+import { CheckIcon, NoSymbolIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import JsonFormatter from "react-json-formatter"
 
 const schema = z.object({
   orderID: z.string(),
@@ -37,6 +51,7 @@ export default function TransactionCreate() {
   const [inputValues, setInputValues] = useState<TransactionFormState>({ ...initialState })
   const [selectedFunction, setSelectedFunction] = useState<string>("")
   const [argInputs, setArgInputs] = useState<any>([])
+  const [argValues, setArgValues] = useState<any>([])
 
   const clampNumber = (value, minNum, maxNum) => {
     console.log("Clamped: ", value)
@@ -70,62 +85,155 @@ export default function TransactionCreate() {
     }
   }
 
-  const resolveComponent = (comp: FieldEntry) => {
+  // const resolveComponent = (comp: FieldEntry) => {
+  //   console.log("Comp: ", comp)
+
+  //   if (comp.components) {
+  //     return (
+  //       <div className="flex flex-col mt-4 ml-4">
+  //         <Title>{comp.name}</Title>
+  //         <div className="ml-4">{comp.components.map(resolveComponent)}</div>
+  //       </div>
+  //     )
+  //   }
+
+  //   switch (comp.type) {
+  //     case "string":
+  //     case "address":
+  //       return (
+  //         <div className="flex flex-col">
+  //           <Text className="mt-4">{comp.name}</Text>
+  //           <TextInput
+  //             onChange={(e) => setArgValues((prevState) => ({ ...prevState, [comp.name]: e.target.value }))}
+  //           ></TextInput>
+  //         </div>
+  //       )
+  //     case "uint256":
+  //       return (
+  //         <div className="flex flex-col">
+  //           <Text className="mt-4">{comp.name}</Text>
+  //           <NumberInput
+  //             onChange={(e) => setArgValues((prevState) => ({ ...prevState, [comp.name]: Number(e.target.value) }))}
+  //           ></NumberInput>
+  //         </div>
+  //       )
+  //     case "bool":
+  //       return (
+  //         <div className="flex flex-col">
+  //           <Text className="mt-4">{comp.name}</Text>
+  //           <Select
+  //             className="min-w-[8rem]"
+  //             onValueChange={(value) => setArgValues({ ...argValues, [comp.name]: Boolean(value) })}
+  //           >
+  //             <SelectItem icon={NoSymbolIcon} value="false">
+  //               No
+  //             </SelectItem>
+  //             <SelectItem icon={CheckIcon} value="true">
+  //               Yes
+  //             </SelectItem>
+  //           </Select>
+  //         </div>
+  //       )
+  //     default:
+  //       return (
+  //         <div className="flex flex-col">
+  //           <Text className="mt-4">{comp.name}</Text>
+  //           <TextInput onChange={(e) => setArgValues({ ...argValues, [comp.name]: e.target.value })}></TextInput>
+  //         </div>
+  //       )
+  //   }
+  // }
+
+  const resolveComponent = (comp: FieldEntry, index: number) => {
     console.log("Comp: ", comp)
+    console.log("Index: ", index)
 
     if (comp.components) {
-      return <div>{comp.components.map(resolveComponent)}</div>
+      return (
+        <div className="flex flex-col mt-4 ml-4">
+          <Title>{comp.name}</Title>
+          <div className="ml-4">{comp.components.map(resolveComponent)}</div>
+        </div>
+      )
     }
 
     switch (comp.type) {
       case "string":
-        return (
-          <div className="flex flex-col">
-            <Text className="mt-4">{comp.name}</Text>
-            <TextInput></TextInput>
-          </div>
-        )
       case "address":
         return (
           <div className="flex flex-col">
             <Text className="mt-4">{comp.name}</Text>
-            <TextInput></TextInput>
+            <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput>
           </div>
         )
       case "uint256":
         return (
           <div className="flex flex-col">
             <Text className="mt-4">{comp.name}</Text>
-            <NumberInput></NumberInput>
+            <NumberInput onChange={(e) => handleArgInputChange(Number(e.target.value), index)}></NumberInput>
+          </div>
+        )
+      case "bool":
+        return (
+          <div className="flex flex-col">
+            <Text className="mt-4">{comp.name}</Text>
+            <Select className="min-w-[8rem]" onValueChange={(value) => handleArgInputChange(value, index)}>
+              <SelectItem icon={NoSymbolIcon} value="false">
+                No
+              </SelectItem>
+              <SelectItem icon={CheckIcon} value="true">
+                Yes
+              </SelectItem>
+            </Select>
           </div>
         )
       default:
         return (
           <div className="flex flex-col">
             <Text className="mt-4">{comp.name}</Text>
-            <TextInput></TextInput>
+            <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput>
           </div>
         )
     }
+  }
+
+  const handleArgInputChange = (value: any, index: number) => {
+    console.log("argValues: ", argValues)
+    console.log("INDEX: ", index)
+
+    const newArgValues = [...argValues]
+    console.log("newArgValues: ", newArgValues)
+    newArgValues[index] = value
+    console.log("newArgValues: ", newArgValues)
+    setArgValues(newArgValues)
   }
 
   const renderArgInputs = () => {
     const foundEntry = parsedAbi.find((item) => item.name === selectedFunction)
     console.log("Found Entry: ", foundEntry)
     const inputs = []
-    foundEntry.inputs.map((item) => inputs.push(resolveComponent(item)))
+    foundEntry.inputs.map((item, index) => inputs.push(resolveComponent(item, index)))
     console.log("Inputs: ", inputs)
     setArgInputs(inputs)
+    const emptyArr = Array(inputs.length)
+    setArgValues(emptyArr)
   }
 
   useEffect(() => {
-    if (selectedFunction === "") return
+    if (selectedFunction === "") {
+      setArgInputs([])
+      return
+    }
     renderArgInputs()
   }, [selectedFunction])
 
   useEffect(() => {
-    console.log("Arg Inuts: ", argInputs)
+    console.log("Arg Inputs: ", argInputs)
   }, [argInputs])
+
+  useEffect(() => {
+    console.log("Arg Values: ", argValues)
+  }, [argValues])
 
   const validateSearchForm = () => {
     setValidationErrors(null)
@@ -156,7 +264,7 @@ export default function TransactionCreate() {
   const executeFunction = async () => {
     try {
       const data = await writeContract({
-        address: /* TODO what address to use?*/ "",
+        address: inputValues.smartContractAddress,
         abi: JSON.parse(inputValues.userAbi),
         functionName: selectedFunction,
         args: [],
@@ -226,36 +334,96 @@ export default function TransactionCreate() {
             />
           </div>
         </div>
-        <div className="flex flex-col grow">
-          <Text>ABI</Text>
-          <div className="flex flex-col mt-2">
-            <TextInput
-              value={inputValues.userAbi}
-              onChange={(e) => setInputValues({ ...inputValues, userAbi: e.target.value })}
-              error={!!validationErrors?.userAbi}
-              errorMessage={validationErrors?.userAbi}
-              spellCheck={false}
-            />
-          </div>
-        </div>
       </div>
 
-      <div className="flex flex-row md:justify-end mt-4">
-        <Button className="grow md:grow-0" disabled={isLoading} onClick={parseAbi} variant="secondary">
-          {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-          <TailSpin
-            height={20}
-            width={20}
-            color={SPINNER_COLOR}
-            ariaLabel="tail-spin-loading"
-            radius="0"
-            wrapperStyle={{}}
-            wrapperClass=""
-            visible={isLoading}
-          />
-          {isLoading ? "" : "Parse ABI"}
-        </Button>
-      </div>
+      {isAbiParsed ? (
+        <div className="flex flex-col lg:flex-row gap-6 mt-4">
+          <div className="flex flex-col grow">
+            <Text>Functions parsed from provided ABI</Text>
+            <div className="max-h-[30rem] overflow-auto mt-2 tremor-TextInput-root flex flex-col relative w-full  min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
+              <JsonFormatter
+                json={JSON.stringify(parsedAbi)}
+                tabWith={4}
+                jsonStyle={{
+                  propertyStyle: { color: "rgb(59 130 246)" },
+                  stringStyle: { color: "rgb(16 185 129)" },
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col lg:flex-row gap-6 mt-4">
+          <div className="flex flex-col grow">
+            <Text>ABI</Text>
+            <div className="tremor-TextInput-root flex flex-col mt-2 relative w-full items-center min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
+              <textarea
+                value={inputValues.userAbi}
+                onChange={(e) => {
+                  e.target.style.height = ""
+                  e.target.style.height = e.target.scrollHeight + "px"
+                  setInputValues({ ...inputValues, userAbi: e.target.value })
+                }}
+                // error={!!validationErrors?.userAbi}
+                // errorMessage={validationErrors?.userAbi}
+                placeholder="Copy and paste your ABI here"
+                spellCheck={false}
+                className="tremor-TextInput-input w-full focus:outline-none focus:ring-0 border-none bg-transparent text-tremor-default text-tremor-content-emphasis dark:text-dark-tremor-content-emphasis [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none pl-3 pr-4 py-2 placeholder:text-tremor-content dark:placeholder:text-dark-tremor-content resize-none"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAbiParsed ? (
+        <div className="flex flex-row md:justify-end mt-4">
+          <Button
+            className="grow md:grow-0"
+            disabled={isLoading}
+            color="red"
+            icon={XMarkIcon}
+            onClick={() => {
+              setIsAbiParsed(false)
+              setParsedAbi(undefined)
+              setInputValues({ ...inputValues, userAbi: "" })
+              setArgInputs([])
+              setArgValues([])
+              setSelectedFunction("")
+            }}
+            variant="secondary"
+          >
+            {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+            <TailSpin
+              height={20}
+              width={20}
+              color={SPINNER_COLOR}
+              ariaLabel="tail-spin-loading"
+              radius="0"
+              wrapperStyle={{}}
+              wrapperClass=""
+              visible={isLoading}
+            />
+            {isLoading ? "" : "Clear ABI"}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-row md:justify-end mt-4">
+          <Button className="grow md:grow-0" disabled={isLoading} onClick={parseAbi} variant="secondary">
+            {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+            <TailSpin
+              height={20}
+              width={20}
+              color={SPINNER_COLOR}
+              ariaLabel="tail-spin-loading"
+              radius="0"
+              wrapperStyle={{}}
+              wrapperClass=""
+              visible={isLoading}
+            />
+            {isLoading ? "" : "Parse ABI"}
+          </Button>
+        </div>
+      )}
 
       {isAbiParsed && (
         <div className="flex flex-col lg:flex-row gap-6 mt-4">
