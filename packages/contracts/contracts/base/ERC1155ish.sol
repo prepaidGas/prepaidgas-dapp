@@ -11,7 +11,7 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
   /// @dev id => holder  => spender => amount
   mapping(uint256 => mapping(address => mapping(address => uint256))) private _allowance;
   /// @dev id => holder => amount
-  mapping(uint256 => mapping(address => uint256)) private _totalAllowance;
+  mapping(uint256 => mapping(address => uint256)) private _totalLocked;
 
   event Approval(address indexed holder, uint256 indexed id, address indexed spender, uint256 amount);
   event URI(string value);
@@ -42,11 +42,11 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
   }
 
   function usable(address from, uint256 id, address spender) public view returns (uint256) {
-    uint256 totalBalnace = balanceOf(from, id);
+    uint256 totalAccessibleBalnace = balanceOf(from, id) - _totalLocked[id][from];
     uint256 allowanceBoundary = allowance(from, id, spender);
 
-    if (!isApprovedForAll(from, spender) && totalBalnace > allowanceBoundary) return allowanceBoundary;
-    return totalBalnace;
+    if (!isApprovedForAll(from, spender) && totalAccessibleBalnace > allowanceBoundary) return allowanceBoundary;
+    return totalAccessibleBalnace;
   }
 
   function allowance(address holder, uint256 id, address spender) public view returns (uint256) {
@@ -82,17 +82,21 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
     // @todo add error invalid spender
     if (from != spender) revert("");
 
-    if (_allowance[id][from][spender] > amount) {
-      uint256 diffDecrease = _allowance[id][from][spender] - amount;
-      _totalAllowance[id][from] -= diffDecrease;
-    } else if (_allowance[id][from][spender] < amount) {
-      uint256 diffIncrease = amount - _allowance[id][from][spender];
-      _totalAllowance[id][from] += diffIncrease;
-    }
-    // @todo it should be impossible to transfer more than `balance - allowed`
     _allowance[id][from][spender] = amount;
 
     emit Approval(from, id, spender, amount);
+  }
+
+  function _lockGasTokens(address from, uint256 id, uint256 value) internal {
+    // @todo add error handling
+    _totalLocked[id][from] += value;
+    // @todo add event emmiting
+  }
+
+  function _unlockGasTokens(address from, uint256 id, uint256 value) internal {
+    // @todo add error handling
+    _totalLocked[id][from] -= value;
+    // @todo add event emmiting
   }
 
   // @todo add sufficient comments to describe the updated behaviour
@@ -106,22 +110,8 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
 
         uint256 usableAmount = usable(from, id, msg.sender);
         uint256 fromBalance = balanceOf(from, id);
-        // @todo check `from` and `to` address
-        uint256 totalAllowance = _totalAllowance[id][from];
-        address spender = msg.sender;
 
         if (usableAmount < value) revert ERC1155InsufficientBalance(from, fromBalance, value, id); // @todo replace with other custom errors
-
-        //_isValidTotalAllowance(from, id, )
-        // @todo check if it is transfer from or transfer
-        if (from != spender) {
-          _allowance[id][from][spender] -= value;
-          _totalAllowance[id][from] -= value;
-        } else {
-          // @todo insufficient allowance
-          if (totalAllowance < balanceOf(from, id) - value)
-            revert ERC1155InsufficientBalance(from, fromBalance, value, id);
-        }
       }
     }
     // create from balance var

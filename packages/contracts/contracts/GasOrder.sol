@@ -63,24 +63,36 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
     execution = executionEndpoint;
   }
 
-  function addTransactionSignature(bytes calldata _signature, Message calldata transactionData) public {
-    if (txSignatures[_signature]) revert InvalidSignature(_signature);
+  function addTransaction(
+    bytes calldata _signature,
+    Message calldata _transactionData
+  ) public specificStatus(_transactionData.gasOrder, OrderStatus.Active) {
+    // @todo use msg hash instead of sig
+    bytes32 hashedMsg = Executor(execution).messageHash(_transactionData);
+    // @todo update error to `Invalidsignature`
+    if (txMsgHashes[hashedMsg]) revert InvalidTransaction(hashedMsg);
 
-    bytes32 digest = Executor(execution).messageHash(transactionData);
-    address recovered = digest.recover(_signature);
-    if (recovered != transactionData.from) revert UnknownRecovered(recovered);
+    address recovered = hashedMsg.recover(_signature);
+    if (recovered != _transactionData.from) revert UnknownRecovered(recovered);
 
-    txSignatures[_signature] = true;
-    lockedTokens[transactionData.gasOrder][_signature] = transactionData.gas;
+    txMsgHashes[hashedMsg] = true;
+    lockedTokens[_transactionData.gasOrder][hashedMsg] = _transactionData.gas;
 
-    uint256 balance = usable(transactionData.onBehalf, transactionData.gasOrder, transactionData.from);
-    if (transactionData.gas > balance) revert GasLimitExceedBalance(transactionData.gas, balance);
-    // @todo check if user might spend gas
-    // @todo lock gas Tokens
-    // @todo should we utilize onrecive hook?
+    uint256 balance = usable(_transactionData.onBehalf, _transactionData.gasOrder, _transactionData.from);
+    if (_transactionData.gas >= balance) revert GasLimitExceedBalance(_transactionData.gas, balance);
+
+    _lockGasTokens(_transactionData.from, _transactionData.gasOrder, _transactionData.gas);
+    // @todo add event emmiting
   }
 
-  // @todo add orderExist function
+  function unlockGasTokens(uint256 orderId, Message calldata _transactionData) public {
+    bytes32 hashedMsg = Executor(execution).messageHash(_transactionData);
+    // @todo add error, no such tx
+    if (!txMsgHashes[hashedMsg]) revert InvalidTransaction(hashedMsg);
+
+    _unlockGasTokens(_transactionData.from, _transactionData.gasOrder, _transactionData.gas);
+  }
+
   // @todo add support of our _msgSender
   // @todo gas optimization
   // - rewrite loops with an unchecked increment
@@ -273,6 +285,8 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
       address unlockToken = guarantee[id].token;
       _distribute(fulfiller, unlockToken, _takeFee(Fee.Guarantee, unlockToken, unlockAmount));
     }
+
+    _unlockGasTokens(from, id, gasSpent);
   }
 
   /**

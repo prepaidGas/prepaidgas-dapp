@@ -13,7 +13,7 @@ contract GasOrderStateVariables {
 
   mapping(uint256 => address) public executor;
 
-  // order Id -> txSignature -> amount of locked tokens
-  mapping(uint256 => mapping(bytes => uint256)) public lockedTokens;
-  mapping(bytes => bool) public txSignatures;
+  // orderId -> txMsgHash -> amount of locked tokens
+  mapping(uint256 => mapping(bytes32 => uint256)) public lockedTokens;
+  mapping(bytes32 => bool) public txMsgHashes;
 }

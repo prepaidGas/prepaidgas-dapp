@@ -24,6 +24,8 @@ error NotOperator(address holder, address spender);
 error UnexpectedRecovered(address recovered, address expected);
 error UnknownRecovered(address recovered);
 error InvalidSignature(bytes signature);
+
+error InvalidTransaction(bytes32 transactionMessageHash);
 error IncorrectSignatureOrder(address lower, address higher);
 
 error IncorrectAddressArgument(address received);
