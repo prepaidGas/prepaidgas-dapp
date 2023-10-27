@@ -44,7 +44,7 @@ export default function TransactionCreate() {
     orderID: "",
     gasLimit: 0,
     smartContractAddress: "",
-    userAbi: "",
+    userAbi: testABIstring,
   }
 
   //Input values
@@ -144,17 +144,79 @@ export default function TransactionCreate() {
   //   }
   // }
 
-  const resolveComponent = (comp: FieldEntry, index: number) => {
+  const resolveComponent = (comp: FieldEntry, index: number, isNested: boolean = false) => {
     console.log("Comp: ", comp)
     console.log("Index: ", index)
+    console.log("IsNested: ", isNested)
 
     if (comp.components) {
       return (
         <div className="flex flex-col mt-4 ml-4">
           <Title>{comp.name}</Title>
-          <div className="ml-4">{comp.components.map(resolveComponent)}</div>
+          {/* <div className="ml-4">{comp.components.map(resolveComponent)}</div> */}
+          <div className="ml-4">{comp.components.map((item) => resolveComponent(item, index, true))}</div>
         </div>
       )
+    }
+
+    if (isNested) {
+      switch (comp.type) {
+        case "uint256":
+          return (
+            <div className="flex flex-col">
+              <Text className="mt-4">{comp.name}</Text>
+              <NumberInput
+                onChange={(e) => {
+                  setArgValues((prevState) => {
+                    const nextState = [...prevState]
+                    nextState[index] = { ...nextState[index], [comp.name]: Number(e.target.value) }
+                    return nextState
+                  })
+                }}
+              ></NumberInput>
+            </div>
+          )
+        case "bool":
+          return (
+            <div className="flex flex-col">
+              <Text className="mt-4">{comp.name}</Text>
+              <Select
+                className="min-w-[8rem]"
+                onValueChange={(value) => {
+                  setArgValues((prevState) => {
+                    const nextState = [...prevState]
+                    nextState[index] = { ...nextState[index], [comp.name]: value }
+                    return nextState
+                  })
+                }}
+              >
+                <SelectItem icon={NoSymbolIcon} value="false">
+                  No
+                </SelectItem>
+                <SelectItem icon={CheckIcon} value="true">
+                  Yes
+                </SelectItem>
+              </Select>
+            </div>
+          )
+        case "string":
+        case "address":
+        default:
+          return (
+            <div className="flex flex-col">
+              <Text className="mt-4">{comp.name}</Text>
+              <TextInput
+                onChange={(e) => {
+                  setArgValues((prevState) => {
+                    const nextState = [...prevState]
+                    nextState[index] = { ...nextState[index], [comp.name]: e.target.value }
+                    return nextState
+                  })
+                }}
+              ></TextInput>
+            </div>
+          )
+      }
     }
 
     switch (comp.type) {
@@ -198,15 +260,6 @@ export default function TransactionCreate() {
   }
 
   const handleArgInputChange = (value: any, index: number) => {
-    // console.log("argValues: ", argValues)
-    // console.log("INDEX: ", index)
-
-    // const newArgValues = [...argValues]
-
-    // console.log("newArgValues: ", newArgValues)
-    // newArgValues[index] = value
-
-    // console.log("newArgValues: ", newArgValues)
     setArgValues((prevState) => {
       const nextState = [...prevState]
       nextState[index] = value
@@ -275,13 +328,13 @@ export default function TransactionCreate() {
         address: inputValues.smartContractAddress,
         abi: JSON.parse(inputValues.userAbi),
         functionName: selectedFunction,
-        args: [],
+        args: argValues,
       })
-      console.log("CreateOrderData: ", data)
+      console.log("TransactionData: ", data)
       const txData = await waitForTransaction({ hash: data.hash })
-      console.log("CreateOrderTXData: ", txData)
+      console.log("TransactionTXData: ", txData)
     } catch (e) {
-      console.log("CreateOrderError: ", e)
+      console.log("TransactionError: ", e)
     }
   }
 
@@ -2198,3 +2251,6 @@ const GasOrderABI: ABIEntry[] = [
     type: "function",
   },
 ]
+
+const testABIstring: string =
+  '[{"inputs":[{"internalType":"address","name":"executionEndpoint","type":"address"},{"internalType":"string","name":"link","type":"string"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"received","type":"uint256"},{"internalType":"uint256","name":"expected","type":"uint256"}],"name":"BadIncomeTransfer","type":"error"},{"inputs":[{"internalType":"uint256","name":"requested","type":"uint256"},{"internalType":"uint256","name":"allowed","type":"uint256"}],"name":"BalanceExhausted","type":"error"},{"inputs":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"DeadlineExpired","type":"error"},{"inputs":[{"internalType":"uint256","name":"limit","type":"uint256"},{"internalType":"uint256","name":"balance","type":"uint256"}],"name":"GasLimitExceedBalance","type":"error"},{"inputs":[{"internalType":"address","name":"holder","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"NotOperator","type":"error"},{"inputs":[{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"uint256","name":"max","type":"uint256"}],"name":"OverhighValue","type":"error"},{"inputs":[{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"uint256","name":"min","type":"uint256"}],"name":"OverlowValue","type":"error"},{"inputs":[{"internalType":"bool","name":"revokable","type":"bool"},{"internalType":"enum OrderStatus","name":"status","type":"uint8"}],"name":"RevokeNotAllowed","type":"error"},{"inputs":[{"internalType":"address","name":"received","type":"address"},{"internalType":"address","name":"expected","type":"address"}],"name":"Unauthorized","type":"error"},{"inputs":[{"internalType":"enum OrderStatus","name":"received","type":"uint8"},{"internalType":"enum OrderStatus","name":"expected","type":"uint8"}],"name":"WrongOrderStatus","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"holder","type":"address"},{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"holder","type":"address"},{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Claim","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"receiver","type":"address"},{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Distribute","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"executor","type":"address"}],"name":"OrderAccept","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"executionWindow","type":"uint256"}],"name":"OrderCreate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferStarted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"indexed":false,"internalType":"uint256[]","name":"values","type":"uint256[]"}],"name":"TransferBatch","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"TransferSingle","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"value","type":"string"}],"name":"URI","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"value","type":"string"},{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"}],"name":"URI","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"enum Fee","name":"fee","type":"uint8"},{"indexed":false,"internalType":"uint256","name":"old","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"current","type":"uint256"}],"name":"UpdateProtocolFee","type":"event"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"guaranteeTransfer","type":"uint256"}],"name":"acceptOrder","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"acceptOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"holder","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"accounts","type":"address[]"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"}],"name":"balanceOfBatch","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"claim","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"holder","type":"address"},{"internalType":"address","name":"token","type":"address"}],"name":"claimable","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"maxGas","type":"uint256"},{"internalType":"uint256","name":"executionPeriodStart","type":"uint256"},{"internalType":"uint256","name":"executionPeriodDeadline","type":"uint256"},{"internalType":"uint256","name":"executionWindow","type":"uint256"},{"internalType":"bool","name":"revokable","type":"bool"},{"components":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"internalType":"struct Payment","name":"rewardValue","type":"tuple"},{"components":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"gasPrice","type":"uint256"}],"internalType":"struct GasPayment","name":"gasCostValue","type":"tuple"},{"components":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"gasPrice","type":"uint256"}],"internalType":"struct GasPayment","name":"guaranteeValue","type":"tuple"},{"internalType":"uint256","name":"rewardTransfer","type":"uint256"},{"internalType":"uint256","name":"gasCostTransfer","type":"uint256"}],"name":"createOrder","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"execution","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"executor","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"exists","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"enum Fee","name":"id","type":"uint8"}],"name":"fee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"gasCost","outputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"gasPrice","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_creator","type":"address"},{"internalType":"address","name":"_user","type":"address"},{"internalType":"enum OrderStatus","name":"_status","type":"uint8"},{"internalType":"uint256","name":"_limit","type":"uint256"},{"internalType":"uint256","name":"_start","type":"uint256"}],"name":"getFilteredOrders","outputs":[{"components":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"creator","type":"address"},{"internalType":"enum OrderStatus","name":"status","type":"uint8"},{"internalType":"uint256","name":"maxGas","type":"uint256"},{"internalType":"uint256","name":"executionPeriodStart","type":"uint256"},{"internalType":"uint256","name":"executionPeriodDeadline","type":"uint256"},{"internalType":"uint256","name":"executionWindow","type":"uint256"},{"internalType":"bool","name":"isRevokable","type":"bool"},{"components":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"internalType":"struct Payment","name":"reward","type":"tuple"},{"components":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"gasPrice","type":"uint256"}],"internalType":"struct GasPayment","name":"gasCost","type":"tuple"},{"components":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"gasPrice","type":"uint256"}],"internalType":"struct GasPayment","name":"guaranteeLocked","type":"tuple"},{"internalType":"uint256","name":"availableGasHoldings","type":"uint256"}],"internalType":"struct FilteredOrder[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_creator","type":"address"},{"internalType":"enum OrderStatus","name":"_status","type":"uint8"},{"internalType":"uint256","name":"_limit","type":"uint256"},{"internalType":"uint256","name":"_start","type":"uint256"}],"name":"getFilteredOrders","outputs":[{"components":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"creator","type":"address"},{"internalType":"enum OrderStatus","name":"status","type":"uint8"},{"internalType":"uint256","name":"maxGas","type":"uint256"},{"internalType":"uint256","name":"executionPeriodStart","type":"uint256"},{"internalType":"uint256","name":"executionPeriodDeadline","type":"uint256"},{"internalType":"uint256","name":"executionWindow","type":"uint256"},{"internalType":"bool","name":"isRevokable","type":"bool"},{"components":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"internalType":"struct Payment","name":"reward","type":"tuple"},{"components":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"gasPrice","type":"uint256"}],"internalType":"struct GasPayment","name":"gasCost","type":"tuple"},{"components":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"gasPrice","type":"uint256"}],"internalType":"struct GasPayment","name":"guaranteeLocked","type":"tuple"},{"internalType":"uint256","name":"availableGasHoldings","type":"uint256"}],"internalType":"struct FilteredOrder[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address[]","name":"_holders","type":"address[]"}],"name":"getTotalBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"guarantee","outputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"gasPrice","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"holder","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"order","outputs":[{"internalType":"address","name":"creator","type":"address"},{"internalType":"uint256","name":"maxGas","type":"uint256"},{"internalType":"uint256","name":"maxGasPrice","type":"uint256"},{"internalType":"uint256","name":"executionPeriodStart","type":"uint256"},{"internalType":"uint256","name":"executionPeriodDeadline","type":"uint256"},{"internalType":"uint256","name":"executionWindow","type":"uint256"},{"internalType":"bool","name":"isRevokable","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ordersCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"onBehalf","type":"address"},{"internalType":"uint256","name":"gasLimit","type":"uint256"},{"internalType":"address","name":"fulfiller","type":"address"},{"internalType":"uint256","name":"gasSpent","type":"uint256"}],"name":"reportExecution","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"holder","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"retrieveGasCost","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"retrieveGuarantee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"revokeOrder","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"reward","outputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"amounts","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeBatchTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"enum Fee","name":"id","type":"uint8"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"setFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"link","type":"string"}],"name":"setURI","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"status","outputs":[{"internalType":"enum OrderStatus","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"receivers","type":"address[]"},{"internalType":"address[]","name":"tokens","type":"address[]"},{"internalType":"uint256[]","name":"amounts","type":"uint256[]"}],"name":"takeAway","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_creator","type":"address"},{"internalType":"enum OrderStatus","name":"_status","type":"uint8"}],"name":"totalMatchingOrdersCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"uri","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"holder","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"spender","type":"address"}],"name":"usable","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]'
