@@ -2,7 +2,7 @@ const Executor = require("abi/Executor.sol/Executor.json")
 const GasOrder = require("abi/GasOrder.sol/GasOrder.json")
 const MockToken = require("abi/mock/MockToken.sol/MockToken.json")
 
-interface FieldEntry {
+export interface FieldEntry {
   indexed?: boolean
   internalType: string
   name?: string
@@ -10,7 +10,7 @@ interface FieldEntry {
   components?: FieldEntry[]
 }
 
-interface ABIEntry {
+export interface ABIEntry {
   inputs?: FieldEntry[]
   outputs?: FieldEntry[]
   anonymous?: boolean

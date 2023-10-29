@@ -15,6 +15,7 @@
     "dev-setup": "npm run fe-dev & npm run sc-node-mock; wait"
   },
   "dependencies": {
+    "react-json-formatter": "^0.4.0",
     "react-loader-spinner": "^5.4.5",
     "zod": "^3.22.4"
   }
