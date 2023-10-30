@@ -18,7 +18,7 @@ import {
   Title,
 } from "@tremor/react"
 
-import { SPINNER_COLOR } from "../../../constants/themeConstants"
+import { SPINNER_COLOR } from "../../../../constants/themeConstants"
 import { TailSpin } from "react-loader-spinner"
 import { CheckIcon, NoSymbolIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import JsonFormatter from "react-json-formatter"

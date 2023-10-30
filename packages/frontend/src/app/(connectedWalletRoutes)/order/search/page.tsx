@@ -5,16 +5,16 @@ import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 import { Title, Text, Metric, Color, Icon, Card } from "@tremor/react"
 
 import { readContract } from "@wagmi/core"
-import SearchFiltersCard, { FilterOptions } from "../../../components/SearchFiltersCard"
-import OrderCard from "../../../components/OrderCard"
+import SearchFiltersCard, { FilterOptions } from "../../../../components/SearchFiltersCard"
+import OrderCard from "../../../../components/OrderCard"
 import { useEffect, useState } from "react"
-import Pagination from "../../../components/Pagination"
+import Pagination from "../../../../components/Pagination"
 
 // @todo display first 100 items
 import { GasOrderABI } from "helpers/abi"
-import ToasterPopup from "../../../components/ToasterPopup"
+import ToasterPopup from "../../../../components/ToasterPopup"
 import { TailSpin } from "react-loader-spinner"
-import { SPINNER_COLOR } from "../../../constants/themeConstants"
+import { SPINNER_COLOR } from "../../../../constants/themeConstants"
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
 
 export default function SearchOrder() {
