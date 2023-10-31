@@ -6,12 +6,11 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 
 import "./../common/Errors.sol" as Error;
 
-// @todo !!! IMPORTANT update openzeppelin package
 abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
   /// @dev id => holder  => spender => amount
   mapping(uint256 => mapping(address => mapping(address => uint256))) private _allowance;
   /// @dev id => holder => amount
-  mapping(uint256 => mapping(address => uint256)) private _totalAllowance;
+  mapping(uint256 => mapping(address => uint256)) private _totalLocked;
 
   event Approval(address indexed holder, uint256 indexed id, address indexed spender, uint256 amount);
   event URI(string value);
@@ -42,11 +41,11 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
   }
 
   function usable(address from, uint256 id, address spender) public view returns (uint256) {
-    uint256 totalBalnace = balanceOf(from, id);
-    uint256 allowanceBoundary = allowance(from, id, spender);
+    uint256 balance = balanceOf(from, id);
+    uint256 boundary = allowance(from, id, spender);
 
-    if (!isApprovedForAll(from, spender) && totalBalnace > allowanceBoundary) return allowanceBoundary;
-    return totalBalnace;
+    if (!isApprovedForAll(from, spender) && balance > boundary) return boundary;
+    return balance;
   }
 
   function allowance(address holder, uint256 id, address spender) public view returns (uint256) {
@@ -79,52 +78,28 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
   }
 
   function _approve(address from, uint256 id, address spender, uint256 amount) private {
-    // @todo add error invalid spender
-    if (from != spender) revert("");
-
-    if (_allowance[id][from][spender] > amount) {
-      uint256 diffDecrease = _allowance[id][from][spender] - amount;
-      _totalAllowance[id][from] -= diffDecrease;
-    } else if (_allowance[id][from][spender] < amount) {
-      uint256 diffIncrease = amount - _allowance[id][from][spender];
-      _totalAllowance[id][from] += diffIncrease;
-    }
-    // @todo it should be impossible to transfer more than `balance - allowed`
     _allowance[id][from][spender] = amount;
 
     emit Approval(from, id, spender, amount);
   }
 
-  // @todo add sufficient comments to describe the updated behaviour
-  function _update(address from, address to, uint256[] memory ids, uint256[] memory values) internal virtual override {
-    /// Start allowance calculation logic
-    if (from != address(0)) {
-      // @todo optimize function
-      for (uint256 i = 0; i < ids.length; ++i) {
-        uint256 id = ids[i];
-        uint256 value = values[i];
+  function _lockGasTokens(address from, uint256 id, uint256 value) internal {
+    // @todo add error handling
+    _totalLocked[id][from] += value;
+    // @todo add event emmiting
+  }
 
-        uint256 usableAmount = usable(from, id, msg.sender);
-        uint256 fromBalance = balanceOf(from, id);
-        // @todo check `from` and `to` address
-        uint256 totalAllowance = _totalAllowance[id][from];
-        address spender = msg.sender;
+  function _unlockGasTokens(address from, uint256 id, uint256 value) internal {
+    // @todo add error handling
+    _totalLocked[id][from] -= value;
+    // @todo add event emmiting
+  }
 
-        if (usableAmount < value) revert ERC1155InsufficientBalance(from, fromBalance, value, id); // @todo replace with other custom errors
+  function balanceOf(address account, uint256 id) public view override returns (uint256) {
+    return super.balanceOf(account, id) - totalLocked(id, from);
+  }
 
-        //_isValidTotalAllowance(from, id, )
-        // @todo check if it is transfer from or transfer
-        if (from != spender) {
-          _allowance[id][from][spender] -= value;
-          _totalAllowance[id][from] -= value;
-        } else {
-          // @todo insufficient allowance
-          if (totalAllowance < balanceOf(from, id) - value)
-            revert ERC1155InsufficientBalance(from, fromBalance, value, id);
-        }
-      }
-    }
-    // create from balance var
-    super._update(from, to, ids, values);
+  function totalLocked(address account, uint256 id) public view returns (uint256) {
+    return _totalLocked[id][account];
   }
 }
