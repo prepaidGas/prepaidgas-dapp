@@ -67,7 +67,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
     bytes calldata _signature,
     Message calldata _transactionData
   ) public specificStatus(_transactionData.gasOrder, OrderStatus.Active) {
-    // @todo use msg hash instead of sig
+    // @todo import ExecutionMessage
     bytes32 hashedMsg = Executor(execution).messageHash(_transactionData);
     // @todo update error to `Invalidsignature`
     if (txMsgHashes[hashedMsg]) revert InvalidTransaction(hashedMsg);
@@ -76,7 +76,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
     if (recovered != _transactionData.from) revert UnknownRecovered(recovered);
 
     txMsgHashes[hashedMsg] = true;
-    lockedTokens[_transactionData.gasOrder][hashedMsg] = _transactionData.gas;
+    transactionLockedTokens[hashedMsg] = _transactionData.gas;
 
     uint256 balance = usable(_transactionData.onBehalf, _transactionData.gasOrder, _transactionData.from);
     if (_transactionData.gas >= balance) revert GasLimitExceedBalance(_transactionData.gas, balance);
@@ -85,7 +85,10 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
     // @todo add event emmiting
   }
 
-  function unlockGasTokens(uint256 orderId, Message calldata _transactionData) public {
+  function unlockGasTokens(
+    Message calldata _transactionData
+  ) public specificStatus(_transactionData.gasOrder, OrderStatus.Active) {
+    // @todo finalize
     bytes32 hashedMsg = Executor(execution).messageHash(_transactionData);
     // @todo add error, no such tx
     if (!txMsgHashes[hashedMsg]) revert InvalidTransaction(hashedMsg);
