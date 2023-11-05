@@ -96,7 +96,7 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
   }
 
   function balanceOf(address account, uint256 id) public view override returns (uint256) {
-    return super.balanceOf(account, id) - totalLocked(id, from);
+    return super.balanceOf(account, id) - totalLocked(account, id);
   }
 
   function totalLocked(address account, uint256 id) public view returns (uint256) {
