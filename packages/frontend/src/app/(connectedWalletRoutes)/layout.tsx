@@ -40,7 +40,7 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
       </header>
 
       <nav className="fixed w-[20%] left-0 top-0 z-[49] h-[100%] overflow-y-scroll hidden lg:block">
-        <Card className="rounded-none p-0 text-lg !bg-transparent !pt-[4.5rem]">
+        <div className="rounded-none p-0 text-lg !bg-transparent border-none !pt-[4.5rem]">
           <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
             <AccordionHeader className="bg-transparent rounded-none">Orders</AccordionHeader>
             <AccordionBody className="flex flex-col gap-2 bg-transparent rounded-none">
@@ -75,7 +75,7 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
               </Link>
             </AccordionBody>
           </Accordion>
-        </Card>
+        </div>
       </nav>
 
       {showSidebar && (
