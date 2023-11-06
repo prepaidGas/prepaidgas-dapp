@@ -23,7 +23,7 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
   return (
     <div>
       <header className="fixed h-[4rem] left-0 top-0 w-full flex z-50 flex-row bg-gray-300">
-        <Card className="rounded-none flex flex-row justify-between items-center py-3 px-4">
+        <Card className="!rounded-none flex flex-row justify-between items-center py-3 px-4">
           <div className="flex flex-row items-center">
             <Button
               className="lg:hidden"
@@ -70,6 +70,9 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
               <Link href="/tx/history">
                 <Button className="w-full">History</Button>
               </Link>
+              <Link href="/tx/add">
+                <Button className="w-full">Add Request</Button>
+              </Link>
             </AccordionBody>
           </Accordion>
         </Card>
@@ -107,146 +110,8 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
                 <Link href="/tx/history">
                   <Button className="w-full">History</Button>
                 </Link>
-              </AccordionBody>
-            </Accordion>
-
-            <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
-              <AccordionHeader className="bg-transparent rounded-none">Transactions</AccordionHeader>
-              <AccordionBody className="flex flex-col gap-2 bg-transparent rounded-none">
-                <Link href="/tx/create">
-                  <Button className="w-full">Create Transaction</Button>
-                </Link>
-                <Link href="/tx/explorer">
-                  <Button className="w-full">Explorer</Button>
-                </Link>
-                <Link href="/tx/history">
-                  <Button className="w-full">History</Button>
-                </Link>
-              </AccordionBody>
-            </Accordion>
-            <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
-              <AccordionHeader className="bg-transparent rounded-none">Transactions</AccordionHeader>
-              <AccordionBody className="flex flex-col gap-2 bg-transparent rounded-none">
-                <Link href="/tx/create">
-                  <Button className="w-full">Create Transaction</Button>
-                </Link>
-                <Link href="/tx/explorer">
-                  <Button className="w-full">Explorer</Button>
-                </Link>
-                <Link href="/tx/history">
-                  <Button className="w-full">History</Button>
-                </Link>
-              </AccordionBody>
-            </Accordion>
-            <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
-              <AccordionHeader className="bg-transparent rounded-none">Transactions</AccordionHeader>
-              <AccordionBody className="flex flex-col gap-2 bg-transparent rounded-none">
-                <Link href="/tx/create">
-                  <Button className="w-full">Create Transaction</Button>
-                </Link>
-                <Link href="/tx/explorer">
-                  <Button className="w-full">Explorer</Button>
-                </Link>
-                <Link href="/tx/history">
-                  <Button className="w-full">History</Button>
-                </Link>
-              </AccordionBody>
-            </Accordion>
-            <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
-              <AccordionHeader className="bg-transparent rounded-none">Transactions</AccordionHeader>
-              <AccordionBody className="flex flex-col gap-2 bg-transparent rounded-none">
-                <Link href="/tx/create">
-                  <Button className="w-full">Create Transaction</Button>
-                </Link>
-                <Link href="/tx/explorer">
-                  <Button className="w-full">Explorer</Button>
-                </Link>
-                <Link href="/tx/history">
-                  <Button className="w-full">History</Button>
-                </Link>
-              </AccordionBody>
-            </Accordion>
-            <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
-              <AccordionHeader className="bg-transparent rounded-none">Transactions</AccordionHeader>
-              <AccordionBody className="flex flex-col gap-2 bg-transparent rounded-none">
-                <Link href="/tx/create">
-                  <Button className="w-full">Create Transaction</Button>
-                </Link>
-                <Link href="/tx/explorer">
-                  <Button className="w-full">Explorer</Button>
-                </Link>
-                <Link href="/tx/history">
-                  <Button className="w-full">History</Button>
-                </Link>
-              </AccordionBody>
-            </Accordion>
-            <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
-              <AccordionHeader className="bg-transparent rounded-none">Transactions</AccordionHeader>
-              <AccordionBody className="flex flex-col gap-2 bg-transparent rounded-none">
-                <Link href="/tx/create">
-                  <Button className="w-full">Create Transaction</Button>
-                </Link>
-                <Link href="/tx/explorer">
-                  <Button className="w-full">Explorer</Button>
-                </Link>
-                <Link href="/tx/history">
-                  <Button className="w-full">History</Button>
-                </Link>
-              </AccordionBody>
-            </Accordion>
-            <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
-              <AccordionHeader className="bg-transparent rounded-none">Transactions</AccordionHeader>
-              <AccordionBody className="flex flex-col gap-2 bg-transparent rounded-none">
-                <Link href="/tx/create">
-                  <Button className="w-full">Create Transaction</Button>
-                </Link>
-                <Link href="/tx/explorer">
-                  <Button className="w-full">Explorer</Button>
-                </Link>
-                <Link href="/tx/history">
-                  <Button className="w-full">History</Button>
-                </Link>
-              </AccordionBody>
-            </Accordion>
-            <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
-              <AccordionHeader className="bg-transparent rounded-none">Transactions</AccordionHeader>
-              <AccordionBody className="flex flex-col gap-2 bg-transparent rounded-none">
-                <Link href="/tx/create">
-                  <Button className="w-full">Create Transaction</Button>
-                </Link>
-                <Link href="/tx/explorer">
-                  <Button className="w-full">Explorer</Button>
-                </Link>
-                <Link href="/tx/history">
-                  <Button className="w-full">History</Button>
-                </Link>
-              </AccordionBody>
-            </Accordion>
-            <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
-              <AccordionHeader className="bg-transparent rounded-none">Transactions</AccordionHeader>
-              <AccordionBody className="flex flex-col gap-2 bg-transparent rounded-none">
-                <Link href="/tx/create">
-                  <Button className="w-full">Create Transaction</Button>
-                </Link>
-                <Link href="/tx/explorer">
-                  <Button className="w-full">Explorer</Button>
-                </Link>
-                <Link href="/tx/history">
-                  <Button className="w-full">History</Button>
-                </Link>
-              </AccordionBody>
-            </Accordion>
-            <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
-              <AccordionHeader className="bg-transparent rounded-none">Transactions</AccordionHeader>
-              <AccordionBody className="flex flex-col gap-2 bg-transparent rounded-none">
-                <Link href="/tx/create">
-                  <Button className="w-full">Create Transaction</Button>
-                </Link>
-                <Link href="/tx/explorer">
-                  <Button className="w-full">Explorer</Button>
-                </Link>
-                <Link href="/tx/history">
-                  <Button className="w-full">History</Button>
+                <Link href="/tx/add">
+                  <Button className="w-full">Add Request</Button>
                 </Link>
               </AccordionBody>
             </Accordion>
