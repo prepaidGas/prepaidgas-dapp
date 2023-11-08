@@ -4,33 +4,9 @@ pragma solidity 0.8.20;
 struct Order {
   address manager;
   uint256 maxGas;
-  uint256 maxGasPrice;
   uint256 executionPeriodStart;
   uint256 executionPeriodDeadline;
   uint256 executionWindow;
-}
-
-// @dev this structure is based on the `Order` structure, but has `id` and `status` extra fields
-struct FilteredOrder {
-  uint256 id;
-  address manager;
-  OrderStatus status;
-  uint256 maxGas;
-  uint256 executionPeriodStart;
-  uint256 executionPeriodDeadline;
-  uint256 executionWindow;
-  uint256 availableGasHoldings;
-  TokenAmountWithDetails reward;
-  TokenAmountWithDetails gasCost;
-  TokenAmountWithDetails guarantee;
-}
-
-struct TokenAmountWithDetails {
-  string name;
-  string symbol;
-  uint256 decimals;
-  address token;
-  uint256 value;
 }
 
 enum OrderStatus {
@@ -63,6 +39,20 @@ interface IGasOrder {
     address fulfiller,
     uint256 gasSpent
   ) external;
+
+  function ordersCount() internal returns (uint256);
+//  mapping(uint256 => Order) public order;
+//
+//  mapping(uint256 => Payment) public reward;
+//  mapping(uint256 => GasPayment) public gasCost;
+//  mapping(uint256 => GasPayment) public guarantee;
+//
+//  mapping(uint256 => address) public executor;
+//
+//  // orderId -> txMsgHash -> amount of locked tokens
+//  // @todo utilize this variable
+//  mapping(bytes32 => uint256) public transactionLockedTokens;
+//  mapping(bytes32 => bool) public txMsgHashes;
 
   event OrderCreate(uint256 indexed id, uint256 executionWindow);
   event OrderAccept(uint256 indexed id, address indexed executor);

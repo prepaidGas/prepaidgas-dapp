@@ -19,7 +19,7 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
   address public immutable gasOrder;
 
   /// @dev from => nonce => exhausted
-  mapping(address => mapping(uint256 => bool)) public nonces;
+  mapping(address => mapping(uint256 => bool)) public nonce;
 
   event Execution(
     address indexed from,
@@ -34,7 +34,7 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
   );
 
   modifier validNonce(address from, uint256 nonce) {
-    if (nonces[from][nonce]) revert NonceExhausted(from, nonce);
+    if (nonce[from][nonce]) revert NonceExhausted(from, nonce);
     _;
   }
 
@@ -128,7 +128,7 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
    * @return gasSpent The amount of Gas used during execution.
    *
    * This function verifies the validity of executing the message and performs the actions
-   * described in the message. It also updates nonces and emits an execution event.
+   * described in the message. It also updates nonce and emits an execution event.
    */
   function _execute(
     Message calldata message,
@@ -140,7 +140,7 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     /// @dev recovered could not be 0x0 due to `ECDSA.recover` design
     if (recovered != message.from) revert UnexpectedRecovered(recovered, message.from);
 
-    nonces[message.from][message.nonce] = true;
+    nonce[message.from][message.nonce] = true;
 
     uint256 gas = gasleft();
     (bool success, bytes memory returndata) = message.to.call{gas: message.gas}(

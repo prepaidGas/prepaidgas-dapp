@@ -22,13 +22,27 @@ import "hardhat/console.sol";
 /**
  * @title GasOrder
  * @notice This contract manages the deposit for Gas orders
- * @dev It is recomended to deploy the contract to the cheep network
+ * @dev It is recommended to deploy the contract to the cheep network
  * @author SteMak, web3skeptic (markfender)
  */
 
 contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
   using SafeERC20 for IERC20;
   using ECDSA for bytes32;
+
+  uint256 public ordersCount;
+  mapping(uint256 => Order) public order;
+
+  mapping(uint256 => Payment) public reward;
+  mapping(uint256 => GasPayment) public gasCost;
+  mapping(uint256 => GasPayment) public guarantee;
+
+  mapping(uint256 => address) public executor;
+
+  // orderId -> txMsgHash -> amount of locked tokens
+  // @todo utilize this variable
+  mapping(bytes32 => uint256) public transactionLockedTokens;
+  mapping(bytes32 => bool) public txMsgHashes;
 
   address public immutable execution;
 
@@ -63,39 +77,6 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
     execution = executionEndpoint;
   }
 
-  function addTransaction(
-    bytes calldata _signature,
-    Message calldata _transactionData
-  ) public specificStatus(_transactionData.gasOrder, OrderStatus.Active) {
-    // @todo import ExecutionMessage
-    bytes32 hashedMsg = Executor(execution).messageHash(_transactionData);
-    // @todo update error to `Invalidsignature`
-    if (txMsgHashes[hashedMsg]) revert InvalidTransaction(hashedMsg);
-
-    address recovered = hashedMsg.recover(_signature);
-    if (recovered != _transactionData.from) revert UnknownRecovered(recovered);
-
-    txMsgHashes[hashedMsg] = true;
-    transactionLockedTokens[hashedMsg] = _transactionData.gas;
-
-    uint256 balance = usable(_transactionData.onBehalf, _transactionData.gasOrder, _transactionData.from);
-    if (_transactionData.gas >= balance) revert GasLimitExceedBalance(_transactionData.gas, balance);
-
-    _lockGasTokens(_transactionData.from, _transactionData.gasOrder, _transactionData.gas);
-    // @todo add event emmiting
-  }
-
-  function unlockGasTokens(
-    Message calldata _transactionData
-  ) public specificStatus(_transactionData.gasOrder, OrderStatus.Active) {
-    // @todo finalize
-    bytes32 hashedMsg = Executor(execution).messageHash(_transactionData);
-    // @todo add error, no such tx
-    if (!txMsgHashes[hashedMsg]) revert InvalidTransaction(hashedMsg);
-
-    _unlockGasTokens(_transactionData.from, _transactionData.gasOrder, _transactionData.gas);
-  }
-
   // @todo add support of our _msgSender
   // @todo gas optimization
   // - rewrite loops with an unchecked increment
@@ -118,10 +99,8 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
    * This function creates an order with the specified parameters. It ensures the validity
    * of the order parameters and initializes the order's details.
    */
-  // @todo-backlog add `revocable` functionality
   function createOrder(
     uint256 maxGas,
-    // uint256 maxGasCost, // @todo add maxGasCost
     uint256 executionPeriodStart,
     uint256 executionPeriodDeadline,
     uint256 executionWindow,
@@ -135,6 +114,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
     deadlineNotMet(executionPeriodDeadline)
     deadlineNotMet(executionPeriodStart)
     possibleExecutionWindow(executionWindow)
+  returns (uint256)
   {
     require(executionPeriodStart + executionWindow < executionPeriodDeadline); // @todo add error msg
     require(maxGas > 0); // @todo consider replacing `0` with the value which represents the minimum valuable value
@@ -158,9 +138,8 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
     _acceptIncomingOrderCreate(maxGas, rewardValue, gasCostValue, rewardTransfer, gasCostTransfer);
 
     emit OrderCreate(id, executionWindow);
-    // @todo return the created order id to handle the case when it is created from
-    // the third party contract and it is needed to store it somewhere
-    // return id;
+
+     return id;
   }
 
   /// @dev function to avoid stack too deep issue
@@ -223,6 +202,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
    */
   function retrieveGuarantee(uint256 id) external specificStatus(id, OrderStatus.Inactive) {
     _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * totalSupply(id));
+    // @todo missing burn
   }
 
   /**
@@ -309,5 +289,28 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
     order[_orderId].manager = _newManager;
 
     emit OrderManagerChanged(_orderId, oldManager, _newManager);
+  }
+
+  /**
+ * @dev Gets the current status of an order with the given ID.
+   *
+   * @param id The ID of the order.
+   * @return status The current status of the order.
+   *
+   * This function returns the current status of an order based on various conditions
+   * such as the executor, execution deadlines, and more. It provides insight into the
+   * state of the order.
+   */
+  // @todo verify the function and all the possible states
+
+  function status(uint256 id) public view returns (OrderStatus) {
+    if (order[id].manager == address(0)) return OrderStatus.None;
+    else if (executor[id] != address(0)) {
+      if (totalSupply(id) == 0) return OrderStatus.Closed;
+      else if (order[id].executionPeriodDeadline <= block.timestamp) return OrderStatus.Inactive;
+      else if (order[id].executionPeriodStart <= block.timestamp) return OrderStatus.Active;
+      else return OrderStatus.Accepted;
+    } else if (order[id].executionPeriodStart < block.timestamp) return OrderStatus.Untaken;
+    else return OrderStatus.Pending;
   }
 }

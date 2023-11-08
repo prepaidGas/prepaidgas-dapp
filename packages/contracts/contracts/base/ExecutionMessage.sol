@@ -2,17 +2,17 @@
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-// @todo add chainId for future multichin versions
+
 bytes32 constant MESSAGE_TYPE_HASH = keccak256(
   "Message("
-  "address from,"
-  "uint256 nonce,"
-  "uint256 gasOrder,"
-  "address onBehalf,"
-  "uint256 deadline,"
-  "address to,"
-  "uint256 gas,"
-  "bytes data"
+    "address from,"
+    "uint256 nonce,"
+    "uint256 gasOrder,"
+    "address onBehalf,"
+    "uint256 deadline,"
+    "address to,"
+    "uint256 gas,"
+    "bytes data"
   ")"
 );
 
