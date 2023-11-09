@@ -2,8 +2,9 @@
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {ERC1155ish} from "./ERC1155ish.sol";
 
-import {Order, OrderStatus} from "../interfaces/IGasOrder.sol";
+import {GasPayment, Order, OrderStatus, Payment} from "../interfaces/IGasOrder.sol";
 
 struct TokenDetails {
   address token;
@@ -22,21 +23,49 @@ struct FilteredOrder {
   GasPayment guarantee;
 }
 
-abstract contract GasOrderGetters {
+abstract contract GasOrderGetters is ERC1155ish {
   /// @dev The functions are required to be presented in the extended contract
 
-  /// @notice gasOrder data
-  function ordersCount() public returns (uint256);
-  function order(uint256 id) public returns (Order);
-  function reward(uint256 id) public returns (Payment);
-  function gasCost(uint256 id) public returns (GasPayment);
-  function guarantee(uint256 id) public returns (GasPayment);
-  function executor(uint256 id) public returns (address);
-  function status(uint256 id) public returns (OrderStatus);
+  /// @notice ERC1155 custom
+  //function usable(address, uint256, address) public view virtual returns (uint256);
 
-  /// @notice ERC1155ish data
-  function balanceOf(address account, uint256 id) public returns (address);
-  function allowance(address holder, uint256 id, address spender) public returns (uint256);
+  /// @notice gasOrder data
+  function ordersCount() public view virtual returns (uint256);
+
+  function order(uint256) public view virtual returns (Order memory);
+
+  function reward(uint256) public view virtual returns (Payment memory);
+
+  function gasCost(uint256) public view virtual returns (GasPayment memory);
+
+  function guarantee(uint256) public view virtual returns (GasPayment memory);
+
+  function executor(uint256) public view virtual returns (address);
+
+  function execution() public view virtual returns (address);
+
+  /**
+   * @dev Gets the current status of an order with the given ID.
+   *
+   * @param id The ID of the order.
+   * @return status The current status of the order.
+   *
+   * This function returns the current status of an order based on various conditions
+   * such as the executor, execution deadlines, and more. It provides insight into the
+   * state of the order.
+   */
+  // @todo verify the function and all the possible states
+
+  function status(uint256 id) public view returns (OrderStatus) {
+    if (order(id).manager == address(0)) return OrderStatus.None;
+    else if (executor(id) != address(0)) {
+      if (totalSupply(id) == 0) return OrderStatus.Closed;
+      else if (order(id).executionPeriodDeadline <= block.timestamp) return OrderStatus.Inactive;
+      else if (order(id).executionPeriodStart <= block.timestamp) return OrderStatus.Active;
+      else return OrderStatus.Accepted;
+    } else if (order(id).executionPeriodStart < block.timestamp) return OrderStatus.Untaken;
+    else return OrderStatus.Pending;
+  }
 
   /// @notice over high tokens array length may cause function call failure
   function getTokensDetails(address[] memory tokens) external view returns (TokenDetails[] memory) {
@@ -44,6 +73,7 @@ abstract contract GasOrderGetters {
     TokenDetails[] memory result = new TokenDetails[](length);
 
     for (uint256 i; i < length; i++) {
+      address token = tokens[i];
       // @todo utilise try functionality
       result[i] = TokenDetails({
         token: token,
@@ -85,8 +115,9 @@ abstract contract GasOrderGetters {
 
     bool anyManager = manager == address(0);
     bool anyStatus = state == OrderStatus.None;
+    uint256 orders = ordersCount();
 
-    for (uint256 id = 0; id < ordersCount; id++) {
+    for (uint256 id = 0; id < orders; id++) {
       if ((anyManager || order(id).manager == manager) && (anyStatus || status(id) == state)) {
         matching++;
       }
@@ -116,9 +147,9 @@ abstract contract GasOrderGetters {
     uint256 orders = ordersCount();
 
     for (uint256 id = 0; id < orders && length < limit; id++) {
-      if ((anyManager || order(id).manager == _manager) && (anyStatus || status(id) == state)) {
-        if (_offset > 0) {
-          _offset--;
+      if ((anyManager || order(id).manager == manager) && (anyStatus || status(id) == state)) {
+        if (offset > 0) {
+          offset--;
           continue;
         }
 
@@ -126,7 +157,7 @@ abstract contract GasOrderGetters {
           id: id,
           order: order(id),
           status: status(id),
-          gasBalance: noUser ? 0 : balanceOf(user, orderId),
+          gasBalance: noUser ? 0 : balanceOf(user, id),
           reward: reward(id),
           gasCost: gasCost(id),
           guarantee: guarantee(id)
@@ -161,7 +192,7 @@ abstract contract GasOrderGetters {
         id: id,
         order: order(id),
         status: status(id),
-        gasBalance: noUser ? 0 : balanceOf(user, orderId),
+        gasBalance: noUser ? 0 : balanceOf(user, id),
         reward: reward(id),
         gasCost: gasCost(id),
         guarantee: guarantee(id)

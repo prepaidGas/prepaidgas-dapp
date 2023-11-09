@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.20;
 
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -12,7 +10,9 @@ import "./base/GasOrderGetters.sol";
 import {ERC1155ish} from "./base/ERC1155ish.sol";
 import {Message} from "./base/ExecutionMessage.sol";
 import {FeeProcessor, Fee} from "./tools/FeeProcessor.sol";
-import {Order, FilteredOrder, OrderStatus, GasPayment, Payment, IGasOrder, TokenAmountWithDetails} from "./interfaces/IGasOrder.sol";
+import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
+
+import {FilteredOrder} from "./base/GasOrderGetters.sol";
 
 import "./common/Errors.sol";
 import "./common/Constants.sol";
@@ -26,29 +26,23 @@ import "hardhat/console.sol";
  * @author SteMak, web3skeptic (markfender)
  */
 
-contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
+contract GasOrder is IGasOrder, FeeProcessor, GasOrderGetters {
   using SafeERC20 for IERC20;
-  using ECDSA for bytes32;
 
-  uint256 public ordersCount;
-  mapping(uint256 => Order) public order;
+  uint256 private _ordersCount;
+  mapping(uint256 => Order) private _order;
 
-  mapping(uint256 => Payment) public reward;
-  mapping(uint256 => GasPayment) public gasCost;
-  mapping(uint256 => GasPayment) public guarantee;
+  mapping(uint256 => Payment) private _reward;
+  mapping(uint256 => GasPayment) private _gasCost;
+  mapping(uint256 => GasPayment) private _guarantee;
 
-  mapping(uint256 => address) public executor;
+  mapping(uint256 => address) private _executor;
 
-  // orderId -> txMsgHash -> amount of locked tokens
-  // @todo utilize this variable
-  mapping(bytes32 => uint256) public transactionLockedTokens;
-  mapping(bytes32 => bool) public txMsgHashes;
-
-  address public immutable execution;
+  address private immutable _execution;
 
   // @todo move events to a separate file, probably to interface
   modifier executionCallback() {
-    if (execution != msg.sender) revert Unauthorized(msg.sender, execution);
+    if (execution() != msg.sender) revert Unauthorized(msg.sender, execution());
     _;
   }
   /* @todo implement modifier of getter
@@ -74,7 +68,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
   }
 
   constructor(address executionEndpoint, string memory link) ERC1155ish(link) {
-    execution = executionEndpoint;
+    _execution = executionEndpoint;
   }
 
   // @todo add support of our _msgSender
@@ -114,32 +108,32 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
     deadlineNotMet(executionPeriodDeadline)
     deadlineNotMet(executionPeriodStart)
     possibleExecutionWindow(executionWindow)
-  returns (uint256)
+    returns (uint256)
   {
     require(executionPeriodStart + executionWindow < executionPeriodDeadline); // @todo add error msg
     require(maxGas > 0); // @todo consider replacing `0` with the value which represents the minimum valuable value
 
-    uint256 id = ordersCount++;
+    uint256 id = _ordersCount++;
 
-    order[id] = Order({
+    _order[id] = Order({
       manager: msg.sender, // @todo replace with `owner`, make transferable
       maxGas: maxGas,
-      /// @dev magic number, should be removed in the future
-      maxGasPrice: 1 ether,
+      /// @dev it is removed for now, but one day we will implement it I swear
+      // maxGasPrice: 1 ether,
       executionPeriodStart: executionPeriodStart,
       executionPeriodDeadline: executionPeriodDeadline,
       executionWindow: executionWindow
     });
 
-    reward[id] = rewardValue;
-    gasCost[id] = gasCostValue;
-    guarantee[id] = guaranteeValue;
+    _reward[id] = rewardValue;
+    _gasCost[id] = gasCostValue;
+    _guarantee[id] = guaranteeValue;
 
     _acceptIncomingOrderCreate(maxGas, rewardValue, gasCostValue, rewardTransfer, gasCostTransfer);
 
     emit OrderCreate(id, executionWindow);
 
-     return id;
+    return id;
   }
 
   /// @dev function to avoid stack too deep issue
@@ -165,11 +159,11 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
    * and rewards to the contract and updating the order's status.
    */
   function acceptOrder(uint256 id, uint256 guaranteeTransfer) external specificStatus(id, OrderStatus.Pending) {
-    executor[id] = msg.sender;
-    _mint(order[id].manager, id, order[id].maxGas);
+    _executor[id] = msg.sender;
+    _mint(order(id).manager, id, order(id).maxGas);
 
-    _distribute(msg.sender, reward[id].token, _takeFee(Fee.Reward, reward[id].token, reward[id].amount));
-    _acceptIncoming(guarantee[id].token, msg.sender, guaranteeTransfer, totalSupply(id) * guarantee[id].gasPrice);
+    _distribute(msg.sender, reward(id).token, _takeFee(Fee.Reward, reward(id).token, reward(id).amount));
+    _acceptIncoming(guarantee(id).token, msg.sender, guaranteeTransfer, totalSupply(id) * guarantee(id).gasPrice);
 
     emit OrderAccept(id, msg.sender);
   }
@@ -188,9 +182,9 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
 
     OrderStatus orderStatus = status(id);
     if (orderStatus == OrderStatus.Active || orderStatus == OrderStatus.Inactive)
-      _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * amount);
+      _distribute(executor(id), guarantee(id).token, guarantee(id).gasPrice * amount);
 
-    IERC20(gasCost[id].token).safeTransfer(holder, gasCost[id].gasPrice * amount);
+    IERC20(gasCost(id).token).safeTransfer(holder, gasCost(id).gasPrice * amount);
   }
 
   /**
@@ -201,7 +195,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
    * This function retrieves guarantees from an order and distributes them to the executor after order is finally fulfilled.
    */
   function retrieveGuarantee(uint256 id) external specificStatus(id, OrderStatus.Inactive) {
-    _distribute(executor[id], guarantee[id].token, guarantee[id].gasPrice * totalSupply(id));
+    _distribute(executor(id), guarantee(id).token, guarantee(id).gasPrice * totalSupply(id));
     // @todo missing burn
   }
 
@@ -214,7 +208,7 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
    * It returns rewards to the order manager.
    */
   function revokeOrder(uint256 id) external {
-    Order memory currentOrder = order[id];
+    Order memory currentOrder = order(id);
     if (msg.sender != currentOrder.manager) revert Unauthorized(msg.sender, currentOrder.manager);
 
     OrderStatus currentStatus = status(id);
@@ -223,11 +217,11 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
     if (currentStatus != OrderStatus.Pending && currentStatus != OrderStatus.Untaken)
       revert WrongOrderStatus(currentStatus, OrderStatus.Untaken);
 
-    executor[id] = address(1);
+    _executor[id] = address(1);
 
-    IERC20(reward[id].token).safeTransfer(order[id].manager, reward[id].amount);
+    IERC20(reward(id).token).safeTransfer(order(id).manager, reward(id).amount);
     /// @notice gasCost also should be withdrawn back to the manager
-    IERC20(gasCost[id].token).safeTransfer(order[id].manager, gasCost[id].gasPrice * order[id].maxGas);
+    IERC20(gasCost(id).token).safeTransfer(order(id).manager, gasCost(id).gasPrice * order(id).maxGas);
   }
 
   /**
@@ -257,15 +251,15 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
     if (gasSpent > balance) gasSpent = balance;
     _utilizeAllowance(onBehalf, id, from, gasSpent);
 
-    if (fulfiller == address(0)) fulfiller = executor[id];
+    if (fulfiller == address(0)) fulfiller = executor(id);
 
-    _distribute(fulfiller, gasCost[id].token, gasCost[id].gasPrice * gasSpent);
+    _distribute(fulfiller, gasCost(id).token, gasCost(id).gasPrice * gasSpent);
 
-    uint256 unlockAmount = guarantee[id].gasPrice * gasSpent;
-    if (fulfiller == executor[id]) {
-      _distribute(fulfiller, guarantee[id].token, unlockAmount);
+    uint256 unlockAmount = guarantee(id).gasPrice * gasSpent;
+    if (fulfiller == executor(id)) {
+      _distribute(fulfiller, guarantee(id).token, unlockAmount);
     } else {
-      address unlockToken = guarantee[id].token;
+      address unlockToken = guarantee(id).token;
       _distribute(fulfiller, unlockToken, _takeFee(Fee.Guarantee, unlockToken, unlockAmount));
     }
 
@@ -280,37 +274,45 @@ contract GasOrder is IGasOrder, FeeProcessor, ERC1155ish, GasOrderGetters {
    *
    */
   function transferOrderManagement(uint256 _orderId, address _newManager) external {
-    address oldManager = order[_orderId].manager;
+    address oldManager = order(_orderId).manager;
     if (msg.sender != oldManager) revert Unauthorized(msg.sender, oldManager);
     // @dev disallow setting manager address to zero, zero manager address is used to detect that the order is not created
     // if it is needed to set empty manager, it is recomended to set another dead address
     if (oldManager == _newManager || _newManager == address(0)) revert IncorrectAddressArgument(_newManager);
 
-    order[_orderId].manager = _newManager;
+    _order[_orderId].manager = _newManager;
 
     emit OrderManagerChanged(_orderId, oldManager, _newManager);
   }
 
-  /**
- * @dev Gets the current status of an order with the given ID.
-   *
-   * @param id The ID of the order.
-   * @return status The current status of the order.
-   *
-   * This function returns the current status of an order based on various conditions
-   * such as the executor, execution deadlines, and more. It provides insight into the
-   * state of the order.
-   */
-  // @todo verify the function and all the possible states
+  // @notice getter functions implementations
+  function ordersCount() public view override returns (uint256) {
+    return _ordersCount;
+  }
 
-  function status(uint256 id) public view returns (OrderStatus) {
-    if (order[id].manager == address(0)) return OrderStatus.None;
-    else if (executor[id] != address(0)) {
-      if (totalSupply(id) == 0) return OrderStatus.Closed;
-      else if (order[id].executionPeriodDeadline <= block.timestamp) return OrderStatus.Inactive;
-      else if (order[id].executionPeriodStart <= block.timestamp) return OrderStatus.Active;
-      else return OrderStatus.Accepted;
-    } else if (order[id].executionPeriodStart < block.timestamp) return OrderStatus.Untaken;
-    else return OrderStatus.Pending;
+  function order(uint256 id) public view override returns (Order memory) {
+    return _order[id];
+  }
+
+  function reward(uint256 id) public view override returns (Payment memory) {
+    return _reward[id];
+  }
+
+  function gasCost(uint256 id) public view override returns (GasPayment memory) {
+    return _gasCost[id];
+  }
+
+  function guarantee(uint256 id) public view override returns (GasPayment memory) {
+    return _guarantee[id];
+  }
+
+  function executor(uint256 id) public view override returns (address) {
+    return _executor[id];
+  }
+
+  //function status(uint256) public returns (OrderStatus);
+
+  function execution() public view override returns (address) {
+    return _execution;
   }
 }

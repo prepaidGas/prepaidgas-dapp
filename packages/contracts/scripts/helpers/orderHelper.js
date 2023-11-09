@@ -31,7 +31,7 @@ async function createOrder(
   if (isAccepted) {
     await tokenContract.connect(executor).approve(gasContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
     // @notice the maximum value is `100`
-    const ordersAmount = await gasContract.totalMatchingOrdersCount(
+    const ordersAmount = await gasContract.getMatchingOrdersCount(
       ethers.ZeroAddress,
       0, // OrderStatus.None
     )

@@ -33,8 +33,8 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     bool liquidation
   );
 
-  modifier validNonce(address from, uint256 nonce) {
-    if (nonce[from][nonce]) revert NonceExhausted(from, nonce);
+  modifier validNonce(address from, uint256 _nonce) {
+    if (nonce[from][_nonce]) revert NonceExhausted(from, _nonce);
     _;
   }
 

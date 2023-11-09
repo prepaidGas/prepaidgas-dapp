@@ -1,45 +1,63 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.20;
 
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+
+import "./common/Errors.sol";
+import "./common/Constants.sol";
+
+import "./Executor.sol";
+import {ERC1155ish} from "./base/ERC1155ish.sol";
+
+import "./base/GasOrderGetters.sol";
 import {Message} from "./base/ExecutionMessage.sol";
+import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
 
-contract TxAccept is ExecutionMessage {
-    mapping(address => mapping(uint256 => bool)) public nonce;
-    mapping(address => mapping(uint256 => uint256)) public lock;
+abstract contract TxAccept is GasOrderGetters {
+  using ECDSA for bytes32;
 
-    function addTransaction(
-        bytes calldata signature,
-        Message calldata message
-    ) public specificStatus(transactionData.gasOrder, OrderStatus.Active) {
-        bytes32 hash = messageHash(_transactionData);
+  mapping(address => mapping(uint256 => bool)) public nonce;
+  mapping(address => mapping(uint256 => uint256)) public lock;
 
-        address recovered = hash.recover(signature);
-        if (recovered != message.from) revert UnknownRecovered(recovered);
+  modifier specificStatus(uint256 id, OrderStatus expected) {
+    OrderStatus real = status(id);
 
-        // @todo update error to `InvalidSignature`
-        if (nonce[message.from][message.nonce]) revert InvalidTransaction(hash);
-        nonce[message.from][message.nonce] = true;
+    if (real != expected) revert WrongOrderStatus(real, expected);
+    _;
+  }
 
-        lock[message.from][message.nonce] = message.gas;
+  function addTransaction(
+    bytes calldata signature,
+    Message calldata message
+  ) public specificStatus(message.gasOrder, OrderStatus.Active) {
+    bytes32 hash = Executor(execution()).messageHash(message);
 
-        uint256 balance = usable(_transactionData.onBehalf, _transactionData.gasOrder, _transactionData.from);
-        if (_transactionData.gas >= balance) revert GasLimitExceedBalance(_transactionData.gas, balance);
+    address recovered = hash.recover(signature);
+    if (recovered != message.from) revert UnknownRecovered(recovered);
 
-        _lockGasTokens(_transactionData.from, _transactionData.gasOrder, _transactionData.gas);
+    // @todo update error to `InvalidSignature`
+    if (nonce[message.from][message.nonce]) revert InvalidTransaction(hash);
+    nonce[message.from][message.nonce] = true;
 
-        // @todo time bounds check
+    lock[message.from][message.nonce] = message.gas;
 
-        // @todo add event emmiting
-    }
+    uint256 balance = usable(message.onBehalf, message.gasOrder, message.from);
+    if (message.gas >= balance) revert GasLimitExceedBalance(message.gas, balance);
 
-    function unlockGasTokens(
-        Message calldata _transactionData
-    ) public {
-        // @todo finalize
-        bytes32 hashedMsg = Executor(execution).messageHash(_transactionData);
-        // @todo add error, no such tx
-        if (!txMsgHashes[hashedMsg]) revert InvalidTransaction(hashedMsg);
+    _lockGasTokens(message.from, message.gasOrder, message.gas);
 
-        _unlockGasTokens(_transactionData.from, _transactionData.gasOrder, _transactionData.gas);
-    }
+    // @todo time bounds check
+
+    // @todo add event emmiting
+  }
+
+  // @todo check if the function is needed
+  function unlockGasTokens(Message calldata message) public {
+    // @todo finalize
+    bytes32 hash = Executor(execution()).messageHash(message);
+    // @todo add error, no such tx
+    if (!nonce[message.from][message.nonce]) revert InvalidTransaction(hash);
+
+    _unlockGasTokens(message.from, message.gasOrder, message.gas);
+  }
 }

@@ -178,7 +178,7 @@ describe("GasOrder", function () {
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
 
-      const totalAmountOfOrders = await GasOrderContract.totalMatchingOrdersCount(
+      const totalAmountOfOrders = await GasOrderContract.getMatchingOrdersCount(
         ethers.ZeroAddress,
         0, // OrderStatus.None
       )
@@ -187,17 +187,18 @@ describe("GasOrder", function () {
 
       const ordersWithAccount2Owner = await GasOrderContract.getFilteredOrders(
         accounts[2].address,
+        ethers.ZeroAddress, // `user` is not set
         0, // OrderStatus.None
         100,
         0,
       )
-
       expect(ordersWithAccount2Owner.length).to.be.eq(2)
       expect(ordersWithAccount2Owner[0][0]).to.be.eq(4) // order number
-      expect(ordersWithAccount2Owner[0][3]).to.be.eq(2000) // order number
+      expect(ordersWithAccount2Owner[0][1][1]).to.be.eq(2000) // order number
 
       const ordersWithRandomOwner = await GasOrderContract.getFilteredOrders(
         "0x0000000000000000000000000000000000000001",
+        ethers.ZeroAddress, // `user` is not set
         0, // OrderStatus.None
         100,
         0,
@@ -206,6 +207,7 @@ describe("GasOrder", function () {
 
       const bigOffset = await GasOrderContract.getFilteredOrders(
         accounts[2].address,
+        ethers.ZeroAddress, // `user` is not set
         0, // OrderStatus.None
         100,
         100,
@@ -215,6 +217,7 @@ describe("GasOrder", function () {
 
       const normalOffset = await GasOrderContract.getFilteredOrders(
         accounts[2].address,
+        ethers.ZeroAddress, // `user` is not set
         0, // OrderStatus.None
         100,
         1,
@@ -250,7 +253,7 @@ describe("GasOrder", function () {
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
 
-      const totalUserGasHoldings = await GasOrderContract.getOrdersById([1, 2, 3], ethers.ZeroAddress)
+      const totalUserGasHoldings = await GasOrderContract.getOrdersByIds([1, 2, 3], ethers.ZeroAddress)
 
       expect(totalUserGasHoldings.length).to.be.eq(3)
     })
