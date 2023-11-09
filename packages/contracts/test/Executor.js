@@ -22,13 +22,7 @@ describe("Executor", function () {
     const GasOrderContract = await GasOrderFactory.deploy()
     await GasOrderContract.deploymentTransaction().wait()
 
-    const ExecutorContract = await ExecutorFactory.deploy(
-      GasOrderContract.target,
-      PROJECT_NAME,
-      PROJECT_VERSION,
-      VALIDATOR_THRESHOLD,
-      VALIDATORS,
-    )
+    const ExecutorContract = await ExecutorFactory.deploy(GasOrderContract.target, PROJECT_NAME, PROJECT_VERSION)
     await ExecutorContract.deploymentTransaction().wait()
 
     return { accounts, admin, ExecutorContract, GasOrderContract }
@@ -228,6 +222,7 @@ describe("Executor", function () {
     })
   })
 
+  /* @dev validators functionality is out of the first version scope
   describe("Validate message liquidation", function () {
     it("liquidate arbitrary message", async function () {
       for (let i = 0; i < 15; i++) {
@@ -301,7 +296,6 @@ describe("Executor", function () {
         "NonceExhausted",
       )
     })
-
     it("liquidate before deadline", async function () {
       const { accounts, admin, ExecutorContract } = await loadFixture(initialSetup)
       await ExecutorContract.setValidatorThreshold(1)
@@ -498,5 +492,5 @@ describe("Executor", function () {
         "UnknownRecovered",
       )
     })
-  })
+  })*/
 })

@@ -5,15 +5,13 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import {ExecutionMessage, Message} from "./base/ExecutionMessage.sol";
 
-import {Validators} from "./tools/Validators.sol";
-
 import {IGasOrder} from "./interfaces/IGasOrder.sol";
 import {IExecutor} from "./interfaces/IExecutor.sol";
 
 import "./common/Errors.sol";
 import "./common/Constants.sol";
 
-contract Executor is IExecutor, ExecutionMessage, Validators {
+contract Executor is IExecutor, ExecutionMessage {
   using ECDSA for bytes32;
 
   address public immutable gasOrder;
@@ -43,13 +41,7 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
     _;
   }
 
-  constructor(
-    address ordersManager,
-    string memory name,
-    string memory version,
-    uint256 minValidations,
-    address[] memory initialValidators
-  ) ExecutionMessage(name, version) Validators(minValidations, initialValidators) {
+  constructor(address ordersManager, string memory name, string memory version) ExecutionMessage(name, version) {
     gasOrder = ordersManager;
   }
 
@@ -77,46 +69,24 @@ contract Executor is IExecutor, ExecutionMessage, Validators {
    *
    * @param message The message to execute with the platform metadata.
    * @param signature The senders signature of the message.
-   * @param validations An array of the message validations.
    *
-   * This function verifies the validity of liquidation, checks the provided validator signatures,
-   * and performs the necessary actions.
+   * This function verifies the validity of liquidation and performs the necessary actions.
    * After execution the liquidator will be rewarded.
    */
   function liquidate(
     Message calldata message,
-    bytes calldata signature,
-    bytes[] calldata validations
+    bytes calldata signature
   ) external deadlineMet(message.deadline) validNonce(message.from, message.nonce) {
-    _checkValidations(message, validations);
-
+    // @todo replace validators related functionality `_checkValidations`
+    _checkLiquidation();
     uint256 gasSpent = _execute(message, signature, true);
-
-    uint256 infrastructureGas = INFR_GAS_LIQUIDATE + INFR_GAS_RECOVER_SIGNER * validatorThreshold();
+    //@todo recheck the corectness of these operations
+    uint256 infrastructureGas = INFR_GAS_LIQUIDATE + INFR_GAS_RECOVER_SIGNER;
     _reportExecution(message, msg.sender, gasSpent, infrastructureGas);
   }
 
-  /**
-   * @dev Checks the validity of signature validations.
-   *
-   * @param message The message to execute with the platform metadata.
-   * @param validations An array of the message validations.
-   *
-   * This function ensures that all signatures are supplied by the authorized validators.
-   */
-  function _checkValidations(
-    Message calldata message,
-    bytes[] calldata validations
-  ) private view enoughValidations(validations.length) {
-    bytes32 digest = messageHash(message);
-
-    address last;
-    for (uint256 i = 0; i < validatorThreshold(); i++) {
-      address recovered = digest.recover(validations[i]);
-      if (last >= recovered) revert IncorrectSignatureOrder(last, recovered);
-      if (!isValidator(recovered)) revert UnknownRecovered(recovered);
-      last = recovered;
-    }
+  function _checkLiquidation() internal {
+    // @todo implement funcitonality
   }
 
   /**

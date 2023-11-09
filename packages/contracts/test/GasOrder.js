@@ -29,13 +29,7 @@ describe("GasOrder", function () {
 
     const GasOrderContractAddress = await precalculateAddress(admin, 1)
 
-    const ExecutorContract = await ExecutorFactory.deploy(
-      GasOrderContractAddress,
-      PROJECT_NAME,
-      PROJECT_VERSION,
-      VALIDATOR_THRESHOLD,
-      VALIDATORS,
-    )
+    const ExecutorContract = await ExecutorFactory.deploy(GasOrderContractAddress, PROJECT_NAME, PROJECT_VERSION)
     await ExecutorContract.deploymentTransaction().wait()
     // @todo add deploy error handling
     console.log(`Executor contract deployed: ${ExecutorContract.target}`)

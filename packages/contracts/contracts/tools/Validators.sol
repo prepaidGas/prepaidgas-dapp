@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
+// @notice !!!IMPORTANT this contract is not gonna be utilized for the first version of the protocol
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
