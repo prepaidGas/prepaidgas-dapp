@@ -3,28 +3,17 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import "./common/Errors.sol";
-import "./common/Constants.sol";
-
 import "./Executor.sol";
-import {ERC1155ish} from "./base/ERC1155ish.sol";
 
 import "./base/GasOrderGetters.sol";
 import {Message} from "./base/ExecutionMessage.sol";
-import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
+import {OrderStatus} from "./interfaces/IGasOrder.sol";
 
 abstract contract TxAccept is GasOrderGetters {
   using ECDSA for bytes32;
 
   mapping(address => mapping(uint256 => bool)) public nonce;
   mapping(address => mapping(uint256 => uint256)) public lock;
-
-  modifier specificStatus(uint256 id, OrderStatus expected) {
-    OrderStatus real = status(id);
-
-    if (real != expected) revert WrongOrderStatus(real, expected);
-    _;
-  }
 
   function addTransaction(
     bytes calldata signature,

@@ -2,22 +2,13 @@
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./Executor.sol";
-import "./base/GasOrderGetters.sol";
+import "./TxAccept.sol";
+
 import {ERC1155ish} from "./base/ERC1155ish.sol";
-import {Message} from "./base/ExecutionMessage.sol";
 import {FeeProcessor, Fee} from "./tools/FeeProcessor.sol";
 import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
-
-import {FilteredOrder} from "./base/GasOrderGetters.sol";
-
-import "./common/Errors.sol";
-import "./common/Constants.sol";
-
-import "hardhat/console.sol";
 
 /**
  * @title GasOrder
@@ -26,7 +17,7 @@ import "hardhat/console.sol";
  * @author SteMak, web3skeptic (markfender)
  */
 
-contract GasOrder is IGasOrder, FeeProcessor, GasOrderGetters {
+contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
   using SafeERC20 for IERC20;
 
   uint256 private _ordersCount;
@@ -39,33 +30,6 @@ contract GasOrder is IGasOrder, FeeProcessor, GasOrderGetters {
   mapping(uint256 => address) private _executor;
 
   address private immutable _execution;
-
-  // @todo move events to a separate file, probably to interface
-  modifier executionCallback() {
-    if (execution() != msg.sender) revert Unauthorized(msg.sender, execution());
-    _;
-  }
-  /* @todo implement modifier of getter
-  modifier orderExists(uint256 id) {
-    
-  }*/
-
-  modifier deadlineNotMet(uint256 deadline) {
-    if (deadline <= block.timestamp) revert DeadlineExpired(block.timestamp, deadline);
-    _;
-  }
-
-  modifier possibleExecutionWindow(uint256 window) {
-    if (window < MIN_EXEC_WINDOW) revert UnderflowValue(window, MIN_EXEC_WINDOW);
-    _;
-  }
-
-  modifier specificStatus(uint256 id, OrderStatus expected) {
-    OrderStatus real = status(id);
-
-    if (real != expected) revert WrongOrderStatus(real, expected);
-    _;
-  }
 
   constructor(address executionEndpoint, string memory link) ERC1155ish(link) {
     _execution = executionEndpoint;

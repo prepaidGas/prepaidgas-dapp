@@ -6,6 +6,9 @@ import {ERC1155ish} from "./ERC1155ish.sol";
 
 import {GasPayment, Order, OrderStatus, Payment} from "../interfaces/IGasOrder.sol";
 
+import "./../common/Errors.sol";
+import "./../common/Constants.sol";
+
 struct TokenDetails {
   address token;
   string name;
@@ -24,6 +27,30 @@ struct FilteredOrder {
 }
 
 abstract contract GasOrderGetters is ERC1155ish {
+  /// @dev modifiers
+  // @todo move events to a separate file, probably to interface
+  modifier executionCallback() {
+    if (execution() != msg.sender) revert Unauthorized(msg.sender, execution());
+    _;
+  }
+
+  modifier deadlineNotMet(uint256 deadline) {
+    if (deadline <= block.timestamp) revert DeadlineExpired(block.timestamp, deadline);
+    _;
+  }
+
+  modifier possibleExecutionWindow(uint256 window) {
+    if (window < MIN_EXEC_WINDOW) revert UnderflowValue(window, MIN_EXEC_WINDOW);
+    _;
+  }
+
+  modifier specificStatus(uint256 id, OrderStatus expected) {
+    OrderStatus real = status(id);
+
+    if (real != expected) revert WrongOrderStatus(real, expected);
+    _;
+  }
+
   /// @dev The functions are required to be presented in the extended contract
 
   /// @notice ERC1155 custom
