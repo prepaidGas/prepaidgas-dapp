@@ -66,8 +66,8 @@ export default function AddTxRequest() {
           ></DialogWindow>
         )
       ) : null}
-      <Title>Create Order</Title>
-      <Text>You might create order on this page</Text>
+      <Title>Add transaction request</Title>
+      <Text>You might add transaction request on this page</Text>
       {/* Main section */}
       <AddTxRequestCard
         setShowDialogWindow={setShowDialogWindow}

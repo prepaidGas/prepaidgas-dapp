@@ -30,15 +30,15 @@ import { SPINNER_COLOR } from "../constants/themeConstants"
 import { z } from "zod"
 
 const schema = z.object({
-  from: z.string(),
+  from: z.string().min(1),
   nonce: z.number(),
   gasOrder: z.number(),
-  onBehalf: z.string(),
+  onBehalf: z.string().min(1),
   deadlineDate: z.date(),
-  deadlineTime: z.string(),
-  to: z.string(),
+  deadlineTime: z.string().min(1),
+  to: z.string().min(1),
   gas: z.number(),
-  data: z.string(),
+  data: z.string().min(1),
 })
 
 type AddTxRequestState = z.infer<typeof schema>
