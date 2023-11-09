@@ -52,7 +52,7 @@ export default function UserStatsCard() {
       const data = await readContract({
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
-        functionName: "totalMatchingOrdersCount",
+        functionName: "getMatchingOrdersCount",
         args: ["0x0000000000000000000000000000000000000000", status],
       })
       console.log("totalMatchingOrdersCount", data)
