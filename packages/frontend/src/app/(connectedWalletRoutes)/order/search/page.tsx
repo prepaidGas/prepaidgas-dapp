@@ -45,7 +45,7 @@ export default function SearchOrder() {
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
         functionName: "getFilteredOrders",
-        args: [manager || defaultManager, status, numberOfEntries, (pageNumber - 1) * numberOfEntries],
+        args: [manager || defaultManager, defaultManager, status, numberOfEntries, (pageNumber - 1) * numberOfEntries],
       })
       // console.log("DATA", data)
       setOrdersData(data as FilteredOrderStructOutput[])
@@ -61,7 +61,7 @@ export default function SearchOrder() {
       const data = await readContract({
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
-        functionName: "totalMatchingOrdersCount",
+        functionName: "getMatchingOrdersCount",
         args: [filterOptions.manager || defaultManager, filterOptions.status],
       })
       console.log("getTotalEntriesNumber", { filterOptions })
