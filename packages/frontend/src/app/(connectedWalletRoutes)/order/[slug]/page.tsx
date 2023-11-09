@@ -10,8 +10,8 @@ import { GasOrderABI } from "helpers/abi"
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 import { useAccount } from "wagmi"
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
-import StatusBadge from "../../../components/StatusBadge"
-import { COLOR_BY_STATUS, SPINNER_COLOR, STATUS } from "../../../constants/themeConstants"
+import StatusBadge from "../../../../components/StatusBadge"
+import { COLOR_BY_STATUS, SPINNER_COLOR, STATUS } from "../../../../constants/themeConstants"
 import { TailSpin } from "react-loader-spinner"
 
 export default function Page({ params }: { params: { slug: string } }) {

@@ -515,8 +515,8 @@ export default function CreateOrderCard({
           </div>
         </AccordionBody>
       </Accordion>
-      <div className="flex flex-row justify-end mt-4">
-        <Button disabled={isLoading} onClick={handleSubmit}>
+      <div className="flex flex-row md:justify-end mt-4">
+        <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
           {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
           <TailSpin
             height={20}
