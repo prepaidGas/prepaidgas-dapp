@@ -7,6 +7,7 @@ import {ExecutionMessage, Message} from "./base/ExecutionMessage.sol";
 
 import {IGasOrder} from "./interfaces/IGasOrder.sol";
 import {IExecutor} from "./interfaces/IExecutor.sol";
+import {ITxAccept} from "./interfaces/ITxAccept.sol";
 
 import "./common/Errors.sol";
 import "./common/Constants.sol";
@@ -15,9 +16,6 @@ contract Executor is IExecutor, ExecutionMessage {
   using ECDSA for bytes32;
 
   address public immutable gasOrder;
-
-  /// @dev from => nonce => exhausted
-  mapping(address => mapping(uint256 => bool)) public nonce;
 
   event Execution(
     address indexed from,
@@ -30,11 +28,6 @@ contract Executor is IExecutor, ExecutionMessage {
     address fulfiller,
     bool liquidation
   );
-
-  modifier validNonce(address from, uint256 _nonce) {
-    if (nonce[from][_nonce]) revert NonceExhausted(from, _nonce);
-    _;
-  }
 
   modifier deadlineMet(uint256 deadline) {
     if (deadline > block.timestamp) revert DeadlineNotMet(block.timestamp, deadline);
@@ -54,10 +47,7 @@ contract Executor is IExecutor, ExecutionMessage {
    * This function verifies the validity of executing the message and performs the actions.
    * After execution the registered executor will be rewarded.
    */
-  function execute(
-    Message calldata message,
-    bytes calldata signature
-  ) external validNonce(message.from, message.nonce) {
+  function execute(Message calldata message, bytes calldata signature) external {
     uint256 gasSpent = _execute(message, signature, false);
 
     /// @dev address(0) means registered executor should be rewarded
@@ -73,20 +63,11 @@ contract Executor is IExecutor, ExecutionMessage {
    * This function verifies the validity of liquidation and performs the necessary actions.
    * After execution the liquidator will be rewarded.
    */
-  function liquidate(
-    Message calldata message,
-    bytes calldata signature
-  ) external deadlineMet(message.deadline) validNonce(message.from, message.nonce) {
-    // @todo replace validators related functionality `_checkValidations`
-    _checkLiquidation();
+  function liquidate(Message calldata message, bytes calldata signature) external {
     uint256 gasSpent = _execute(message, signature, true);
     //@todo recheck the corectness of these operations
     uint256 infrastructureGas = INFR_GAS_LIQUIDATE + INFR_GAS_RECOVER_SIGNER;
     _reportExecution(message, msg.sender, gasSpent, infrastructureGas);
-  }
-
-  function _checkLiquidation() internal {
-    // @todo implement funcitonality
   }
 
   /**
@@ -109,8 +90,6 @@ contract Executor is IExecutor, ExecutionMessage {
     address recovered = digest.recover(signature);
     /// @dev recovered could not be 0x0 due to `ECDSA.recover` design
     if (recovered != message.from) revert UnexpectedRecovered(recovered, message.from);
-
-    nonce[message.from][message.nonce] = true;
 
     uint256 gas = gasleft();
     (bool success, bytes memory returndata) = message.to.call{gas: message.gas}(
@@ -149,13 +128,6 @@ contract Executor is IExecutor, ExecutionMessage {
     uint256 gasSpent,
     uint256 infrastructureGas
   ) private {
-    IGasOrder(gasOrder).reportExecution(
-      message.gasOrder,
-      message.from,
-      message.onBehalf,
-      message.gas + infrastructureGas,
-      fulfiller,
-      gasSpent + infrastructureGas
-    );
+    IGasOrder(gasOrder).reportExecution(message, fulfiller, gasSpent, infrastructureGas);
   }
 }

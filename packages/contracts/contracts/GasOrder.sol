@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./TxAccept.sol";
 
+import {Message} from "./base/ExecutionMessage.sol";
 import {ERC1155ish} from "./base/ERC1155ish.sol";
 import {FeeProcessor, Fee} from "./tools/FeeProcessor.sol";
 import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
@@ -191,32 +192,41 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
   /**
    * @dev Verifies the execution of the order and updates the balance.
    *
-   * @param id The ID of the order.
-   * @param from The signer's address.
-   * @param onBehalf The address on behalf of which the order is executed.
-   * @param gasLimit The Gas restriction for the execution.
+   * @param message The transaction message data.
    * @param fulfiller The fulfiller's address (executor or liquidator).
    * @param gasSpent The amount of Gas spent during execution.
+   * @param infrastructureGas The Gas expences for the infrastracture call.
    *
    * This function verifies the execution of an order and handles gas costs, rewards, and guarantees.
    */
   function reportExecution(
-    uint256 id,
-    address from,
-    address onBehalf,
-    uint256 gasLimit,
+    Message calldata message,
     address fulfiller,
-    uint256 gasSpent
-  ) external executionCallback specificStatus(id, OrderStatus.Active) {
+    uint256 gasSpent,
+    uint256 infrastructureGas
+  ) external executionCallback specificStatus(message.gasOrder, OrderStatus.Active) {
+    uint256 id = message.gasOrder;
+    address from = message.from;
+    address onBehalf = message.onBehalf;
+    uint256 transactionNonce = message.nonce;
+    uint256 deadline = message.deadline;
     uint256 balance = usable(onBehalf, id, from);
+    // @todo verify correctness
+    uint256 gasLimit = message.gas - infrastructureGas;
     if (gasLimit > balance) revert GasLimitExceedBalance(gasLimit, balance);
 
     /// @dev should not happen in ordinary situations
     if (gasSpent > balance) gasSpent = balance;
     _utilizeAllowance(onBehalf, id, from, gasSpent);
 
-    if (fulfiller == address(0)) fulfiller = executor(id);
-
+    if (fulfiller == address(0)) {
+      if (!isExecutable(message)) revert ExecutionImpossible(from, transactionNonce, message.deadline, block.timestamp);
+      // execution
+      fulfiller = executor(id);
+    } else {
+      // liquidation
+      if (!isLiquidatable(message)) revert LiquidationImpossible(from, transactionNonce, deadline);
+    }
     _distribute(fulfiller, gasCost(id).token, gasCost(id).gasPrice * gasSpent);
 
     uint256 unlockAmount = guarantee(id).gasPrice * gasSpent;
@@ -228,6 +238,7 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
     }
 
     _unlockGasTokens(from, id, gasSpent);
+    _unlockTxGasTokens(message);
   }
 
   /**

@@ -20,7 +20,7 @@ async function createOrder(
       GAS_AMOUNT,
       latestTime + possibleExecutionStart,
       latestTime + possibleExecutionDeadline,
-      40,
+      60,
       [tokenContract.target, INITIAL_EXECUTOR_REWARD],
       [tokenContract.target, GAS_COST],
       [tokenContract.target, LOCKED_GUARANTEE_PER_GAS],

@@ -16,8 +16,8 @@ abstract contract TxAccept is GasOrderGetters {
   mapping(address => mapping(uint256 => uint256)) public lock;
 
   function addTransaction(
-    bytes calldata signature,
-    Message calldata message
+    Message calldata message,
+    bytes calldata signature
   ) public specificStatus(message.gasOrder, OrderStatus.Active) {
     bytes32 hash = Executor(execution()).messageHash(message);
 
@@ -41,12 +41,36 @@ abstract contract TxAccept is GasOrderGetters {
   }
 
   // @todo check if the function is needed
-  function unlockGasTokens(Message calldata message) public {
+  function _unlockTxGasTokens(Message calldata message) internal {
     // @todo finalize
-    bytes32 hash = Executor(execution()).messageHash(message);
     // @todo add error, no such tx
-    if (!nonce[message.from][message.nonce]) revert InvalidTransaction(hash);
+    if (!nonce[message.from][message.nonce]) revert(); //InvalidTransaction();
+    lock[message.from][message.nonce] = 0;
+    //_unlockGasTokens(message.from, message.gasOrder, message.gas);
+  }
 
-    _unlockGasTokens(message.from, message.gasOrder, message.gas);
+  function isExecutable(Message calldata message) public view returns (bool) {
+    // @todo disallow locking zero gas during the tx
+    uint256 executionWindow = order(message.gasOrder).executionWindow;
+
+    if (
+      message.deadline - executionWindow * 2 < block.timestamp &&
+      message.deadline - executionWindow > block.timestamp &&
+      nonce[message.from][message.nonce] &&
+      lock[message.from][message.nonce] > 0
+    ) return true;
+    else return false;
+  }
+
+  function isLiquidatable(Message calldata message) public view returns (bool) {
+    // @todo finish the function validations
+    // @todo disallow locking zero gas during the tx
+    if (
+      message.deadline - order(message.gasOrder).executionWindow >= block.timestamp &&
+      message.deadline < block.timestamp &&
+      nonce[message.from][message.nonce] &&
+      lock[message.from][message.nonce] > 0
+    ) return true;
+    else return false;
   }
 }

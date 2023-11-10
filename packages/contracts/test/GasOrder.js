@@ -10,8 +10,6 @@ const {
   PROJECT_NAME,
   PROJECT_VERSION,
   TOKEN_LINK,
-  VALIDATOR_THRESHOLD,
-  VALIDATORS,
 } = require("../scripts/constants/index.js")
 
 const orderHelper = require("../scripts/helpers/orderHelper.js")
@@ -39,13 +37,11 @@ describe("GasOrder", function () {
     console.log(`GasOrder contract deployed: ${GasOrderContract.target}`)
 
     const TokenFactory = await ethers.getContractFactory("MockToken")
+    // calculate numbers based on constants
     const TokenContract = await TokenFactory.deploy("MockUSD", "MUSD", "1000000000000") // @todo use ethers function to specify token amount
-    await TokenContract.transfer(accounts[1], 20000000)
-    await TokenContract.transfer(accounts[2], 20000000)
-
-    await TokenContract.transfer(accounts[10], 20000000)
-
-    await TokenContract.transfer(accounts[10], 20000000)
+    await TokenContract.transfer(accounts[1], 20000000000)
+    await TokenContract.transfer(accounts[2], 20000000000)
+    await TokenContract.transfer(accounts[10], 20000000000)
 
     await TokenContract.deploymentTransaction().wait()
 
@@ -188,7 +184,7 @@ describe("GasOrder", function () {
       )
       expect(ordersWithAccount2Owner.length).to.be.eq(2)
       expect(ordersWithAccount2Owner[0][0]).to.be.eq(4) // order number
-      expect(ordersWithAccount2Owner[0][1][1]).to.be.eq(2000) // order number
+      expect(ordersWithAccount2Owner[0][1][1]).to.be.eq(GAS_AMOUNT) // order number
 
       const ordersWithRandomOwner = await GasOrderContract.getFilteredOrders(
         "0x0000000000000000000000000000000000000001",
@@ -233,7 +229,7 @@ describe("GasOrder", function () {
 
       const totalUserGasHoldings = await GasOrderContract.getTotalBalance(accounts[1], [])
 
-      expect(totalUserGasHoldings).to.be.eq(4000)
+      expect(totalUserGasHoldings).to.be.eq(GAS_AMOUNT * 2)
     })
 
     it("Should get orders by ids", async function () {

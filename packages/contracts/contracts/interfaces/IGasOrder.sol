@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.20;
 
+import {Message} from "../base/ExecutionMessage.sol";
+
 struct Order {
   address manager;
   uint256 maxGas;
@@ -32,12 +34,10 @@ struct Payment {
 
 interface IGasOrder {
   function reportExecution(
-    uint256 id,
-    address from,
-    address onBehalf,
-    uint256 gasLimit,
+    Message calldata message,
     address fulfiller,
-    uint256 gasSpent
+    uint256 gasSpent,
+    uint256 infrastructureGas
   ) external;
 
   event OrderCreate(uint256 indexed id, uint256 executionWindow);
