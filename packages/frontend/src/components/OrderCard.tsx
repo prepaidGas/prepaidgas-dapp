@@ -27,12 +27,9 @@ interface OrderCard extends FilteredOrderStructOutput {
 // @todo display order data
 export default function OrderCard({
   id,
-  manager,
+  order,
+  gasBalance,
   status,
-  maxGas,
-  executionPeriodStart,
-  executionPeriodDeadline,
-  executionWindow,
   gasCost,
   reward,
   guarantee,
@@ -113,23 +110,24 @@ export default function OrderCard({
       {/* @dev Order Id */}
       <Metric>#{id.toString()}</Metric>
 
-      <Text>Manager: {manager}</Text>
+      <Text>Manager: {order.manager}</Text>
       {/* @dev Order executionPeriodStart and executionPeriodDeadline */}
       {/*"yyyy.mm.dd hh:ss:mm"*/}
       <Text>
-        Execution timeframe: {format(new Date(Number(executionPeriodStart) * 1000), "MMM d y, HH:mm:ss")} -{" "}
-        {format(new Date(Number(executionPeriodDeadline) * 1000), "MMM d y, HH:mm:ss")}
+        Execution timeframe: {format(new Date(Number(order.executionPeriodStart) * 1000), "MMM d y, HH:mm:ss")} -{" "}
+        {format(new Date(Number(order.executionPeriodDeadline) * 1000), "MMM d y, HH:mm:ss")}
       </Text>
       {/* @dev Order executionWindow */}
-      <Text>Execution window: {executionWindow.toString()}</Text>
+      <Text>Execution window: {order.executionWindow.toString()}</Text>
       {/* @dev Order executionWindow */}
       {/* @dev Order data, the details might be found in `TokenAmountWithDetails` structure */}
-      <Text>{`Reward: ${reward.value} ${reward.symbol}`}</Text>
-      <Text>{`Gas Cost: ${gasCost.value} ${gasCost.symbol}`}</Text>
-      <Text>{`Guarantee: ${guarantee.value} ${guarantee.symbol}`}</Text>
+      {/* todo: how to get token 'symbol'? ${reward.amount} ${reward.symbol} */}
+      <Text>{`Reward: ${reward.amount} ${reward.token}`}</Text>
+      <Text>{`Gas Cost: ${gasCost.gasPrice} ${gasCost.token}`}</Text>
+      <Text>{`Guarantee: ${guarantee.gasPrice} ${guarantee.token}`}</Text>
       {/* @dev Gas left (maxGas) */}
       <Flex className="mt-4">
-        <Text>Used: 0 / {maxGas.toString()}</Text>
+        <Text>Used: 0 / {order.maxGas.toString()}</Text>
       </Flex>
       <ProgressBar value={32} className="mt-2" />
       <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">

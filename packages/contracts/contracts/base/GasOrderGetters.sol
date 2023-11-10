@@ -2,16 +2,75 @@
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ERC1155ish} from "./ERC1155ish.sol";
 
-import "./ERC1155ish.sol";
-import "./GasOrderStateVariables.sol";
-import "../common/Constants.sol";
+import {GasPayment, Order, OrderStatus, Payment} from "../interfaces/IGasOrder.sol";
 
-import {Order, FilteredOrder, OrderStatus, TokenAmountWithDetails} from "../interfaces/IGasOrder.sol";
+import "./../common/Errors.sol";
+import "./../common/Constants.sol";
 
-abstract contract GasOrderGetters is GasOrderStateVariables, ERC1155ish {
-  /// Getters function
+struct TokenDetails {
+  address token;
+  string name;
+  string symbol;
+  uint256 decimals;
+}
+
+struct FilteredOrder {
+  uint256 id;
+  Order order;
+  OrderStatus status;
+  uint256 gasBalance;
+  Payment reward;
+  GasPayment gasCost;
+  GasPayment guarantee;
+}
+
+abstract contract GasOrderGetters is ERC1155ish {
+  /// @dev modifiers
+  // @todo move events to a separate file, probably to interface
+  modifier executionCallback() {
+    if (execution() != msg.sender) revert Unauthorized(msg.sender, execution());
+    _;
+  }
+
+  modifier deadlineNotMet(uint256 deadline) {
+    if (deadline <= block.timestamp) revert DeadlineExpired(block.timestamp, deadline);
+    _;
+  }
+
+  modifier possibleExecutionWindow(uint256 window) {
+    if (window < MIN_EXEC_WINDOW) revert UnderflowValue(window, MIN_EXEC_WINDOW);
+    _;
+  }
+
+  modifier specificStatus(uint256 id, OrderStatus expected) {
+    OrderStatus real = status(id);
+
+    if (real != expected) revert WrongOrderStatus(real, expected);
+    _;
+  }
+
+  /// @dev The functions are required to be presented in the extended contract
+
+  /// @notice ERC1155 custom
+  //function usable(address, uint256, address) public view virtual returns (uint256);
+
+  /// @notice gasOrder data
+  function ordersCount() public view virtual returns (uint256);
+
+  function order(uint256) public view virtual returns (Order memory);
+
+  function reward(uint256) public view virtual returns (Payment memory);
+
+  function gasCost(uint256) public view virtual returns (GasPayment memory);
+
+  function guarantee(uint256) public view virtual returns (GasPayment memory);
+
+  function executor(uint256) public view virtual returns (address);
+
+  function execution() public view virtual returns (address);
+
   /**
    * @dev Gets the current status of an order with the given ID.
    *
@@ -25,163 +84,148 @@ abstract contract GasOrderGetters is GasOrderStateVariables, ERC1155ish {
   // @todo verify the function and all the possible states
 
   function status(uint256 id) public view returns (OrderStatus) {
-    if (order[id].manager == address(0)) return OrderStatus.None;
-    else if (executor[id] != address(0)) {
+    if (order(id).manager == address(0)) return OrderStatus.None;
+    else if (executor(id) != address(0)) {
       if (totalSupply(id) == 0) return OrderStatus.Closed;
-      else if (order[id].executionPeriodDeadline <= block.timestamp) return OrderStatus.Inactive;
-      else if (order[id].executionPeriodStart <= block.timestamp) return OrderStatus.Active;
+      else if (order(id).executionPeriodDeadline <= block.timestamp) return OrderStatus.Inactive;
+      else if (order(id).executionPeriodStart <= block.timestamp) return OrderStatus.Active;
       else return OrderStatus.Accepted;
-    } else if (order[id].executionPeriodStart < block.timestamp) return OrderStatus.Untaken;
+    } else if (order(id).executionPeriodStart < block.timestamp) return OrderStatus.Untaken;
     else return OrderStatus.Pending;
   }
 
-  // Getter function to filter and paginate orders
-  // @todo add user field
-  function getFilteredOrders(
-    address _manager,
-    OrderStatus _status,
-    uint256 _limit,
-    uint256 _start
-  ) external view returns (FilteredOrder[] memory) {
-    return getFilteredOrders(_manager, address(0), _status, _limit, _start);
-  }
+  /// @notice over high tokens array length may cause function call failure
+  function getTokensDetails(address[] memory tokens) external view returns (TokenDetails[] memory) {
+    uint256 length = tokens.length;
+    TokenDetails[] memory result = new TokenDetails[](length);
 
-  // @todo add comments
-  function getFilteredOrders(
-    address _manager,
-    address _user,
-    OrderStatus _status,
-    uint256 _limit, // amount of items to get after start
-    uint256 _offset
-  ) public view returns (FilteredOrder[] memory) {
-    // Ensure the limit does not exceed the maximum
-    uint256 limit = (_limit > MAX_FILTERED_ORDERS) ? MAX_FILTERED_ORDERS : _limit;
-
-    FilteredOrder[] memory result = new FilteredOrder[](limit);
-
-    uint256 addedOrders = 0;
-    for (uint256 orderId = 0; orderId < ordersCount && addedOrders < limit; orderId++) {
-      if (
-        (_manager == address(0) || order[orderId].manager == _manager) &&
-        (_status == OrderStatus.None || status(orderId) == _status)
-      ) {
-        if (_offset > 0) _offset--;
-        else {
-          result[addedOrders] = FilteredOrder({
-            id: orderId,
-            manager: order[orderId].manager,
-            status: status(orderId),
-            maxGas: order[orderId].maxGas,
-            executionPeriodStart: order[orderId].executionPeriodStart,
-            executionPeriodDeadline: order[orderId].executionPeriodDeadline,
-            executionWindow: order[orderId].executionWindow,
-            availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0,
-            reward: TokenAmountWithDetails(
-              IERC20Metadata(reward[orderId].token).name(),
-              IERC20Metadata(reward[orderId].token).symbol(),
-              IERC20Metadata(reward[orderId].token).decimals(),
-              reward[orderId].token,
-              reward[orderId].amount
-            ),
-            gasCost: TokenAmountWithDetails(
-              IERC20Metadata(gasCost[orderId].token).name(),
-              IERC20Metadata(gasCost[orderId].token).symbol(),
-              IERC20Metadata(gasCost[orderId].token).decimals(),
-              gasCost[orderId].token,
-              gasCost[orderId].gasPrice
-            ),
-            guarantee: TokenAmountWithDetails(
-              IERC20Metadata(guarantee[orderId].token).name(),
-              IERC20Metadata(guarantee[orderId].token).symbol(),
-              IERC20Metadata(guarantee[orderId].token).decimals(),
-              guarantee[orderId].token,
-              guarantee[orderId].gasPrice
-            )
-          });
-
-          addedOrders++;
-        }
-      }
-    }
-
-    if (addedOrders < limit) {
-      // @dev cut array size
-      /// @solidity memory-safe-assembly
-      assembly {
-        mstore(result, addedOrders)
-      }
-    }
-
-    return result;
-  }
-
-  function getOrdersById(uint256[] calldata ids, address _user) public view returns (FilteredOrder[] memory) {
-    FilteredOrder[] memory result = new FilteredOrder[](ids.length);
-    for (uint256 resultIndex = 0; resultIndex < ids.length; resultIndex++) {
-      uint256 orderId = ids[resultIndex];
-      result[resultIndex] = FilteredOrder({
-        id: orderId,
-        manager: order[orderId].manager,
-        status: status(orderId),
-        maxGas: order[orderId].maxGas,
-        executionPeriodStart: order[orderId].executionPeriodStart,
-        executionPeriodDeadline: order[orderId].executionPeriodDeadline,
-        executionWindow: order[orderId].executionWindow,
-        availableGasHoldings: _user != address(0) ? balanceOf(_user, orderId) : 0,
-        reward: TokenAmountWithDetails(
-          IERC20Metadata(reward[orderId].token).name(),
-          IERC20Metadata(reward[orderId].token).symbol(),
-          IERC20Metadata(reward[orderId].token).decimals(),
-          reward[orderId].token,
-          reward[orderId].amount
-        ),
-        gasCost: TokenAmountWithDetails(
-          IERC20Metadata(gasCost[orderId].token).name(),
-          IERC20Metadata(gasCost[orderId].token).symbol(),
-          IERC20Metadata(gasCost[orderId].token).decimals(),
-          gasCost[orderId].token,
-          gasCost[orderId].gasPrice
-        ),
-        guarantee: TokenAmountWithDetails(
-          IERC20Metadata(guarantee[orderId].token).name(),
-          IERC20Metadata(guarantee[orderId].token).symbol(),
-          IERC20Metadata(guarantee[orderId].token).decimals(),
-          guarantee[orderId].token,
-          guarantee[orderId].gasPrice
-        )
+    for (uint256 i; i < length; i++) {
+      address token = tokens[i];
+      // @todo utilise try functionality
+      result[i] = TokenDetails({
+        token: token,
+        name: IERC20Metadata(token).name(),
+        symbol: IERC20Metadata(token).symbol(),
+        decimals: IERC20Metadata(token).decimals()
       });
     }
+
     return result;
   }
 
-  // @todo disallow approving gasTokens to yourself
-  // @todo test what is the limit on the amount of orders to return value successfuly
-  function getTotalBalance(address _user, address[] memory _holders) external view returns (uint256) {
-    //@todo limit holders length
-    uint256 totalGasBalance = 0;
-    uint256 holdersAmount = _holders.length;
-    for (uint256 orderId = 0; orderId < ordersCount; orderId++) {
-      uint256 holdersAllowance = 0;
+  /// @notice over high amount of orders may lead tot the function call failure
+  /// @notice over high holders array length may cause function call failure
+  /// @notice the holders array should not contain duplications or the user inside
+  function getTotalBalance(address user, address[] memory holders) external view returns (uint256) {
+    uint256 gasBalance = 0;
+    uint256 allowances = holders.length;
+    uint256 orders = ordersCount();
 
-      for (uint256 i_holder = 0; i_holder < holdersAmount; i_holder++) {
-        holdersAllowance += allowance(_holders[i_holder], orderId, _user);
+    for (uint256 id = 0; id < orders; id++) {
+      uint256 allowed = 0;
+
+      for (uint256 i = 0; i < allowances; i++) {
+        allowed += allowance(holders[i], id, user);
       }
-      totalGasBalance += balanceOf(_user, orderId) + holdersAllowance;
+
+      gasBalance += balanceOf(user, id) + allowed;
     }
-    return totalGasBalance;
+
+    return gasBalance;
   }
 
-  // Function to calculate the total number of matching orders
-  function totalMatchingOrdersCount(address _manager, OrderStatus _status) public view returns (uint256) {
-    uint256 matchingCount = 0;
-    for (uint256 orderId = 0; orderId < ordersCount; orderId++) {
-      if (
-        (_manager == address(0) || order[orderId].manager == _manager) &&
-        (_status == OrderStatus.None || status(orderId) == _status)
-      ) {
-        matchingCount++;
+  /// @notice over high amount of orders may lead to the function call failure
+  /// @notice zero manager address means any manager
+  /// @notice none order status means any status
+  function getMatchingOrdersCount(address manager, OrderStatus state) external view returns (uint256) {
+    uint256 matching = 0;
+
+    bool anyManager = manager == address(0);
+    bool anyStatus = state == OrderStatus.None;
+    uint256 orders = ordersCount();
+
+    for (uint256 id = 0; id < orders; id++) {
+      if ((anyManager || order(id).manager == manager) && (anyStatus || status(id) == state)) {
+        matching++;
       }
     }
-    return matchingCount;
+
+    return matching;
+  }
+
+  /// @notice over high limit value may cause function call failure
+  /// @notice zero manager address means any manager
+  /// @notice none order status means any status
+  /// @notice zero user address means no user
+  function getFilteredOrders(
+    address manager,
+    address user,
+    OrderStatus state,
+    uint256 limit,
+    uint256 offset
+  ) external view returns (FilteredOrder[] memory) {
+    FilteredOrder[] memory result = new FilteredOrder[](limit);
+
+    bool anyManager = manager == address(0);
+    bool anyStatus = state == OrderStatus.None;
+    bool noUser = user == address(0);
+
+    uint256 length = 0;
+    uint256 orders = ordersCount();
+
+    for (uint256 id = 0; id < orders && length < limit; id++) {
+      if ((anyManager || order(id).manager == manager) && (anyStatus || status(id) == state)) {
+        if (offset > 0) {
+          offset--;
+          continue;
+        }
+
+        result[length] = FilteredOrder({
+          id: id,
+          order: order(id),
+          status: status(id),
+          gasBalance: noUser ? 0 : balanceOf(user, id),
+          reward: reward(id),
+          gasCost: gasCost(id),
+          guarantee: guarantee(id)
+        });
+
+        length++;
+      }
+    }
+
+    if (length < limit) {
+      /// @solidity memory-safe-assembly
+      assembly {
+        mstore(result, length)
+      }
+    }
+
+    return result;
+  }
+
+  /// @notice over high ids array length may cause function call failure
+  /// @notice zero user address means no user
+  function getOrdersByIds(uint256[] calldata ids, address user) external view returns (FilteredOrder[] memory) {
+    uint256 length = ids.length;
+    FilteredOrder[] memory result = new FilteredOrder[](length);
+
+    bool noUser = user == address(0);
+
+    for (uint256 i = 0; i < length; i++) {
+      uint256 id = ids[i];
+
+      result[i] = FilteredOrder({
+        id: id,
+        order: order(id),
+        status: status(id),
+        gasBalance: noUser ? 0 : balanceOf(user, id),
+        reward: reward(id),
+        gasCost: gasCost(id),
+        guarantee: guarantee(id)
+      });
+    }
+
+    return result;
   }
 }

@@ -10,8 +10,6 @@ const {
   PROJECT_NAME,
   PROJECT_VERSION,
   TOKEN_LINK,
-  VALIDATOR_THRESHOLD,
-  VALIDATORS,
 } = require("../scripts/constants/index.js")
 
 const orderHelper = require("../scripts/helpers/orderHelper.js")
@@ -29,13 +27,7 @@ describe("GasOrder", function () {
 
     const GasOrderContractAddress = await precalculateAddress(admin, 1)
 
-    const ExecutorContract = await ExecutorFactory.deploy(
-      GasOrderContractAddress,
-      PROJECT_NAME,
-      PROJECT_VERSION,
-      VALIDATOR_THRESHOLD,
-      VALIDATORS,
-    )
+    const ExecutorContract = await ExecutorFactory.deploy(GasOrderContractAddress, PROJECT_NAME, PROJECT_VERSION)
     await ExecutorContract.deploymentTransaction().wait()
     // @todo add deploy error handling
     console.log(`Executor contract deployed: ${ExecutorContract.target}`)
@@ -45,13 +37,11 @@ describe("GasOrder", function () {
     console.log(`GasOrder contract deployed: ${GasOrderContract.target}`)
 
     const TokenFactory = await ethers.getContractFactory("MockToken")
+    // calculate numbers based on constants
     const TokenContract = await TokenFactory.deploy("MockUSD", "MUSD", "1000000000000") // @todo use ethers function to specify token amount
-    await TokenContract.transfer(accounts[1], 20000000)
-    await TokenContract.transfer(accounts[2], 20000000)
-
-    await TokenContract.transfer(accounts[10], 20000000)
-
-    await TokenContract.transfer(accounts[10], 20000000)
+    await TokenContract.transfer(accounts[1], 20000000000)
+    await TokenContract.transfer(accounts[2], 20000000000)
+    await TokenContract.transfer(accounts[10], 20000000000)
 
     await TokenContract.deploymentTransaction().wait()
 
@@ -178,7 +168,7 @@ describe("GasOrder", function () {
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
 
-      const totalAmountOfOrders = await GasOrderContract.totalMatchingOrdersCount(
+      const totalAmountOfOrders = await GasOrderContract.getMatchingOrdersCount(
         ethers.ZeroAddress,
         0, // OrderStatus.None
       )
@@ -187,17 +177,18 @@ describe("GasOrder", function () {
 
       const ordersWithAccount2Owner = await GasOrderContract.getFilteredOrders(
         accounts[2].address,
+        ethers.ZeroAddress, // `user` is not set
         0, // OrderStatus.None
         100,
         0,
       )
-
       expect(ordersWithAccount2Owner.length).to.be.eq(2)
       expect(ordersWithAccount2Owner[0][0]).to.be.eq(4) // order number
-      expect(ordersWithAccount2Owner[0][3]).to.be.eq(2000) // order number
+      expect(ordersWithAccount2Owner[0][1][1]).to.be.eq(GAS_AMOUNT) // order number
 
       const ordersWithRandomOwner = await GasOrderContract.getFilteredOrders(
         "0x0000000000000000000000000000000000000001",
+        ethers.ZeroAddress, // `user` is not set
         0, // OrderStatus.None
         100,
         0,
@@ -206,6 +197,7 @@ describe("GasOrder", function () {
 
       const bigOffset = await GasOrderContract.getFilteredOrders(
         accounts[2].address,
+        ethers.ZeroAddress, // `user` is not set
         0, // OrderStatus.None
         100,
         100,
@@ -215,6 +207,7 @@ describe("GasOrder", function () {
 
       const normalOffset = await GasOrderContract.getFilteredOrders(
         accounts[2].address,
+        ethers.ZeroAddress, // `user` is not set
         0, // OrderStatus.None
         100,
         1,
@@ -236,7 +229,7 @@ describe("GasOrder", function () {
 
       const totalUserGasHoldings = await GasOrderContract.getTotalBalance(accounts[1], [])
 
-      expect(totalUserGasHoldings).to.be.eq(4000)
+      expect(totalUserGasHoldings).to.be.eq(GAS_AMOUNT * 2)
     })
 
     it("Should get orders by ids", async function () {
@@ -250,7 +243,7 @@ describe("GasOrder", function () {
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
       await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
 
-      const totalUserGasHoldings = await GasOrderContract.getOrdersById([1, 2, 3], ethers.ZeroAddress)
+      const totalUserGasHoldings = await GasOrderContract.getOrdersByIds([1, 2, 3], ethers.ZeroAddress)
 
       expect(totalUserGasHoldings.length).to.be.eq(3)
     })

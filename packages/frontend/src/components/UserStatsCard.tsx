@@ -14,8 +14,9 @@ import {
 } from "@heroicons/react/24/outline"
 import { Card, Grid, Text, Metric, Badge, Title, Icon, Button } from "@tremor/react"
 import { useEffect, useState } from "react"
-import { STATUS_COLORS } from "../constants/themeConstants"
 import { useAccount } from "wagmi"
+import StatusBadge from "./StatusBadge"
+import { STATUS } from "../constants/themeConstants"
 
 export default function UserStatsCard() {
   const [totalGas, setTotalGas] = useState<null | number>(null)
@@ -24,6 +25,7 @@ export default function UserStatsCard() {
     accepted: null,
     active: null,
     inactive: null,
+    untaken: null,
     closed: null,
   })
   const { address, isConnecting, isDisconnected } = useAccount()
@@ -50,7 +52,7 @@ export default function UserStatsCard() {
       const data = await readContract({
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
-        functionName: "totalMatchingOrdersCount",
+        functionName: "getMatchingOrdersCount",
         args: ["0x0000000000000000000000000000000000000000", status],
       })
       console.log("totalMatchingOrdersCount", data)
@@ -64,21 +66,23 @@ export default function UserStatsCard() {
   const fetchData = async () => {
     setTotalGas(await getTotalGas())
 
-    const pending = await getOdersCount(1)
+    const pending = await getOdersCount(STATUS.Pending)
     console.log("OrdersCount Pending: ", pending)
-    const accepted = await getOdersCount(2)
+    const accepted = await getOdersCount(STATUS.Accepted)
     console.log("OrdersCount Accepted: ", accepted)
-    const active = await getOdersCount(3)
+    const active = await getOdersCount(STATUS.Active)
     console.log("OrdersCount Active: ", active)
-    const inactive = await getOdersCount(4)
+    const inactive = await getOdersCount(STATUS.Inactive)
     console.log("OrdersCount Inactive: ", inactive)
-    const closed = await getOdersCount(5)
+    const untaken = await getOdersCount(STATUS.Untaken)
+    console.log("OrdersCount Untaken: ", untaken)
+    const closed = await getOdersCount(STATUS.Closed)
     console.log("OrdersCount Closed: ", closed)
 
     const all = await getOdersCount(0)
     console.log("OrdersCount All: ", all)
 
-    setOrdersCount({ pending, accepted, active, inactive, closed })
+    setOrdersCount({ pending, accepted, active, inactive, untaken, closed })
   }
 
   useEffect(() => {
@@ -108,21 +112,12 @@ export default function UserStatsCard() {
         </div>
 
         <Grid numItems={2} numItemsSm={3} numItemsLg={5} className="mt-4 gap-2 flex flex-wrap">
-          <Badge icon={ArrowPathIcon} color={STATUS_COLORS[1]}>
-            Pending: {ordersCount.pending}
-          </Badge>
-          <Badge icon={CheckCircleIcon} color={STATUS_COLORS[2]}>
-            Accepted: {ordersCount.accepted}
-          </Badge>
-          <Badge icon={PlayIcon} color={STATUS_COLORS[3]}>
-            Active: {ordersCount.active}
-          </Badge>
-          <Badge icon={ExclamationTriangleIcon} color={STATUS_COLORS[4]}>
-            Inactive: {ordersCount.inactive}
-          </Badge>
-          <Badge icon={XCircleIcon} color={STATUS_COLORS[5]}>
-            Closed: {ordersCount.closed}
-          </Badge>
+          <StatusBadge status={STATUS.Pending}>{ordersCount.pending}</StatusBadge>
+          <StatusBadge status={STATUS.Accepted}>{ordersCount.accepted}</StatusBadge>
+          <StatusBadge status={STATUS.Active}>{ordersCount.active}</StatusBadge>
+          <StatusBadge status={STATUS.Inactive}>{ordersCount.inactive}</StatusBadge>
+          <StatusBadge status={STATUS.Untaken}>{ordersCount.untaken}</StatusBadge>
+          <StatusBadge status={STATUS.Closed}>{ordersCount.closed}</StatusBadge>
         </Grid>
       </div>
 

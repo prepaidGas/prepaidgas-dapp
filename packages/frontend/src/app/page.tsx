@@ -13,10 +13,16 @@ import { useAccount } from "wagmi"
 import { WalletIcon } from "@heroicons/react/24/outline"
 import { Icon, Title } from "@tremor/react"
 
+import dynamic from "next/dynamic"
+
+const DynamicDialogWindow = dynamic(() => import("../components/DialogWindow"), { ssr: false })
+
 export default function Home() {
   const [showDialogWindow, setShowDialogWindow] = useState(true)
 
-  const { address, isConnecting, isDisconnected } = useAccount()
+  var canUseDOM = !!(typeof window !== "undefined" && window.document && window.document.createElement)
+
+  const { address } = canUseDOM ? useAccount() : { address: "" }
 
   useEffect(() => {
     console.log("ADDRESS: ", address)
@@ -27,6 +33,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-between p-24">
+      <DynamicDialogWindow />
       {showDialogWindow ? (
         <DialogWindow
           isClosable={false}

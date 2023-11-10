@@ -10,7 +10,7 @@ contract Distributor {
   using SafeERC20 for IERC20;
 
   /// @dev holder => token => amount
-  mapping(address => mapping(address => uint256)) private _balances;
+  mapping(address => mapping(address => uint256)) private _balance;
 
   event Distribute(address indexed receiver, address indexed token, uint256 amount);
   event Claim(address indexed holder, address indexed token, uint256 amount);
@@ -20,7 +20,7 @@ contract Distributor {
   }
 
   function claimable(address holder, address token) public view returns (uint256) {
-    return _balances[holder][token];
+    return _balance[holder][token];
   }
 
   function _claim(address receiver, address holder, address token, uint256 amount) internal {
@@ -28,7 +28,7 @@ contract Distributor {
 
     uint256 available = claimable(holder, token);
     if (amount > available) revert Error.BalanceExhausted(amount, available);
-    _balances[holder][token] -= amount;
+    _balance[holder][token] -= amount;
 
     IERC20(token).safeTransfer(receiver, amount);
     emit Claim(holder, token, amount);
@@ -37,7 +37,7 @@ contract Distributor {
   function _distribute(address holder, address token, uint256 amount) internal {
     if (amount == 0) return;
 
-    _balances[holder][token] += amount;
+    _balance[holder][token] += amount;
     emit Distribute(holder, token, amount);
   }
 

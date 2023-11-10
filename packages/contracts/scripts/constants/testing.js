@@ -1,7 +1,7 @@
 // @dev constants for testing
 const LOCKED_GUARANTEE_PER_GAS = 100
 const INITIAL_EXECUTOR_REWARD = 200
-const GAS_AMOUNT = 2000
+const GAS_AMOUNT = 20000000
 const GAS_COST = 100
 const TOTAL_TEST_ORDERS_AMOUNT = 300
 

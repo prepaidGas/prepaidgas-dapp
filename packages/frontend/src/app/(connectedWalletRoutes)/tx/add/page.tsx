@@ -1,13 +1,14 @@
 "use client"
 
 import { Card, Title, Text, Grid } from "@tremor/react"
-import CreateOrderCard from "../../../components/CreateOrderCard"
+import CreateOrderCard from "../../../../components/CreateOrderCard"
 import { useEffect, useState } from "react"
-import DialogWindow from "../../../components/DialogWindow"
-import { SPINNER_COLOR } from "../../../constants/themeConstants"
+import DialogWindow from "../../../../components/DialogWindow"
+import { SPINNER_COLOR } from "../../../../constants/themeConstants"
 import { TailSpin } from "react-loader-spinner"
+import AddTxRequestCard from "../../../../components/AddTxRequestCard"
 
-export default function CreateOrder() {
+export default function AddTxRequest() {
   const [showDialogWindow, setShowDialogWindow] = useState(false)
   const [transactionDetails, setTransactionDetails] = useState<null | any>(null)
 
@@ -65,10 +66,13 @@ export default function CreateOrder() {
           ></DialogWindow>
         )
       ) : null}
-      <Title>Create Order</Title>
-      <Text>You might create order on this page</Text>
+      <Title>Add transaction request</Title>
+      <Text>You might add transaction request on this page</Text>
       {/* Main section */}
-      <CreateOrderCard setShowDialogWindow={setShowDialogWindow} setTransactionDetails={setTransactionDetails} />
+      <AddTxRequestCard
+        setShowDialogWindow={setShowDialogWindow}
+        setTransactionDetails={setTransactionDetails}
+      ></AddTxRequestCard>
 
       {/* KPI section */}
       <Grid numItemsMd={2} className="mt-6 gap-6">

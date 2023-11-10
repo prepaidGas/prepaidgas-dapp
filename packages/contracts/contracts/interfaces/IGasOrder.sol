@@ -1,36 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.20;
 
+import {Message} from "../base/ExecutionMessage.sol";
+
 struct Order {
   address manager;
   uint256 maxGas;
-  uint256 maxGasPrice;
   uint256 executionPeriodStart;
   uint256 executionPeriodDeadline;
   uint256 executionWindow;
-}
-
-// @dev this structure is based on the `Order` structure, but has `id` and `status` extra fields
-struct FilteredOrder {
-  uint256 id;
-  address manager;
-  OrderStatus status;
-  uint256 maxGas;
-  uint256 executionPeriodStart;
-  uint256 executionPeriodDeadline;
-  uint256 executionWindow;
-  uint256 availableGasHoldings;
-  TokenAmountWithDetails reward;
-  TokenAmountWithDetails gasCost;
-  TokenAmountWithDetails guarantee;
-}
-
-struct TokenAmountWithDetails {
-  string name;
-  string symbol;
-  uint256 decimals;
-  address token;
-  uint256 value;
 }
 
 enum OrderStatus {
@@ -56,12 +34,10 @@ struct Payment {
 
 interface IGasOrder {
   function reportExecution(
-    uint256 id,
-    address from,
-    address onBehalf,
-    uint256 gasLimit,
+    Message calldata message,
     address fulfiller,
-    uint256 gasSpent
+    uint256 gasSpent,
+    uint256 infrastructureGas
   ) external;
 
   event OrderCreate(uint256 indexed id, uint256 executionWindow);

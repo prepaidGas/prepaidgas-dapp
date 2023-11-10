@@ -10,8 +10,8 @@ import { GasOrderABI } from "helpers/abi"
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 import { useAccount } from "wagmi"
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
-import StatusBadge from "../../../components/StatusBadge"
-import { COLOR_BY_STATUS, SPINNER_COLOR, STATUS } from "../../../constants/themeConstants"
+import StatusBadge from "../../../../components/StatusBadge"
+import { COLOR_BY_STATUS, SPINNER_COLOR, STATUS } from "../../../../constants/themeConstants"
 import { TailSpin } from "react-loader-spinner"
 
 export default function Page({ params }: { params: { slug: string } }) {
@@ -21,7 +21,7 @@ export default function Page({ params }: { params: { slug: string } }) {
   const [isError, setIsError] = useState(false)
 
   const isRevocable =
-    orderData?.manager === address &&
+    orderData?.order?.manager === address &&
     (Number(orderData.status) === STATUS.Pending || Number(orderData.status) === STATUS.Untaken)
 
   const fetchOrderData = async () => {
@@ -29,14 +29,14 @@ export default function Page({ params }: { params: { slug: string } }) {
       const data = await readContract({
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
-        functionName: "getOrdersById",
+        functionName: "getOrdersByIds",
         args: [[params.slug], address],
       })
-      console.log("GetOrdersById DATA", data)
+      console.log("getOrdersByIds DATA", data)
       setOrderData(data[0] as FilteredOrderStructOutput)
       setIsLoading(false)
     } catch (e) {
-      console.log("GetOrdersById ERROR: ", e)
+      console.log("getOrdersByIds ERROR: ", e)
       setIsError(true)
     }
   }
@@ -79,7 +79,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
         functionName: "retrieveGasCost",
-        args: [address, params.slug, orderData.gasCost.value],
+        args: [address, params.slug, orderData.gasCost.gasPrice],
       })
       console.log("SingleOrderPage Retrieve Gas DATA", data)
       const txData = await waitForTransaction({ hash: data.hash })
@@ -114,30 +114,27 @@ export default function Page({ params }: { params: { slug: string } }) {
           <Title>Order number: {params.slug}</Title>
           <Card className="mt-3" decoration="top" decorationColor={COLOR_BY_STATUS[Number(orderData.status)]}>
             <StatusBadge status={Number(orderData.status)} />
-
             {/* @dev Order Id */}
             <Metric>#{orderData.id.toString()}</Metric>
-
-            <Text>Manager: {orderData.manager}</Text>
+            <Text>Manager: {orderData.order.manager}</Text>
             {/* @dev Order executionPeriodStart and executionPeriodDeadline */}
             {/*"yyyy.mm.dd hh:ss:mm"*/}
             <Text>
               Execution timeframe:{" "}
-              {format(new Date(Number(orderData.executionPeriodStart) * 1000), "MMM d y, HH:mm:ss")} -{" "}
-              {format(new Date(Number(orderData.executionPeriodDeadline) * 1000), "MMM d y, HH:mm:ss")}
+              {format(new Date(Number(orderData.order.executionPeriodStart) * 1000), "MMM d y, HH:mm:ss")} -{" "}
+              {format(new Date(Number(orderData.order.executionPeriodDeadline) * 1000), "MMM d y, HH:mm:ss")}
             </Text>
             {/* @dev Order executionWindow */}
-            <Text>Execution window: {orderData.executionWindow.toString()}</Text>
+            <Text>Execution window: {orderData.order.executionWindow.toString()}</Text>
             {/* @dev Order executionWindow */}
             {/* @dev Order data, the details might be found in `TokenAmountWithDetails` structure */}
-            <Text>{`Reward: ${orderData.reward.value} ${orderData.reward.symbol}`}</Text>
-            <Text>{`Gas Cost: ${orderData.gasCost.value} ${orderData.gasCost.symbol}`}</Text>
-            <Text>{`Guarantee: ${orderData.guarantee.value} ${orderData.guarantee.symbol}`}</Text>
-            <Text>{`Available Gas Holdings: ${orderData.availableGasHoldings}`}</Text>
-
+            <Text>{`Reward: ${orderData.reward.amount} ${orderData.reward.token}`}</Text>
+            <Text>{`Gas Cost: ${orderData.gasCost.gasPrice} ${orderData.gasCost.token}`}</Text>
+            <Text>{`Guarantee: ${orderData.guarantee.gasPrice} ${orderData.guarantee.token}`}</Text>
+            <Text>{`Available Gas Holdings: ${orderData.gasBalance}`}</Text>
             {/* @dev Gas left (maxGas) */}
             <Flex className="mt-4">
-              <Text>Used: 0 / {orderData.maxGas.toString()}</Text>
+              <Text>Used: 0 / {orderData.order.maxGas.toString()}</Text>
             </Flex>
             <ProgressBar value={32} className="mt-2" />
             <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
@@ -145,7 +142,7 @@ export default function Page({ params }: { params: { slug: string } }) {
               {Number(orderData.status) === STATUS.Inactive && (
                 <Button onClick={retrieveGuarantee}>Retrieve Guarantee</Button>
               )}
-              {Number(orderData.availableGasHoldings) > 0 && <Button onClick={retrieveGasCost}>Retrieve Gas</Button>}
+              {Number(orderData.gasBalance) > 0 && <Button onClick={retrieveGasCost}>Retrieve Gas</Button>}
               <Button onClick={revokeOrder}>Revoke</Button>
               <Button onClick={retrieveGuarantee}>Retrieve Guarantee</Button>
               <Button onClick={retrieveGasCost}>Retrieve Gas</Button>
