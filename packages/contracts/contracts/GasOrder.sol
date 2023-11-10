@@ -237,7 +237,7 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
       _distribute(fulfiller, unlockToken, _takeFee(Fee.Guarantee, unlockToken, unlockAmount));
     }
 
-    _unlockGasTokens(from, id, gasSpent);
+    _decreaseLock(from, id, gasSpent);
     _unlockTxGasTokens(message);
   }
 

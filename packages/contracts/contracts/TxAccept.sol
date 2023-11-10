@@ -33,7 +33,7 @@ abstract contract TxAccept is GasOrderGetters {
     uint256 balance = usable(message.onBehalf, message.gasOrder, message.from);
     if (message.gas >= balance) revert GasLimitExceedBalance(message.gas, balance);
 
-    _lockGasTokens(message.from, message.gasOrder, message.gas);
+    _increaseLock(message.from, message.gasOrder, message.gas);
 
     // @todo time bounds check
 
