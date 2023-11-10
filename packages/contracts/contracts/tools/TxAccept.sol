@@ -3,17 +3,19 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import "./Executor.sol";
+import "../Executor.sol";
 
-import "./base/GasOrderGetters.sol";
-import {Message} from "./base/ExecutionMessage.sol";
-import {OrderStatus} from "./interfaces/IGasOrder.sol";
+import "../base/GasOrderGetters.sol";
+import {Message} from "../base/ExecutionMessage.sol";
+import {OrderStatus} from "../interfaces/IGasOrder.sol";
 
 abstract contract TxAccept is GasOrderGetters {
   using ECDSA for bytes32;
 
   mapping(address => mapping(uint256 => bool)) public nonce;
   mapping(address => mapping(uint256 => uint256)) public lock;
+
+  event TransactionAdded(Message message, bytes indexed signature);
 
   function addTransaction(
     Message calldata message,
@@ -33,20 +35,20 @@ abstract contract TxAccept is GasOrderGetters {
     uint256 balance = usable(message.onBehalf, message.gasOrder, message.from);
     if (message.gas >= balance) revert GasLimitExceedBalance(message.gas, balance);
 
-    _lockGasTokens(message.from, message.gasOrder, message.gas);
+    _increaseLockedTokens(message.from, message.gasOrder, message.gas);
 
     // @todo time bounds check
 
-    // @todo add event emmiting
+    emit TransactionAdded(message, signature);
   }
 
   // @todo check if the function is needed
-  function _unlockTxGasTokens(Message calldata message) internal {
+  function _unlockGasTokens(Message calldata message) internal {
     // @todo finalize
     // @todo add error, no such tx
     if (!nonce[message.from][message.nonce]) revert(); //InvalidTransaction();
     lock[message.from][message.nonce] = 0;
-    //_unlockGasTokens(message.from, message.gasOrder, message.gas);
+    _decreaseLockedTokens(message.from, message.gasOrder, message.gas);
   }
 
   function isExecutable(Message calldata message) public view returns (bool) {

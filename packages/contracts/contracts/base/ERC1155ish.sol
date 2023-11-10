@@ -14,6 +14,8 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
 
   event Approval(address indexed holder, uint256 indexed id, address indexed spender, uint256 amount);
   event URI(string value);
+  event IncreasedLock(address indexed from, uint256 indexed id, uint256 value);
+  event DecreasedLock(address indexed from, uint256 indexed id, uint256 value);
 
   constructor(string memory link) Ownable(msg.sender) ERC1155(link) {}
 
@@ -83,16 +85,18 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
     emit Approval(from, id, spender, amount);
   }
 
-  function _lockGasTokens(address from, uint256 id, uint256 value) internal {
+  function _increaseLockedTokens(address from, uint256 id, uint256 value) internal {
     // @todo add error handling
     _totalLocked[id][from] += value;
-    // @todo add event emmiting
+
+    emit IncreasedLock(from, id, value);
   }
 
-  function _unlockGasTokens(address from, uint256 id, uint256 value) internal {
+  function _decreaseLockedTokens(address from, uint256 id, uint256 value) internal {
     // @todo add error handling
     _totalLocked[id][from] -= value;
-    // @todo add event emmiting
+
+    emit DecreasedLock(from, id, value);
   }
 
   function balanceOf(address account, uint256 id) public view override returns (uint256) {
