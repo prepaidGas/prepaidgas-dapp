@@ -27,6 +27,7 @@ error InvalidSignature(bytes signature);
 error InvalidTransaction(bytes32 transactionMessageHash);
 error IncorrectSignatureOrder(address lower, address higher);
 error IncorrectAddressArgument(address received);
+error InvalidTransactionDeadline(uint256 transactionDeadline, uint256 orderDeadline);
 
 error LiquidationImpossible(address from, uint256 nonce, uint256 deadline);
 error ExecutionImpossible(address from, uint256 nonce, uint256 deadline, uint256 currentTime);
