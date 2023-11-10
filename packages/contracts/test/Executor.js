@@ -17,6 +17,7 @@ const { randomBytes, randomNumber } = require("../scripts/helpers/random.js")
 const { domain, messageType } = require("../scripts/helpers/eip712.js")
 
 const orderHelper = require("../scripts/helpers/orderHelper.js")
+const { createSignedMsg, createAndAcceptOrder } = require("../scripts/helpers/common.helpers.js")
 
 describe("Executor", function () {
   async function initialSetup() {
@@ -55,84 +56,37 @@ describe("Executor", function () {
 
   describe("Transaction request execution", function () {
     it("execute message", async function () {
-      //@todo optimize code to reduce amount of reusable elements
       const { accounts, admin, ExecutorContract, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
-      const signer = accounts[randomNumber(5) + 1]
-      await TokenContract.transfer(signer, 20000000000)
 
-      await orderHelper.createOrder(signer, GasOrderContract, TokenContract, false, false, 36000, 865000)
-      await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-      await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
+      const { signer } = await createAndAcceptOrder({ accounts, GasOrderContract, TokenContract })
 
-      await GasOrderContract.connect(accounts[0]).acceptOrder(0, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-      await time.increase(36001)
+      const customV1 = randomNumber(10)
+      const customV2 = randomNumber(9) + 1
 
-      const EndpointFactory = await ethers.getContractFactory("MockEndpoint")
-      const EndpointContract = await EndpointFactory.deploy()
-
-      const v1 = randomNumber(10)
-      const v2 = randomNumber(9) + 1
-
-      const from = signer.address,
-        nonce = randomNumber(100),
-        gasOrder = 0,
-        onBehalf = signer.address,
-        deadline = (await time.latest()) + 80, // @todo replace with execution window automaticaly
-        to = EndpointContract.target,
-        gas = 10000000,
-        data = "0x6057361d00000000000000000000000000000000000000000000000000000000000000" + v1 + v2
-
-      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
-      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
-
-      const signedMessage = await signer.signTypedData(
-        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
-        { Message: messageType },
-        messageStruct,
+      const { messageTuple, signedMessage, EndpointContract } = await createSignedMsg(
+        {
+          signer,
+          ExecutorContract,
+        },
+        { customV1, customV2 },
       )
 
       await GasOrderContract.addTransaction(messageTuple, signedMessage)
 
       await ExecutorContract.execute(messageTuple, signedMessage)
 
-      expect(await EndpointContract.retrieve()).to.equal(v1 * 16 + v2)
+      expect(await EndpointContract.retrieve()).to.equal(customV1 * 16 + customV2)
     })
 
     it("message replay", async function () {
       const { accounts, admin, ExecutorContract, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
-      const signer = accounts[randomNumber(5) + 1]
-      await TokenContract.transfer(signer, 20000000000)
 
-      await orderHelper.createOrder(signer, GasOrderContract, TokenContract, false, false, 36000, 865000)
-      await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-      await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
+      const { signer } = await createAndAcceptOrder({ accounts, GasOrderContract, TokenContract })
 
-      await GasOrderContract.connect(accounts[0]).acceptOrder(0, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-      await time.increase(36001)
-
-      const EndpointFactory = await ethers.getContractFactory("MockEndpoint")
-      const EndpointContract = await EndpointFactory.deploy()
-
-      const v1 = randomNumber(10)
-      const v2 = randomNumber(9) + 1
-
-      const from = signer.address,
-        nonce = randomNumber(100),
-        gasOrder = 0,
-        onBehalf = signer.address,
-        deadline = (await time.latest()) + 80, // @todo replace with execution window automaticaly
-        to = EndpointContract.target,
-        gas = 10000000,
-        data = "0x6057361d00000000000000000000000000000000000000000000000000000000000000" + v1 + v2
-
-      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
-      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
-
-      const signedMessage = await signer.signTypedData(
-        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
-        { Message: messageType },
-        messageStruct,
-      )
+      const { messageTuple, signedMessage } = await createSignedMsg({
+        signer,
+        ExecutorContract,
+      })
 
       await GasOrderContract.addTransaction(messageTuple, signedMessage)
 
@@ -146,37 +100,15 @@ describe("Executor", function () {
 
     it("add transaction with the same nonce", async function () {
       const { accounts, admin, ExecutorContract, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
-      const signer = accounts[randomNumber(5) + 1]
-      await TokenContract.transfer(signer, 20000000000)
-      await orderHelper.createOrder(signer, GasOrderContract, TokenContract, false, false, 36000, 865000)
-      await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-      await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-      await GasOrderContract.connect(accounts[0]).acceptOrder(0, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
+      const { signer } = await createAndAcceptOrder({ accounts, GasOrderContract, TokenContract })
       const nonce = randomNumber(100)
       {
-        await time.increase(36001)
-
-        const EndpointFactory = await ethers.getContractFactory("MockEndpoint")
-        const EndpointContract = await EndpointFactory.deploy()
-
-        const v1 = randomNumber(10)
-        const v2 = randomNumber(9) + 1
-
-        const from = signer.address,
-          gasOrder = 0,
-          onBehalf = signer.address,
-          deadline = (await time.latest()) + 80, // @todo replace with execution window automaticaly
-          to = EndpointContract.target,
-          gas = 10000000,
-          data = "0x6057361d00000000000000000000000000000000000000000000000000000000000000" + v1 + v2
-
-        const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
-        const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
-
-        const signedMessage = await signer.signTypedData(
-          domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
-          { Message: messageType },
-          messageStruct,
+        const { messageTuple, signedMessage } = await createSignedMsg(
+          {
+            signer,
+            ExecutorContract,
+          },
+          { customNonce: nonce },
         )
 
         await GasOrderContract.addTransaction(messageTuple, signedMessage)
@@ -184,29 +116,12 @@ describe("Executor", function () {
         await ExecutorContract.execute(messageTuple, signedMessage)
       }
       {
-        await time.increase(36001)
-
-        const EndpointFactory = await ethers.getContractFactory("MockEndpoint")
-        const EndpointContract = await EndpointFactory.deploy()
-
-        const v1 = randomNumber(10)
-        const v2 = randomNumber(9) + 1
-
-        const from = signer.address,
-          gasOrder = 0,
-          onBehalf = signer.address,
-          deadline = (await time.latest()) + 80, // @todo replace with execution window automaticaly
-          to = EndpointContract.target,
-          gas = 10000000,
-          data = "0x6057361d00000000000000000000000000000000000000000000000000000000000000" + v1 + v2
-
-        const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
-        const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
-
-        const signedMessage = await signer.signTypedData(
-          domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
-          { Message: messageType },
-          messageStruct,
+        const { messageTuple, signedMessage } = await createSignedMsg(
+          {
+            signer,
+            ExecutorContract,
+          },
+          { customNonce: nonce },
         )
 
         await expect(GasOrderContract.addTransaction(messageTuple, signedMessage)).to.be.revertedWithCustomError(
