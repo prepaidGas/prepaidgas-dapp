@@ -21,6 +21,8 @@ abstract contract TxAccept is GasOrderGetters {
     Message calldata message,
     bytes calldata signature
   ) public specificStatus(message.gasOrder, OrderStatus.Active) {
+    uint256 orderDeadline = order(message.gasOrder).executionPeriodDeadline;
+    if (message.deadline > orderDeadline) revert InvalidTransactionDeadline(message.deadline, orderDeadline);
     bytes32 hash = Executor(execution()).messageHash(message);
 
     address recovered = hash.recover(signature);

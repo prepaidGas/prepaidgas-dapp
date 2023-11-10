@@ -70,7 +70,7 @@ contract Executor is IExecutor, ExecutionMessage {
     _reportExecution(message, msg.sender, gasSpent, infrastructureGas);
   }
 
-  function liquidateWithoutExecution(Message calldata message, bytes calldata signature) external {
+  function liquidateWithoutExecution(Message calldata message) external {
     _reportExecution(message, message.from, 0, 0);
   }
 
