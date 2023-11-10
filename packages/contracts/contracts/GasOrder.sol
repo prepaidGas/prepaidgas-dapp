@@ -223,6 +223,8 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
       if (!isExecutable(message)) revert ExecutionImpossible(from, transactionNonce, message.deadline, block.timestamp);
       // execution
       fulfiller = executor(id);
+    } else if (fulfiller == message.from && gasSpent == 0) {
+      if (!isLiquidatableWithoutExecution(message)) revert LiquidationImpossible(from, transactionNonce, deadline);
     } else {
       // liquidation
       if (!isLiquidatable(message)) revert LiquidationImpossible(from, transactionNonce, deadline);
