@@ -50,7 +50,7 @@ abstract contract TxAccept is GasOrderGetters {
     // @todo add error, no such tx
     if (!nonce[message.from][message.nonce]) revert(); //InvalidTransaction();
     lock[message.from][message.nonce] = 0;
-    _decreaseLockedTokens(message.from, message.gasOrder, message.gas);
+    _decreaseLock(message.from, message.gasOrder, message.gas);
   }
 
   function isExecutable(Message calldata message) public view returns (bool) {

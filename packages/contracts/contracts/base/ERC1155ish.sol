@@ -10,7 +10,7 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
   /// @dev id => holder => spender => amount
   mapping(uint256 => mapping(address => mapping(address => uint256))) private _allowance;
   /// @dev id => holder => amount
-  mapping(uint256 => mapping(address => uint256)) private _totalLocked;
+  mapping(uint256 => mapping(address => uint256)) private _totalLock;
 
   event Approval(address indexed holder, uint256 indexed id, address indexed spender, uint256 amount);
   event UpdateLock(address indexed holder, uint256 indexed id, uint256 amount);
@@ -83,32 +83,32 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
     emit Approval(holder, id, spender, amount);
   }
 
-  function totalLocked(address holder, uint256 id) public view returns (uint256) {
-    return _totalLocked[id][holder];
+  function totalLock(address holder, uint256 id) public view returns (uint256) {
+    return _totalLock[id][holder];
   }
 
   function _increaseLock(address holder, uint256 id, uint256 value) internal {
     uint256 balance = balanceAvailable(holder, id);
     if (balance < value) revert Error.BalanceExhausted(value, balance);
 
-    _setLock(holder, id, totalLocked(holder, id) + value);
+    _setLock(holder, id, totalLock(holder, id) + value);
   }
 
   function _decreaseLock(address holder, uint256 id, uint256 value) internal {
-    uint256 balance = totalLocked(holder, id);
+    uint256 balance = totalLock(holder, id);
     if (balance < value) revert Error.BalanceExhausted(value, balance);
 
-    _setLock(holder, id, totalLocked(holder, id) - value);
+    _setLock(holder, id, totalLock(holder, id) - value);
   }
 
   function _setLock(address holder, uint256 id, uint256 value) private {
-    _totalLocked[id][holder] = value;
+    _totalLock[id][holder] = value;
 
     emit UpdateLock(holder, id, value);
   }
 
   function balanceAvailable(address holder, uint256 id) public view returns (uint256) {
-    return balanceOf(holder, id) - totalLocked(holder, id);
+    return balanceOf(holder, id) - totalLock(holder, id);
   }
 
   function _update(address holder, address receiver, uint256[] memory ids, uint256[] memory values) internal override {
@@ -118,7 +118,7 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
     for (uint256 i = 0; i < ids.length; i++) {
       uint256 id = ids[i];
       uint256 balance = balanceOf(holder, id);
-      uint256 lock = totalLocked(holder, id);
+      uint256 lock = totalLock(holder, id);
 
       if (balance < lock) revert Error.BalanceExhausted(lock, balance);
     }
