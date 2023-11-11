@@ -6,10 +6,10 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../Executor.sol";
 
 import "../base/GasOrderGetters.sol";
-import {Message} from "../base/ExecutionMessage.sol";
+import {ReproducerMessage, Message} from "../base/Message.sol";
 import {OrderStatus} from "../interfaces/IGasOrder.sol";
 
-abstract contract TxAccept is GasOrderGetters {
+abstract contract TxAccept is GasOrderGetters, ReproducerMessage {
   using ECDSA for bytes32;
 
   mapping(address => mapping(uint256 => bool)) public nonce;
@@ -23,7 +23,7 @@ abstract contract TxAccept is GasOrderGetters {
   ) public specificStatus(message.gasOrder, OrderStatus.Active) {
     uint256 orderDeadline = order(message.gasOrder).executionPeriodDeadline;
     if (message.deadline > orderDeadline) revert InvalidTransactionDeadline(message.deadline, orderDeadline);
-    bytes32 hash = Executor(execution()).messageHash(message);
+    bytes32 hash = messageHash(message);
 
     address recovered = hash.recover(signature);
     if (recovered != message.from) revert UnknownRecovered(recovered);

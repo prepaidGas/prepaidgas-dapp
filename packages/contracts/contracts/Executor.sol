@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import {ExecutionMessage, Message} from "./base/ExecutionMessage.sol";
+import {VerifierMessage, Message} from "./base/Message.sol";
 
 import {IGasOrder} from "./interfaces/IGasOrder.sol";
 import {IExecutor} from "./interfaces/IExecutor.sol";
@@ -12,7 +12,7 @@ import {ITxAccept} from "./interfaces/ITxAccept.sol";
 import "./common/Errors.sol";
 import "./common/Constants.sol";
 
-contract Executor is IExecutor, ExecutionMessage {
+contract Executor is IExecutor, VerifierMessage {
   using ECDSA for bytes32;
 
   address public immutable gasOrder;
@@ -34,7 +34,7 @@ contract Executor is IExecutor, ExecutionMessage {
     _;
   }
 
-  constructor(address ordersManager, string memory name, string memory version) ExecutionMessage(name, version) {
+  constructor(address ordersManager, string memory name, string memory version) VerifierMessage(name, version) {
     gasOrder = ordersManager;
   }
 

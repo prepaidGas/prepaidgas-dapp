@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.20;
 
-import {Message} from "../base/ExecutionMessage.sol";
+import {Message} from "../base/Message.sol";
 
 struct Order {
   address manager;
