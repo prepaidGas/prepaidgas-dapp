@@ -16,7 +16,7 @@ const { precalculateAddress } = require("../scripts/helpers/index.js")
 const { randomBytes, randomNumber } = require("../scripts/helpers/random.js")
 const { domain, messageType } = require("../scripts/helpers/eip712.js")
 
-const orderHelper = require("../scripts/helpers/orderHelper.js")
+const { createOrder } = require("../scripts/helpers/order.js")
 const { createSignedMsg, createAndAcceptOrder } = require("../scripts/helpers/common.helpers.js")
 
 describe("Executor", function () {
@@ -57,8 +57,9 @@ describe("Executor", function () {
   describe("Transaction request execution", function () {
     it("execute message", async function () {
       const { accounts, admin, ExecutorContract, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
-
-      const { signer } = await createAndAcceptOrder({ accounts, GasOrderContract, TokenContract })
+      const signer = accounts[randomNumber(5) + 1]
+      await TokenContract.transfer(signer, 20000000000)
+      await createOrder(signer, GasOrderContract, TokenContract, true, admin, 36000, 865000)
 
       const customV1 = randomNumber(10)
       const customV2 = randomNumber(9) + 1
@@ -81,7 +82,9 @@ describe("Executor", function () {
     it("message replay", async function () {
       const { accounts, admin, ExecutorContract, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
 
-      const { signer } = await createAndAcceptOrder({ accounts, GasOrderContract, TokenContract })
+      const signer = accounts[randomNumber(5) + 1]
+      await TokenContract.transfer(signer, 20000000000)
+      await createOrder(signer, GasOrderContract, TokenContract, true, admin, 36000, 865000)
 
       const { messageTuple, signedMessage } = await createSignedMsg({
         signer,
@@ -100,7 +103,10 @@ describe("Executor", function () {
 
     it("add transaction with the same nonce", async function () {
       const { accounts, admin, ExecutorContract, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
-      const { signer } = await createAndAcceptOrder({ accounts, GasOrderContract, TokenContract })
+      const signer = accounts[randomNumber(5) + 1]
+      await TokenContract.transfer(signer, 20000000000)
+      await createOrder(signer, GasOrderContract, TokenContract, true, admin, 36000, 865000)
+
       const nonce = randomNumber(100)
       {
         const { messageTuple, signedMessage } = await createSignedMsg(

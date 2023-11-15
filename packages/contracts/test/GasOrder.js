@@ -12,7 +12,7 @@ const {
   TOKEN_LINK,
 } = require("../scripts/constants/index.js")
 
-const orderHelper = require("../scripts/helpers/orderHelper.js")
+const { createOrder } = require("../scripts/helpers/order.js")
 const { precalculateAddress } = require("../scripts/helpers/index.js")
 
 describe("GasOrder", function () {
@@ -58,7 +58,7 @@ describe("GasOrder", function () {
 
       const tokensBalanceBefore = await TokenContract.balanceOf(admin.address)
 
-      await orderHelper.createOrder(admin, GasOrderContract, TokenContract)
+      await createOrder(admin, GasOrderContract, TokenContract)
 
       const tokensBalanceAfter = await TokenContract.balanceOf(admin.address)
 
@@ -71,7 +71,7 @@ describe("GasOrder", function () {
 
       const tokensBalanceBefore = await TokenContract.balanceOf(admin.address)
 
-      await orderHelper.createOrder(admin, GasOrderContract, TokenContract, false, false, 36000, 865000, 36001)
+      await createOrder(admin, GasOrderContract, TokenContract, false, false, 36000, 865000, 36001)
 
       const tokensBalanceAfter = await TokenContract.balanceOf(admin.address)
 
@@ -88,7 +88,7 @@ describe("GasOrder", function () {
     it("Executor should accept a new order", async function () {
       const { accounts, admin, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
 
-      await orderHelper.createOrder(admin, GasOrderContract, TokenContract, false, false, 36000, 865000)
+      await createOrder(admin, GasOrderContract, TokenContract, false, false, 36000, 865000)
 
       await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
       await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
@@ -109,7 +109,7 @@ describe("GasOrder", function () {
     it("Should fail to retrive prepaid tokens from order if not enough ERC1155 Gas tokens on balance", async function () {
       const { accounts, admin, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
 
-      await orderHelper.createOrder(admin, GasOrderContract, TokenContract, false, false, 36000, 865000)
+      await createOrder(admin, GasOrderContract, TokenContract, false, false, 36000, 865000)
 
       await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
       await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
@@ -128,7 +128,7 @@ describe("GasOrder", function () {
     it("Should transfer order management", async function () {
       const { admin, accounts, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
 
-      await orderHelper.createOrder(admin, GasOrderContract, TokenContract)
+      await createOrder(admin, GasOrderContract, TokenContract)
 
       await GasOrderContract.transferOrderManagement(0, accounts[5].address)
 
@@ -139,7 +139,7 @@ describe("GasOrder", function () {
     it("Should fail transfering order management due to the same manager", async function () {
       const { admin, accounts, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
 
-      await orderHelper.createOrder(admin, GasOrderContract, TokenContract)
+      await createOrder(admin, GasOrderContract, TokenContract)
 
       await expect(GasOrderContract.transferOrderManagement(0, admin.address)).to.be.revertedWithCustomError(
         GasOrderContract,
@@ -150,7 +150,7 @@ describe("GasOrder", function () {
     it("Should fail transfering order management if access is unauthorized", async function () {
       const { admin, accounts, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
 
-      await orderHelper.createOrder(admin, GasOrderContract, TokenContract)
+      await createOrder(admin, GasOrderContract, TokenContract)
 
       await expect(
         GasOrderContract.connect(accounts[2]).transferOrderManagement(0, admin.address),
@@ -161,12 +161,12 @@ describe("GasOrder", function () {
     it("Should get orders with spesific owner", async function () {
       const { accounts, admin, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
       // @notice orders mockups
-      await orderHelper.createOrder(admin, GasOrderContract, TokenContract)
-      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract)
-      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract)
-      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract)
-      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
-      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
+      await createOrder(admin, GasOrderContract, TokenContract)
+      await createOrder(accounts[1], GasOrderContract, TokenContract)
+      await createOrder(accounts[1], GasOrderContract, TokenContract)
+      await createOrder(accounts[1], GasOrderContract, TokenContract)
+      await createOrder(accounts[2], GasOrderContract, TokenContract)
+      await createOrder(accounts[2], GasOrderContract, TokenContract)
 
       const totalAmountOfOrders = await GasOrderContract.getMatchingOrdersCount(
         ethers.ZeroAddress,
@@ -220,12 +220,12 @@ describe("GasOrder", function () {
       const { accounts, admin, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
 
       // @notice orders mockups
-      await orderHelper.createOrder(admin, GasOrderContract, TokenContract)
-      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10])
-      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10])
-      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract)
-      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
-      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
+      await createOrder(admin, GasOrderContract, TokenContract)
+      await createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10])
+      await createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10])
+      await createOrder(accounts[1], GasOrderContract, TokenContract)
+      await createOrder(accounts[2], GasOrderContract, TokenContract)
+      await createOrder(accounts[2], GasOrderContract, TokenContract)
 
       const totalUserGasHoldings = await GasOrderContract.getTotalBalance(accounts[1], [])
 
@@ -236,12 +236,12 @@ describe("GasOrder", function () {
       const { accounts, admin, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
 
       // @notice orders mockups
-      await orderHelper.createOrder(admin, GasOrderContract, TokenContract)
-      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10])
-      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10])
-      await orderHelper.createOrder(accounts[1], GasOrderContract, TokenContract)
-      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
-      await orderHelper.createOrder(accounts[2], GasOrderContract, TokenContract)
+      await createOrder(admin, GasOrderContract, TokenContract)
+      await createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10])
+      await createOrder(accounts[1], GasOrderContract, TokenContract, true, accounts[10])
+      await createOrder(accounts[1], GasOrderContract, TokenContract)
+      await createOrder(accounts[2], GasOrderContract, TokenContract)
+      await createOrder(accounts[2], GasOrderContract, TokenContract)
 
       const totalUserGasHoldings = await GasOrderContract.getOrdersByIds([1, 2, 3], ethers.ZeroAddress)
 

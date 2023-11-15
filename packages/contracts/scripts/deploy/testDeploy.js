@@ -5,7 +5,7 @@ const {
   PROJECT_VERSION,
   TOKEN_LINK,
 } = require("../constants/index.js")
-const orderHelper = require("../helpers/orderHelper.js")
+const { createOrder } = require("../helpers/order.js")
 const { precalculateAddress } = require("../helpers/index.js")
 
 async function initDeploymentSetup() {
@@ -42,7 +42,7 @@ async function initDeploymentSetup() {
   await TokenContract.transfer(accounts[10].address, "500000000")
   for (let i = 0; i < TOTAL_TEST_ORDERS_AMOUNT; i++) {
     let isAccepted = Math.random() < 0.5
-    await orderHelper.createOrder(
+    await createOrder(
       admin,
       GasOrderContract,
       TokenContract,
