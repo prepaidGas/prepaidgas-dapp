@@ -13,7 +13,8 @@ struct TokenDetails {
   address token;
   string name;
   string symbol;
-  uint256 decimals;
+  uint8 decimals;
+  uint8 broken;
 }
 
 struct FilteredOrder {
@@ -100,17 +101,33 @@ abstract contract GasOrderGetters is ERC1155ish {
     TokenDetails[] memory result = new TokenDetails[](length);
 
     for (uint256 i; i < length; i++) {
-      address token = tokens[i];
-      // @todo utilise try functionality
-      result[i] = TokenDetails({
-        token: token,
-        name: IERC20Metadata(token).name(),
-        symbol: IERC20Metadata(token).symbol(),
-        decimals: IERC20Metadata(token).decimals()
-      });
+      result[i] = getTokenDetails(tokens[i]);
     }
 
     return result;
+  }
+
+  function getTokenDetails(address token) public view returns (TokenDetails memory) {
+    TokenDetails memory details = TokenDetails({
+      token: token,
+      name: "",
+      symbol: "",
+      decimals: 0,
+      broken : 0
+    });
+    IERC20Metadata meta = IERC20Metadata(token);
+
+    try meta.name() returns (string memory name)  {
+      details.name = name;
+    } catch { details.broken += 1; }
+    try meta.symbol() returns (string memory symbol)  {
+      details.symbol = symbol;
+    } catch { details.broken += 2; }
+    try meta.decimals() returns (uint8 decimals)  {
+      details.decimals = decimals;
+    } catch { details.broken += 4; }
+
+    return details;
   }
 
   /// @notice over high amount of orders may lead tot the function call failure

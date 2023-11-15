@@ -53,7 +53,7 @@ describe("Executor", function () {
     return { accounts, admin, ExecutorContract, GasOrderContract, TokenContract }
   }
 
-  describe("Validate message execution", function () {
+  describe("Transaction request execution", function () {
     it("execute message", async function () {
       //@todo optimize code to reduce amount of reusable elements
       const { accounts, admin, ExecutorContract, GasOrderContract, TokenContract } = await loadFixture(initialSetup)
@@ -242,6 +242,14 @@ describe("Executor", function () {
         ExecutorContract,
         "UnexpectedRecovered",
       )
+    })
+  })
+  describe("Transaction request liquidation", function () {
+    it("liquidate transaction", async function () {
+      // @todo
+    })
+    it("liquidate transaction by signer without execution", async function () {
+      // @todo
     })
   })
 

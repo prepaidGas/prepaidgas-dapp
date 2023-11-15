@@ -7,12 +7,13 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "./../common/Errors.sol" as Error;
 
 abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
-  /// @dev id => holder  => spender => amount
+  /// @dev id => holder => spender => amount
   mapping(uint256 => mapping(address => mapping(address => uint256))) private _allowance;
   /// @dev id => holder => amount
-  mapping(uint256 => mapping(address => uint256)) private _totalLocked;
+  mapping(uint256 => mapping(address => uint256)) private _totalLock;
 
   event Approval(address indexed holder, uint256 indexed id, address indexed spender, uint256 amount);
+  event UpdateLock(address indexed holder, uint256 indexed id, uint256 amount);
   event URI(string value);
 
   constructor(string memory link) Ownable(msg.sender) ERC1155(link) {}
@@ -40,11 +41,11 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
     _approve(holder, id, spender, amount);
   }
 
-  function usable(address from, uint256 id, address spender) public view returns (uint256) {
-    uint256 balance = balanceOf(from, id);
-    uint256 boundary = allowance(from, id, spender);
+  function usable(address holder, uint256 id, address spender) public view returns (uint256) {
+    uint256 balance = balanceAvailable(holder, id);
+    uint256 boundary = allowance(holder, id, spender);
 
-    if (!isApprovedForAll(from, spender) && balance > boundary) return boundary;
+    if (!isApprovedForAll(holder, spender) && balance > boundary) return boundary;
     return balance;
   }
 
@@ -52,7 +53,6 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
     return _allowance[id][holder][spender];
   }
 
-  // @todo verify that it does not impose new vulnarability
   function isApprovedForAll(address holder, address spender) public view override returns (bool) {
     return holder == spender || super.isApprovedForAll(holder, spender);
   }
@@ -70,36 +70,57 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
   }
 
   function _utilizeOperator(address holder, uint256 id, address spender, uint256 amount) internal {
-    uint256 balance = balanceOf(holder, id);
+    uint256 balance = balanceAvailable(holder, id);
     if (balance < amount) revert Error.BalanceExhausted(amount, balance);
 
     if (!isApprovedForAll(holder, spender)) revert Error.NotOperator(holder, spender);
     _burn(holder, id, amount);
   }
 
-  function _approve(address from, uint256 id, address spender, uint256 amount) private {
-    _allowance[id][from][spender] = amount;
+  function _approve(address holder, uint256 id, address spender, uint256 amount) private {
+    _allowance[id][holder][spender] = amount;
 
-    emit Approval(from, id, spender, amount);
+    emit Approval(holder, id, spender, amount);
   }
 
-  function _lockGasTokens(address from, uint256 id, uint256 value) internal {
-    // @todo add error handling
-    _totalLocked[id][from] += value;
-    // @todo add event emmiting
+  function totalLock(address holder, uint256 id) public view returns (uint256) {
+    return _totalLock[id][holder];
   }
 
-  function _unlockGasTokens(address from, uint256 id, uint256 value) internal {
-    // @todo add error handling
-    _totalLocked[id][from] -= value;
-    // @todo add event emmiting
+  function _increaseLock(address holder, uint256 id, uint256 value) internal {
+    uint256 balance = balanceAvailable(holder, id);
+    if (balance < value) revert Error.BalanceExhausted(value, balance);
+
+    _setLock(holder, id, totalLock(holder, id) + value);
   }
 
-  function balanceOf(address account, uint256 id) public view override returns (uint256) {
-    return super.balanceOf(account, id) - totalLocked(account, id);
+  function _decreaseLock(address holder, uint256 id, uint256 value) internal {
+    uint256 balance = totalLock(holder, id);
+    if (balance < value) revert Error.BalanceExhausted(value, balance);
+
+    _setLock(holder, id, totalLock(holder, id) - value);
   }
 
-  function totalLocked(address account, uint256 id) public view returns (uint256) {
-    return _totalLocked[id][account];
+  function _setLock(address holder, uint256 id, uint256 value) private {
+    _totalLock[id][holder] = value;
+
+    emit UpdateLock(holder, id, value);
+  }
+
+  function balanceAvailable(address holder, uint256 id) public view returns (uint256) {
+    return balanceOf(holder, id) - totalLock(holder, id);
+  }
+
+  function _update(address holder, address receiver, uint256[] memory ids, uint256[] memory values) internal override {
+    super._update(holder, receiver, ids, values);
+
+    /// @dev ids may contain duplications => pre-validation requires a lot of memory => post-validation is used
+    for (uint256 i = 0; i < ids.length; i++) {
+      uint256 id = ids[i];
+      uint256 balance = balanceOf(holder, id);
+      uint256 lock = totalLock(holder, id);
+
+      if (balance < lock) revert Error.BalanceExhausted(lock, balance);
+    }
   }
 }

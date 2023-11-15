@@ -4,9 +4,9 @@ pragma solidity 0.8.20;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./TxAccept.sol";
+import "./tools/TxAccept.sol";
 
-import {Message} from "./base/ExecutionMessage.sol";
+import {Message} from "./base/Message.sol";
 import {ERC1155ish} from "./base/ERC1155ish.sol";
 import {FeeProcessor, Fee} from "./tools/FeeProcessor.sol";
 import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
@@ -34,6 +34,10 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
 
   constructor(address executionEndpoint, string memory link) ERC1155ish(link) {
     _execution = executionEndpoint;
+  }
+
+  function verifier() public override view returns (address) {
+    return _execution;
   }
 
   // @todo add support of our _msgSender
@@ -223,6 +227,8 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
       if (!isExecutable(message)) revert ExecutionImpossible(from, transactionNonce, message.deadline, block.timestamp);
       // execution
       fulfiller = executor(id);
+    } else if (fulfiller == message.from && gasSpent == 0) {
+      if (!isLiquidatableWithoutExecution(message)) revert LiquidationImpossible(from, transactionNonce, deadline);
     } else {
       // liquidation
       if (!isLiquidatable(message)) revert LiquidationImpossible(from, transactionNonce, deadline);
@@ -237,8 +243,7 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
       _distribute(fulfiller, unlockToken, _takeFee(Fee.Guarantee, unlockToken, unlockAmount));
     }
 
-    _unlockGasTokens(from, id, gasSpent);
-    _unlockTxGasTokens(message);
+    _unlockGasTokens(message);
   }
 
   /**
