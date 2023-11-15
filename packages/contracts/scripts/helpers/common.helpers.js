@@ -16,7 +16,7 @@ const { precalculateAddress } = require("./index.js")
 const { randomBytes, randomNumber } = require("./random.js")
 const { domain, messageType } = require("./eip712.js")
 
-const orderHelper = require("./orderHelper.js")
+const orderHelper = require("./order.js")
 
 /**
  *
@@ -63,28 +63,4 @@ async function createSignedMsg(essentialProps, options = {}) {
   return { messageTuple, messageStruct, signedMessage, EndpointContract }
 }
 
-/**
- *
- * @param {Object} essentialProps
- * @param {*} essentialProps.accounts
- * @param {*} essentialProps.GasOrderContract
- * @param {*} essentialProps.TokenContract
- * @param {Object} options
- * @returns
- */
-async function createAndAcceptOrder(essentialProps) {
-  const { accounts, GasOrderContract, TokenContract } = essentialProps
-
-  const signer = accounts[randomNumber(5) + 1]
-  await TokenContract.transfer(signer, 20000000000)
-
-  await orderHelper.createOrder(signer, GasOrderContract, TokenContract, false, false, 36000, 865000)
-  await TokenContract.transfer(accounts[0].address, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-  await TokenContract.connect(accounts[0]).approve(GasOrderContract.target, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-
-  await GasOrderContract.connect(accounts[0]).acceptOrder(0, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
-
-  return { signer }
-}
-
-module.exports = { createSignedMsg, createAndAcceptOrder }
+module.exports = { createSignedMsg }
