@@ -6,21 +6,21 @@ const { PROJECT_NAME, PROJECT_VERSION, CHAIN_ID } = require("../../scripts/const
 const { randomBytes, randomNumber } = require("../../scripts/helpers/random.js")
 const { domain, messageType } = require("../../scripts/helpers/eip712.js")
 
-describe("ExecutionMessage", function () {
+describe("VerifierMessage", function () {
   async function initialSetup() {
     const [admin, ...accounts] = await ethers.getSigners()
 
-    const ExecutionMessageFactory = await ethers.getContractFactory("ExecutionMessage")
+    const MessageFactory = await ethers.getContractFactory("VerifierMessage")
 
-    const ExecutionMessageContract = await ExecutionMessageFactory.deploy(PROJECT_NAME, PROJECT_VERSION)
-    await ExecutionMessageContract.deploymentTransaction().wait()
+    const MessageContract = await MessageFactory.deploy(PROJECT_NAME, PROJECT_VERSION)
+    await MessageContract.deploymentTransaction().wait()
 
-    return { accounts, admin, ExecutionMessageContract }
+    return { accounts, admin, MessageContract }
   }
 
   describe("Validate message hash", function () {
     it("static message", async function () {
-      const { accounts, admin, ExecutionMessageContract } = await loadFixture(initialSetup)
+      const { accounts, admin, MessageContract } = await loadFixture(initialSetup)
 
       const from = "0x376a2a023a105bc2e19ce19ad275b9bbbcb23e1a",
         nonce = 70,
@@ -35,9 +35,9 @@ describe("ExecutionMessage", function () {
       const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
       const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
 
-      const messageHash = await ExecutionMessageContract.messageHash(messageTuple)
+      const messageHash = await MessageContract.messageHash(messageTuple)
       const signedMessage = await signer.signTypedData(
-        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutionMessageContract),
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, MessageContract),
         { Message: messageType },
         messageStruct,
       )
@@ -46,7 +46,7 @@ describe("ExecutionMessage", function () {
     })
 
     it("empty message", async function () {
-      const { accounts, admin, ExecutionMessageContract } = await loadFixture(initialSetup)
+      const { accounts, admin, MessageContract } = await loadFixture(initialSetup)
 
       const from = "0x376a2a023a105bc2e19ce19ad275b9bbbcb23e1a",
         nonce = 0,
@@ -61,9 +61,9 @@ describe("ExecutionMessage", function () {
       const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
       const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
 
-      const messageHash = await ExecutionMessageContract.messageHash(messageTuple)
+      const messageHash = await MessageContract.messageHash(messageTuple)
       const signedMessage = await signer.signTypedData(
-        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutionMessageContract),
+        domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, MessageContract),
         { Message: messageType },
         messageStruct,
       )
@@ -73,7 +73,7 @@ describe("ExecutionMessage", function () {
 
     it("arbitrary message", async function () {
       for (let i = 0; i < 15; i++) {
-        const { accounts, admin, ExecutionMessageContract } = await loadFixture(initialSetup)
+        const { accounts, admin, MessageContract } = await loadFixture(initialSetup)
         const from = randomBytes(20),
           nonce = randomNumber(100),
           gasOrder = randomNumber(100),
@@ -87,9 +87,9 @@ describe("ExecutionMessage", function () {
         const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
         const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
 
-        const messageHash = await ExecutionMessageContract.messageHash(messageTuple)
+        const messageHash = await MessageContract.messageHash(messageTuple)
         const signedMessage = await signer.signTypedData(
-          domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutionMessageContract),
+          domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, MessageContract),
           { Message: messageType },
           messageStruct,
         )
@@ -100,7 +100,7 @@ describe("ExecutionMessage", function () {
 
     it("data mismatch", async function () {
       for (let i = 0; i < 15; i++) {
-        const { accounts, admin, ExecutionMessageContract } = await loadFixture(initialSetup)
+        const { accounts, admin, MessageContract } = await loadFixture(initialSetup)
         const from = randomBytes(20),
           nonce = randomNumber(100),
           gasOrder = randomNumber(100),
@@ -122,9 +122,9 @@ describe("ExecutionMessage", function () {
             ...messageTupleInitial.slice(i + 1),
           ]
 
-          const messageHash = await ExecutionMessageContract.messageHash(messageTuple)
+          const messageHash = await MessageContract.messageHash(messageTuple)
           const signedMessage = await signer.signTypedData(
-            domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutionMessageContract),
+            domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, MessageContract),
             { Message: messageType },
             messageStruct,
           )

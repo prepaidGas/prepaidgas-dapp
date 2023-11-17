@@ -50,6 +50,7 @@ describe("Executor", function () {
     await GasOrderContract.setFee(0, SYSTEM_FEE)
     await GasOrderContract.setFee(1, SYSTEM_FEE)
     await GasOrderContract.setFee(2, SYSTEM_FEE)
+    await GasOrderContract.updateDomainSeparator()
 
     return { accounts, admin, ExecutorContract, GasOrderContract, TokenContract }
   }

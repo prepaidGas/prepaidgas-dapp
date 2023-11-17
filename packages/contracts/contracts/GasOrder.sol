@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./tools/TxAccept.sol";
 
-import {Message} from "./base/Message.sol";
+import {Message} from "./base/VerifierMessage.sol";
 import {ERC1155ish} from "./base/ERC1155ish.sol";
 import {FeeProcessor, Fee} from "./tools/FeeProcessor.sol";
 import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
@@ -36,7 +36,7 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
     _execution = executionEndpoint;
   }
 
-  function verifier() public override view returns (address) {
+  function verifier() public view override returns (address) {
     return _execution;
   }
 

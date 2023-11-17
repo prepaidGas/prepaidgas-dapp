@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../Executor.sol";
 
 import "../base/GasOrderGetters.sol";
-import {ReproducerMessage, Message} from "../base/Message.sol";
+import {ReproducerMessage, Message} from "../base/VerifierMessage.sol";
 import {OrderStatus} from "../interfaces/IGasOrder.sol";
 
 abstract contract TxAccept is GasOrderGetters, ReproducerMessage {

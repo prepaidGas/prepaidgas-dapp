@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import {VerifierMessage, Message} from "./base/Message.sol";
+import {VerifierMessage, Message} from "./base/VerifierMessage.sol";
 
 import {IGasOrder} from "./interfaces/IGasOrder.sol";
 import {IExecutor} from "./interfaces/IExecutor.sol";
