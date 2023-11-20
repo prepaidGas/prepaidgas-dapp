@@ -72,6 +72,10 @@ describe("Executor", function () {
         },
         { customV1, customV2 },
       )
+      console.log(`
+      Signed msg: ${signedMessage}
+      Message tuple: ${messageTuple}
+      `)
 
       await GasOrderContract.addTransaction(messageTuple, signedMessage)
 
@@ -133,7 +137,7 @@ describe("Executor", function () {
 
         await expect(GasOrderContract.addTransaction(messageTuple, signedMessage)).to.be.revertedWithCustomError(
           GasOrderContract,
-          "InvalidTransaction",
+          "NonceExhausted",
         )
       }
     })

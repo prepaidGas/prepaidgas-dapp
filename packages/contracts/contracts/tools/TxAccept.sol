@@ -22,14 +22,19 @@ abstract contract TxAccept is GasOrderGetters, ReproducerMessage {
     bytes calldata signature
   ) public specificStatus(message.gasOrder, OrderStatus.Active) {
     uint256 orderDeadline = order(message.gasOrder).executionPeriodDeadline;
-    if (message.deadline > orderDeadline) revert InvalidTransactionDeadline(message.deadline, orderDeadline);
+    uint256 executionWindow = order(message.gasOrder).executionWindow;
+    // @dev the Exucutor should execute msg in the timespan from `deadline - 2 * executionWindow` to `deadline - executionWindow`
+    // the liquidation is possible from `deadline - executionWindow` to `deadline`
+
+    // @todo recheck time bounds check
+    if (message.deadline > orderDeadline - 2 * executionWindow && message.deadline > block.timestamp)
+      revert InvalidTransactionDeadline(message.deadline, orderDeadline);
     bytes32 hash = messageHash(message);
 
     address recovered = hash.recover(signature);
     if (recovered != message.from) revert UnknownRecovered(recovered);
 
-    // @todo update error to `InvalidSignature`
-    if (nonce[message.from][message.nonce]) revert InvalidTransaction(hash);
+    if (nonce[message.from][message.nonce]) revert NonceExhausted(message.from, message.nonce);
     nonce[message.from][message.nonce] = true;
 
     lock[message.from][message.nonce] = message.gas;
@@ -38,8 +43,6 @@ abstract contract TxAccept is GasOrderGetters, ReproducerMessage {
     if (message.gas >= balance) revert GasLimitExceedBalance(message.gas, balance);
 
     _increaseLock(message.from, message.gasOrder, message.gas);
-
-    // @todo time bounds check
 
     emit TransactionAdded(message, signature);
   }
