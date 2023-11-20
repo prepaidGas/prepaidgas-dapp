@@ -2,6 +2,7 @@
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import {VerifierMessage, Message} from "./base/VerifierMessage.sol";
 
@@ -12,7 +13,7 @@ import {ITxAccept} from "./interfaces/ITxAccept.sol";
 import "./common/Errors.sol";
 import "./common/Constants.sol";
 
-contract Executor is IExecutor, VerifierMessage {
+contract Executor is IExecutor, VerifierMessage, ReentrancyGuard {
   using ECDSA for bytes32;
 
   address public immutable gasOrder;
@@ -47,7 +48,7 @@ contract Executor is IExecutor, VerifierMessage {
    * This function verifies the validity of executing the message and performs the actions.
    * After execution the registered executor will be rewarded.
    */
-  function execute(Message calldata message, bytes calldata signature) external {
+  function execute(Message calldata message, bytes calldata signature) external nonReentrant {
     uint256 gasSpent = _execute(message, signature, false);
 
     /// @dev address(0) means registered executor should be rewarded
@@ -63,14 +64,15 @@ contract Executor is IExecutor, VerifierMessage {
    * This function verifies the validity of liquidation and performs the necessary actions.
    * After execution the liquidator will be rewarded.
    */
-  function liquidate(Message calldata message, bytes calldata signature) external {
+  function liquidate(Message calldata message, bytes calldata signature) external nonReentrant {
     uint256 gasSpent = _execute(message, signature, true);
     //@todo recheck the corectness of these operations
     uint256 infrastructureGas = INFR_GAS_LIQUIDATE + INFR_GAS_RECOVER_SIGNER;
     _reportExecution(message, msg.sender, gasSpent, infrastructureGas);
   }
 
-  function liquidateWithoutExecution(Message calldata message) external {
+  // @todo check if reentrancy protection is needed
+  function liquidateWithoutExecution(Message calldata message) external nonReentrant {
     _reportExecution(message, message.from, 0, 0);
   }
 

@@ -37,6 +37,7 @@ abstract contract TxAccept is GasOrderGetters, ReproducerMessage {
     if (nonce[message.from][message.nonce]) revert NonceExhausted(message.from, message.nonce);
     nonce[message.from][message.nonce] = true;
 
+    // @todo add validation for the Gas amount, it should be bigger than infrastructure call gas costs
     lock[message.from][message.nonce] = message.gas;
 
     uint256 balance = usable(message.onBehalf, message.gasOrder, message.from);
