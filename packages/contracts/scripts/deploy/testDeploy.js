@@ -37,6 +37,8 @@ async function initDeploymentSetup() {
   await GasOrderContract.setFee(1, SYSTEM_FEE)
   await GasOrderContract.setFee(2, SYSTEM_FEE)
 
+  await GasOrderContract.updateDomainSeparator()
+
   // @dev send mock tokens to the tester hardhat address
   await TokenContract.transfer("0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65", "100000000000000000000000")
   // Create and accept order
