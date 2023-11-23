@@ -28,7 +28,8 @@ type SigningState = z.infer<typeof schemaSigning>
 
 export default function TestPage() {
   const signingInitialValues = {
-    message: "",
+    message:
+      '{"nonce":0,"gasOrder":0,"onBehalf":"0x00222290dd7278aa3ddd389cc1e1d165cc4bafe5","deadline":0,"to":"0xfb071837728455c581f370704b225ac9eabdfa4a","gas":0,"data":"0x"}',
     dataTypes:
       '[{"name":"from","type":"address"},{"name":"nonce","type":"uint256"},{"name":"gasOrder","type":"uint256"},{"name":"onBehalf","type":"address"},{"name":"deadline","type":"uint256"},{"name":"to","type":"address"},{"name":"gas","type":"uint256"},{"name":"data","type":"bytes"}]',
     parsedData: undefined,
@@ -81,18 +82,18 @@ export default function TestPage() {
       verifyingContract: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
     }
 
-    const types = {
-      Message: [
-        { name: "from", type: "address" },
-        { name: "nonce", type: "uint256" },
-        { name: "gasOrder", type: "uint256" },
-        { name: "onBehalf", type: "address" },
-        { name: "deadline", type: "uint256" },
-        { name: "to", type: "address" },
-        { name: "gas", type: "uint256" },
-        { name: "data", type: "bytes" },
-      ],
-    }
+    // const types = {
+    //   Message: [
+    //     { name: "from", type: "address" },
+    //     { name: "nonce", type: "uint256" },
+    //     { name: "gasOrder", type: "uint256" },
+    //     { name: "onBehalf", type: "address" },
+    //     { name: "deadline", type: "uint256" },
+    //     { name: "to", type: "address" },
+    //     { name: "gas", type: "uint256" },
+    //     { name: "data", type: "bytes" },
+    //   ],
+    // }
 
     /*
     const message = {
@@ -108,8 +109,11 @@ export default function TestPage() {
     }
     */
 
+    const types = {
+      Message: inputValuesForSigning.parsedTypes,
+    }
+
     const message = {
-      //@todo get address automatically
       from: address,
       nonce: inputValuesForSigning.parsedMessage.nonce,
       gasOrder: inputValuesForSigning.parsedMessage.gasOrder,
