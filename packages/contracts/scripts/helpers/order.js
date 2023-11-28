@@ -38,6 +38,15 @@ async function createOrder(
 
     // Accepting order
     await gasContract.connect(executor).acceptOrder(parseInt(ordersAmount) - 1, GAS_AMOUNT * LOCKED_GUARANTEE_PER_GAS)
+    await gasContract
+      .connect(orderManager)
+      .safeTransferFrom(
+        orderManager.address,
+        "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+        parseInt(ordersAmount) - 1,
+        GAS_AMOUNT / 10,
+        "0x",
+      )
   }
 
   if (increaseTime != 0) {
