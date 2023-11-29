@@ -27,6 +27,7 @@ import { CheckIcon, ClockIcon, NoSymbolIcon, WalletIcon, XMarkIcon } from "@hero
 import JsonFormatter from "react-json-formatter"
 import { CHAIN_ID, PROJECT_NAME, PROJECT_VERSION } from "constants/executor"
 import { ethers } from "ethers"
+import DialogWindow from "../../../../components/DialogWindow"
 
 const formSchema = z.object({
   from: z.string().min(1),
@@ -59,10 +60,8 @@ export default function TransactionCreate() {
   const [validationErrors, setValidationErrors] = useState<null | { [key: string]: string }>(null)
   const [parsedAbi, setParsedAbi] = useState<ABIEntry[] | undefined>()
   //todo decide on whether to use dialogWindow
-  /*
   const [showDialogWindow, setShowDialogWindow] = useState(false)
   const [transactionDetails, setTransactionDetails] = useState<null | any>(null)
-  */
 
   // const initialState: TransactionFormState = {
   //   from: "",
@@ -477,9 +476,13 @@ export default function TransactionCreate() {
       console.log("addTransactionData: ", data)
       const txData = await waitForTransaction({ hash: data.hash })
       console.log("waitForTxData: ", txData)
+      setTransactionDetails({ ...txData })
     } catch (e) {
       console.log("ERROR: ", e)
+      setTransactionDetails({ error: e })
     }
+
+    setShowDialogWindow(true)
 
     // try {
     //   const data = await readContract({
@@ -509,135 +512,185 @@ export default function TransactionCreate() {
   }, [inputValues])
 
   return (
-    <Card className="mt-6 flex flex-col w-full">
-      {/* Gas Amount and Date & Time Settings */}
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col">
-          <Text>From</Text>
-          <div className="flex flex-col mt-2">
-            <TextInput
-              icon={WalletIcon}
-              value={inputValues.from}
-              onChange={(e) => setInputValues({ ...inputValues, from: e.target.value })}
-              placeholder={inputValues.from}
-              error={!!validationErrors?.from}
-              errorMessage={validationErrors?.from}
-              spellCheck={false}
-            ></TextInput>
+    <>
+      {showDialogWindow ? (
+        Boolean(transactionDetails) ? (
+          <DialogWindow
+            onClose={() => {
+              setShowDialogWindow(false)
+              setTransactionDetails(null)
+            }}
+            isClosable={true}
+            title="Transaction Result"
+            description={
+              transactionDetails.error ? (
+                "There seems to be an error :("
+              ) : (
+                <div className="flex flex-col break-words gap-4">
+                  From
+                  <Text>{transactionDetails.from}</Text>
+                  To
+                  <Text>{transactionDetails.to}</Text>
+                  Transaction Hash
+                  <Text>{transactionDetails.transactionHash}</Text>
+                  Status
+                  <Text>{transactionDetails.status}</Text>
+                </div>
+              )
+            }
+          ></DialogWindow>
+        ) : (
+          <DialogWindow
+            isClosable={false}
+            title="Creating Transaction"
+            description={
+              <div className="flex justify-center">
+                <TailSpin
+                  height={40}
+                  width={40}
+                  color={SPINNER_COLOR}
+                  ariaLabel="tail-spin-loading"
+                  radius="0"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                  visible={true}
+                />
+              </div>
+            }
+          ></DialogWindow>
+        )
+      ) : null}
+      <Card className="mt-6 flex flex-col w-full">
+        {/* Gas Amount and Date & Time Settings */}
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col">
+            <Text>From</Text>
+            <div className="flex flex-col mt-2">
+              <TextInput
+                icon={WalletIcon}
+                value={inputValues.from}
+                onChange={(e) => setInputValues({ ...inputValues, from: e.target.value })}
+                placeholder={inputValues.from}
+                error={!!validationErrors?.from}
+                errorMessage={validationErrors?.from}
+                spellCheck={false}
+              ></TextInput>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col">
-          <Text>Nonce</Text>
-          <div className="flex flex-row mt-2">
-            <NumberInput
-              value={inputValues.nonce.toString()}
-              onChange={(e) =>
-                setInputValues({ ...inputValues, nonce: clampNumber(Number(e.target.value), 0, 100000) })
-              }
-              error={!!validationErrors?.nonce}
-              errorMessage={validationErrors?.nonce}
-              spellCheck={false}
-            />
+          <div className="flex flex-col">
+            <Text>Nonce</Text>
+            <div className="flex flex-row mt-2">
+              <NumberInput
+                value={inputValues.nonce.toString()}
+                onChange={(e) =>
+                  setInputValues({ ...inputValues, nonce: clampNumber(Number(e.target.value), 0, 100000) })
+                }
+                error={!!validationErrors?.nonce}
+                errorMessage={validationErrors?.nonce}
+                spellCheck={false}
+              />
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col">
-          <Text>Gas Order</Text>
-          <div className="flex flex-row">
-            <NumberInput
-              className="mt-2"
-              value={inputValues.gasOrder.toString()}
-              onChange={(e) =>
-                setInputValues({ ...inputValues, gasOrder: clampNumber(Number(e.target.value), 0, 100000) })
-              }
-              error={!!validationErrors?.gasOrder}
-              errorMessage={validationErrors?.gasOrder}
-              spellCheck={false}
-            />
+          <div className="flex flex-col">
+            <Text>Gas Order</Text>
+            <div className="flex flex-row">
+              <NumberInput
+                className="mt-2"
+                value={inputValues.gasOrder.toString()}
+                onChange={(e) =>
+                  setInputValues({ ...inputValues, gasOrder: clampNumber(Number(e.target.value), 0, 100000) })
+                }
+                error={!!validationErrors?.gasOrder}
+                errorMessage={validationErrors?.gasOrder}
+                spellCheck={false}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <Text>On Behalf</Text>
+            <div className="flex flex-col mt-2">
+              <TextInput
+                icon={WalletIcon}
+                value={inputValues.onBehalf}
+                onChange={(e) => setInputValues({ ...inputValues, onBehalf: e.target.value })}
+                placeholder={inputValues.onBehalf}
+                error={!!validationErrors?.onBehalf}
+                errorMessage={validationErrors?.onBehalf}
+                spellCheck={false}
+              ></TextInput>
+            </div>
+          </div>
+          <div className="flex flex-col justify-between">
+            <Text>Execution period End</Text>
+            <div className="flex flex-row mt-2">
+              <DatePicker
+                value={inputValues.deadlineDate}
+                onValueChange={(value) => setInputValues({ ...inputValues, deadlineDate: value })}
+              />
+            </div>
+            <div className="flex flex-col mt-2">
+              <TextInput
+                icon={ClockIcon}
+                value={inputValues.deadlineTime}
+                onChange={(e) => setInputValues({ ...inputValues, deadlineTime: e.target.value })}
+                placeholder={inputValues.deadlineTime}
+                error={!!validationErrors?.deadlineTime}
+                errorMessage={validationErrors?.deadlineTime}
+                spellCheck={false}
+              ></TextInput>
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <Text>To</Text>
+            <div className="flex flex-col mt-2">
+              <TextInput
+                icon={WalletIcon}
+                value={inputValues.to}
+                onChange={(e) => setInputValues({ ...inputValues, to: e.target.value })}
+                placeholder={inputValues.to}
+                error={!!validationErrors?.to}
+                errorMessage={validationErrors?.to}
+                spellCheck={false}
+              ></TextInput>
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <Text>Gas</Text>
+            <div className="flex flex-row mt-2">
+              <NumberInput
+                value={inputValues.gas.toString()}
+                onChange={(e) =>
+                  setInputValues({ ...inputValues, gas: clampNumber(Number(e.target.value), 0, 100000) })
+                }
+                error={!!validationErrors?.gas}
+                errorMessage={validationErrors?.gas}
+                spellCheck={false}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col grow">
+            <Text>Gas Limit</Text>
+            <div className="flex flex-col mt-2">
+              <NumberInput
+                value={inputValues.gasLimit.toString()}
+                onChange={(e) =>
+                  setInputValues({ ...inputValues, gasLimit: clampNumber(Number(e.target.value), 0, 100000) })
+                }
+                error={!!validationErrors?.gasLimit}
+                errorMessage={validationErrors?.gasLimit}
+                spellCheck={false}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col">
-          <Text>On Behalf</Text>
-          <div className="flex flex-col mt-2">
-            <TextInput
-              icon={WalletIcon}
-              value={inputValues.onBehalf}
-              onChange={(e) => setInputValues({ ...inputValues, onBehalf: e.target.value })}
-              placeholder={inputValues.onBehalf}
-              error={!!validationErrors?.onBehalf}
-              errorMessage={validationErrors?.onBehalf}
-              spellCheck={false}
-            ></TextInput>
-          </div>
-        </div>
-        <div className="flex flex-col justify-between">
-          <Text>Execution period End</Text>
-          <div className="flex flex-row mt-2">
-            <DatePicker
-              value={inputValues.deadlineDate}
-              onValueChange={(value) => setInputValues({ ...inputValues, deadlineDate: value })}
-            />
-          </div>
-          <div className="flex flex-col mt-2">
-            <TextInput
-              icon={ClockIcon}
-              value={inputValues.deadlineTime}
-              onChange={(e) => setInputValues({ ...inputValues, deadlineTime: e.target.value })}
-              placeholder={inputValues.deadlineTime}
-              error={!!validationErrors?.deadlineTime}
-              errorMessage={validationErrors?.deadlineTime}
-              spellCheck={false}
-            ></TextInput>
-          </div>
-        </div>
-
-        <div className="flex flex-col">
-          <Text>To</Text>
-          <div className="flex flex-col mt-2">
-            <TextInput
-              icon={WalletIcon}
-              value={inputValues.to}
-              onChange={(e) => setInputValues({ ...inputValues, to: e.target.value })}
-              placeholder={inputValues.to}
-              error={!!validationErrors?.to}
-              errorMessage={validationErrors?.to}
-              spellCheck={false}
-            ></TextInput>
-          </div>
-        </div>
-
-        <div className="flex flex-col">
-          <Text>Gas</Text>
-          <div className="flex flex-row mt-2">
-            <NumberInput
-              value={inputValues.gas.toString()}
-              onChange={(e) => setInputValues({ ...inputValues, gas: clampNumber(Number(e.target.value), 0, 100000) })}
-              error={!!validationErrors?.gas}
-              errorMessage={validationErrors?.gas}
-              spellCheck={false}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col grow">
-          <Text>Gas Limit</Text>
-          <div className="flex flex-col mt-2">
-            <NumberInput
-              value={inputValues.gasLimit.toString()}
-              onChange={(e) =>
-                setInputValues({ ...inputValues, gasLimit: clampNumber(Number(e.target.value), 0, 100000) })
-              }
-              error={!!validationErrors?.gasLimit}
-              errorMessage={validationErrors?.gasLimit}
-              spellCheck={false}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* todo: remove orderID from page completely */}
-        {/* <div className="flex flex-col grow">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* todo: remove orderID from page completely */}
+          {/* <div className="flex flex-col grow">
           <Text>Order ID</Text>
           <div className="flex flex-col mt-2">
             <TextInput
@@ -649,155 +702,156 @@ export default function TransactionCreate() {
             />
           </div>
         </div> */}
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-6 mt-4">
-        <div className="flex flex-col grow">
-          <Text>Smart Contract Address</Text>
-          <div className="flex flex-col mt-2">
-            <TextInput
-              value={inputValues.smartContractAddress}
-              onChange={(e) => setInputValues({ ...inputValues, smartContractAddress: e.target.value })}
-              error={!!validationErrors?.smartContractAddress}
-              errorMessage={validationErrors?.smartContractAddress}
-              spellCheck={false}
-            />
-          </div>
         </div>
-      </div>
 
-      {isAbiParsed ? (
         <div className="flex flex-col lg:flex-row gap-6 mt-4">
           <div className="flex flex-col grow">
-            <Text>Functions parsed from provided ABI</Text>
-            <div className="max-h-[30rem] overflow-auto mt-2 tremor-TextInput-root flex flex-col relative w-full  min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
-              <JsonFormatter
-                json={JSON.stringify(parsedAbi)}
-                tabWith={4}
-                jsonStyle={{
-                  propertyStyle: { color: "rgb(59 130 246)" },
-                  stringStyle: { color: "rgb(16 185 129)" },
-                }}
+            <Text>Smart Contract Address</Text>
+            <div className="flex flex-col mt-2">
+              <TextInput
+                value={inputValues.smartContractAddress}
+                onChange={(e) => setInputValues({ ...inputValues, smartContractAddress: e.target.value })}
+                error={!!validationErrors?.smartContractAddress}
+                errorMessage={validationErrors?.smartContractAddress}
+                spellCheck={false}
               />
             </div>
           </div>
         </div>
-      ) : (
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">
-          <div className="flex flex-col grow">
-            <Text>ABI</Text>
-            <div className="tremor-TextInput-root flex flex-col mt-2 relative w-full items-center min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
-              <textarea
-                value={inputValues.userAbi}
-                onChange={(e) => {
-                  e.target.style.height = ""
-                  e.target.style.height = e.target.scrollHeight + "px"
-                  setInputValues({ ...inputValues, userAbi: e.target.value })
-                }}
-                // error={!!validationErrors?.userAbi}
-                // errorMessage={validationErrors?.userAbi}
-                placeholder="Copy and paste your ABI here"
-                spellCheck={false}
-                className="tremor-TextInput-input w-full focus:outline-none focus:ring-0 border-none bg-transparent text-tremor-default text-tremor-content-emphasis dark:text-dark-tremor-content-emphasis [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none pl-3 pr-4 py-2 placeholder:text-tremor-content dark:placeholder:text-dark-tremor-content resize-none"
-              ></textarea>
+
+        {isAbiParsed ? (
+          <div className="flex flex-col lg:flex-row gap-6 mt-4">
+            <div className="flex flex-col grow">
+              <Text>Functions parsed from provided ABI</Text>
+              <div className="max-h-[30rem] overflow-auto mt-2 tremor-TextInput-root flex flex-col relative w-full  min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
+                <JsonFormatter
+                  json={JSON.stringify(parsedAbi)}
+                  tabWith={4}
+                  jsonStyle={{
+                    propertyStyle: { color: "rgb(59 130 246)" },
+                    stringStyle: { color: "rgb(16 185 129)" },
+                  }}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {isAbiParsed ? (
-        <div className="flex flex-row md:justify-end mt-4">
-          <Button
-            className="grow md:grow-0"
-            disabled={isLoading}
-            color="red"
-            icon={XMarkIcon}
-            onClick={() => {
-              setIsAbiParsed(false)
-              setParsedAbi(undefined)
-              setInputValues({ ...inputValues, userAbi: "" })
-              setArgInputs([])
-              setArgValues([])
-              setSelectedFunction("")
-            }}
-            variant="secondary"
-          >
-            {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-            <TailSpin
-              height={20}
-              width={20}
-              color={SPINNER_COLOR}
-              ariaLabel="tail-spin-loading"
-              radius="0"
-              wrapperStyle={{}}
-              wrapperClass=""
-              visible={isLoading}
-            />
-            {isLoading ? "" : "Clear ABI"}
-          </Button>
-        </div>
-      ) : (
-        <div className="flex flex-row md:justify-end mt-4">
-          <Button className="grow md:grow-0" disabled={isLoading} onClick={parseAbi} variant="secondary">
-            {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-            <TailSpin
-              height={20}
-              width={20}
-              color={SPINNER_COLOR}
-              ariaLabel="tail-spin-loading"
-              radius="0"
-              wrapperStyle={{}}
-              wrapperClass=""
-              visible={isLoading}
-            />
-            {isLoading ? "" : "Parse ABI"}
-          </Button>
-        </div>
-      )}
-
-      {isAbiParsed && (
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">
-          <div className="flex flex-col grow">
-            <Text>Function</Text>
-            <div className="flex flex-col mt-2">
-              <SearchSelect value={selectedFunction} onValueChange={setSelectedFunction}>
-                {parsedAbi
-                  .filter((item) => item.type === "function")
-                  .map((item, index) => {
-                    return <SearchSelectItem value={item.name}>{item.name}</SearchSelectItem>
-                  })}
-              </SearchSelect>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-6 mt-4">
+            <div className="flex flex-col grow">
+              <Text>ABI</Text>
+              <div className="tremor-TextInput-root flex flex-col mt-2 relative w-full items-center min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
+                <textarea
+                  value={inputValues.userAbi}
+                  onChange={(e) => {
+                    e.target.style.height = ""
+                    e.target.style.height = e.target.scrollHeight + "px"
+                    setInputValues({ ...inputValues, userAbi: e.target.value })
+                  }}
+                  // error={!!validationErrors?.userAbi}
+                  // errorMessage={validationErrors?.userAbi}
+                  placeholder="Copy and paste your ABI here"
+                  spellCheck={false}
+                  className="tremor-TextInput-input w-full focus:outline-none focus:ring-0 border-none bg-transparent text-tremor-default text-tremor-content-emphasis dark:text-dark-tremor-content-emphasis [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none pl-3 pr-4 py-2 placeholder:text-tremor-content dark:placeholder:text-dark-tremor-content resize-none"
+                ></textarea>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {isAbiParsed && selectedFunction && argInputs.length !== 0 && (
-        <div className="mt-8 flex flex-col">
-          <Title>Function Arguments</Title>
-          {argInputs}
-        </div>
-      )}
+        {isAbiParsed ? (
+          <div className="flex flex-row md:justify-end mt-4">
+            <Button
+              className="grow md:grow-0"
+              disabled={isLoading}
+              color="red"
+              icon={XMarkIcon}
+              onClick={() => {
+                setIsAbiParsed(false)
+                setParsedAbi(undefined)
+                setInputValues({ ...inputValues, userAbi: "" })
+                setArgInputs([])
+                setArgValues([])
+                setSelectedFunction("")
+              }}
+              variant="secondary"
+            >
+              {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+              <TailSpin
+                height={20}
+                width={20}
+                color={SPINNER_COLOR}
+                ariaLabel="tail-spin-loading"
+                radius="0"
+                wrapperStyle={{}}
+                wrapperClass=""
+                visible={isLoading}
+              />
+              {isLoading ? "" : "Clear ABI"}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-row md:justify-end mt-4">
+            <Button className="grow md:grow-0" disabled={isLoading} onClick={parseAbi} variant="secondary">
+              {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+              <TailSpin
+                height={20}
+                width={20}
+                color={SPINNER_COLOR}
+                ariaLabel="tail-spin-loading"
+                radius="0"
+                wrapperStyle={{}}
+                wrapperClass=""
+                visible={isLoading}
+              />
+              {isLoading ? "" : "Parse ABI"}
+            </Button>
+          </div>
+        )}
 
-      {isAbiParsed && (
-        <div className="flex flex-row md:justify-end mt-4">
-          <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
-            {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-            <TailSpin
-              height={20}
-              width={20}
-              color={SPINNER_COLOR}
-              ariaLabel="tail-spin-loading"
-              radius="0"
-              wrapperStyle={{}}
-              wrapperClass=""
-              visible={isLoading}
-            />
-            {isLoading ? "" : "Submit"}
-          </Button>
-        </div>
-      )}
-    </Card>
+        {isAbiParsed && (
+          <div className="flex flex-col lg:flex-row gap-6 mt-4">
+            <div className="flex flex-col grow">
+              <Text>Function</Text>
+              <div className="flex flex-col mt-2">
+                <SearchSelect value={selectedFunction} onValueChange={setSelectedFunction}>
+                  {parsedAbi
+                    .filter((item) => item.type === "function")
+                    .map((item, index) => {
+                      return <SearchSelectItem value={item.name}>{item.name}</SearchSelectItem>
+                    })}
+                </SearchSelect>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isAbiParsed && selectedFunction && argInputs.length !== 0 && (
+          <div className="mt-8 flex flex-col">
+            <Title>Function Arguments</Title>
+            {argInputs}
+          </div>
+        )}
+
+        {isAbiParsed && (
+          <div className="flex flex-row md:justify-end mt-4">
+            <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
+              {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+              <TailSpin
+                height={20}
+                width={20}
+                color={SPINNER_COLOR}
+                ariaLabel="tail-spin-loading"
+                radius="0"
+                wrapperStyle={{}}
+                wrapperClass=""
+                visible={isLoading}
+              />
+              {isLoading ? "" : "Submit"}
+            </Button>
+          </div>
+        )}
+      </Card>
+    </>
   )
 }
 
