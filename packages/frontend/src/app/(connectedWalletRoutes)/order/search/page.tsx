@@ -145,6 +145,7 @@ export default function SearchOrder() {
       <Title>Search results: {data?.length}</Title>
       <Text>You might find orders</Text>
       <SearchFiltersCard initialValue={initialState} onSubmit={handleFilterSubmit} />
+
       {/* Main section */}
       {/* {isLoading && (
         <div className="flex h-full items-center justify-center mt-4">
@@ -188,7 +189,7 @@ export default function SearchOrder() {
         data?.map((item: any, index) => (
           <OrderCard
             {...item}
-            className={index === 0 ? "mt-0" : "mt-4"}
+            className={index === 0 ? "mt-4" : "mt-4"}
             onFavorited={onOrderCardAction}
             key={`order-${item.id}`}
           />
