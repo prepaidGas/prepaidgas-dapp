@@ -42,9 +42,7 @@ export default function SearchFiltersCard({
     const isValidForm = validateSearchForm()
     if (!isValidForm) return
 
-    if (inputValues.manager === "") {
-      onSubmit({ ...inputValues })
-    }
+    onSubmit({ ...inputValues })
   }
 
   useEffect(() => {
