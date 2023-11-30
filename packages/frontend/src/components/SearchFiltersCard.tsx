@@ -38,11 +38,15 @@ export default function SearchFiltersCard({
     return true
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = (doDefaultSearch: boolean = false) => {
     const isValidForm = validateSearchForm()
     if (!isValidForm) return
 
-    onSubmit({ ...inputValues })
+    if (doDefaultSearch) {
+      onSubmit({ ...initialValue })
+    } else {
+      onSubmit({ ...inputValues })
+    }
   }
 
   useEffect(() => {
@@ -120,15 +124,10 @@ export default function SearchFiltersCard({
       <div>
         &nbsp;
         <div className="flex flex-col lg:flex-row lg:my-auto gap-2">
-          <Button className="h-[38px] m-0" onClick={handleSubmit} icon={FunnelIcon}>
+          <Button className="h-[38px] m-0" onClick={() => handleSubmit()} icon={FunnelIcon}>
             Apply
           </Button>
-          <Button
-            className="h-[38px] m-0"
-            variant="secondary"
-            onClick={() => setInputValues({ ...initialValue })}
-            icon={XMarkIcon}
-          >
+          <Button className="h-[38px] m-0" variant="secondary" onClick={() => handleSubmit(true)} icon={XMarkIcon}>
             Clear
           </Button>
         </div>
