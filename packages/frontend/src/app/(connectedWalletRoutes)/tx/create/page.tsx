@@ -671,54 +671,6 @@ export default function TransactionCreate() {
               />
             </div>
           </div>
-
-          <div className="flex flex-col grow">
-            <Text>Gas Limit</Text>
-            <div className="flex flex-col mt-2">
-              <NumberInput
-                value={inputValues.gasLimit.toString()}
-                onChange={(e) =>
-                  setInputValues({ ...inputValues, gasLimit: clampNumber(Number(e.target.value), 0, 100000) })
-                }
-                error={!!validationErrors?.gasLimit}
-                errorMessage={validationErrors?.gasLimit}
-                spellCheck={false}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* todo: remove orderID from page completely */}
-          {/* <div className="flex flex-col grow">
-          <Text>Order ID</Text>
-          <div className="flex flex-col mt-2">
-            <TextInput
-              value={inputValues.orderID}
-              onChange={(e) => setInputValues({ ...inputValues, orderID: e.target.value })}
-              error={!!validationErrors?.orderID}
-              errorMessage={validationErrors?.orderID}
-              spellCheck={false}
-            />
-          </div>
-        </div> */}
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">
-          <div className="flex flex-col grow">
-            <Text>Smart Contract Address</Text>
-            <div className="flex flex-col mt-2">
-              <TextInput
-                value={inputValues.smartContractAddress}
-                onChange={(e) => setInputValues({ ...inputValues, smartContractAddress: e.target.value })}
-                error={!!validationErrors?.smartContractAddress}
-                errorMessage={validationErrors?.smartContractAddress}
-                spellCheck={false}
-              />
-            </div>
-          </div>
-        </div>
-
         {isAbiParsed ? (
           <div className="flex flex-col lg:flex-row gap-6 mt-4">
             <div className="flex flex-col grow">
