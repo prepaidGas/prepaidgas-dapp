@@ -143,6 +143,7 @@ export default function SearchOrder() {
   return (
     <>
       <Title>Search results: {data?.length}</Title>
+      {/*TODO: fix spelling*/}
       <Text>You might find orders</Text>
       <SearchFiltersCard initialValue={initialState} onSubmit={handleFilterSubmit} />
 
