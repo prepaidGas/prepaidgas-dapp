@@ -70,6 +70,9 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
               <Link href="/tx/history">
                 <Button className="w-full">History</Button>
               </Link>
+              <Link href="/tx/requested">
+                <Button className="w-full">Requested</Button>
+              </Link>
             </AccordionBody>
           </Accordion>
         </div>
@@ -106,6 +109,9 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
                 </Link>
                 <Link href="/tx/history">
                   <Button className="w-full">History</Button>
+                </Link>
+                <Link href="/tx/requested">
+                  <Button className="w-full">Requested</Button>
                 </Link>
               </AccordionBody>
             </Accordion>
