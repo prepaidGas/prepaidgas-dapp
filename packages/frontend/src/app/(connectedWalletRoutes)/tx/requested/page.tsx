@@ -83,20 +83,38 @@ export default function RequestedTxPage() {
   }
 
   const getFilteredEntries = (entries: RequestedTx[], filterOptions: FilterOptionsRequestedTx, page: number) => {
-    let filteredTransactions = JSON.parse(JSON.stringify(entries))
+    let filteredTransactions: RequestedTx[] = JSON.parse(JSON.stringify(entries))
+
+    console.log("getFilteredEntries FilterOptions: ", filterOptions)
 
     const filter = { nonce: Number(filterOptions.nonce), status: filterOptions.status }
 
-    if (filterOptions.nonce !== "" || filterOptions.status !== 2) {
-      filteredTransactions = filteredTransactions.filter(function (item) {
-        for (let key in filter) {
-          if (item[key] === undefined || item[key] != filter[key]) return false
-        }
-        return true
-      })
+    // if (filterOptions.nonce !== "" || filterOptions.status !== 2) {
+    //   filteredTransactions = filteredTransactions.filter(function (item) {
+    //     for (let key in filter) {
+    //       if (item[key] === undefined || item[key] != filter[key]) return false
+    //     }
+    //     return true
+    //   })
+    // }
+
+    if (filterOptions.nonce !== "") {
+      filteredTransactions = filteredTransactions.filter((item) => item.nonce === filter.nonce)
     }
+
+    if (filterOptions.status !== 2) {
+      filteredTransactions = filteredTransactions.filter((item) => item.status === filter.status)
+    }
+
     const rangeMin = (page - 1) * filterOptions.numberOfEntries
     const rangeMax = rangeMin + filterOptions.numberOfEntries
+
+    if (filteredTransactions.length === 0) {
+      setShowError(true)
+    } else {
+      setShowError(false)
+    }
+    setIsLoading(false)
     setRange({ rangeMin, rangeMax })
     setTotalEntries(filteredTransactions.length)
     setTxEntriesFiltered(filteredTransactions)
