@@ -8,8 +8,9 @@ import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX } from "../constants/regexConstants"
 import { ICON_BY_STATUS } from "../constants/themeConstants"
 
 const schema = z.object({
-  nonce: z.string(),
   status: z.number(),
+  from: z.string(),
+  to: z.string(),
   numberOfEntries: z.number(),
 })
 export type FilterOptionsRequestedTx = z.infer<typeof schema>
@@ -43,6 +44,7 @@ export default function RequestedTxSearchFiltersCard({
     if (!isValidForm) return
 
     if (doDefaultSearch) {
+      setInputValues({ ...initialValue })
       onSubmit({ ...initialValue })
     } else {
       onSubmit({ ...inputValues })
@@ -63,15 +65,26 @@ export default function RequestedTxSearchFiltersCard({
 
   return (
     <Card className="mt-6 flex flex-col gap-3 lg:gap-4 lg:flex-row align-middle justify-center ">
+      {/* @todo Replace with a more sophisticated component, with error handling and input validation, or ens */}
       <div className="flex flex-col grow align-middle">
-        Nonce
-        {/* @todo Replace with a more sophisticated component, with error handling and input validation, or ens */}
+        From
         <NumberInput
-          onChange={(e) => setInputValues({ ...inputValues, nonce: e.target.value })}
-          value={inputValues.nonce}
-          error={!!validationErrors?.nonce}
-          errorMessage={validationErrors?.nonce[0]}
-          placeholder="Enter a single number or you can specify a range e.g. [10-20]"
+          onChange={(e) => setInputValues({ ...inputValues, from: e.target.value })}
+          value={inputValues.from}
+          error={!!validationErrors?.from}
+          errorMessage={validationErrors?.from[0]}
+          placeholder=""
+          spellCheck={false}
+        />
+      </div>
+      <div className="flex flex-col grow align-middle">
+        To
+        <NumberInput
+          onChange={(e) => setInputValues({ ...inputValues, to: e.target.value })}
+          value={inputValues.to}
+          error={!!validationErrors?.to}
+          errorMessage={validationErrors?.to[0]}
+          placeholder=""
           spellCheck={false}
         />
       </div>

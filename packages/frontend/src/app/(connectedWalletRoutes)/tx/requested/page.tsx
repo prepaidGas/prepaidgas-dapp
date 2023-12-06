@@ -27,7 +27,8 @@ export default function RequestedTxPage() {
   const { address, isConnecting, isDisconnected } = useAccount()
 
   const initialState: FilterOptionsRequestedTx = {
-    nonce: "",
+    from: "",
+    to: "",
     status: 2,
     numberOfEntries: 50,
   }
@@ -87,8 +88,6 @@ export default function RequestedTxPage() {
 
     console.log("getFilteredEntries FilterOptions: ", filterOptions)
 
-    const filter = { nonce: Number(filterOptions.nonce), status: filterOptions.status }
-
     // if (filterOptions.nonce !== "" || filterOptions.status !== 2) {
     //   filteredTransactions = filteredTransactions.filter(function (item) {
     //     for (let key in filter) {
@@ -98,13 +97,26 @@ export default function RequestedTxPage() {
     //   })
     // }
 
-    if (filterOptions.nonce !== "") {
-      filteredTransactions = filteredTransactions.filter((item) => item.nonce === filter.nonce)
-    }
+    // if (filterOptions.from !== "" && filterOptions.to !== "") {
+    //   console.log("to and from")
+    //   filteredTransactions = filteredTransactions.filter((item) => item.nonce >= filter.from && item.nonce <= filter.to)
+    // } else if (filterOptions.from !== "") {
+    //   console.log("from")
+    //   filteredTransactions = filteredTransactions.filter((item) => item.nonce >= filter.from)
+    // } else if (filterOptions.to !== "") {
+    //   console.log("to")
+    //   filteredTransactions = filteredTransactions.filter((item) => item.nonce <= filter.to)
+    // }
 
-    if (filterOptions.status !== 2) {
-      filteredTransactions = filteredTransactions.filter((item) => item.status === filter.status)
-    }
+    filteredTransactions = filteredTransactions.filter((item) => {
+      const bool =
+        item.nonce >= (filterOptions.from !== "" ? Number(filterOptions.from) : 0) &&
+        item.nonce <= (filterOptions.to !== "" ? Number(filterOptions.to) : filteredTransactions.length)
+
+      console.log("Item: ", item)
+      console.log("Bool: ", bool)
+      return bool
+    })
 
     const rangeMin = (page - 1) * filterOptions.numberOfEntries
     const rangeMax = rangeMin + filterOptions.numberOfEntries
@@ -114,6 +126,7 @@ export default function RequestedTxPage() {
     } else {
       setShowError(false)
     }
+
     setIsLoading(false)
     setRange({ rangeMin, rangeMax })
     setTotalEntries(filteredTransactions.length)
