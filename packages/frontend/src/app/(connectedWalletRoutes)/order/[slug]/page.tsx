@@ -5,7 +5,7 @@ import { readContract, writeContract, waitForTransaction } from "@wagmi/core"
 import { useEffect, useState } from "react"
 import format from "date-fns/format"
 
-import { Title, Text, Card, Metric, Flex, ProgressBar, Icon, Button } from "@tremor/react"
+import { Title, Text, Card, Metric, Flex, ProgressBar, Icon, Button, NumberInput, TextInput } from "@tremor/react"
 import { GasOrderABI } from "helpers/abi"
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 import { useAccount } from "wagmi"
@@ -13,6 +13,7 @@ import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
 import StatusBadge from "../../../../components/StatusBadge"
 import { COLOR_BY_STATUS, SPINNER_COLOR, STATUS } from "../../../../constants/themeConstants"
 import { TailSpin } from "react-loader-spinner"
+import DialogWindow from "../../../../components/DialogWindow"
 
 export default function Page({ params }: { params: { slug: string } }) {
   const [isLoading, setIsLoading] = useState(true)
@@ -20,11 +21,22 @@ export default function Page({ params }: { params: { slug: string } }) {
   const { address, isConnecting, isDisconnected } = useAccount()
   const [isError, setIsError] = useState(false)
 
+  const [showWindowRetrieveGas, setShowWindowRetrieveGas] = useState(false)
+  const [gasAmountHasChanged, setGasAmountHasChanged] = useState(false)
+  const [userBalance, setUserBalance] = useState<Number>(0)
+  const [specifiedBalance, setSpecifiedBalance] = useState<Number>(0)
+  const [transactionDetailsRetrieveGas, setTransactionDetailsRetrieveGas] = useState<null | any>(null)
+
+  const [showWindowChangeManager, setShowWindowChangeManager] = useState(false)
+  const [specifiedManager, setSpecifiedManager] = useState("")
+  const [transactionDetailsChangeManager, setTransactionDetailsChangeManager] = useState<null | any>(null)
+
   const isRevocable =
     orderData?.order?.manager === address &&
     (Number(orderData.status) === STATUS.Pending || Number(orderData.status) === STATUS.Untaken)
 
   const fetchOrderData = async () => {
+    setIsLoading(true)
     try {
       const data = await readContract({
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
@@ -35,6 +47,22 @@ export default function Page({ params }: { params: { slug: string } }) {
       console.log("getOrdersByIds DATA", data)
       setOrderData(data[0] as FilteredOrderStructOutput)
       setIsLoading(false)
+    } catch (e) {
+      console.log("getOrdersByIds ERROR: ", e)
+      setIsLoading(false)
+      setIsError(true)
+      return
+    }
+
+    try {
+      const data = await readContract({
+        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        abi: GasOrderABI,
+        functionName: "balanceAvailable",
+        args: [address, params.slug],
+      })
+      console.log("BalanceAvailable: ", data)
+      setUserBalance(Number(data))
     } catch (e) {
       console.log("getOrdersByIds ERROR: ", e)
       setIsError(true)
@@ -79,19 +107,44 @@ export default function Page({ params }: { params: { slug: string } }) {
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
         functionName: "retrieveGasCost",
-        args: [address, params.slug, orderData.gasCost.gasPrice],
+        args: [address, params.slug, gasAmountHasChanged ? specifiedBalance : userBalance],
       })
       console.log("SingleOrderPage Retrieve Gas DATA", data)
       const txData = await waitForTransaction({ hash: data.hash })
+      setTransactionDetailsRetrieveGas({ ...txData })
       console.log("SingleOrderPageTXData: ", txData)
     } catch (e) {
+      setTransactionDetailsRetrieveGas({ error: e })
       console.log("SingleOrderPage Retrieve Gas ERROR", e)
+    }
+  }
+
+  const transferOrderManagement = async () => {
+    try {
+      const data = await writeContract({
+        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        abi: GasOrderABI,
+        functionName: "transferOrderManagement",
+        args: [params.slug, specifiedManager],
+      })
+      console.log("SingleOrderPage Change Manager DATA", data)
+      const txData = await waitForTransaction({ hash: data.hash })
+      setTransactionDetailsChangeManager({ ...txData })
+      console.log("SingleOrderPageTXData: ", txData)
+    } catch (e) {
+      setTransactionDetailsChangeManager({ error: e })
+      console.log("SingleOrderPage Change Manager ERROR", e)
     }
   }
 
   useEffect(() => {
     fetchOrderData()
-  }, [])
+  }, [transactionDetailsRetrieveGas, transactionDetailsChangeManager])
+
+  useEffect(() => {
+    console.log("UseEffect TXDetails: ", transactionDetailsRetrieveGas)
+    console.log("UseEffect TXDetails bool: ", Boolean(transactionDetailsRetrieveGas))
+  }, [transactionDetailsRetrieveGas])
 
   return (
     <>
@@ -111,6 +164,150 @@ export default function Page({ params }: { params: { slug: string } }) {
       )}
       {orderData && !isLoading && (
         <>
+          {/*Retrieve Gas Dialog Window START*/}
+          {showWindowRetrieveGas &&
+            (Boolean(transactionDetailsRetrieveGas) ? (
+              <DialogWindow
+                onClose={() => {
+                  setShowWindowRetrieveGas(false)
+                  setTransactionDetailsRetrieveGas(null)
+                }}
+                isClosable={true}
+                title="Transaction Result"
+                description={
+                  transactionDetailsRetrieveGas.error ? (
+                    "There seems to be an error with your request :("
+                  ) : (
+                    <div className="flex flex-col break-words gap-4">
+                      From
+                      <Text>{transactionDetailsRetrieveGas.from}</Text>
+                      To
+                      <Text>{transactionDetailsRetrieveGas.to}</Text>
+                      Transaction Hash
+                      <Text>{transactionDetailsRetrieveGas.transactionHash}</Text>
+                      Status
+                      <Text>{transactionDetailsRetrieveGas.status}</Text>
+                    </div>
+                  )
+                }
+              ></DialogWindow>
+            ) : (
+              <DialogWindow
+                onClose={() => {
+                  setShowWindowRetrieveGas(false)
+                  setTransactionDetailsRetrieveGas(null)
+                  setGasAmountHasChanged(false)
+                }}
+                isClosable={true}
+                title="Retrieve Gas"
+                description={
+                  <div className="flex flex-col">
+                    <Text>Specify the amount of Gas you want to retrieve: </Text>
+                    <div className="flex flex-col mt-4">
+                      <NumberInput
+                        value={!gasAmountHasChanged ? userBalance.toString() : specifiedBalance.toString()}
+                        onChange={(e) => {
+                          setGasAmountHasChanged(true)
+                          setSpecifiedBalance(Number(e.target.value))
+                        }}
+                        // error={!!validationErrors?.to}
+                        // errorMessage={validationErrors?.to}
+                        spellCheck={false}
+                      ></NumberInput>
+                    </div>
+                    <Text className="mt-4">{`(Max amount available for retrieving: ${userBalance})`}</Text>
+                  </div>
+                }
+                actionButtons={[
+                  <Button variant="primary" onClick={retrieveGasCost}>
+                    Retrieve
+                  </Button>,
+                  <Button
+                    variant="secondary"
+                    color="red"
+                    onClick={() => {
+                      setShowWindowRetrieveGas(false)
+                      setTransactionDetailsRetrieveGas(null)
+                      setGasAmountHasChanged(false)
+                    }}
+                  >
+                    Cancel
+                  </Button>,
+                ]}
+              ></DialogWindow>
+            ))}
+          {/*Retrieve Gas Dialog Window End*/}
+          {/*Change Manager Dialog Window START*/}
+          {showWindowChangeManager &&
+            (Boolean(transactionDetailsChangeManager) ? (
+              <DialogWindow
+                onClose={() => {
+                  setShowWindowChangeManager(false)
+                  setTransactionDetailsChangeManager(null)
+                }}
+                isClosable={true}
+                title="Transaction Result"
+                description={
+                  transactionDetailsChangeManager.error ? (
+                    "There seems to be an error with your request :("
+                  ) : (
+                    <div className="flex flex-col break-words gap-4">
+                      From
+                      <Text>{transactionDetailsChangeManager.from}</Text>
+                      To
+                      <Text>{transactionDetailsChangeManager.to}</Text>
+                      Transaction Hash
+                      <Text>{transactionDetailsChangeManager.transactionHash}</Text>
+                      Status
+                      <Text>{transactionDetailsChangeManager.status}</Text>
+                    </div>
+                  )
+                }
+              ></DialogWindow>
+            ) : (
+              <DialogWindow
+                onClose={() => {
+                  setShowWindowChangeManager(false)
+                  setTransactionDetailsChangeManager(null)
+                }}
+                isClosable={true}
+                title="Transfer Order Management"
+                description={
+                  <div className="flex flex-col">
+                    <Text>Specify the address of a new order manager: </Text>
+                    <div className="flex flex-col mt-4">
+                      <TextInput
+                        value={specifiedManager}
+                        onChange={(e) => {
+                          setSpecifiedManager(e.target.value)
+                        }}
+                        // error={!!validationErrors?.to}
+                        // errorMessage={validationErrors?.to}
+                        spellCheck={false}
+                      ></TextInput>
+                    </div>
+                  </div>
+                }
+                actionButtons={[
+                  <Button variant="primary" onClick={transferOrderManagement}>
+                    Submit
+                  </Button>,
+                  <Button
+                    variant="secondary"
+                    color="red"
+                    onClick={() => {
+                      {
+                        setShowWindowChangeManager(false)
+                        setTransactionDetailsChangeManager(null)
+                      }
+                    }}
+                  >
+                    Cancel
+                  </Button>,
+                ]}
+              ></DialogWindow>
+            ))}
+          {/*Change Manager Dialog Window END*/}
           <Title>Order number: {params.slug}</Title>
           <Card className="mt-3" decoration="top" decorationColor={COLOR_BY_STATUS[Number(orderData.status)]}>
             <StatusBadge status={Number(orderData.status)} />
@@ -142,10 +339,17 @@ export default function Page({ params }: { params: { slug: string } }) {
               {Number(orderData.status) === STATUS.Inactive && (
                 <Button onClick={retrieveGuarantee}>Retrieve Guarantee</Button>
               )}
-              {Number(orderData.gasBalance) > 0 && <Button onClick={retrieveGasCost}>Retrieve Gas</Button>}
-              <Button onClick={revokeOrder}>Revoke</Button>
-              <Button onClick={retrieveGuarantee}>Retrieve Guarantee</Button>
-              <Button onClick={retrieveGasCost}>Retrieve Gas</Button>
+              {Number(orderData.gasBalance) > 0 && (
+                <Button onClick={() => setShowWindowRetrieveGas(true)}>Retrieve Gas</Button>
+              )}
+              {orderData.order.manager === address && (
+                <Button onClick={() => setShowWindowChangeManager(true)}>Change Manager</Button>
+              )}
+              {/*TODO: Remove test buttons*/}
+              <Button onClick={revokeOrder}>TEST Revoke</Button>
+              <Button onClick={retrieveGuarantee}>TEST Retrieve Guarantee</Button>
+              <Button onClick={() => setShowWindowRetrieveGas(true)}>TEST Retrieve Gas</Button>
+              <Button onClick={() => setShowWindowChangeManager(true)}>TEST Change Manager</Button>
             </div>
           </Card>
         </>

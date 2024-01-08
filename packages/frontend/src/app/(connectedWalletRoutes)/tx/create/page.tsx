@@ -1,12 +1,15 @@
 "use client"
 import { useEffect, useState } from "react"
 import { z } from "zod"
-import { readContract, writeContract, waitForTransaction } from "@wagmi/core"
-import { ABIEntry, FieldEntry } from "helpers/abi"
+import { readContract, writeContract, waitForTransaction, signTypedData } from "@wagmi/core"
+
+import { ABIEntry, FieldEntry, GasOrderABI } from "helpers/abi"
+import { parse, getHours, getMinutes, getSeconds } from "date-fns"
 
 import {
   Button,
   Card,
+  DatePicker,
   NumberInput,
   SearchSelect,
   SearchSelectItem,
@@ -20,17 +23,34 @@ import {
 
 import { SPINNER_COLOR } from "../../../../constants/themeConstants"
 import { TailSpin } from "react-loader-spinner"
-import { CheckIcon, NoSymbolIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { CheckIcon, ClockIcon, NoSymbolIcon, WalletIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import JsonFormatter from "react-json-formatter"
+import { CHAIN_ID, PROJECT_NAME, PROJECT_VERSION } from "constants/executor"
+import { ethers } from "ethers"
+import DialogWindow from "../../../../components/DialogWindow"
 
-const schema = z.object({
-  orderID: z.string(),
+const formSchema = z.object({
+  from: z.string().min(1),
+  nonce: z.number(),
+  gasOrder: z.number(),
+  onBehalf: z.string(),
+  deadlineDate: z.date(),
+  deadlineTime: z.string().min(1),
+  to: z.string().min(1),
+  gas: z.number(),
+  data: z.string().min(1),
   gasLimit: z.number(),
-  smartContractAddress: z.string(),
+  smartContractAddress: z.string().min(1),
   userAbi: z.string(),
 })
 
-type TransactionFormState = z.infer<typeof schema>
+const signedScheme = z.object({
+  signedMsg: z.string(),
+  data: z.string(),
+})
+
+type TransactionFormState = z.infer<typeof formSchema>
+type SignedMsgAndDataState = z.infer<typeof signedScheme>
 
 export default function TransactionCreate() {
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
@@ -39,16 +59,64 @@ export default function TransactionCreate() {
   const [isAbiParsed, setIsAbiParsed] = useState(false)
   const [validationErrors, setValidationErrors] = useState<null | { [key: string]: string }>(null)
   const [parsedAbi, setParsedAbi] = useState<ABIEntry[] | undefined>()
+  //todo decide on whether to use dialogWindow
+  const [showDialogWindow, setShowDialogWindow] = useState(false)
+  const [transactionDetails, setTransactionDetails] = useState<null | any>(null)
+
+  // const initialState: TransactionFormState = {
+  //   from: "",
+  //   nonce: 0,
+  //   gasOrder: 0,
+  //   onBehalf: "",
+  //   deadlineDate: null,
+  //   deadlineTime: null,
+  //   to: "",
+  //   gas: 0,
+  //   data: "",
+  //   //orderID: "",
+  //   gasLimit: 0,
+  //   smartContractAddress: "",
+  //   userAbi: testABIstring,
+  // }
+
+  /*
+    const message = {
+      //@todo get address automatically
+      from: "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+      nonce: 0,
+      gasOrder: 0,
+      onBehalf: "0x00222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+      deadline: 0,
+      to: "0xfb071837728455c581f370704b225ac9eabdfa4a",
+      gas: 0,
+      data: "0x",
+    }
+    */
 
   const initialState: TransactionFormState = {
-    orderID: "",
+    from: "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+    nonce: 0,
+    gasOrder: 0,
+    onBehalf: "0x00222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+    deadlineDate: null,
+    deadlineTime: "00:00:00",
+    to: "0xfb071837728455c581f370704b225ac9eabdfa4a",
+    gas: 0,
+    data: "0x",
     gasLimit: 0,
     smartContractAddress: "",
     userAbi: testABIstring,
   }
 
+  const signedInitialState: SignedMsgAndDataState = {
+    signedMsg: "",
+    data: "0x",
+  }
+
   //Input values
   const [inputValues, setInputValues] = useState<TransactionFormState>({ ...initialState })
+  const [signedInputValues, setSignedInputValues] = useState<SignedMsgAndDataState>({ ...signedInitialState })
+
   const [selectedFunction, setSelectedFunction] = useState<string>("")
   const [argInputs, setArgInputs] = useState<any>([])
   const [argValues, setArgValues] = useState<any>([])
@@ -85,64 +153,30 @@ export default function TransactionCreate() {
     }
   }
 
-  // const resolveComponent = (comp: FieldEntry) => {
-  //   console.log("Comp: ", comp)
+  const parseTime = (timeString: string) => {
+    const parsedTime = parse(timeString, "HH:mm:ss", new Date())
+    const hours = getHours(parsedTime)
+    const minutes = getMinutes(parsedTime)
+    const seconds = getSeconds(parsedTime)
+    return [hours, minutes, seconds]
+  }
 
-  //   if (comp.components) {
-  //     return (
-  //       <div className="flex flex-col mt-4 ml-4">
-  //         <Title>{comp.name}</Title>
-  //         <div className="ml-4">{comp.components.map(resolveComponent)}</div>
-  //       </div>
-  //     )
-  //   }
+  const combineDateAndTime = (date: Date, time: string) => {
+    const hoursMinutesSeconds = parseTime(time)
+    const combinedDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      hoursMinutesSeconds[0],
+      hoursMinutesSeconds[1],
+      hoursMinutesSeconds[2],
+    )
+    return combinedDate
+  }
 
-  //   switch (comp.type) {
-  //     case "string":
-  //     case "address":
-  //       return (
-  //         <div className="flex flex-col">
-  //           <Text className="mt-4">{comp.name}</Text>
-  //           <TextInput
-  //             onChange={(e) => setArgValues((prevState) => ({ ...prevState, [comp.name]: e.target.value }))}
-  //           ></TextInput>
-  //         </div>
-  //       )
-  //     case "uint256":
-  //       return (
-  //         <div className="flex flex-col">
-  //           <Text className="mt-4">{comp.name}</Text>
-  //           <NumberInput
-  //             onChange={(e) => setArgValues((prevState) => ({ ...prevState, [comp.name]: Number(e.target.value) }))}
-  //           ></NumberInput>
-  //         </div>
-  //       )
-  //     case "bool":
-  //       return (
-  //         <div className="flex flex-col">
-  //           <Text className="mt-4">{comp.name}</Text>
-  //           <Select
-  //             className="min-w-[8rem]"
-  //             onValueChange={(value) => setArgValues({ ...argValues, [comp.name]: Boolean(value) })}
-  //           >
-  //             <SelectItem icon={NoSymbolIcon} value="false">
-  //               No
-  //             </SelectItem>
-  //             <SelectItem icon={CheckIcon} value="true">
-  //               Yes
-  //             </SelectItem>
-  //           </Select>
-  //         </div>
-  //       )
-  //     default:
-  //       return (
-  //         <div className="flex flex-col">
-  //           <Text className="mt-4">{comp.name}</Text>
-  //           <TextInput onChange={(e) => setArgValues({ ...argValues, [comp.name]: e.target.value })}></TextInput>
-  //         </div>
-  //       )
-  //   }
-  // }
+  const getUnixTimestampInSeconds = (date: Date) => {
+    return Math.floor(date.getTime() / 1000)
+  }
 
   const resolveComponent = (comp: FieldEntry, index: number, isNested: boolean = false) => {
     console.log("Comp: ", comp)
@@ -299,7 +333,7 @@ export default function TransactionCreate() {
   const validateSearchForm = () => {
     setValidationErrors(null)
 
-    const result = schema.safeParse(inputValues)
+    const result = formSchema.safeParse(inputValues)
     if (result.success === false) {
       const formatedErrors = Object.entries(result.error.flatten().fieldErrors).reduce((acc, curr) => {
         const [error, errorTexts] = curr
@@ -316,26 +350,153 @@ export default function TransactionCreate() {
     setIsValidating(true)
 
     if (validateSearchForm()) {
-      executeFunction()
+      //executeFunction()
+      signMessage()
     } else {
       console.log("Form has errors. Please fix them before submitting.")
     }
   }
 
   const executeFunction = async () => {
+    // try {
+    //   const data = await writeContract({
+    //     address: inputValues.smartContractAddress,
+    //     abi: JSON.parse(inputValues.userAbi),
+    //     functionName: selectedFunction,
+    //     args: argValues,
+    //   })
+    //   console.log("TransactionData: ", data)
+    //   const txData = await waitForTransaction({ hash: data.hash })
+    //   console.log("TransactionTXData: ", txData)
+    // } catch (e) {
+    //   console.log("TransactionError: ", e)
+    // }
+  }
+
+  const signMessage = async () => {
     try {
-      const data = await writeContract({
-        address: inputValues.smartContractAddress,
-        abi: JSON.parse(inputValues.userAbi),
-        functionName: selectedFunction,
-        args: argValues,
+      const balance = await readContract({
+        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        abi: GasOrderABI,
+        functionName: "balanceOf",
+        args: ["0x15d34aaf54267db7d7c367839aaf71a00a2c6a65", inputValues.gasOrder],
       })
-      console.log("TransactionData: ", data)
-      const txData = await waitForTransaction({ hash: data.hash })
-      console.log("TransactionTXData: ", txData)
+      console.log("balance: ", balance)
     } catch (e) {
-      console.log("TransactionError: ", e)
+      console.log("ERROR: ", e)
     }
+
+    const domain = {
+      name: PROJECT_NAME,
+      version: PROJECT_VERSION,
+      chainId: CHAIN_ID,
+      verifyingContract: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    }
+
+    const types = {
+      Message: [
+        { name: "from", type: "address" },
+        { name: "nonce", type: "uint256" },
+        { name: "gasOrder", type: "uint256" },
+        { name: "onBehalf", type: "address" },
+        { name: "deadline", type: "uint256" },
+        { name: "to", type: "address" },
+        { name: "gas", type: "uint256" },
+        { name: "data", type: "bytes" },
+      ],
+    }
+
+    /*
+    const message = {
+      //@todo get address automatically
+      from: "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+      nonce: 0,
+      gasOrder: 0,
+      onBehalf: "0x00222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+      deadline: 0,
+      to: "0xfb071837728455c581f370704b225ac9eabdfa4a",
+      gas: 0,
+      data: "0x",
+    }
+    */
+
+    try {
+      let contractInterface = new ethers.Interface(testABIstring)
+
+      const encodedData = contractInterface.encodeFunctionData(selectedFunction, argValues)
+
+      console.log("EncodedData: ", encodedData)
+
+      const message = {
+        from: inputValues.from,
+        nonce: inputValues.nonce,
+        gasOrder: inputValues.gasOrder,
+        onBehalf: inputValues.onBehalf,
+        deadline: getUnixTimestampInSeconds(combineDateAndTime(inputValues.deadlineDate, inputValues.deadlineTime)),
+        to: inputValues.to,
+        gas: inputValues.gas,
+        data: encodedData,
+      }
+
+      const messageTuple = [
+        message.from,
+        message.nonce,
+        message.gasOrder,
+        message.onBehalf,
+        message.deadline,
+        message.to,
+        message.gas,
+        message.data,
+      ]
+
+      //todo check typescript
+      // @ts-ignore
+      const signature = await signTypedData({
+        domain,
+        message,
+        primaryType: "Message",
+        types,
+      })
+      console.log("signature: ", signature)
+
+      const messageHash = await readContract({
+        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        abi: GasOrderABI,
+        functionName: "messageHash",
+        args: [messageTuple],
+      })
+      console.log("Data: ", messageHash)
+
+      const data = await writeContract({
+        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        abi: GasOrderABI,
+        functionName: "addTransaction",
+        args: [message, signature],
+      })
+      console.log("addTransactionData: ", data)
+      const txData = await waitForTransaction({ hash: data.hash })
+      console.log("waitForTxData: ", txData)
+      setTransactionDetails({ ...txData })
+    } catch (e) {
+      console.log("ERROR: ", e)
+      setTransactionDetails({ error: e })
+    }
+
+    setShowDialogWindow(true)
+
+    // try {
+    //   const data = await readContract({
+    //     address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    //     abi: GasOrderABI,
+    //     functionName: "messageHash",
+    //     args: [messageTuple],
+    //   })
+    //   console.log("Data: ", data)
+    //   const result = ethers.recoverAddress(data as BytesLike, signature as SignatureLike)
+    //   console.log("RecoverAddres: ", result)
+    // } catch (e) {
+    //   console.log("ERROR: ", e)
+    // }
   }
 
   useEffect(() => {
@@ -351,184 +512,298 @@ export default function TransactionCreate() {
   }, [inputValues])
 
   return (
-    <Card className="mt-6 flex flex-col w-full">
-      {/* Gas Amount and Date & Time Settings */}
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="flex flex-col grow">
-          <Text>Order ID</Text>
-          <div className="flex flex-col mt-2">
-            <TextInput
-              value={inputValues.orderID}
-              onChange={(e) => setInputValues({ ...inputValues, orderID: e.target.value })}
-              error={!!validationErrors?.orderID}
-              errorMessage={validationErrors?.orderID}
-              spellCheck={false}
-            />
+    <>
+      {showDialogWindow ? (
+        Boolean(transactionDetails) ? (
+          <DialogWindow
+            onClose={() => {
+              setShowDialogWindow(false)
+              setTransactionDetails(null)
+            }}
+            isClosable={true}
+            title="Transaction Result"
+            description={
+              transactionDetails.error ? (
+                "There seems to be an error :("
+              ) : (
+                <div className="flex flex-col break-words gap-4">
+                  From
+                  <Text>{transactionDetails.from}</Text>
+                  To
+                  <Text>{transactionDetails.to}</Text>
+                  Transaction Hash
+                  <Text>{transactionDetails.transactionHash}</Text>
+                  Status
+                  <Text>{transactionDetails.status}</Text>
+                </div>
+              )
+            }
+          ></DialogWindow>
+        ) : (
+          <DialogWindow
+            isClosable={false}
+            title="Creating Transaction"
+            description={
+              <div className="flex justify-center">
+                <TailSpin
+                  height={40}
+                  width={40}
+                  color={SPINNER_COLOR}
+                  ariaLabel="tail-spin-loading"
+                  radius="0"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                  visible={true}
+                />
+              </div>
+            }
+          ></DialogWindow>
+        )
+      ) : null}
+      <Card className="mt-6 flex flex-col w-full">
+        {/* Gas Amount and Date & Time Settings */}
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col">
+            <Text>From</Text>
+            <div className="flex flex-col mt-2">
+              <TextInput
+                icon={WalletIcon}
+                value={inputValues.from}
+                onChange={(e) => setInputValues({ ...inputValues, from: e.target.value })}
+                placeholder={inputValues.from}
+                error={!!validationErrors?.from}
+                errorMessage={validationErrors?.from}
+                spellCheck={false}
+              ></TextInput>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col grow">
-          <Text>Gas Limit</Text>
-          <div className="flex flex-col mt-2">
-            <NumberInput
-              value={inputValues.gasLimit.toString()}
-              onChange={(e) =>
-                setInputValues({ ...inputValues, gasLimit: clampNumber(Number(e.target.value), 0, 100000) })
-              }
-              error={!!validationErrors?.gasLimit}
-              errorMessage={validationErrors?.gasLimit}
-              spellCheck={false}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-6 mt-4">
-        <div className="flex flex-col grow">
-          <Text>Smart Contract Address</Text>
-          <div className="flex flex-col mt-2">
-            <TextInput
-              value={inputValues.smartContractAddress}
-              onChange={(e) => setInputValues({ ...inputValues, smartContractAddress: e.target.value })}
-              error={!!validationErrors?.smartContractAddress}
-              errorMessage={validationErrors?.smartContractAddress}
-              spellCheck={false}
-            />
-          </div>
-        </div>
-      </div>
-
-      {isAbiParsed ? (
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">
-          <div className="flex flex-col grow">
-            <Text>Functions parsed from provided ABI</Text>
-            <div className="max-h-[30rem] overflow-auto mt-2 tremor-TextInput-root flex flex-col relative w-full  min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
-              <JsonFormatter
-                json={JSON.stringify(parsedAbi)}
-                tabWith={4}
-                jsonStyle={{
-                  propertyStyle: { color: "rgb(59 130 246)" },
-                  stringStyle: { color: "rgb(16 185 129)" },
-                }}
+          <div className="flex flex-col">
+            <Text>Nonce</Text>
+            <div className="flex flex-row mt-2">
+              <NumberInput
+                value={inputValues.nonce.toString()}
+                onChange={(e) =>
+                  setInputValues({ ...inputValues, nonce: clampNumber(Number(e.target.value), 0, 100000) })
+                }
+                error={!!validationErrors?.nonce}
+                errorMessage={validationErrors?.nonce}
+                spellCheck={false}
               />
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">
-          <div className="flex flex-col grow">
-            <Text>ABI</Text>
-            <div className="tremor-TextInput-root flex flex-col mt-2 relative w-full items-center min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
-              <textarea
-                value={inputValues.userAbi}
-                onChange={(e) => {
-                  e.target.style.height = ""
-                  e.target.style.height = e.target.scrollHeight + "px"
-                  setInputValues({ ...inputValues, userAbi: e.target.value })
-                }}
-                // error={!!validationErrors?.userAbi}
-                // errorMessage={validationErrors?.userAbi}
-                placeholder="Copy and paste your ABI here"
+          <div className="flex flex-col">
+            <Text>Gas Order</Text>
+            <div className="flex flex-row">
+              <NumberInput
+                className="mt-2"
+                value={inputValues.gasOrder.toString()}
+                onChange={(e) =>
+                  setInputValues({ ...inputValues, gasOrder: clampNumber(Number(e.target.value), 0, 100000) })
+                }
+                error={!!validationErrors?.gasOrder}
+                errorMessage={validationErrors?.gasOrder}
                 spellCheck={false}
-                className="tremor-TextInput-input w-full focus:outline-none focus:ring-0 border-none bg-transparent text-tremor-default text-tremor-content-emphasis dark:text-dark-tremor-content-emphasis [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none pl-3 pr-4 py-2 placeholder:text-tremor-content dark:placeholder:text-dark-tremor-content resize-none"
-              ></textarea>
+              />
             </div>
           </div>
-        </div>
-      )}
 
-      {isAbiParsed ? (
-        <div className="flex flex-row md:justify-end mt-4">
-          <Button
-            className="grow md:grow-0"
-            disabled={isLoading}
-            color="red"
-            icon={XMarkIcon}
-            onClick={() => {
-              setIsAbiParsed(false)
-              setParsedAbi(undefined)
-              setInputValues({ ...inputValues, userAbi: "" })
-              setArgInputs([])
-              setArgValues([])
-              setSelectedFunction("")
-            }}
-            variant="secondary"
-          >
-            {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-            <TailSpin
-              height={20}
-              width={20}
-              color={SPINNER_COLOR}
-              ariaLabel="tail-spin-loading"
-              radius="0"
-              wrapperStyle={{}}
-              wrapperClass=""
-              visible={isLoading}
-            />
-            {isLoading ? "" : "Clear ABI"}
-          </Button>
-        </div>
-      ) : (
-        <div className="flex flex-row md:justify-end mt-4">
-          <Button className="grow md:grow-0" disabled={isLoading} onClick={parseAbi} variant="secondary">
-            {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-            <TailSpin
-              height={20}
-              width={20}
-              color={SPINNER_COLOR}
-              ariaLabel="tail-spin-loading"
-              radius="0"
-              wrapperStyle={{}}
-              wrapperClass=""
-              visible={isLoading}
-            />
-            {isLoading ? "" : "Parse ABI"}
-          </Button>
-        </div>
-      )}
-
-      {isAbiParsed && (
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">
-          <div className="flex flex-col grow">
-            <Text>Function</Text>
+          <div className="flex flex-col">
+            <Text>On Behalf</Text>
             <div className="flex flex-col mt-2">
-              <SearchSelect value={selectedFunction} onValueChange={setSelectedFunction}>
-                {parsedAbi
-                  .filter((item) => item.type === "function")
-                  .map((item, index) => {
-                    return <SearchSelectItem value={item.name}>{item.name}</SearchSelectItem>
-                  })}
-              </SearchSelect>
+              <TextInput
+                icon={WalletIcon}
+                value={inputValues.onBehalf}
+                onChange={(e) => setInputValues({ ...inputValues, onBehalf: e.target.value })}
+                placeholder={inputValues.onBehalf}
+                error={!!validationErrors?.onBehalf}
+                errorMessage={validationErrors?.onBehalf}
+                spellCheck={false}
+              ></TextInput>
             </div>
           </div>
-        </div>
-      )}
+          <div className="flex flex-col justify-between">
+            <Text>Execution period End</Text>
+            <div className="flex flex-row mt-2">
+              <DatePicker
+                value={inputValues.deadlineDate}
+                onValueChange={(value) => setInputValues({ ...inputValues, deadlineDate: value })}
+              />
+            </div>
+            <div className="flex flex-col mt-2">
+              <TextInput
+                icon={ClockIcon}
+                value={inputValues.deadlineTime}
+                onChange={(e) => setInputValues({ ...inputValues, deadlineTime: e.target.value })}
+                placeholder={inputValues.deadlineTime}
+                error={!!validationErrors?.deadlineTime}
+                errorMessage={validationErrors?.deadlineTime}
+                spellCheck={false}
+              ></TextInput>
+            </div>
+          </div>
 
-      {isAbiParsed && selectedFunction && argInputs.length !== 0 && (
-        <div className="mt-8 flex flex-col">
-          <Title>Function Arguments</Title>
-          {argInputs}
-        </div>
-      )}
+          <div className="flex flex-col">
+            <Text>To</Text>
+            <div className="flex flex-col mt-2">
+              <TextInput
+                icon={WalletIcon}
+                value={inputValues.to}
+                onChange={(e) => setInputValues({ ...inputValues, to: e.target.value })}
+                placeholder={inputValues.to}
+                error={!!validationErrors?.to}
+                errorMessage={validationErrors?.to}
+                spellCheck={false}
+              ></TextInput>
+            </div>
+          </div>
 
-      {isAbiParsed && (
-        <div className="flex flex-row md:justify-end mt-4">
-          <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
-            {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-            <TailSpin
-              height={20}
-              width={20}
-              color={SPINNER_COLOR}
-              ariaLabel="tail-spin-loading"
-              radius="0"
-              wrapperStyle={{}}
-              wrapperClass=""
-              visible={isLoading}
-            />
-            {isLoading ? "" : "Submit"}
-          </Button>
-        </div>
-      )}
-    </Card>
+          <div className="flex flex-col">
+            <Text>Gas</Text>
+            <div className="flex flex-row mt-2">
+              <NumberInput
+                value={inputValues.gas.toString()}
+                onChange={(e) =>
+                  setInputValues({ ...inputValues, gas: clampNumber(Number(e.target.value), 0, 100000) })
+                }
+                error={!!validationErrors?.gas}
+                errorMessage={validationErrors?.gas}
+                spellCheck={false}
+              />
+            </div>
+          </div>
+        {isAbiParsed ? (
+          <div className="flex flex-col lg:flex-row gap-6 mt-4">
+            <div className="flex flex-col grow">
+              <Text>Functions parsed from provided ABI</Text>
+              <div className="max-h-[30rem] overflow-auto mt-2 tremor-TextInput-root flex flex-col relative w-full  min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
+                <JsonFormatter
+                  json={JSON.stringify(parsedAbi)}
+                  tabWith={4}
+                  jsonStyle={{
+                    propertyStyle: { color: "rgb(59 130 246)" },
+                    stringStyle: { color: "rgb(16 185 129)" },
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-6 mt-4">
+            <div className="flex flex-col grow">
+              <Text>ABI</Text>
+              <div className="tremor-TextInput-root flex flex-col mt-2 relative w-full items-center min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
+                <textarea
+                  value={inputValues.userAbi}
+                  onChange={(e) => {
+                    e.target.style.height = ""
+                    e.target.style.height = e.target.scrollHeight + "px"
+                    setInputValues({ ...inputValues, userAbi: e.target.value })
+                  }}
+                  // error={!!validationErrors?.userAbi}
+                  // errorMessage={validationErrors?.userAbi}
+                  placeholder="Copy and paste your ABI here"
+                  spellCheck={false}
+                  className="tremor-TextInput-input w-full focus:outline-none focus:ring-0 border-none bg-transparent text-tremor-default text-tremor-content-emphasis dark:text-dark-tremor-content-emphasis [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none pl-3 pr-4 py-2 placeholder:text-tremor-content dark:placeholder:text-dark-tremor-content resize-none"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isAbiParsed ? (
+          <div className="flex flex-row md:justify-end mt-4">
+            <Button
+              className="grow md:grow-0"
+              disabled={isLoading}
+              color="red"
+              icon={XMarkIcon}
+              onClick={() => {
+                setIsAbiParsed(false)
+                setParsedAbi(undefined)
+                setInputValues({ ...inputValues, userAbi: "" })
+                setArgInputs([])
+                setArgValues([])
+                setSelectedFunction("")
+              }}
+              variant="secondary"
+            >
+              {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+              <TailSpin
+                height={20}
+                width={20}
+                color={SPINNER_COLOR}
+                ariaLabel="tail-spin-loading"
+                radius="0"
+                wrapperStyle={{}}
+                wrapperClass=""
+                visible={isLoading}
+              />
+              {isLoading ? "" : "Clear ABI"}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-row md:justify-end mt-4">
+            <Button className="grow md:grow-0" disabled={isLoading} onClick={parseAbi} variant="secondary">
+              {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+              <TailSpin
+                height={20}
+                width={20}
+                color={SPINNER_COLOR}
+                ariaLabel="tail-spin-loading"
+                radius="0"
+                wrapperStyle={{}}
+                wrapperClass=""
+                visible={isLoading}
+              />
+              {isLoading ? "" : "Parse ABI"}
+            </Button>
+          </div>
+        )}
+
+        {isAbiParsed && (
+          <div className="flex flex-col lg:flex-row gap-6 mt-4">
+            <div className="flex flex-col grow">
+              <Text>Function</Text>
+              <div className="flex flex-col mt-2">
+                <SearchSelect value={selectedFunction} onValueChange={setSelectedFunction}>
+                  {parsedAbi
+                    .filter((item) => item.type === "function")
+                    .map((item, index) => {
+                      return <SearchSelectItem value={item.name}>{item.name}</SearchSelectItem>
+                    })}
+                </SearchSelect>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isAbiParsed && selectedFunction && argInputs.length !== 0 && (
+          <div className="mt-8 flex flex-col">
+            <Title>Function Arguments</Title>
+            {argInputs}
+          </div>
+        )}
+
+        {isAbiParsed && (
+          <div className="flex flex-row md:justify-end mt-4">
+            <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
+              {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+              <TailSpin
+                height={20}
+                width={20}
+                color={SPINNER_COLOR}
+                ariaLabel="tail-spin-loading"
+                radius="0"
+                wrapperStyle={{}}
+                wrapperClass=""
+                visible={isLoading}
+              />
+              {isLoading ? "" : "Submit"}
+            </Button>
+          </div>
+        )}
+      </Card>
+    </>
   )
 }
 

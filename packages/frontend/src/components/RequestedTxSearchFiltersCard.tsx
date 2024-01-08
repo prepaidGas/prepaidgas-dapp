@@ -2,24 +2,25 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { ZodIssue, z } from "zod"
 
 import { FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline"
-import { Card, TextInput, Select, SelectItem, Button } from "@tremor/react"
+import { Card, TextInput, Select, SelectItem, Button, NumberInput } from "@tremor/react"
 
 import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX } from "../constants/regexConstants"
 import { ICON_BY_STATUS } from "../constants/themeConstants"
 
 const schema = z.object({
-  manager: z.string().regex(ETH_ADDRESS_OR_EMPTY_STRING_REGEX, { message: "Incorrect address" }),
-  status: z.number().lte(5).gte(0),
+  status: z.number(),
+  from: z.string(),
+  to: z.string(),
   numberOfEntries: z.number(),
 })
-export type FilterOptions = z.infer<typeof schema>
+export type FilterOptionsRequestedTx = z.infer<typeof schema>
 
-export default function SearchFiltersCard({
+export default function RequestedTxSearchFiltersCard({
   initialValue,
   onSubmit,
 }: {
-  initialValue: FilterOptions
-  onSubmit: (x: FilterOptions) => void
+  initialValue: FilterOptionsRequestedTx
+  onSubmit: (x: FilterOptionsRequestedTx) => void
 }) {
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
 
@@ -43,6 +44,7 @@ export default function SearchFiltersCard({
     if (!isValidForm) return
 
     if (doDefaultSearch) {
+      setInputValues({ ...initialValue })
       onSubmit({ ...initialValue })
     } else {
       onSubmit({ ...inputValues })
@@ -63,15 +65,26 @@ export default function SearchFiltersCard({
 
   return (
     <Card className="mt-6 flex flex-col gap-3 lg:gap-4 lg:flex-row align-middle justify-center ">
+      {/* @todo Replace with a more sophisticated component, with error handling and input validation, or ens */}
       <div className="flex flex-col grow align-middle">
-        Manager
-        {/* @todo Replace with a more sophisticated component, with error handling and input validation, or ens */}
-        <TextInput
-          onChange={(e) => setInputValues({ ...inputValues, manager: e.target.value })}
-          value={inputValues.manager}
-          error={!!validationErrors?.manager}
-          errorMessage={validationErrors?.manager[0]}
-          placeholder="0x1dA..."
+        From
+        <NumberInput
+          onChange={(e) => setInputValues({ ...inputValues, from: e.target.value })}
+          value={inputValues.from}
+          error={!!validationErrors?.from}
+          errorMessage={validationErrors?.from[0]}
+          placeholder=""
+          spellCheck={false}
+        />
+      </div>
+      <div className="flex flex-col grow align-middle">
+        To
+        <NumberInput
+          onChange={(e) => setInputValues({ ...inputValues, to: e.target.value })}
+          value={inputValues.to}
+          error={!!validationErrors?.to}
+          errorMessage={validationErrors?.to[0]}
+          placeholder=""
           spellCheck={false}
         />
       </div>
@@ -80,29 +93,10 @@ export default function SearchFiltersCard({
         <Select
           value={inputValues.status.toString()}
           onValueChange={(value) => setInputValues({ ...inputValues, status: Number(value) })}
-          icon={ICON_BY_STATUS[inputValues.status]}
         >
-          <SelectItem icon={ICON_BY_STATUS[0]} value="0">
-            Any
-          </SelectItem>
-          <SelectItem icon={ICON_BY_STATUS[1]} value="1">
-            Pending
-          </SelectItem>
-          <SelectItem icon={ICON_BY_STATUS[2]} value="2">
-            Accepted
-          </SelectItem>
-          <SelectItem icon={ICON_BY_STATUS[3]} value="3">
-            Active
-          </SelectItem>
-          <SelectItem icon={ICON_BY_STATUS[4]} value="4">
-            Inactive
-          </SelectItem>
-          <SelectItem icon={ICON_BY_STATUS[5]} value="5">
-            Untaken
-          </SelectItem>
-          <SelectItem icon={ICON_BY_STATUS[6]} value="6">
-            Closed
-          </SelectItem>
+          <SelectItem value="0">Executed</SelectItem>
+          <SelectItem value="1">Pending</SelectItem>
+          <SelectItem value="2">Any</SelectItem>
         </Select>
       </div>
       <div className="">

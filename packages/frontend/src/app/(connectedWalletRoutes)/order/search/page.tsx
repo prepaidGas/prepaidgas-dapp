@@ -16,8 +16,11 @@ import ToasterPopup from "../../../../components/ToasterPopup"
 import { TailSpin } from "react-loader-spinner"
 import { SPINNER_COLOR } from "../../../../constants/themeConstants"
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
+import { useAccount } from "wagmi"
 
 export default function SearchOrder() {
+  const { address, isConnecting, isDisconnected } = useAccount()
+
   const initialState: FilterOptions = {
     manager: "",
     status: 0,
@@ -40,12 +43,21 @@ export default function SearchOrder() {
 
     console.log("starting search")
     const { manager, status, numberOfEntries } = filterOptions
+    const searchArgs = [
+      manager === "" ? defaultManager : manager,
+      address,
+      status,
+      numberOfEntries,
+      (pageNumber - 1) * numberOfEntries,
+    ]
+    console.log("SearchArgs: ", searchArgs)
     try {
       const data = await readContract({
         address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
         abi: GasOrderABI,
         functionName: "getFilteredOrders",
-        args: [manager || defaultManager, defaultManager, status, numberOfEntries, (pageNumber - 1) * numberOfEntries],
+        //TODO replace second argument with users address instead of defaultManager (already done but i'm leaving todo for now)
+        args: searchArgs,
       })
       // console.log("DATA", data)
       setOrdersData(data as FilteredOrderStructOutput[])
@@ -109,14 +121,17 @@ export default function SearchOrder() {
   }
 
   const handleFilterSubmit = (filterOptions: FilterOptions) => {
+    console.log("handleFilterSubmit START")
     setFilterState(filterOptions)
     setCurrentPage(1)
     executeSearch(filterOptions, 1)
+    console.log("handleFilterSubmit END")
   }
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
     executeSearch(filterState, page)
+    console.log("handlePageChange")
   }
 
   useEffect(() => {
@@ -128,8 +143,10 @@ export default function SearchOrder() {
   return (
     <>
       <Title>Search results: {data?.length}</Title>
+      {/*TODO: fix spelling*/}
       <Text>You might find orders</Text>
       <SearchFiltersCard initialValue={initialState} onSubmit={handleFilterSubmit} />
+
       {/* Main section */}
       {/* {isLoading && (
         <div className="flex h-full items-center justify-center mt-4">
@@ -173,7 +190,7 @@ export default function SearchOrder() {
         data?.map((item: any, index) => (
           <OrderCard
             {...item}
-            className={index === 0 ? "mt-0" : "mt-4"}
+            className={index === 0 ? "mt-4" : "mt-4"}
             onFavorited={onOrderCardAction}
             key={`order-${item.id}`}
           />

@@ -37,10 +37,27 @@ async function initDeploymentSetup() {
   await GasOrderContract.setFee(1, SYSTEM_FEE)
   await GasOrderContract.setFee(2, SYSTEM_FEE)
 
+  await GasOrderContract.updateDomainSeparator()
+
   // @dev send mock tokens to the tester hardhat address
   await TokenContract.transfer("0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65", "100000000000000000000000")
+
   // Create and accept order
   await TokenContract.transfer(accounts[10].address, "500000000000000")
+  await TokenContract.transfer(accounts[7].address, "500000000000000")
+
+  for (let i = 0; i < 3; i++) {
+    let isAccepted = Math.random() < 0.5
+    await createOrder(
+      accounts[7],
+      GasOrderContract,
+      TokenContract,
+      isAccepted,
+      isAccepted ? accounts[10] : false,
+      100,
+      1801194545,
+    )
+  }
   for (let i = 0; i < TOTAL_TEST_ORDERS_AMOUNT; i++) {
     let isAccepted = Math.random() < 0.5
     await createOrder(
@@ -53,6 +70,7 @@ async function initDeploymentSetup() {
       864000,
     )
   }
+
   // fruitsToGet.map(fruit => getNumFruit(fruit))
   // const numFruits = await Promise.all(promises)
 

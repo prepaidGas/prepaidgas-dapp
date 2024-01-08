@@ -39,7 +39,7 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
         </Card>
       </header>
 
-      <nav className="fixed w-[20%] left-0 top-0 z-[49] h-[100%] overflow-y-scroll hidden lg:block">
+      <nav className="fixed w-[20%] left-0 top-0 z-[49] h-[100%] overflow-y-auto hidden lg:block">
         <div className="rounded-none p-0 text-lg !bg-transparent border-none !pt-[4.5rem]">
           <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
             <AccordionHeader className="bg-transparent rounded-none">Orders</AccordionHeader>
@@ -70,8 +70,8 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
               <Link href="/tx/history">
                 <Button className="w-full">History</Button>
               </Link>
-              <Link href="/tx/add">
-                <Button className="w-full">Add Request</Button>
+              <Link href="/tx/requested">
+                <Button className="w-full">Requested</Button>
               </Link>
             </AccordionBody>
           </Accordion>
@@ -110,8 +110,8 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
                 <Link href="/tx/history">
                   <Button className="w-full">History</Button>
                 </Link>
-                <Link href="/tx/add">
-                  <Button className="w-full">Add Request</Button>
+                <Link href="/tx/requested">
+                  <Button className="w-full">Requested</Button>
                 </Link>
               </AccordionBody>
             </Accordion>
@@ -120,7 +120,7 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
       )}
 
       <div className="mx-auto lg:ml-[20%]">
-        <main className="p-8 max-w-screen-lg mt-[4.5rem] overflow-scroll">{children}</main>
+        <main className="p-8 max-w-screen-lg mt-[4.5rem] overflow-auto">{children}</main>
         {/* {children} */}
       </div>
     </div>

@@ -38,7 +38,7 @@ export default function DialogWindow({
             <Subtitle> {description}</Subtitle>
           )}
           {withoutDescription ? null : <Divider />}
-          <div className="flex justify-center items-center flex-col gap-2">{actionButtons}</div>
+          <div className="flex flex-col gap-2">{actionButtons}</div>
         </Card>
       </div>
     </div>
