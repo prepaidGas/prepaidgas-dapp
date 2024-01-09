@@ -1,9 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    webpack: (config) => {
-        config.resolve.fallback = { fs: false, net: false, tls: false }
-        return config
-    },
+  webpack: (config, _) => {
+    config = {
+      ...config,
+      watchOptions: {
+        ...config.watchOptions,
+        poll: 800,
+        aggregateTimeout: 300,
+      },
+    }
+    config.resolve.fallback = { fs: false, net: false, tls: false }
+    return config
+  },
 }
 
 module.exports = nextConfig
+

@@ -12,7 +12,8 @@
     "sc-node-mock": "npm run node-mock -w prepaidgas-contracts",
     "sc-test": "npm run test -w prepaidgas-contracts",
     "sc-coverage": "npm run coverage -w prepaidgas-contracts",
-    "dev-setup": "npm run fe-dev & npm run sc-node-mock; wait"
+    "dev-setup": "npm run fe-dev & npm run sc-node-mock; wait",
+    "docker-setup": "docker run --rm -v /${PWD}:/app -p 3000:3000 -p 8545:8545 wednesday npm run dev-setup"
   },
   "dependencies": {
     "ethers": "^6.8.1",
