@@ -13,7 +13,7 @@
   --z-fixed: 100;
 
   /*===== Colors =====*/
-  --first-color: #4723d9;
+  --first-color: #3b82f6;
   --first-color-light: #afa5d9;
   --white-color: #f7f6fb;
 }
@@ -44,10 +44,10 @@ body {
   background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
 }
 
-#content-main {
+.content-main {
   position: relative;
-  margin: var(--header-height) 0 0 0;
-  padding: 0 1rem;
+  margin-top: var(--header-height);
+  /* padding: 0 1rem; */
   transition: 0.5s;
 }
 
@@ -93,7 +93,7 @@ a {
 .l-navbar {
   position: fixed;
   top: 0;
-  left: -30%;
+  left: calc(var(--nav-width) * -1);
   width: var(--nav-width);
   height: 100vh;
   background-color: var(--first-color);
@@ -125,7 +125,7 @@ a {
 
 .nav__logo-icon {
   font-size: 1.25rem;
-  color: var(--white-color);
+  color: var(--white-color) !important;
 }
 
 .nav__logo-name {
@@ -146,6 +146,7 @@ a {
 
 .nav__icon {
   font-size: 1.25rem;
+  color: var(--white-color) !important;
 }
 
 /*Show navbar movil*/
@@ -155,7 +156,7 @@ a {
 
 /*Add padding body movil*/
 .body-pd {
-  padding-left: calc(var(--nav-width) + 1rem);
+  padding-left: calc(var(--nav-width));
 }
 
 /*Active links*/
@@ -174,9 +175,10 @@ a {
 
 /* ===== MEDIA QUERIES=====*/
 @media screen and (min-width: 768px) {
-  #content-main {
-    margin: calc(var(--header-height) + 1rem) 0 0 0;
-    padding-left: calc(var(--nav-width) + 2rem);
+  .content-main {
+    margin-top: calc(var(--header-height) + 1rem);
+    /* margin-left: calc(var(--header-height) + 1rem); */
+    padding-left: var(--nav-width);
   }
 
   .header {
@@ -200,11 +202,11 @@ a {
 
   /*Show navbar desktop*/
   .show {
-    width: calc(var(--nav-width) + 156px);
+    width: calc(var(--nav-width) + 156px) !important ;
   }
 
   /*Add padding body desktop*/
   .body-pd {
-    padding-left: calc(var(--nav-width) + 188px);
+    padding-left: calc(var(--nav-width) + 156px);
   }
 }

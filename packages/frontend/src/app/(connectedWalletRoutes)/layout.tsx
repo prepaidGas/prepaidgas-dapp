@@ -26,7 +26,7 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
   return (
     <>
       <header className={`header ${showSidebar ? "body-pd" : ""}`} id="header">
-        <Card className="!rounded-none flex flex-row justify-between items-center py-3 px-4">
+        <Card className={`!rounded-none flex flex-row justify-between items-center py-3 px-4`}>
           <div className="flex flex-row items-center">
             <Button
               className="scale-150"
@@ -34,8 +34,8 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
               variant="light"
               onClick={() => setShowSidebar(!showSidebar)}
             />
-            <Icon className="ml-4 hidden md:block" icon={FireIcon}></Icon>
-            <Title className="text-lg hidden md:inline">prepaidgas.io</Title>
+            {/* <Icon className="ml-4 hidden md:block" icon={FireIcon}></Icon> */}
+            {/* <Title className="text-lg hidden md:inline">prepaidgas.io</Title> */}
           </div>
           <ConnectButton />
         </Card>
@@ -43,7 +43,7 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
 
       <Sidebar showSidebar={showSidebar}></Sidebar>
 
-      <div className={`${showSidebar ? "body-pd" : ""}`} id="content-main">
+      <div className={`content-main ${showSidebar ? "body-pd" : ""}`} id="content-main">
         {/* <nav className="fixed w-[20%] left-0 top-0 z-[49] h-[100%] overflow-y-auto hidden lg:block">
         <div className="rounded-none p-0 text-lg !bg-transparent border-none !pt-[4.5rem]">
           <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
