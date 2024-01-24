@@ -82,7 +82,7 @@ export default function OrderCard({
   }
 
   return (
-    <Card className={className} decoration="top" decorationColor={COLOR_BY_STATUS[Number(status)]}>
+    <Card className={className + " break-words"} decoration="top" decorationColor={COLOR_BY_STATUS[Number(status)]}>
       <Flex>
         <StatusBadge status={Number(status)} />
         {isFavorite ? (
