@@ -35,7 +35,7 @@ export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean
     <div className={`l-navbar ${showSidebar ? "show" : ""}`} id="nav-bar">
       <nav className="nav">
         <div>
-          <Link className="nav__logo" href="#">
+          <Link className="nav__logo !py-3" href="#">
             <Icon className="nav__logo-icon" icon={FireIcon}></Icon>
             <Title className="nav__logo-name">prepaidgas.io</Title>
           </Link>
