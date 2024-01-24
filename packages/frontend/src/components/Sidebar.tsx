@@ -30,6 +30,22 @@ const schema = z.object({
 type AddTxRequestState = z.infer<typeof schema>
 
 export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean }) {
+  const [activeLink, setActiveLink] = useState("")
+
+  const links = [
+    { name: "Dashboard", icon: TableCellsIcon, href: "#" },
+    { name: "Users", icon: UserIcon, href: "#" },
+    { name: "Messages", icon: InboxIcon, href: "#" },
+    { name: "Favorites", icon: BookmarkIcon, href: "#" },
+    { name: "Data", icon: FolderIcon, href: "#" },
+    { name: "Analytics", icon: ChartBarIcon, href: "#" },
+  ]
+
+  const linkOnClickHandler = (event: React.MouseEvent<HTMLElement>, linkName: string) => {
+    // elemArr.forEach((elem) => elem.cl)
+    setActiveLink(linkName)
+  }
+
   useEffect(() => {}, [])
   return (
     <div className={`l-navbar ${showSidebar ? "show" : ""}`} id="nav-bar">
@@ -41,30 +57,16 @@ export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean
           </Link>
 
           <div className="nav__list">
-            <Link className="nav__link" href="#">
-              <Icon className="nav__icon" icon={TableCellsIcon}></Icon>
-              <Title className="nav__name">Dashboard</Title>
-            </Link>
-            <Link className="nav__link" href="#">
-              <Icon className="nav__icon" icon={UserIcon}></Icon>
-              <Title className="nav__name">Users</Title>
-            </Link>
-            <Link className="nav__link" href="#">
-              <Icon className="nav__icon" icon={InboxIcon}></Icon>
-              <Title className="nav__name">Messages</Title>
-            </Link>
-            <Link className="nav__link" href="#">
-              <Icon className="nav__icon" icon={BookmarkIcon}></Icon>
-              <Title className="nav__name">Favorites</Title>
-            </Link>
-            <Link className="nav__link" href="#">
-              <Icon className="nav__icon" icon={FolderIcon}></Icon>
-              <Title className="nav__name">Data</Title>
-            </Link>
-            <Link className="nav__link" href="#">
-              <Icon className="nav__icon" icon={ChartBarIcon}></Icon>
-              <Title className="nav__name">Analytics</Title>
-            </Link>
+            {links.map((item) => (
+              <Link
+                onClick={(event: React.MouseEvent<HTMLElement>) => linkOnClickHandler(event, item.name)}
+                className={`nav__link ${activeLink === item.name ? "active" : ""}`}
+                href={item.href}
+              >
+                <Icon className="nav__icon" icon={item.icon}></Icon>
+                <Title className="nav__name">{item.name}</Title>
+              </Link>
+            ))}
           </div>
 
           <Link className="nav__link" href="#">
