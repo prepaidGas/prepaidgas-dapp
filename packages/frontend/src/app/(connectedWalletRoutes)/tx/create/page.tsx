@@ -671,137 +671,138 @@ export default function TransactionCreate() {
               />
             </div>
           </div>
-        {isAbiParsed ? (
-          <div className="flex flex-col lg:flex-row gap-6 mt-4">
-            <div className="flex flex-col grow">
-              <Text>Functions parsed from provided ABI</Text>
-              <div className="max-h-[30rem] overflow-auto mt-2 tremor-TextInput-root flex flex-col relative w-full  min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
-                <JsonFormatter
-                  json={JSON.stringify(parsedAbi)}
-                  tabWith={4}
-                  jsonStyle={{
-                    propertyStyle: { color: "rgb(59 130 246)" },
-                    stringStyle: { color: "rgb(16 185 129)" },
-                  }}
+          {isAbiParsed ? (
+            <div className="flex flex-col lg:flex-row gap-6 mt-4">
+              <div className="flex flex-col grow">
+                <Text>Functions parsed from provided ABI</Text>
+                <div className="max-h-[30rem] overflow-auto mt-2 tremor-TextInput-root flex flex-col relative w-full  min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
+                  <JsonFormatter
+                    json={JSON.stringify(parsedAbi)}
+                    tabWith={4}
+                    jsonStyle={{
+                      propertyStyle: { color: "rgb(59 130 246)" },
+                      stringStyle: { color: "rgb(16 185 129)" },
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col lg:flex-row gap-6 mt-4">
+              <div className="flex flex-col grow">
+                <Text>ABI</Text>
+                <div className="tremor-TextInput-root flex flex-col mt-2 relative w-full items-center min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
+                  <textarea
+                    value={inputValues.userAbi}
+                    onChange={(e) => {
+                      e.target.style.height = ""
+                      e.target.style.height = e.target.scrollHeight + "px"
+                      setInputValues({ ...inputValues, userAbi: e.target.value })
+                    }}
+                    // error={!!validationErrors?.userAbi}
+                    // errorMessage={validationErrors?.userAbi}
+                    placeholder="Copy and paste your ABI here"
+                    spellCheck={false}
+                    className="tremor-TextInput-input w-full focus:outline-none focus:ring-0 border-none bg-transparent text-tremor-default text-tremor-content-emphasis dark:text-dark-tremor-content-emphasis [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none pl-3 pr-4 py-2 placeholder:text-tremor-content dark:placeholder:text-dark-tremor-content resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isAbiParsed ? (
+            <div className="flex flex-row md:justify-end mt-4">
+              <Button
+                className="grow md:grow-0"
+                disabled={isLoading}
+                color="red"
+                icon={XMarkIcon}
+                onClick={() => {
+                  setIsAbiParsed(false)
+                  setParsedAbi(undefined)
+                  setInputValues({ ...inputValues, userAbi: "" })
+                  setArgInputs([])
+                  setArgValues([])
+                  setSelectedFunction("")
+                }}
+                variant="secondary"
+              >
+                {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+                <TailSpin
+                  height={20}
+                  width={20}
+                  color={SPINNER_COLOR}
+                  ariaLabel="tail-spin-loading"
+                  radius="0"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                  visible={isLoading}
                 />
+                {isLoading ? "" : "Clear ABI"}
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-row md:justify-end mt-4">
+              <Button className="grow md:grow-0" disabled={isLoading} onClick={parseAbi} variant="secondary">
+                {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+                <TailSpin
+                  height={20}
+                  width={20}
+                  color={SPINNER_COLOR}
+                  ariaLabel="tail-spin-loading"
+                  radius="0"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                  visible={isLoading}
+                />
+                {isLoading ? "" : "Parse ABI"}
+              </Button>
+            </div>
+          )}
+
+          {isAbiParsed && (
+            <div className="flex flex-col lg:flex-row gap-6 mt-4">
+              <div className="flex flex-col grow">
+                <Text>Function</Text>
+                <div className="flex flex-col mt-2">
+                  <SearchSelect value={selectedFunction} onValueChange={setSelectedFunction}>
+                    {parsedAbi
+                      .filter((item) => item.type === "function")
+                      .map((item, index) => {
+                        return <SearchSelectItem value={item.name}>{item.name}</SearchSelectItem>
+                      })}
+                  </SearchSelect>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="flex flex-col lg:flex-row gap-6 mt-4">
-            <div className="flex flex-col grow">
-              <Text>ABI</Text>
-              <div className="tremor-TextInput-root flex flex-col mt-2 relative w-full items-center min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
-                <textarea
-                  value={inputValues.userAbi}
-                  onChange={(e) => {
-                    e.target.style.height = ""
-                    e.target.style.height = e.target.scrollHeight + "px"
-                    setInputValues({ ...inputValues, userAbi: e.target.value })
-                  }}
-                  // error={!!validationErrors?.userAbi}
-                  // errorMessage={validationErrors?.userAbi}
-                  placeholder="Copy and paste your ABI here"
-                  spellCheck={false}
-                  className="tremor-TextInput-input w-full focus:outline-none focus:ring-0 border-none bg-transparent text-tremor-default text-tremor-content-emphasis dark:text-dark-tremor-content-emphasis [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none pl-3 pr-4 py-2 placeholder:text-tremor-content dark:placeholder:text-dark-tremor-content resize-none"
-                ></textarea>
-              </div>
+          )}
+
+          {isAbiParsed && selectedFunction && argInputs.length !== 0 && (
+            <div className="mt-8 flex flex-col">
+              <Title>Function Arguments</Title>
+              {argInputs}
             </div>
-          </div>
-        )}
+          )}
 
-        {isAbiParsed ? (
-          <div className="flex flex-row md:justify-end mt-4">
-            <Button
-              className="grow md:grow-0"
-              disabled={isLoading}
-              color="red"
-              icon={XMarkIcon}
-              onClick={() => {
-                setIsAbiParsed(false)
-                setParsedAbi(undefined)
-                setInputValues({ ...inputValues, userAbi: "" })
-                setArgInputs([])
-                setArgValues([])
-                setSelectedFunction("")
-              }}
-              variant="secondary"
-            >
-              {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-              <TailSpin
-                height={20}
-                width={20}
-                color={SPINNER_COLOR}
-                ariaLabel="tail-spin-loading"
-                radius="0"
-                wrapperStyle={{}}
-                wrapperClass=""
-                visible={isLoading}
-              />
-              {isLoading ? "" : "Clear ABI"}
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-row md:justify-end mt-4">
-            <Button className="grow md:grow-0" disabled={isLoading} onClick={parseAbi} variant="secondary">
-              {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-              <TailSpin
-                height={20}
-                width={20}
-                color={SPINNER_COLOR}
-                ariaLabel="tail-spin-loading"
-                radius="0"
-                wrapperStyle={{}}
-                wrapperClass=""
-                visible={isLoading}
-              />
-              {isLoading ? "" : "Parse ABI"}
-            </Button>
-          </div>
-        )}
-
-        {isAbiParsed && (
-          <div className="flex flex-col lg:flex-row gap-6 mt-4">
-            <div className="flex flex-col grow">
-              <Text>Function</Text>
-              <div className="flex flex-col mt-2">
-                <SearchSelect value={selectedFunction} onValueChange={setSelectedFunction}>
-                  {parsedAbi
-                    .filter((item) => item.type === "function")
-                    .map((item, index) => {
-                      return <SearchSelectItem value={item.name}>{item.name}</SearchSelectItem>
-                    })}
-                </SearchSelect>
-              </div>
+          {isAbiParsed && (
+            <div className="flex flex-row md:justify-end mt-4">
+              <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
+                {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
+                <TailSpin
+                  height={20}
+                  width={20}
+                  color={SPINNER_COLOR}
+                  ariaLabel="tail-spin-loading"
+                  radius="0"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                  visible={isLoading}
+                />
+                {isLoading ? "" : "Submit"}
+              </Button>
             </div>
-          </div>
-        )}
-
-        {isAbiParsed && selectedFunction && argInputs.length !== 0 && (
-          <div className="mt-8 flex flex-col">
-            <Title>Function Arguments</Title>
-            {argInputs}
-          </div>
-        )}
-
-        {isAbiParsed && (
-          <div className="flex flex-row md:justify-end mt-4">
-            <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
-              {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-              <TailSpin
-                height={20}
-                width={20}
-                color={SPINNER_COLOR}
-                ariaLabel="tail-spin-loading"
-                radius="0"
-                wrapperStyle={{}}
-                wrapperClass=""
-                visible={isLoading}
-              />
-              {isLoading ? "" : "Submit"}
-            </Button>
-          </div>
-        )}
+          )}
+        </div>
       </Card>
     </>
   )

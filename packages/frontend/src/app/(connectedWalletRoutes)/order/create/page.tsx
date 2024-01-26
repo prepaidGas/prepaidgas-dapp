@@ -17,7 +17,7 @@ export default function CreateOrder() {
   }, [transactionDetails])
 
   return (
-    <>
+    <div>
       {showDialogWindow ? (
         Boolean(transactionDetails) ? (
           <DialogWindow
@@ -81,6 +81,6 @@ export default function CreateOrder() {
           <div className="h-28" />
         </Card>
       </Grid>
-    </>
+    </div>
   )
 }
