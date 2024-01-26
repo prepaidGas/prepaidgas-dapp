@@ -7,7 +7,8 @@ import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useAccount } from "wagmi"
 import { useEffect, useState } from "react"
 import { redirect } from "next/navigation"
-import { Bars4Icon, FireIcon } from "@heroicons/react/24/outline"
+import { Bars4Icon, FireIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import Sidebar from "../../components/Sidebar"
 
 export default function NavigationLayout({ children }: { children: React.ReactNode }) {
   const { address, isConnecting, isDisconnected } = useAccount()
@@ -20,26 +21,30 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
     }
   }, [address])
 
+  let headerTailwind: string = "fixed h-[4rem] left-0 top-0 w-full flex z-50 flex-row bg-gray-300"
+
   return (
-    <div>
-      <header className="fixed h-[4rem] left-0 top-0 w-full flex z-50 flex-row bg-gray-300">
-        <Card className="!rounded-none flex flex-row justify-between items-center py-3 px-4">
+    <>
+      <header className={`header ${showSidebar ? "body-pd" : ""}`} id="header">
+        <Card className={`!rounded-none flex flex-row justify-between items-center py-3 px-4`}>
           <div className="flex flex-row items-center">
             <Button
-              className="lg:hidden"
-              icon={Bars4Icon}
-              variant="secondary"
+              className="scale-150"
+              icon={showSidebar ? XMarkIcon : Bars4Icon}
+              variant="light"
               onClick={() => setShowSidebar(!showSidebar)}
             />
-
-            <Icon className="ml-4 hidden md:block" icon={FireIcon}></Icon>
-            <Title className="text-lg hidden md:inline">prepaidgas.io</Title>
+            {/* <Icon className="ml-4 hidden md:block" icon={FireIcon}></Icon> */}
+            {/* <Title className="text-lg hidden md:inline">prepaidgas.io</Title> */}
           </div>
           <ConnectButton />
         </Card>
       </header>
 
-      <nav className="fixed w-[20%] left-0 top-0 z-[49] h-[100%] overflow-y-auto hidden lg:block">
+      <Sidebar showSidebar={showSidebar}></Sidebar>
+
+      <div className={`content-main ${showSidebar ? "body-pd" : ""}`} id="content-main">
+        {/* <nav className="fixed w-[20%] left-0 top-0 z-[49] h-[100%] overflow-y-auto hidden lg:block">
         <div className="rounded-none p-0 text-lg !bg-transparent border-none !pt-[4.5rem]">
           <Accordion className="!bg-transparent rounded-none border-none" defaultOpen={true}>
             <AccordionHeader className="bg-transparent rounded-none">Orders</AccordionHeader>
@@ -117,12 +122,10 @@ export default function NavigationLayout({ children }: { children: React.ReactNo
             </Accordion>
           </Card>
         </nav>
-      )}
+      )} */}
 
-      <div className="mx-auto lg:ml-[20%]">
         <main className="p-8 max-w-screen-lg mt-[4.5rem] overflow-auto">{children}</main>
-        {/* {children} */}
       </div>
-    </div>
+    </>
   )
 }
