@@ -108,24 +108,24 @@ abstract contract GasOrderGetters is ERC1155ish {
   }
 
   function getTokenDetails(address token) public view returns (TokenDetails memory) {
-    TokenDetails memory details = TokenDetails({
-      token: token,
-      name: "",
-      symbol: "",
-      decimals: 0,
-      broken : 0
-    });
+    TokenDetails memory details = TokenDetails({token: token, name: "", symbol: "", decimals: 0, broken: 0});
     IERC20Metadata meta = IERC20Metadata(token);
 
-    try meta.name() returns (string memory name)  {
+    try meta.name() returns (string memory name) {
       details.name = name;
-    } catch { details.broken += 1; }
-    try meta.symbol() returns (string memory symbol)  {
+    } catch {
+      details.broken += 1;
+    }
+    try meta.symbol() returns (string memory symbol) {
       details.symbol = symbol;
-    } catch { details.broken += 2; }
-    try meta.decimals() returns (uint8 decimals)  {
+    } catch {
+      details.broken += 2;
+    }
+    try meta.decimals() returns (uint8 decimals) {
       details.decimals = decimals;
-    } catch { details.broken += 4; }
+    } catch {
+      details.broken += 4;
+    }
 
     return details;
   }

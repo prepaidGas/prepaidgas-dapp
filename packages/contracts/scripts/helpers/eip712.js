@@ -14,6 +14,7 @@ const messageType = [
   { name: "deadline", type: "uint256" },
   { name: "to", type: "address" },
   { name: "gas", type: "uint256" },
+  { name: "tips", type: "uint256" },
   { name: "data", type: "bytes" },
 ]
 

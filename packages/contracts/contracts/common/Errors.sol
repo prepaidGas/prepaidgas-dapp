@@ -31,3 +31,4 @@ error InvalidTransactionDeadline(uint256 transactionDeadline, uint256 orderDeadl
 
 error LiquidationImpossible(address from, uint256 nonce, uint256 deadline);
 error ExecutionImpossible(address from, uint256 nonce, uint256 deadline, uint256 currentTime);
+// @todo insufficient tips

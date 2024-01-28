@@ -45,6 +45,10 @@ abstract contract TxAccept is GasOrderGetters, ReproducerMessage {
 
     _increaseLock(message.from, message.gasOrder, message.gas);
 
+    // @todo add validation and throw error on revert
+    // @dev the recipient should be able to accept such tokens
+    _safeTransferFrom(message.from, msg.sender, message.gasOrder, message.tips, "");
+
     emit TransactionAdded(message, signature);
   }
 

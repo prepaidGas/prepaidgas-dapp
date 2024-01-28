@@ -56,6 +56,8 @@ async function initDeploymentSetup() {
       isAccepted ? accounts[10] : false,
       100,
       1801194545,
+      0,
+      "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
     )
   }
   for (let i = 0; i < TOTAL_TEST_ORDERS_AMOUNT; i++) {
@@ -68,6 +70,8 @@ async function initDeploymentSetup() {
       isAccepted ? accounts[10] : false,
       36000,
       864000,
+      0,
+      "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
     )
   }
 

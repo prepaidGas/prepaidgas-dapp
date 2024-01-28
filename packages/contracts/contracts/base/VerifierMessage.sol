@@ -13,6 +13,7 @@ bytes32 constant MESSAGE_TYPE_HASH = keccak256(
   "uint256 deadline,"
   "address to,"
   "uint256 gas,"
+  "uint256 tips,"
   "bytes data"
   ")"
 );
@@ -25,6 +26,7 @@ struct Message {
   uint256 deadline;
   address to;
   uint256 gas;
+  uint256 tips;
   bytes data;
 }
 
@@ -44,6 +46,7 @@ abstract contract HashMessage {
             message.deadline,
             message.to,
             message.gas,
+            message.tips,
             /// @dev keccak dynamic field
             keccak256(message.data)
           )

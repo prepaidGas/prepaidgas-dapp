@@ -49,10 +49,11 @@ async function createSignedMsg(essentialProps, options = {}) {
     deadline = (await time.latest()) + 80, // @todo replace with execution window automaticaly
     to = EndpointContract.target,
     gas = 10000000,
+    tips = 0,
     data = "0x6057361d00000000000000000000000000000000000000000000000000000000000000" + v1 + v2
 
-  const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, data]
-  const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, data }
+  const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data]
+  const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data }
 
   const signedMessage = await signer.signTypedData(
     domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
