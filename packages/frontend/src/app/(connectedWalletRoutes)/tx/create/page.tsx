@@ -1,10 +1,13 @@
 "use client"
 import { useEffect, useState } from "react"
 import { z } from "zod"
+import { useAccount } from "wagmi"
 import { readContract, writeContract, waitForTransaction, signTypedData } from "@wagmi/core"
 
 import { ABIEntry, FieldEntry, GasOrderABI } from "helpers/abi"
 import { parse, getHours, getMinutes, getSeconds } from "date-fns"
+
+import { ADDITIONAL_TIME_SECONDS } from "../../../../constants/dateAndTimeConstants"
 
 import {
   Button,
@@ -30,7 +33,6 @@ import { ethers } from "ethers"
 import DialogWindow from "../../../../components/DialogWindow"
 
 const formSchema = z.object({
-  from: z.string().min(1),
   nonce: z.number(),
   gasOrder: z.number(),
   onBehalf: z.string(),
@@ -38,6 +40,7 @@ const formSchema = z.object({
   deadlineTime: z.string().min(1),
   to: z.string().min(1),
   gas: z.number(),
+  tips: z.number(),
   data: z.string().min(1),
   gasLimit: z.number(),
   smartContractAddress: z.string().min(1),
@@ -62,6 +65,7 @@ export default function TransactionCreate() {
   //todo decide on whether to use dialogWindow
   const [showDialogWindow, setShowDialogWindow] = useState(false)
   const [transactionDetails, setTransactionDetails] = useState<null | any>(null)
+  const [numberOfOrders, setNumberOfOrders] = useState(0)
 
   // const initialState: TransactionFormState = {
   //   from: "",
@@ -93,8 +97,9 @@ export default function TransactionCreate() {
     }
     */
 
+  const { address } = useAccount()
+
   const initialState: TransactionFormState = {
-    from: "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
     nonce: 0,
     gasOrder: 0,
     onBehalf: "0x00222290dd7278aa3ddd389cc1e1d165cc4bafe5",
@@ -102,6 +107,7 @@ export default function TransactionCreate() {
     deadlineTime: "00:00:00",
     to: "0xfb071837728455c581f370704b225ac9eabdfa4a",
     gas: 0,
+    tips: 0,
     data: "0x",
     gasLimit: 0,
     smartContractAddress: "",
@@ -332,14 +338,32 @@ export default function TransactionCreate() {
 
   const validateSearchForm = () => {
     setValidationErrors(null)
+    let formatedErrors: any = {}
+    let isValid = true
+    const deadline = getUnixTimestampInSeconds(combineDateAndTime(inputValues.deadlineDate, inputValues.deadlineTime))
 
     const result = formSchema.safeParse(inputValues)
     if (result.success === false) {
-      const formatedErrors = Object.entries(result.error.flatten().fieldErrors).reduce((acc, curr) => {
+      formatedErrors = Object.entries(result.error.flatten().fieldErrors).reduce((acc, curr) => {
         const [error, errorTexts] = curr
         acc[error] = errorTexts[0]
         return acc
       }, {})
+      isValid = false
+    }
+    if (inputValues.gasOrder >= numberOfOrders) {
+      formatedErrors.gasOrder
+        ? (formatedErrors.gasOrder += " \n No such order")
+        : (formatedErrors.gasOrder = "No such order")
+      isValid = false
+    }
+    if (deadline + ADDITIONAL_TIME_SECONDS <= getUnixTimestampInSeconds(new Date())) {
+      formatedErrors.gasOrder
+        ? (formatedErrors.deadlineTime += " \n Must be in the future")
+        : (formatedErrors.deadlineTime = "Must be in the future")
+      isValid = false
+    }
+    if (!isValid) {
       setValidationErrors(formatedErrors)
       return false
     }
@@ -402,6 +426,7 @@ export default function TransactionCreate() {
         { name: "deadline", type: "uint256" },
         { name: "to", type: "address" },
         { name: "gas", type: "uint256" },
+        { name: "tips", type: "uint256" },
         { name: "data", type: "bytes" },
       ],
     }
@@ -428,13 +453,14 @@ export default function TransactionCreate() {
       console.log("EncodedData: ", encodedData)
 
       const message = {
-        from: inputValues.from,
+        from: address,
         nonce: inputValues.nonce,
         gasOrder: inputValues.gasOrder,
         onBehalf: inputValues.onBehalf,
         deadline: getUnixTimestampInSeconds(combineDateAndTime(inputValues.deadlineDate, inputValues.deadlineTime)),
         to: inputValues.to,
         gas: inputValues.gas,
+        tips: inputValues.tips,
         data: encodedData,
       }
 
@@ -446,6 +472,7 @@ export default function TransactionCreate() {
         message.deadline,
         message.to,
         message.gas,
+        message.tips,
         message.data,
       ]
 
@@ -511,6 +538,25 @@ export default function TransactionCreate() {
     }
   }, [inputValues])
 
+  useEffect(() => {
+    const fetchNumberOfOrders = async () => {
+      try {
+        const numberOfOrders = await readContract({
+          address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+          abi: GasOrderABI,
+          functionName: "ordersCount",
+          args: [],
+        })
+        console.log("numberOfOrders: ", numberOfOrders)
+        setNumberOfOrders(Number(numberOfOrders))
+      } catch (e) {
+        console.log("numberOfOrders ERROR: ", e)
+      }
+    }
+
+    fetchNumberOfOrders()
+  }, [])
+
   return (
     <>
       {showDialogWindow ? (
@@ -564,20 +610,6 @@ export default function TransactionCreate() {
         {/* Gas Amount and Date & Time Settings */}
         <div className="flex flex-col gap-6">
           <div className="flex flex-col">
-            <Text>From</Text>
-            <div className="flex flex-col mt-2">
-              <TextInput
-                icon={WalletIcon}
-                value={inputValues.from}
-                onChange={(e) => setInputValues({ ...inputValues, from: e.target.value })}
-                placeholder={inputValues.from}
-                error={!!validationErrors?.from}
-                errorMessage={validationErrors?.from}
-                spellCheck={false}
-              ></TextInput>
-            </div>
-          </div>
-          <div className="flex flex-col">
             <Text>Nonce</Text>
             <div className="flex flex-row mt-2">
               <NumberInput
@@ -593,7 +625,7 @@ export default function TransactionCreate() {
           </div>
           <div className="flex flex-col">
             <Text>Gas Order</Text>
-            <div className="flex flex-row">
+            <div className="flex flex-col">
               <NumberInput
                 className="mt-2"
                 value={inputValues.gasOrder.toString()}
@@ -627,6 +659,7 @@ export default function TransactionCreate() {
               <DatePicker
                 value={inputValues.deadlineDate}
                 onValueChange={(value) => setInputValues({ ...inputValues, deadlineDate: value })}
+                minDate={new Date()}
               />
             </div>
             <div className="flex flex-col mt-2">
@@ -667,6 +700,20 @@ export default function TransactionCreate() {
                 }
                 error={!!validationErrors?.gas}
                 errorMessage={validationErrors?.gas}
+                spellCheck={false}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <Text>Tips</Text>
+            <div className="flex flex-row mt-2">
+              <NumberInput
+                value={inputValues.tips.toString()}
+                onChange={(e) =>
+                  setInputValues({ ...inputValues, tips: clampNumber(Number(e.target.value), 0, 100000) })
+                }
+                error={!!validationErrors?.tips}
+                errorMessage={validationErrors?.tips}
                 spellCheck={false}
               />
             </div>
