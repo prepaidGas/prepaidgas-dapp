@@ -35,7 +35,6 @@ const schema = z.object({
   executionPeriodStartTime: z.string(),
   executionPeriodEndDate: z.date(),
   executionPeriodEndTime: z.string(),
-  isRevocable: z.boolean(),
   rewardValueToken: z.string(),
   rewardValueAmount: z.number().int().gt(0),
   gasCostValueToken: z.string(),
@@ -59,6 +58,8 @@ export default function CreateOrderCard({
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
   const [isValidating, setIsValidating] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [wasRewardTransferChanged, setWasRewardTransferChanged] = useState(false)
+  const [wasGasCostTransferChanged, setWasGasCostTransferChanged] = useState(false)
 
   const [validationErrors, setValidationErrors] = useState<null | { [key: string]: string }>(null)
 
@@ -124,7 +125,6 @@ export default function CreateOrderCard({
     executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
     executionPeriodEndDate: getTomorrowEndDate(),
     executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
-    isRevocable: true,
     rewardValueToken: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
     rewardValueAmount: 10,
     gasCostValueToken: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
@@ -380,9 +380,12 @@ export default function CreateOrderCard({
           <NumberInput
             className="mt-2"
             value={inputValues.rewardValueAmount.toString()}
-            onChange={(e) =>
-              setInputValues({ ...inputValues, rewardValueAmount: clampNumber(Number(e.target.value), 0, 100000) })
-            }
+            onChange={(e) => {
+              const rewardValueAmount = clampNumber(Number(e.target.value), 0, 100000)
+              wasRewardTransferChanged
+                ? setInputValues({ ...inputValues, rewardValueAmount })
+                : setInputValues({ ...inputValues, rewardValueAmount, rewardTransfer: rewardValueAmount })
+            }}
             error={!!validationErrors?.rewardValueAmount}
             errorMessage={validationErrors?.rewardValueAmount}
             spellCheck={false}
@@ -409,9 +412,19 @@ export default function CreateOrderCard({
           <NumberInput
             className="mt-2"
             value={inputValues.gasCostValueGasPrice.toString()}
-            onChange={(e) =>
-              setInputValues({ ...inputValues, gasCostValueGasPrice: clampNumber(Number(e.target.value), 0, 100000) })
-            }
+            onChange={(e) => {
+              const gasCostValueGasPrice = clampNumber(Number(e.target.value), 0, 100000)
+              wasGasCostTransferChanged
+                ? setInputValues({
+                    ...inputValues,
+                    gasCostValueGasPrice,
+                  })
+                : setInputValues({
+                    ...inputValues,
+                    gasCostValueGasPrice,
+                    gasCostTransfer: inputValues.gasAmount * gasCostValueGasPrice,
+                  })
+            }}
             error={!!validationErrors?.gasCostValueGasPrice}
             errorMessage={validationErrors?.gasCostValueGasPrice}
             spellCheck={false}
@@ -454,26 +467,6 @@ export default function CreateOrderCard({
         <AccordionBody className="flex flex-col gap-2">
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex flex-col">
-              <Text>Is order revocable?</Text>
-              <div className="flex flex-row mt-2">
-                <Select
-                  icon={inputValues.isRevocable ? CheckIcon : NoSymbolIcon}
-                  className="min-w-[8rem]"
-                  value={inputValues.isRevocable ? "1" : "0"}
-                  onValueChange={(value) =>
-                    setInputValues({ ...inputValues, isRevocable: value === "0" ? false : true })
-                  }
-                >
-                  <SelectItem icon={NoSymbolIcon} value="0">
-                    No
-                  </SelectItem>
-                  <SelectItem icon={CheckIcon} value="1">
-                    Yes
-                  </SelectItem>
-                </Select>
-              </div>
-            </div>
-            <div className="flex flex-col">
               <Text>Execution window</Text>
               <NumberInput
                 className="mt-2"
@@ -491,9 +484,10 @@ export default function CreateOrderCard({
               <NumberInput
                 className="mt-2"
                 value={inputValues.rewardTransfer.toString()}
-                onChange={(e) =>
+                onChange={(e) => {
                   setInputValues({ ...inputValues, rewardTransfer: clampNumber(Number(e.target.value), 0, 100000) })
-                }
+                  setWasRewardTransferChanged(true)
+                }}
                 error={!!validationErrors?.rewardTransfer}
                 errorMessage={validationErrors?.rewardTransfer}
                 spellCheck={false}
@@ -504,9 +498,10 @@ export default function CreateOrderCard({
               <NumberInput
                 className="mt-2"
                 value={inputValues.gasCostTransfer.toString()}
-                onChange={(e) =>
+                onChange={(e) => {
                   setInputValues({ ...inputValues, gasCostTransfer: clampNumber(Number(e.target.value), 0, 100000) })
-                }
+                  setWasGasCostTransferChanged(true)
+                }}
                 error={!!validationErrors?.gasCostTransfer}
                 errorMessage={validationErrors?.gasCostTransfer}
                 spellCheck={false}
