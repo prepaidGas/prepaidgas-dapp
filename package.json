@@ -16,7 +16,6 @@
     "docker-setup": "docker run --rm -v /${PWD}:/app -p 3000:3000 -p 8545:8545 wednesday npm run dev-setup"
   },
   "dependencies": {
-    "ethers": "^6.8.1",
     "react-json-formatter": "^0.4.0",
     "react-loader-spinner": "^5.4.5",
     "zod": "^3.22.4"
