@@ -43,7 +43,7 @@ const formSchema = z.object({
   tips: z.number(),
   data: z.string().min(1),
   gasLimit: z.number(),
-  smartContractAddress: z.string().min(1),
+  smartContractAddress: z.string(),
   userAbi: z.string(),
 })
 
@@ -347,22 +347,24 @@ export default function TransactionCreate() {
       formatedErrors = Object.entries(result.error.flatten().fieldErrors).reduce((acc, curr) => {
         const [error, errorTexts] = curr
         acc[error] = errorTexts[0]
+        console.log(error)
         return acc
       }, {})
       isValid = false
+      console.log("not safe parsed")
     }
-    if (inputValues.gasOrder >= numberOfOrders) {
-      formatedErrors.gasOrder
-        ? (formatedErrors.gasOrder += " \n No such order")
-        : (formatedErrors.gasOrder = "No such order")
-      isValid = false
-    }
-    if (deadline + ADDITIONAL_TIME_SECONDS <= getUnixTimestampInSeconds(new Date())) {
-      formatedErrors.gasOrder
-        ? (formatedErrors.deadlineTime += " \n Must be in the future")
-        : (formatedErrors.deadlineTime = "Must be in the future")
-      isValid = false
-    }
+    // if (inputValues.gasOrder >= numberOfOrders) {
+    //   formatedErrors.gasOrder
+    //     ? (formatedErrors.gasOrder += " \n No such order")
+    //     : (formatedErrors.gasOrder = "No such order")
+    //   isValid = false
+    // }
+    // if (deadline + ADDITIONAL_TIME_SECONDS <= getUnixTimestampInSeconds(new Date())) {
+    //   formatedErrors.gasOrder
+    //     ? (formatedErrors.deadlineTime += " \n Must be in the future")
+    //     : (formatedErrors.deadlineTime = "Must be in the future")
+    //   isValid = false
+    // }
     if (!isValid) {
       setValidationErrors(formatedErrors)
       return false
@@ -372,6 +374,8 @@ export default function TransactionCreate() {
 
   const handleSubmit = () => {
     setIsValidating(true)
+
+    console.log(validateSearchForm())
 
     if (validateSearchForm()) {
       //executeFunction()
