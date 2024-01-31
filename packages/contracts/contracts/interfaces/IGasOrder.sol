@@ -33,13 +33,6 @@ struct Payment {
 }
 
 interface IGasOrder {
-  function reportExecution(
-    Message calldata message,
-    address fulfiller,
-    uint256 gasSpent,
-    uint256 infrastructureGas
-  ) external;
-
   event OrderCreate(uint256 indexed id, uint256 executionWindow);
   event OrderAccept(uint256 indexed id, address indexed executor);
   event OrderManagerChanged(uint256 indexed id, address indexed oldManager, address indexed newManager);

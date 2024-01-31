@@ -55,21 +55,6 @@ abstract contract HashMessage {
   }
 }
 
-abstract contract ReproducerMessage is HashMessage {
-  bytes32 public domain_separator;
-
-  function verifier() public virtual returns (address);
-
-  // @dev it is required to call the function after setting up the GasOrder contract
-  function updateDomainSeparator() external {
-    domain_separator = VerifierMessage(verifier()).domainSeparator();
-  }
-
-  function _hashTypedDataV4(bytes32 structHash) internal view override returns (bytes32) {
-    return MessageHashUtils.toTypedDataHash(domain_separator, structHash);
-  }
-}
-
 contract VerifierMessage is HashMessage, EIP712 {
   constructor(string memory name, string memory version) EIP712(name, version) {}
 

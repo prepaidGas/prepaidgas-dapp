@@ -13,7 +13,6 @@ const {
 } = require("../scripts/constants/index.js")
 
 const { createOrder } = require("../scripts/helpers/order.js")
-const { precalculateAddress } = require("../scripts/helpers/index.js")
 
 describe("GasOrder", function () {
   // We define a fixture to reuse the same setup in every test.
@@ -22,17 +21,10 @@ describe("GasOrder", function () {
   async function initialSetup() {
     const [admin, ...accounts] = await ethers.getSigners()
 
-    const ExecutorFactory = await ethers.getContractFactory("Executor")
     const GasOrderFactory = await ethers.getContractFactory("GasOrder")
-
-    const GasOrderContractAddress = await precalculateAddress(admin, 1)
-
-    const ExecutorContract = await ExecutorFactory.deploy(GasOrderContractAddress, PROJECT_NAME, PROJECT_VERSION)
-    await ExecutorContract.deploymentTransaction().wait()
     // @todo add deploy error handling
-    console.log(`Executor contract deployed: ${ExecutorContract.target}`)
 
-    const GasOrderContract = await GasOrderFactory.deploy(ExecutorContract.target, TOKEN_LINK)
+    const GasOrderContract = await GasOrderFactory.deploy(PROJECT_NAME, PROJECT_VERSION, TOKEN_LINK)
     await GasOrderContract.deploymentTransaction().wait()
     console.log(`GasOrder contract deployed: ${GasOrderContract.target}`)
 
@@ -49,7 +41,7 @@ describe("GasOrder", function () {
     await GasOrderContract.setFee(1, SYSTEM_FEE)
     await GasOrderContract.setFee(2, SYSTEM_FEE)
 
-    return { accounts, admin, ExecutorContract, GasOrderContract, TokenContract }
+    return { accounts, admin, GasOrderContract, TokenContract }
   }
 
   describe("Order operations", function () {

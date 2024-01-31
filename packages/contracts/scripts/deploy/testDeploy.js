@@ -15,16 +15,9 @@ async function initDeploymentSetup() {
   console.log("Network chain id=", network.chainId)
   console.log("Network data", network)
 
-  const ExecutorFactory = await ethers.getContractFactory("Executor")
   const GasOrderFactory = await ethers.getContractFactory("GasOrder")
 
-  const GasOrderContractAddress = await precalculateAddress(admin, 1)
-  const ExecutorContract = await ExecutorFactory.deploy(GasOrderContractAddress, PROJECT_NAME, PROJECT_VERSION)
-  await ExecutorContract.deploymentTransaction().wait()
-  // @todo add deploy error handling
-  console.log(`Executor contract deployed: ${ExecutorContract.target}`)
-
-  const GasOrderContract = await GasOrderFactory.deploy(ExecutorContract.target, TOKEN_LINK)
+  const GasOrderContract = await GasOrderFactory.deploy(PROJECT_NAME, PROJECT_VERSION, TOKEN_LINK)
   await GasOrderContract.deploymentTransaction().wait()
   console.log(`GasOrder contract deployed: ${GasOrderContract.target}`)
 
@@ -36,8 +29,6 @@ async function initDeploymentSetup() {
   await GasOrderContract.setFee(0, SYSTEM_FEE)
   await GasOrderContract.setFee(1, SYSTEM_FEE)
   await GasOrderContract.setFee(2, SYSTEM_FEE)
-
-  await GasOrderContract.updateDomainSeparator()
 
   // @dev send mock tokens to the tester hardhat address
   await TokenContract.transfer("0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65", "100000000000000000000000")

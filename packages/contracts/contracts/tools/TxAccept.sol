@@ -3,13 +3,11 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import "../Executor.sol";
-
 import "../base/GasOrderGetters.sol";
-import {ReproducerMessage, Message} from "../base/VerifierMessage.sol";
+import {VerifierMessage, Message} from "../base/VerifierMessage.sol";
 import {OrderStatus} from "../interfaces/IGasOrder.sol";
 
-abstract contract TxAccept is GasOrderGetters, ReproducerMessage {
+abstract contract TxAccept is VerifierMessage, GasOrderGetters {
   using ECDSA for bytes32;
 
   mapping(address => mapping(uint256 => bool)) public nonce;

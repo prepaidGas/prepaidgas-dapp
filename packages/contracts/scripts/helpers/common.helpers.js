@@ -21,7 +21,7 @@ const orderHelper = require("./order.js")
 /**
  *
  * @param {Object} essentialProps
- * @param {*} essentialProps.ExecutorContract
+ * @param {*} essentialProps.GasOrderContract
  * @param {*} essentialProps.signer
  * @param {Object} options
  * @param {*} options.customNonce - Specify custom nonce, otherwise will use random nonce
@@ -32,7 +32,7 @@ const orderHelper = require("./order.js")
  * @returns
  */
 async function createSignedMsg(essentialProps, options = {}) {
-  const { signer, ExecutorContract } = essentialProps
+  const { signer, GasOrderContract } = essentialProps
 
   await time.increase(36001)
 
@@ -56,7 +56,7 @@ async function createSignedMsg(essentialProps, options = {}) {
   const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data }
 
   const signedMessage = await signer.signTypedData(
-    domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, ExecutorContract),
+    domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, GasOrderContract),
     { Message: messageType },
     messageStruct,
   )

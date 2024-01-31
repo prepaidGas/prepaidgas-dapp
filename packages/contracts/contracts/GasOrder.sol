@@ -3,6 +3,8 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import "./tools/TxAccept.sol";
 
@@ -11,6 +13,7 @@ import {ERC1155ish} from "./base/ERC1155ish.sol";
 import {FeeProcessor, Fee} from "./tools/FeeProcessor.sol";
 import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/IGasOrder.sol";
 
+// @todo UPDATE the comments
 /**
  * @title GasOrder
  * @notice This contract manages the deposit for Gas orders
@@ -18,7 +21,7 @@ import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/I
  * @author SteMak, web3skeptic (markfender)
  */
 
-contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
+contract GasOrder is IGasOrder, FeeProcessor, TxAccept, ReentrancyGuard {
   using SafeERC20 for IERC20;
 
   uint256 private _ordersCount;
@@ -30,15 +33,11 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
 
   mapping(uint256 => address) private _executor;
 
-  address private immutable _execution;
-
-  constructor(address executionEndpoint, string memory link) ERC1155ish(link) {
-    _execution = executionEndpoint;
-  }
-
-  function verifier() public view override returns (address) {
-    return _execution;
-  }
+  constructor(
+    string memory name,
+    string memory version,
+    string memory link
+  ) VerifierMessage(name, version) ERC1155ish(link) {}
 
   // @todo add support of our _msgSender
   // @todo gas optimization
@@ -203,12 +202,12 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
    *
    * This function verifies the execution of an order and handles gas costs, rewards, and guarantees.
    */
-  function reportExecution(
+  function _reportExecution(
     Message calldata message,
     address fulfiller,
     uint256 gasSpent,
     uint256 infrastructureGas
-  ) external executionCallback specificStatus(message.gasOrder, OrderStatus.Active) {
+  ) internal specificStatus(message.gasOrder, OrderStatus.Active) {
     uint256 id = message.gasOrder;
     address from = message.from;
     address onBehalf = message.onBehalf;
@@ -290,9 +289,103 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept {
     return _executor[id];
   }
 
-  //function status(uint256) public returns (OrderStatus);
+  /// ----------- EXECUTOR LOGIC
 
-  function execution() public view override returns (address) {
-    return _execution;
+  using ECDSA for bytes32;
+
+  event Execution(
+    address indexed from,
+    uint256 nonce,
+    uint256 indexed gasOrder,
+    address indexed onBehalf,
+    bool status,
+    bytes result,
+    uint256 timestamp,
+    address fulfiller,
+    bool liquidation
+  );
+
+  modifier deadlineMet(uint256 deadline) {
+    if (deadline > block.timestamp) revert DeadlineNotMet(block.timestamp, deadline);
+    _;
+  }
+
+  /**
+   * @dev Executes the actions specified in the message.
+   *
+   * @param message The message to execute with the platform metadata.
+   * @param signature The senders signature of the message.
+   *
+   * This function verifies the validity of executing the message and performs the actions.
+   * After execution the registered executor will be rewarded.
+   */
+  function execute(Message calldata message, bytes calldata signature) external nonReentrant {
+    uint256 gasSpent = _execute(message, signature, false);
+
+    /// @dev address(0) means registered executor should be rewarded
+    _reportExecution(message, address(0), gasSpent, INFR_GAS_EXECUTE);
+  }
+
+  /**
+   * @dev Initiates the liquidation process.
+   *
+   * @param message The message to execute with the platform metadata.
+   * @param signature The senders signature of the message.
+   *
+   * This function verifies the validity of liquidation and performs the necessary actions.
+   * After execution the liquidator will be rewarded.
+   */
+  function liquidate(Message calldata message, bytes calldata signature) external nonReentrant {
+    uint256 gasSpent = _execute(message, signature, true);
+    //@todo recheck the corectness of these operations
+    uint256 infrastructureGas = INFR_GAS_LIQUIDATE + INFR_GAS_RECOVER_SIGNER;
+    _reportExecution(message, msg.sender, gasSpent, infrastructureGas);
+  }
+
+  // @todo check if reentrancy protection is needed
+  function liquidateWithoutExecution(Message calldata message) external nonReentrant {
+    _reportExecution(message, message.from, 0, 0);
+  }
+
+  /**
+   * @dev Executes the actions specified in the message.
+   *
+   * @param message The message to execute with the platform metadata.
+   * @param signature The senders signature of the message.
+   * @param liquidation A flag indicating when the execution is called by liquidator.
+   * @return gasSpent The amount of Gas used during execution.
+   *
+   * This function verifies the validity of executing the message and performs the actions
+   * described in the message. It also updates nonce and emits an execution event.
+   */
+  function _execute(
+    Message calldata message,
+    bytes calldata signature,
+    bool liquidation
+  ) private returns (uint256 gasSpent) {
+    bytes32 digest = messageHash(message);
+    address recovered = digest.recover(signature);
+    /// @dev recovered could not be 0x0 due to `ECDSA.recover` design
+    if (recovered != message.from) revert UnexpectedRecovered(recovered, message.from);
+
+    uint256 gas = gasleft();
+    (bool success, bytes memory returndata) = message.to.call{gas: message.gas}(
+      /// @dev to support meta transactions the last parameter should be `from` and will be convered to `_msgSender()`
+      abi.encodePacked(message.data, message.from)
+    );
+
+    gasSpent = gas - gasleft() - INFR_GAS_GET_GAS_SPENT;
+
+    emit Execution(
+      message.from,
+      message.nonce,
+      message.gasOrder,
+      message.onBehalf,
+      success,
+      returndata,
+      block.timestamp,
+      msg.sender,
+      liquidation
+    );
   }
 }

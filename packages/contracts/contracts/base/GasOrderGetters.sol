@@ -30,10 +30,6 @@ struct FilteredOrder {
 abstract contract GasOrderGetters is ERC1155ish {
   /// @dev modifiers
   // @todo move events to a separate file, probably to interface
-  modifier executionCallback() {
-    if (execution() != msg.sender) revert Unauthorized(msg.sender, execution());
-    _;
-  }
 
   modifier deadlineNotMet(uint256 deadline) {
     if (deadline <= block.timestamp) revert DeadlineExpired(block.timestamp, deadline);
@@ -69,8 +65,6 @@ abstract contract GasOrderGetters is ERC1155ish {
   function guarantee(uint256) public view virtual returns (GasPayment memory);
 
   function executor(uint256) public view virtual returns (address);
-
-  function execution() public view virtual returns (address);
 
   /**
    * @dev Gets the current status of an order with the given ID.
