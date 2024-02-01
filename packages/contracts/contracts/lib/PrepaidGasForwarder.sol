@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
-import {IExecutor} from "../interfaces/IExecutor.sol";
+import {IGasOrder} from "../interfaces/IGasOrder.sol";
 
 /**
  *
@@ -19,10 +19,10 @@ abstract contract PrepaidGasForewarder is ERC2771Context, Ownable {
 
   EnumerableSet.AddressSet internal _trustedForewarders;
 
-  // @todo replace `_executorContract` with hardcoded value
+  // @todo replace `_gasOrderContract` with hardcoded value
 
-  constructor(IExecutor _executorContract) ERC2771Context(address(_executorContract)) {
-    _trustedForewarders.add(address(_executorContract));
+  constructor(IGasOrder _gasOrderContract) ERC2771Context(address(_gasOrderContract)) {
+    _trustedForewarders.add(address(_gasOrderContract));
   }
 
   function isTrustedForwarder(address _forewarder) public view override returns (bool) {

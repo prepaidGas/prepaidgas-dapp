@@ -23,6 +23,7 @@ import {Order, OrderStatus, GasPayment, Payment, IGasOrder} from "./interfaces/I
 
 contract GasOrder is IGasOrder, FeeProcessor, TxAccept, ReentrancyGuard {
   using SafeERC20 for IERC20;
+  using ECDSA for bytes32;
 
   uint256 private _ordersCount;
   mapping(uint256 => Order) private _order;
@@ -289,26 +290,7 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept, ReentrancyGuard {
     return _executor[id];
   }
 
-  /// ----------- EXECUTOR LOGIC
-
-  using ECDSA for bytes32;
-
-  event Execution(
-    address indexed from,
-    uint256 nonce,
-    uint256 indexed gasOrder,
-    address indexed onBehalf,
-    bool status,
-    bytes result,
-    uint256 timestamp,
-    address fulfiller,
-    bool liquidation
-  );
-
-  modifier deadlineMet(uint256 deadline) {
-    if (deadline > block.timestamp) revert DeadlineNotMet(block.timestamp, deadline);
-    _;
-  }
+  /// EXECUTOR LOGIC
 
   /**
    * @dev Executes the actions specified in the message.

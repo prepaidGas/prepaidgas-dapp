@@ -31,6 +31,11 @@ abstract contract GasOrderGetters is ERC1155ish {
   /// @dev modifiers
   // @todo move events to a separate file, probably to interface
 
+  modifier deadlineMet(uint256 deadline) {
+    if (deadline > block.timestamp) revert DeadlineNotMet(block.timestamp, deadline);
+    _;
+  }
+
   modifier deadlineNotMet(uint256 deadline) {
     if (deadline <= block.timestamp) revert DeadlineExpired(block.timestamp, deadline);
     _;

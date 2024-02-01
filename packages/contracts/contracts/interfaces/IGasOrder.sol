@@ -33,6 +33,17 @@ struct Payment {
 }
 
 interface IGasOrder {
+  event Execution(
+    address indexed from,
+    uint256 nonce,
+    uint256 indexed gasOrder,
+    address indexed onBehalf,
+    bool status,
+    bytes result,
+    uint256 timestamp,
+    address fulfiller,
+    bool liquidation
+  );
   event OrderCreate(uint256 indexed id, uint256 executionWindow);
   event OrderAccept(uint256 indexed id, address indexed executor);
   event OrderManagerChanged(uint256 indexed id, address indexed oldManager, address indexed newManager);
