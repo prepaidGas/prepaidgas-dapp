@@ -209,4 +209,8 @@ a {
   .body-pd {
     padding-left: calc(var(--nav-width) + 156px);
   }
+
+  .link {
+    @apply text-[#3b82f6] underline hover:brightness-[0.85];
+  }
 }
