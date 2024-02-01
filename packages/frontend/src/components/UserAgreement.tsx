@@ -1,7 +1,9 @@
 import { ReactNode, useState } from "react"
 import Link from "next/link"
+import { Button } from "@tremor/react"
+import CustomConnectBttn from "./CustomConnectBttn"
 
-export default function UserAgreement({ children = null }: { children: ReactNode | null }) {
+export default function UserAgreement() {
   const [isTosAccepted, setIsTosAccepted] = useState(false)
 
   return (
@@ -21,7 +23,10 @@ export default function UserAgreement({ children = null }: { children: ReactNode
             </Link>
           </label>
         </div>
-        {isTosAccepted ? <div className="flex mt-4 items-center justify-center">{children}</div> : null}
+        {/* {isTosAccepted ? <div className="flex mt-4 items-center justify-center">{children}</div> : null} */}
+        <div className="flex mt-4 items-center justify-center">
+          <CustomConnectBttn isActive={isTosAccepted} />
+        </div>
       </div>
     </div>
   )
