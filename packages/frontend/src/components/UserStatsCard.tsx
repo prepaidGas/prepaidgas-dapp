@@ -33,7 +33,7 @@ export default function UserStatsCard() {
   const getTotalGas = async () => {
     try {
       const data = await readContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "getTotalBalance",
         args: [address, []],
@@ -50,7 +50,7 @@ export default function UserStatsCard() {
   const getOdersCount = async (status: number) => {
     try {
       const data = await readContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "getMatchingOrdersCount",
         args: ["0x0000000000000000000000000000000000000000", status],

@@ -1,4 +1,3 @@
-const Executor = require("abi/Executor.sol/Executor.json")
 const GasOrder = require("abi/GasOrder.sol/GasOrder.json")
 const MockToken = require("abi/mock/MockToken.sol/MockToken.json")
 
@@ -19,8 +18,7 @@ export interface ABIEntry {
   name?: string // Optional if it's a function
 }
 
-const ExecutorABI: ABIEntry[] = Executor.abi
 const GasOrderABI: ABIEntry[] = GasOrder.abi
 const MockTokenABI: ABIEntry[] = MockToken.abi
 
-export { ExecutorABI, GasOrderABI, MockTokenABI }
+export { GasOrderABI, MockTokenABI }

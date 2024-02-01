@@ -53,10 +53,10 @@ export default function SearchOrder() {
     console.log("SearchArgs: ", searchArgs)
     try {
       const data = await readContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "getFilteredOrders",
-        //TODO replace second argument with users address instead of defaultManager (already done but i'm leaving todo for now)
+        //@todo replace second argument with users address instead of defaultManager (already done but i'm leaving todo for now)
         args: searchArgs,
       })
       // console.log("DATA", data)
@@ -71,7 +71,7 @@ export default function SearchOrder() {
   const getTotalEntriesNumber = async (filterOptions) => {
     try {
       const data = await readContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "getMatchingOrdersCount",
         args: [filterOptions.manager || defaultManager, filterOptions.status],

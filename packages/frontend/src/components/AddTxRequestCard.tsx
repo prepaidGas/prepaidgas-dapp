@@ -113,7 +113,7 @@ export default function AddTxRequestCard({
     // Add Tx Request
     try {
       const data = await writeContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "addTransaction",
         args: [
@@ -126,6 +126,7 @@ export default function AddTxRequestCard({
             deadline: getUnixTimestampInSeconds(combineDateAndTime(inputValues.deadlineDate, inputValues.deadlineTime)),
             to: inputValues.to,
             gas: inputValues.gas,
+            tips: 0, // @todo update the value
           } as MessageStruct,
         ],
       })

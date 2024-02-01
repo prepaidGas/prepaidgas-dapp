@@ -39,7 +39,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     setIsLoading(true)
     try {
       const data = await readContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "getOrdersByIds",
         args: [[params.slug], address],
@@ -56,7 +56,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     try {
       const data = await readContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "balanceAvailable",
         args: [address, params.slug],
@@ -72,7 +72,7 @@ export default function Page({ params }: { params: { slug: string } }) {
   const revokeOrder = async () => {
     try {
       const data = await writeContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "revokeOrder",
         args: [params.slug],
@@ -88,7 +88,7 @@ export default function Page({ params }: { params: { slug: string } }) {
   const retrieveGuarantee = async () => {
     try {
       const data = await writeContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "retrieveGuarantee",
         args: [params.slug],
@@ -104,7 +104,7 @@ export default function Page({ params }: { params: { slug: string } }) {
   const retrieveGasCost = async () => {
     try {
       const data = await writeContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "retrieveGasCost",
         args: [address, params.slug, gasAmountHasChanged ? specifiedBalance : userBalance],
@@ -122,7 +122,7 @@ export default function Page({ params }: { params: { slug: string } }) {
   const transferOrderManagement = async () => {
     try {
       const data = await writeContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "transferOrderManagement",
         args: [params.slug, specifiedManager],

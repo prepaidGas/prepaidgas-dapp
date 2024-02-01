@@ -169,7 +169,7 @@ export default function CreateOrderCard({
           abi: MockTokenABI,
           functionName: "approve",
           args: [
-            "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+            "0x5FbDB2315678afecb367f032d93F642f64180aa3",
             inputValues.gasCostValueGasPrice * inputValues.gasAmount + inputValues.rewardValueAmount,
           ],
         })
@@ -186,7 +186,7 @@ export default function CreateOrderCard({
           address: inputValues.rewardValueToken as `0x${string}`,
           abi: MockTokenABI,
           functionName: "approve",
-          args: ["0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", inputValues.rewardValueAmount],
+          args: ["0x5FbDB2315678afecb367f032d93F642f64180aa3", inputValues.rewardValueAmount],
         })
         console.log("CreateOrderData: ", data)
       } catch (e) {
@@ -199,7 +199,7 @@ export default function CreateOrderCard({
           abi: MockTokenABI,
           functionName: "approve",
           args: [
-            "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+            "0x5FbDB2315678afecb367f032d93F642f64180aa3",
             inputValues.gasCostValueGasPrice * inputValues.gasAmount,
           ],
         })
@@ -212,7 +212,7 @@ export default function CreateOrderCard({
     // Create Order
     try {
       const data = await writeContract({
-        address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         abi: GasOrderABI,
         functionName: "createOrder",
         args: [

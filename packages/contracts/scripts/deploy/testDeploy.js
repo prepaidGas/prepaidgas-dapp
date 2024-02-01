@@ -69,7 +69,7 @@ async function initDeploymentSetup() {
   // fruitsToGet.map(fruit => getNumFruit(fruit))
   // const numFruits = await Promise.all(promises)
 
-  return { accounts, admin, ExecutorContract, GasOrderContract, TokenContract }
+  return { accounts, admin, GasOrderContract, TokenContract }
 }
 
 initDeploymentSetup().catch((error) => {
