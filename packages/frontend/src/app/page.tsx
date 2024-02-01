@@ -18,5 +18,5 @@ import dynamic from "next/dynamic"
 const DynamicDialogWindow = dynamic(() => import("../components/DialogWindow"), { ssr: false })
 
 export default function Home() {
-  redirect("/order/search")
+  redirect("/order/create")
 }
