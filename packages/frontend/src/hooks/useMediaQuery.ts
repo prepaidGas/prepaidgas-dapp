@@ -3,14 +3,16 @@
 
 import { useState, useLayoutEffect } from "react"
 import useEventListener from "./useEventListener"
+import useIsomorphicLayoutEffect from "./useIsomorphicLayoutEffect"
 
 function useMediaQuery(query) {
+  //use true for a quick fix
   const [isMatch, setIsMatch] = useState(false)
   const [mediaQueryList, setMediaQueryList] = useState(null)
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const matchQueryList = window.matchMedia(query)
-    console.log("Match : ", matchQueryList)
+    console.log("useIsomorphicLayoutEffect", matchQueryList)
 
     setMediaQueryList(matchQueryList)
     setIsMatch(matchQueryList.matches)

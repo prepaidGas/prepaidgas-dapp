@@ -22,11 +22,16 @@ import {
   SelectItem,
   Button,
   DatePickerValue,
+  Tab,
+  TabGroup,
+  TabList,
+  TabPanel,
+  TabPanels,
 } from "@tremor/react"
 import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX } from "../constants/regexConstants"
-import { SPINNER_COLOR } from "../constants/themeConstants"
+import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX } from "../../constants/regexConstants"
+import { SPINNER_COLOR } from "../../constants/themeConstants"
 import { z } from "zod"
 
 const schema = z.object({
@@ -48,7 +53,7 @@ const schema = z.object({
 
 type CreateOrderState = z.infer<typeof schema>
 
-export default function CreateOrderCard({
+export default function CreateOrderCardAdvanced({
   setShowDialogWindow,
   setTransactionDetails,
 }: {
@@ -298,7 +303,7 @@ export default function CreateOrderCard({
   }, [inputValues])
 
   return (
-    <Card className="mt-6 flex flex-col w-full">
+    <div className="mt-6 flex flex-col w-full">
       {/* Gas Amount and Date & Time Settings */}
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex flex-col">
@@ -526,6 +531,6 @@ export default function CreateOrderCard({
           {isLoading ? "" : "Create"}
         </Button>
       </div>
-    </Card>
+    </div>
   )
 }

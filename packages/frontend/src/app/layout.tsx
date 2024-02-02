@@ -25,17 +25,29 @@ const wagmiConfig = createConfig({
   publicClient,
 })
 
-import { Grid, Col, Card, Button } from "@tremor/react"
+import { Grid, Col, Card, Button, Icon, Title } from "@tremor/react"
 import CookieBanner from "../components/CookieBanner"
 import Sidebar from "../components/Sidebar"
-import { useState } from "react"
-import { Bars4Icon, XMarkIcon } from "@heroicons/react/24/outline"
+import { useEffect, useLayoutEffect, useState } from "react"
+import { Bars4Icon, WalletIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import useMediaQuery from "../hooks/useMediaQuery"
+import UserAgreement from "../components/UserAgreement"
+import DialogWindow from "../components/DialogWindow"
+import CustomConnectBttn from "../components/CustomConnectBttn"
 
 // @todo add env var with the contracts addresses
 const inter = Inter({ subsets: ["latin"] })
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const isMobile = useMediaQuery("(max-width: 1024px)")
+
   const [showSidebar, setShowSidebar] = useState(false)
+  // const [showDialogWindow, setShowDialogWindow] = useState(false)
+
+  useLayoutEffect(() => {
+    setShowSidebar(!isMobile)
+    console.log("UseEffect: ", isMobile)
+  }, [isMobile])
 
   return (
     <html lang="en" className="h-full">
@@ -56,6 +68,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <ConnectButton />
                 </Card>
               </header>
+
+              {/* <DialogWindow
+                isClosable={false}
+                withoutDescription={true}
+                title={
+                  <div className="flex flex-row items-center">
+                    <Icon color="orange" variant="outlined" size="lg" icon={WalletIcon}></Icon>
+                    <Title className="ml-4">Wallet Connection</Title>
+                  </div>
+                }
+                description="Please accept our terms of service and connect your wallet to continue with order creation"
+                actionButtons={[<UserAgreement />]}
+                onClose={() => setShowDialogWindow(false)}
+              /> */}
 
               <Sidebar showSidebar={showSidebar}></Sidebar>
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, Title, Text, Grid } from "@tremor/react"
-import CreateOrderCard from "../../../../components/CreateOrderCard"
+import CreateOrderCard from "../../../../components/CreateOrderCards/CreateOrderCard"
 import { useEffect, useState } from "react"
 import DialogWindow from "../../../../components/DialogWindow"
 import { SPINNER_COLOR } from "../../../../constants/themeConstants"
