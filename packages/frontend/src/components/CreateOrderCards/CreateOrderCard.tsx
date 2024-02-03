@@ -1,33 +1,19 @@
 "use client"
 
+import {
+  getTomorrowStartDate,
+  getTomorrowEndDate,
+  combineDateAndTime,
+  getUnixTimestampInSeconds,
+} from "utils/dateAndTime.utils"
 import format from "date-fns/format"
+
 import { writeContract, waitForTransaction } from "@wagmi/core"
 import { MockTokenABI, GasOrderABI } from "helpers/abi"
-
-import { parse, getHours, getMinutes, getSeconds } from "date-fns"
 import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
 
 import { CalendarDaysIcon, CheckIcon, ClockIcon, FireIcon, NoSymbolIcon } from "@heroicons/react/24/outline"
-import {
-  Card,
-  Text,
-  TextInput,
-  NumberInput,
-  DatePicker,
-  Accordion,
-  AccordionHeader,
-  AccordionBody,
-  Icon,
-  Select,
-  SelectItem,
-  Button,
-  DatePickerValue,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
-} from "@tremor/react"
+import { Card, Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react"
 import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX } from "../../constants/regexConstants"
@@ -53,7 +39,7 @@ const schema = z.object({
   gasCostTransfer: z.number().int().gt(0),
 })
 
-type CreateOrderState = z.infer<typeof schema>
+export type CreateOrderState = z.infer<typeof schema>
 
 export default function CreateOrderCard({
   setShowDialogWindow,
@@ -62,51 +48,6 @@ export default function CreateOrderCard({
   setShowDialogWindow: Dispatch<SetStateAction<boolean>>
   setTransactionDetails: Dispatch<SetStateAction<{}>>
 }) {
-  const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
-  const [isValidating, setIsValidating] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [wasRewardTransferChanged, setWasRewardTransferChanged] = useState(false)
-  const [wasGasCostTransferChanged, setWasGasCostTransferChanged] = useState(false)
-
-  const [validationErrors, setValidationErrors] = useState<null | { [key: string]: string }>(null)
-
-  const getTomorrowStartDate = () => {
-    const date = new Date()
-    date.setDate(date.getDate() + 1)
-    return date
-  }
-
-  const getTomorrowEndDate = () => {
-    const date = new Date()
-    date.setDate(date.getDate() + 1)
-    return new Date(date.getTime() + 30 * 60000)
-  }
-
-  const parseTime = (timeString: string) => {
-    const parsedTime = parse(timeString, "HH:mm:ss", new Date())
-    const hours = getHours(parsedTime)
-    const minutes = getMinutes(parsedTime)
-    const seconds = getSeconds(parsedTime)
-    return [hours, minutes, seconds]
-  }
-
-  const combineDateAndTime = (date: Date, time: string) => {
-    const hoursMinutesSeconds = parseTime(time)
-    const combinedDate = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      hoursMinutesSeconds[0],
-      hoursMinutesSeconds[1],
-      hoursMinutesSeconds[2],
-    )
-    return combinedDate
-  }
-
-  const getUnixTimestampInSeconds = (date: Date) => {
-    return Math.floor(date.getTime() / 1000)
-  }
-
   // const initialState: CreateOrderState = {
   //   gasAmount: 0,
   //   executionPeriodStartDate: getTomorrowStartDate(),
@@ -142,9 +83,10 @@ export default function CreateOrderCard({
     rewardTransfer: 10,
     gasCostTransfer: 100,
   }
-
-  //Input values
   const [inputValues, setInputValues] = useState({ ...initialState })
+  const [validationErrors, setValidationErrors] = useState<null | { [key: string]: string }>(null)
+  const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
+  const [isValidating, setIsValidating] = useState(false)
 
   const createOrder = async () => {
     console.log("CreateOrderTestArr: START")
@@ -251,21 +193,6 @@ export default function CreateOrderCard({
     console.log("CreateOrderTestArr: END")
   }
 
-  const clampNumber = (value, minNum, maxNum) => {
-    console.log("Clamped: ", value)
-    if (value === 0) {
-      return 0
-    }
-
-    if (value < minNum) {
-      return minNum
-    } else if (value > maxNum) {
-      return maxNum
-    } else {
-      return value
-    }
-  }
-
   const validateSearchForm = () => {
     setValidationErrors(null)
 
@@ -306,7 +233,6 @@ export default function CreateOrderCard({
 
   return (
     <Card className="mt-6 flex flex-col w-full">
-      {/* Gas Amount and Date & Time Settings */}
       <TabGroup>
         <TabList className="mt-8">
           <Tab>Simple</Tab>
@@ -317,12 +243,20 @@ export default function CreateOrderCard({
             <CreateOrderCardSimple
               setShowDialogWindow={setShowDialogWindow}
               setTransactionDetails={setTransactionDetails}
+              setInputValues={setInputValues}
+              inputValues={inputValues}
+              validationErrors={validationErrors}
+              handleSubmit={handleSubmit}
             />
           </TabPanel>
           <TabPanel>
             <CreateOrderCardAdvanced
               setShowDialogWindow={setShowDialogWindow}
               setTransactionDetails={setTransactionDetails}
+              setInputValues={setInputValues}
+              inputValues={inputValues}
+              validationErrors={validationErrors}
+              handleSubmit={handleSubmit}
             />
           </TabPanel>
         </TabPanels>
