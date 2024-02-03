@@ -6,11 +6,11 @@ import {
   parseTime,
   combineDateAndTime,
   getUnixTimestampInSeconds,
-} from "utils/dateAndTime.utils"
+} from "@/utils/dateAndTime.utils"
 import format from "date-fns/format"
 
 import { writeContract, waitForTransaction } from "@wagmi/core"
-import { MockTokenABI, GasOrderABI } from "helpers/abi"
+import { MockTokenABI, GasOrderABI } from "@/helpers/abi"
 import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
 
 import { CalendarDaysIcon, CheckIcon, ClockIcon, FireIcon, NoSymbolIcon } from "@heroicons/react/24/outline"
@@ -29,8 +29,7 @@ import {
 } from "@tremor/react"
 import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX } from "../../constants/regexConstants"
-import { SPINNER_COLOR } from "../../constants/themeConstants"
+import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX, SPINNER_COLOR } from "@/constants"
 import { z } from "zod"
 
 const schema = z.object({

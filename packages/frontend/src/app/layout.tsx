@@ -26,14 +26,14 @@ const wagmiConfig = createConfig({
 })
 
 import { Grid, Col, Card, Button, Icon, Title } from "@tremor/react"
-import CookieBanner from "../components/CookieBanner"
-import Sidebar from "../components/Sidebar"
+import CookieBanner from "@/components/CookieBanner"
+import Sidebar from "@/components/Sidebar"
 import { useEffect, useLayoutEffect, useState } from "react"
 import { Bars4Icon, WalletIcon, XMarkIcon } from "@heroicons/react/24/outline"
-import useMediaQuery from "../hooks/useMediaQuery"
-import UserAgreement from "../components/UserAgreement"
-import DialogWindow from "../components/DialogWindow"
-import CustomConnectBttn from "../components/CustomConnectBttn"
+import useMediaQuery from "@/hooks/useMediaQuery"
+import UserAgreement from "@/components/UserAgreement"
+import DialogWindow from "@/components/DialogWindow"
+import CustomConnectBttn from "@/components/CustomConnectBttn"
 
 // @todo add env var with the contracts addresses
 const inter = Inter({ subsets: ["latin"] })

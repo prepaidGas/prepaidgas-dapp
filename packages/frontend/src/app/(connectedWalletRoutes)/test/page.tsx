@@ -10,10 +10,12 @@ import { Card, Title, Subtitle, Text, Grid, Color, Button, TextInput, Metric } f
 import { useEffect, useState } from "react"
 import JsonFormatter from "react-json-formatter"
 import { z } from "zod"
-import { GasOrderABI } from "helpers/abi"
+import { GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
+
 import { useAccount } from "wagmi"
 import { TailSpin } from "react-loader-spinner"
-import { SPINNER_COLOR } from "../../../constants/themeConstants"
+
+import { SPINNER_COLOR } from "@/constants"
 
 const schemaSigning = z.object({
   dataTypes: z.any(),
@@ -93,7 +95,7 @@ export default function TestPage() {
       name: PROJECT_NAME,
       version: PROJECT_VERSION,
       chainId: CHAIN_ID,
-      verifyingContract: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      verifyingContract: prepaidGasCoreContractAddress(),
     }
 
     // const types = {
@@ -162,7 +164,7 @@ export default function TestPage() {
       console.log("signature: ", signature)
 
       const data = await readContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "messageHash",
         args: [messageTuple],
@@ -178,7 +180,7 @@ export default function TestPage() {
 
     // try {
     //   const data = await readContract({
-    //     address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    //     address: prepaidGasCoreContractAddress(),
     //     abi: GasOrderABI,
     //     functionName: "messageHash",
     //     args: [messageTuple],

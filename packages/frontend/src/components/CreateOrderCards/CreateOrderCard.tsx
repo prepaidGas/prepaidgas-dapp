@@ -5,19 +5,18 @@ import {
   getTomorrowEndDate,
   combineDateAndTime,
   getUnixTimestampInSeconds,
-} from "utils/dateAndTime.utils"
+} from "@/utils/dateAndTime.utils"
 import format from "date-fns/format"
 
 import { writeContract, waitForTransaction } from "@wagmi/core"
-import { MockTokenABI, GasOrderABI } from "helpers/abi"
+import { MockTokenABI, GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
 import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
 
 import { CalendarDaysIcon, CheckIcon, ClockIcon, FireIcon, NoSymbolIcon } from "@heroicons/react/24/outline"
 import { Card, Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react"
 import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX } from "../../constants/regexConstants"
-import { SPINNER_COLOR } from "../../constants/themeConstants"
+import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX, SPINNER_COLOR } from "@/constants"
 import { z } from "zod"
 import CreateOrderCardSimple from "./CreateOrderCardSimple"
 import CreateOrderCardAdvanced from "./CreateOrderCardAdvanced"
@@ -118,7 +117,7 @@ export default function CreateOrderCard({
           abi: MockTokenABI,
           functionName: "approve",
           args: [
-            "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+            prepaidGasCoreContractAddress(),
             inputValues.gasCostValueGasPrice * inputValues.gasAmount + inputValues.rewardValueAmount,
           ],
         })
@@ -135,7 +134,7 @@ export default function CreateOrderCard({
           address: inputValues.rewardValueToken as `0x${string}`,
           abi: MockTokenABI,
           functionName: "approve",
-          args: ["0x5FbDB2315678afecb367f032d93F642f64180aa3", inputValues.rewardValueAmount],
+          args: [prepaidGasCoreContractAddress(), inputValues.rewardValueAmount],
         })
         console.log("CreateOrderData: ", data)
       } catch (e) {
@@ -148,7 +147,7 @@ export default function CreateOrderCard({
           abi: MockTokenABI,
           functionName: "approve",
           args: [
-            "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+            prepaidGasCoreContractAddress(),
             inputValues.gasCostValueGasPrice * inputValues.gasAmount,
           ],
         })
@@ -161,7 +160,7 @@ export default function CreateOrderCard({
     // Create Order
     try {
       const data = await writeContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "createOrder",
         args: [

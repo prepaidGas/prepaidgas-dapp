@@ -4,19 +4,20 @@
 import { readContract } from "@wagmi/core"
 import RequestedTxSearchFiltersCard, {
   FilterOptionsRequestedTx,
-} from "../../../../components/RequestedTxSearchFiltersCard"
-import OrderCard from "../../../../components/OrderCard"
+} from "@/components/RequestedTxSearchFiltersCard"
+import OrderCard from "@/components/OrderCard"
 import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
 
 import { Title, Text, Metric, Color, Icon, Card } from "@tremor/react"
-import Pagination from "../../../../components/Pagination"
+import Pagination from "@/components/Pagination"
 
-import { GasOrderABI } from "helpers/abi"
+import { GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
 import { TailSpin } from "react-loader-spinner"
-import { SPINNER_COLOR } from "../../../../constants/themeConstants"
+import { SPINNER_COLOR } from "@/constants"
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
-import RequestedTxCard from "../../../../components/RequestedTxCard"
+import RequestedTxCard from "@/components/RequestedTxCard"
+
 
 interface RequestedTx {
   nonce: number
@@ -146,7 +147,7 @@ export default function RequestedTxPage() {
   const getTxStatus = async (nonce: number) => {
     try {
       const status = await readContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "lock",
         args: [address, nonce],

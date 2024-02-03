@@ -1,5 +1,5 @@
 import format from "date-fns/format"
-import { COLOR_BY_STATUS } from "../constants/themeConstants"
+import { COLOR_BY_STATUS } from "@/constants"
 
 import { Card, Text, Metric, Flex, Badge, Color } from "@tremor/react"
 import StatusBadge from "./StatusBadge"
