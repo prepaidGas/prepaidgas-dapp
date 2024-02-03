@@ -2,7 +2,7 @@
 
 import format from "date-fns/format"
 import { writeContract, waitForTransaction } from "@wagmi/core"
-import { MockTokenABI, GasOrderABI, prepaidGasCoreContractAddress } from "@helpers"
+import { MockTokenABI, GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
 import { parse, getHours, getMinutes, getSeconds } from "date-fns"
 import { MessageStruct } from "typechain-types/GasOrder"
 
