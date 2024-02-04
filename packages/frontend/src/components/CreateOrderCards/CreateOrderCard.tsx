@@ -5,18 +5,18 @@ import {
   getTomorrowEndDate,
   combineDateAndTime,
   getUnixTimestampInSeconds,
-} from "utils/dateAndTime.utils"
+} from "@/utils/dateAndTime.utils"
 import format from "date-fns/format"
 
 import { writeContract, waitForTransaction } from "@wagmi/core"
-import { MockTokenABI, GasOrderABI } from "helpers/abi"
+import { MockTokenABI, GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
 import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
 
 import { CalendarDaysIcon, CheckIcon, ClockIcon, FireIcon, NoSymbolIcon } from "@heroicons/react/24/outline"
 import { Card, Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react"
 import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX } from "../../constants/regexConstants"
+import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX, SPINNER_COLOR } from "@/constants"
 import { SPINNER_COLOR } from "../../constants/themeConstants"
 import { z } from "zod"
 import CreateOrderCardSimple from "./CreateOrderCardSimple"
@@ -87,6 +87,7 @@ export default function CreateOrderCard({
   const [validationErrors, setValidationErrors] = useState<null | { [key: string]: string }>(null)
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
   const [isValidating, setIsValidating] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const createOrder = async () => {
     console.log("CreateOrderTestArr: START")
