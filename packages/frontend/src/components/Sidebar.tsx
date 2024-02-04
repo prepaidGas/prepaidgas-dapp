@@ -18,7 +18,7 @@ import {
   ClockIcon,
 } from "@heroicons/react/24/outline"
 import { Card, Text, Icon, Title } from "@tremor/react"
-import { SPINNER_COLOR } from "../constants/themeConstants"
+import { SPINNER_COLOR } from "@/constants"
 import { z } from "zod"
 
 const schema = z.object({

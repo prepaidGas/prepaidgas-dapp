@@ -4,8 +4,7 @@ import { ZodIssue, z } from "zod"
 import { FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import { Card, TextInput, Select, SelectItem, Button } from "@tremor/react"
 
-import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX } from "../constants/regexConstants"
-import { ICON_BY_STATUS } from "../constants/themeConstants"
+import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX, ICON_BY_STATUS } from "@/constants"
 
 const schema = z.object({
   manager: z.string().regex(ETH_ADDRESS_OR_EMPTY_STRING_REGEX, { message: "Incorrect address" }),

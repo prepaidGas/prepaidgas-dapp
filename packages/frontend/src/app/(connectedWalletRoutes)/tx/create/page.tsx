@@ -4,10 +4,8 @@ import { z } from "zod"
 import { useAccount } from "wagmi"
 import { readContract, writeContract, waitForTransaction, signTypedData } from "@wagmi/core"
 
-import { ABIEntry, FieldEntry, GasOrderABI } from "helpers/abi"
+import { ABIEntry, FieldEntry, GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
 import { parse, getHours, getMinutes, getSeconds } from "date-fns"
-
-import { ADDITIONAL_TIME_SECONDS } from "../../../../constants/dateAndTimeConstants"
 
 import {
   Button,
@@ -24,13 +22,13 @@ import {
   Title,
 } from "@tremor/react"
 
-import { SPINNER_COLOR } from "../../../../constants/themeConstants"
+import { ADDITIONAL_TIME_SECONDS, SPINNER_COLOR } from "@/constants"
 import { TailSpin } from "react-loader-spinner"
 import { CheckIcon, ClockIcon, NoSymbolIcon, WalletIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import JsonFormatter from "react-json-formatter"
 import { CHAIN_ID, PROJECT_NAME, PROJECT_VERSION } from "constants/executor"
 import { ethers } from "ethers"
-import DialogWindow from "../../../../components/DialogWindow"
+import DialogWindow from "@/components/DialogWindow"
 
 const formSchema = z.object({
   nonce: z.number(),
@@ -404,7 +402,7 @@ export default function TransactionCreate() {
   const signMessage = async () => {
     try {
       const balance = await readContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "balanceOf",
         args: ["0x15d34aaf54267db7d7c367839aaf71a00a2c6a65", inputValues.gasOrder],
@@ -418,7 +416,7 @@ export default function TransactionCreate() {
       name: PROJECT_NAME,
       version: PROJECT_VERSION,
       chainId: CHAIN_ID,
-      verifyingContract: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      verifyingContract: prepaidGasCoreContractAddress(),
     }
 
     const types = {
@@ -491,7 +489,7 @@ export default function TransactionCreate() {
       console.log("signature: ", signature)
 
       const messageHash = await readContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "messageHash",
         args: [messageTuple],
@@ -499,7 +497,7 @@ export default function TransactionCreate() {
       console.log("Data: ", messageHash)
 
       const data = await writeContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "addTransaction",
         args: [message, signature],
@@ -517,7 +515,7 @@ export default function TransactionCreate() {
 
     // try {
     //   const data = await readContract({
-    //     address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    //     address: prepaidGasCoreContractAddress(),
     //     abi: GasOrderABI,
     //     functionName: "messageHash",
     //     args: [messageTuple],
@@ -546,7 +544,7 @@ export default function TransactionCreate() {
     const fetchNumberOfOrders = async () => {
       try {
         const numberOfOrders = await readContract({
-          address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+          address: prepaidGasCoreContractAddress(),
           abi: GasOrderABI,
           functionName: "ordersCount",
           args: [],

@@ -17,7 +17,6 @@ import { Card, Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react
 import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX, SPINNER_COLOR } from "@/constants"
-import { SPINNER_COLOR } from "../../constants/themeConstants"
 import { z } from "zod"
 import CreateOrderCardSimple from "./CreateOrderCardSimple"
 import CreateOrderCardAdvanced from "./CreateOrderCardAdvanced"
@@ -119,7 +118,7 @@ export default function CreateOrderCard({
           abi: MockTokenABI,
           functionName: "approve",
           args: [
-            "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+            prepaidGasCoreContractAddress(),
             inputValues.gasCostValueGasPrice * inputValues.gasAmount + inputValues.rewardValueAmount,
           ],
         })
@@ -136,7 +135,7 @@ export default function CreateOrderCard({
           address: inputValues.rewardValueToken as `0x${string}`,
           abi: MockTokenABI,
           functionName: "approve",
-          args: ["0x5FbDB2315678afecb367f032d93F642f64180aa3", inputValues.rewardValueAmount],
+          args: [prepaidGasCoreContractAddress(), inputValues.rewardValueAmount],
         })
         console.log("CreateOrderData: ", data)
       } catch (e) {
@@ -148,10 +147,7 @@ export default function CreateOrderCard({
           address: inputValues.gasCostValueToken as `0x${string}`,
           abi: MockTokenABI,
           functionName: "approve",
-          args: [
-            "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-            inputValues.gasCostValueGasPrice * inputValues.gasAmount,
-          ],
+          args: [prepaidGasCoreContractAddress(), inputValues.gasCostValueGasPrice * inputValues.gasAmount],
         })
         console.log("CreateOrderData: ", data)
       } catch (e) {
@@ -162,7 +158,7 @@ export default function CreateOrderCard({
     // Create Order
     try {
       const data = await writeContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "createOrder",
         args: [

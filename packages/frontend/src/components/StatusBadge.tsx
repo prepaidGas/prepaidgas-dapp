@@ -1,5 +1,5 @@
 import { Badge, Color } from "@tremor/react"
-import { COLOR_BY_STATUS, ICON_BY_STATUS, STATUS } from "../constants/themeConstants"
+import { COLOR_BY_STATUS, ICON_BY_STATUS, STATUS } from "@/constants"
 import React, { ReactNode } from "react"
 
 /* @dev Status bage */
