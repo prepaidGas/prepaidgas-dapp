@@ -17,7 +17,7 @@ import { Card, Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react
 import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX, SPINNER_COLOR } from "@/constants"
-import { z } from "zod"
+import { set, z } from "zod"
 import CreateOrderCardSimple from "./CreateOrderCardSimple"
 import CreateOrderCardAdvanced from "./CreateOrderCardAdvanced"
 
@@ -65,6 +65,8 @@ export default function CreateOrderCard({
   //   gasCostTransfer: 0,
   // }
 
+  //rewardValueToken: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+
   //TODO: this initial state is for tests only, remove in production
   const initialState: CreateOrderState = {
     gasAmount: 10,
@@ -72,12 +74,29 @@ export default function CreateOrderCard({
     executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
     executionPeriodEndDate: getTomorrowEndDate(),
     executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
-    rewardValueToken: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    rewardValueToken: "",
     rewardValueAmount: 10,
-    gasCostValueToken: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    gasCostValueToken: "",
     gasCostValueGasPrice: 10,
-    guaranteeValueToken: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    guaranteeValueToken: "",
     guaranteeValueGasPrice: 10,
+    executionWindow: 1000,
+    rewardTransfer: 10,
+    gasCostTransfer: 100,
+  }
+
+  const check: CreateOrderState = {
+    // gasAmount: 10,
+    // executionPeriodStartDate: getTomorrowStartDate(),
+    // executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
+    // executionPeriodEndDate: getTomorrowEndDate(),
+    // executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
+    // rewardValueToken: "",
+    // rewardValueAmount: 10,
+    // gasCostValueToken: "",
+    // gasCostValueGasPrice: 10,
+    // guaranteeValueToken: "",
+    // guaranteeValueGasPrice: 10,
     executionWindow: 1000,
     rewardTransfer: 10,
     gasCostTransfer: 100,
@@ -216,6 +235,32 @@ export default function CreateOrderCard({
     }
   }
 
+  const setAdvancedInputsToDefault = () => {
+    setInputValues({
+      //save current gas amount
+      gasAmount: inputValues.gasAmount,
+      //apply new time
+      executionPeriodStartDate: getTomorrowStartDate(),
+      executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
+      executionPeriodEndDate: getTomorrowEndDate(),
+      executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
+      //set all tokens to be equal to gas value token
+      gasCostValueToken: inputValues.gasCostValueToken,
+      guaranteeValueToken: inputValues.gasCostValueToken,
+      rewardValueToken: inputValues.gasCostValueToken,
+      //save current gasCostValueGasPrice
+      gasCostValueGasPrice: inputValues.gasCostValueGasPrice,
+      //recalculate reward and guarantee
+      guaranteeValueGasPrice: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
+      rewardValueAmount: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
+      //set execution window to initial value
+      executionWindow: initialState.executionWindow,
+      //TODO: recalculate reward transfer and gasCost transfer
+      rewardTransfer: 10,
+      gasCostTransfer: 100,
+    })
+  }
+
   useEffect(() => {
     console.log("INPUT_VALUES: ", inputValues)
 
@@ -232,7 +277,7 @@ export default function CreateOrderCard({
     <Card className="mt-6 flex flex-col w-full">
       <TabGroup>
         <TabList className="mt-8">
-          <Tab>Simple</Tab>
+          <Tab onClick={setAdvancedInputsToDefault}>Simple</Tab>
           <Tab>Advanced</Tab>
         </TabList>
         <TabPanels>

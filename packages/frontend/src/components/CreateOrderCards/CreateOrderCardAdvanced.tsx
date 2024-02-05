@@ -31,25 +31,7 @@ import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX, SPINNER_COLOR } from "@/constants"
 import { z } from "zod"
-
-const schema = z.object({
-  gasAmount: z.number().int().gt(0),
-  executionPeriodStartDate: z.date(),
-  executionPeriodStartTime: z.string(),
-  executionPeriodEndDate: z.date(),
-  executionPeriodEndTime: z.string(),
-  rewardValueToken: z.string(),
-  rewardValueAmount: z.number().int().gt(0),
-  gasCostValueToken: z.string(),
-  gasCostValueGasPrice: z.number().int().gt(0),
-  guaranteeValueToken: z.string(),
-  guaranteeValueGasPrice: z.number().int().gt(0),
-  executionWindow: z.number().int().gt(0),
-  rewardTransfer: z.number().int().gt(0),
-  gasCostTransfer: z.number().int().gt(0),
-})
-
-type CreateOrderState = z.infer<typeof schema>
+import { CreateOrderState } from "./CreateOrderCard"
 
 export default function CreateOrderCardAdvanced({
   setShowDialogWindow,
