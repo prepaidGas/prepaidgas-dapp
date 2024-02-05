@@ -130,7 +130,7 @@ export default function CreateOrderCardSimple({
             wrapperClass=""
             visible={isLoading}
           />
-          {isLoading ? "" : "Create"}
+          {isLoading ? "" : "Create Gas Order"}
         </Button>
       </div>
     </div>
