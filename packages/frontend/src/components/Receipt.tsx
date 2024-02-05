@@ -4,15 +4,15 @@ import Tooltip from "./Tooltip"
 
 export default function Receipt({
   gasAmount,
-  gasCostTokenName,
+  gasCostTokenName = "NULL",
   gasCostValue,
-  rewardTokenName,
+  rewardTokenName = "NULL",
   rewardValue,
 }: {
   gasAmount: number
-  gasCostTokenName: string
+  gasCostTokenName?: string
   gasCostValue: number
-  rewardTokenName: string
+  rewardTokenName?: string
   rewardValue: number
 }) {
   return (
