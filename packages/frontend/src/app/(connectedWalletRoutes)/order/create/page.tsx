@@ -1,11 +1,13 @@
 "use client"
 
-import { Card, Title, Text, Grid } from "@tremor/react"
+import { Card, Title, Text, Grid, Icon } from "@tremor/react"
 import CreateOrderCard from "@/components/CreateOrderCards/CreateOrderCard"
 import { useEffect, useState } from "react"
 import DialogWindow from "@/components/DialogWindow"
 import { SPINNER_COLOR } from "@/constants"
 import { TailSpin } from "react-loader-spinner"
+import UserAgreement from "@/components/UserAgreement"
+import { WalletIcon } from "@heroicons/react/24/outline"
 
 export default function CreateOrder() {
   const [showDialogWindow, setShowDialogWindow] = useState(false)
@@ -65,6 +67,7 @@ export default function CreateOrder() {
           ></DialogWindow>
         )
       ) : null}
+
       <Title>Create Order</Title>
       <Text>You might create order on this page</Text>
       {/* Main section */}

@@ -11,15 +11,16 @@ import format from "date-fns/format"
 import { writeContract, waitForTransaction } from "@wagmi/core"
 import { MockTokenABI, GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
 import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
+import { useAccount } from "wagmi"
 
-import { CalendarDaysIcon, CheckIcon, ClockIcon, FireIcon, NoSymbolIcon } from "@heroicons/react/24/outline"
-import { Card, Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react"
-import { TailSpin } from "react-loader-spinner"
+import { Card, Icon, Tab, TabGroup, TabList, TabPanel, TabPanels, Title } from "@tremor/react"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX, SPINNER_COLOR } from "@/constants"
-import { set, z } from "zod"
+import { z } from "zod"
 import CreateOrderCardSimple from "./CreateOrderCardSimple"
 import CreateOrderCardAdvanced from "./CreateOrderCardAdvanced"
+import DialogWindow from "../DialogWindow"
+import { WalletIcon } from "@heroicons/react/24/outline"
+import UserAgreement from "../UserAgreement"
 
 const schema = z.object({
   gasAmount: z.number().int().gt(0),
@@ -101,6 +102,11 @@ export default function CreateOrderCard({
     rewardTransfer: 10,
     gasCostTransfer: 100,
   }
+
+  const { address, isConnecting, isDisconnected } = useAccount()
+  const [showWalletConnectionWindow, setShowWalletConnectionWindow] = useState(false)
+  const [isOrderOnHold, setIsOrderOnHold] = useState(false)
+
   const [inputValues, setInputValues] = useState({ ...initialState })
   const [validationErrors, setValidationErrors] = useState<null | { [key: string]: string }>(null)
   const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
@@ -229,7 +235,12 @@ export default function CreateOrderCard({
     setIsValidating(true)
 
     if (validateSearchForm()) {
-      createOrder()
+      if (address !== undefined) {
+        createOrder()
+      } else {
+        setIsOrderOnHold(true)
+        setShowWalletConnectionWindow(true)
+      }
     } else {
       console.log("Form has errors. Please fix them before submitting.")
     }
@@ -273,36 +284,61 @@ export default function CreateOrderCard({
     }
   }, [inputValues])
 
+  useEffect(() => {
+    if (address !== undefined && isOrderOnHold) {
+      setShowWalletConnectionWindow(false)
+      setIsOrderOnHold(false)
+      createOrder()
+    }
+  }, [address])
+
   return (
-    <Card className="mt-6 flex flex-col w-full">
-      <TabGroup>
-        <TabList className="mt-8">
-          <Tab onClick={setAdvancedInputsToDefault}>Simple</Tab>
-          <Tab>Advanced</Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <CreateOrderCardSimple
-              setShowDialogWindow={setShowDialogWindow}
-              setTransactionDetails={setTransactionDetails}
-              setInputValues={setInputValues}
-              inputValues={inputValues}
-              validationErrors={validationErrors}
-              handleSubmit={handleSubmit}
-            />
-          </TabPanel>
-          <TabPanel>
-            <CreateOrderCardAdvanced
-              setShowDialogWindow={setShowDialogWindow}
-              setTransactionDetails={setTransactionDetails}
-              setInputValues={setInputValues}
-              inputValues={inputValues}
-              validationErrors={validationErrors}
-              handleSubmit={handleSubmit}
-            />
-          </TabPanel>
-        </TabPanels>
-      </TabGroup>
-    </Card>
+    <>
+      {showWalletConnectionWindow && (
+        <DialogWindow
+          isClosable={true}
+          withoutDescription={true}
+          title={
+            <div className="flex flex-row items-center">
+              <Icon color="orange" variant="outlined" size="lg" icon={WalletIcon}></Icon>
+              <Title className="ml-4">Wallet Connection</Title>
+            </div>
+          }
+          description="Please accept our terms of service and connect your wallet to continue with order creation"
+          actionButtons={[<UserAgreement />]}
+          onClose={() => setShowWalletConnectionWindow(false)}
+        />
+      )}
+      <Card className="mt-6 flex flex-col w-full">
+        <TabGroup>
+          <TabList className="mt-8">
+            <Tab onClick={setAdvancedInputsToDefault}>Simple</Tab>
+            <Tab>Advanced</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              <CreateOrderCardSimple
+                setShowDialogWindow={setShowDialogWindow}
+                setTransactionDetails={setTransactionDetails}
+                setInputValues={setInputValues}
+                inputValues={inputValues}
+                validationErrors={validationErrors}
+                handleSubmit={handleSubmit}
+              />
+            </TabPanel>
+            <TabPanel>
+              <CreateOrderCardAdvanced
+                setShowDialogWindow={setShowDialogWindow}
+                setTransactionDetails={setTransactionDetails}
+                setInputValues={setInputValues}
+                inputValues={inputValues}
+                validationErrors={validationErrors}
+                handleSubmit={handleSubmit}
+              />
+            </TabPanel>
+          </TabPanels>
+        </TabGroup>
+      </Card>
+    </>
   )
 }

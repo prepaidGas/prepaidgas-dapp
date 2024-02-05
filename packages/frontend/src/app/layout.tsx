@@ -69,20 +69,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </Card>
               </header>
 
-              {/* <DialogWindow
-                isClosable={false}
-                withoutDescription={true}
-                title={
-                  <div className="flex flex-row items-center">
-                    <Icon color="orange" variant="outlined" size="lg" icon={WalletIcon}></Icon>
-                    <Title className="ml-4">Wallet Connection</Title>
-                  </div>
-                }
-                description="Please accept our terms of service and connect your wallet to continue with order creation"
-                actionButtons={[<UserAgreement />]}
-                onClose={() => setShowDialogWindow(false)}
-              /> */}
-
               <Sidebar showSidebar={showSidebar}></Sidebar>
 
               <div className={`content-main ${showSidebar ? "body-pd" : ""}`} id="content-main">
