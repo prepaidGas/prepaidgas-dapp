@@ -1,19 +1,13 @@
 "use client"
 
-import format from "date-fns/format"
-import { writeContract, waitForTransaction } from "@wagmi/core"
-import { MockTokenABI, GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
-import { parse, getHours, getMinutes, getSeconds } from "date-fns"
-import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
-
-import { CalendarDaysIcon, CheckIcon, ClockIcon, FireIcon, NoSymbolIcon } from "@heroicons/react/24/outline"
+import { FireIcon } from "@heroicons/react/24/outline"
 import { Text, NumberInput, Button, SearchSelect, SearchSelectItem } from "@tremor/react"
 import { TailSpin } from "react-loader-spinner"
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX, SPINNER_COLOR } from "@/constants"
-import { z } from "zod"
+import { Dispatch, SetStateAction, useState } from "react"
+import { SPINNER_COLOR } from "@/constants"
 import { CreateOrderState } from "./CreateOrderCard"
 import Receipt from "../Receipt"
+import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
 
 export default function CreateOrderCardSimple({
   setInputValues,
@@ -21,31 +15,12 @@ export default function CreateOrderCardSimple({
   validationErrors,
   handleSubmit,
 }: {
-  setShowDialogWindow: Dispatch<SetStateAction<boolean>>
-  setTransactionDetails: Dispatch<SetStateAction<{}>>
   setInputValues: Dispatch<SetStateAction<{}>>
   inputValues: CreateOrderState
   validationErrors: null | { [key: string]: string }
   handleSubmit: () => void
 }) {
   const [isLoading, setIsLoading] = useState(false)
-  const [wasRewardTransferChanged, setWasRewardTransferChanged] = useState(false)
-  const [wasGasCostTransferChanged, setWasGasCostTransferChanged] = useState(false)
-
-  const clampNumber = (value, minNum, maxNum) => {
-    console.log("Clamped: ", value)
-    if (value === 0) {
-      return 0
-    }
-
-    if (value < minNum) {
-      return minNum
-    } else if (value > maxNum) {
-      return maxNum
-    } else {
-      return value
-    }
-  }
 
   return (
     <div className="mt-6 flex flex-col w-full">
@@ -57,13 +32,22 @@ export default function CreateOrderCardSimple({
             <NumberInput
               icon={FireIcon}
               value={inputValues.gasAmount.toString()}
-              onChange={(e) =>
-                setInputValues({ ...inputValues, gasAmount: clampNumber(Number(e.target.value), 0, 100000) })
-              }
+              onChange={(e) => {
+                const gasAmount = Number(e.target.value)
+                setInputValues({
+                  ...inputValues,
+                  gasAmount,
+                  guaranteeValueGasPrice: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
+                  rewardValueAmount: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
+                  gasCostTransfer: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
+                  rewardTransfer: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
+                })
+              }}
+              min={0}
               error={!!validationErrors?.gasAmount}
               errorMessage={validationErrors?.gasAmount}
               spellCheck={false}
-            />
+            ></NumberInput>
           </div>
         </div>
         <div className="flex flex-col lg:grow">
@@ -94,13 +78,14 @@ export default function CreateOrderCardSimple({
             className="mt-2"
             value={inputValues.gasCostValueGasPrice.toString()}
             onChange={(e) => {
-              const gasCostValueGasPrice = clampNumber(Number(e.target.value), 0, 100000)
-              const gasCostTransfer = inputValues.gasAmount * gasCostValueGasPrice
+              const gasCostValueGasPrice = Number(e.target.value)
               setInputValues({
                 ...inputValues,
                 gasCostValueGasPrice,
-                guaranteeValueGasPrice: inputValues.gasAmount * gasCostValueGasPrice,
-                rewardValueAmount: (inputValues.gasAmount / 10) * gasCostValueGasPrice,
+                guaranteeValueGasPrice: getGuaranteeValue(inputValues.gasAmount, gasCostValueGasPrice),
+                rewardValueAmount: getRewardValue(inputValues.gasAmount, gasCostValueGasPrice),
+                gasCostTransfer: getGuaranteeValue(inputValues.gasAmount, gasCostValueGasPrice),
+                rewardTransfer: getRewardValue(inputValues.gasAmount, gasCostValueGasPrice),
               })
             }}
             error={!!validationErrors?.gasCostValueGasPrice}
@@ -113,9 +98,7 @@ export default function CreateOrderCardSimple({
         <Receipt
           //TODO pass correct token names
           gasAmount={inputValues.gasAmount}
-          gasCostTokenName="TRX"
           gasCostValue={inputValues.gasCostValueGasPrice}
-          rewardTokenName="USDT"
           rewardValue={inputValues.rewardValueAmount}
         />
         <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
