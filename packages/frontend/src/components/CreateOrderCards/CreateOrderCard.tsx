@@ -69,6 +69,7 @@ export default function CreateOrderCard({
   //rewardValueToken: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 
   //TODO: this initial state is for tests only, remove in production
+  //TODO: execution window and dates?
   const initialState: CreateOrderState = {
     gasAmount: 10,
     executionPeriodStartDate: getTomorrowStartDate(),
@@ -81,23 +82,6 @@ export default function CreateOrderCard({
     gasCostValueGasPrice: 10,
     guaranteeValueToken: "",
     guaranteeValueGasPrice: 10,
-    executionWindow: 1000,
-    rewardTransfer: 10,
-    gasCostTransfer: 100,
-  }
-
-  const check: CreateOrderState = {
-    // gasAmount: 10,
-    // executionPeriodStartDate: getTomorrowStartDate(),
-    // executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
-    // executionPeriodEndDate: getTomorrowEndDate(),
-    // executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
-    // rewardValueToken: "",
-    // rewardValueAmount: 10,
-    // gasCostValueToken: "",
-    // gasCostValueGasPrice: 10,
-    // guaranteeValueToken: "",
-    // guaranteeValueGasPrice: 10,
     executionWindow: 1000,
     rewardTransfer: 10,
     gasCostTransfer: 100,
@@ -267,8 +251,8 @@ export default function CreateOrderCard({
       //set execution window to initial value
       executionWindow: initialState.executionWindow,
       //TODO: recalculate reward transfer and gasCost transfer
-      rewardTransfer: 10,
-      gasCostTransfer: 100,
+      rewardTransfer: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
+      gasCostTransfer: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
     })
   }
 
@@ -318,8 +302,6 @@ export default function CreateOrderCard({
           <TabPanels>
             <TabPanel>
               <CreateOrderCardSimple
-                setShowDialogWindow={setShowDialogWindow}
-                setTransactionDetails={setTransactionDetails}
                 setInputValues={setInputValues}
                 inputValues={inputValues}
                 validationErrors={validationErrors}
@@ -328,8 +310,6 @@ export default function CreateOrderCard({
             </TabPanel>
             <TabPanel>
               <CreateOrderCardAdvanced
-                setShowDialogWindow={setShowDialogWindow}
-                setTransactionDetails={setTransactionDetails}
                 setInputValues={setInputValues}
                 inputValues={inputValues}
                 validationErrors={validationErrors}
