@@ -6,10 +6,23 @@ import { Inter } from "next/font/google"
 
 import "@rainbow-me/rainbowkit/styles.css"
 
-import { ConnectButton, getDefaultWallets, lightTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit"
+import {
+  ConnectButton,
+  DisclaimerComponent,
+  getDefaultWallets,
+  lightTheme,
+  RainbowKitProvider,
+} from "@rainbow-me/rainbowkit"
 import { configureChains, createConfig, WagmiConfig } from "wagmi"
 import { hardhat, mainnet } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
+
+import { Grid, Col, Card, Button, Icon, Title } from "@tremor/react"
+import CookieBanner from "@/components/CookieBanner"
+import Sidebar from "@/components/Sidebar"
+import { useEffect, useLayoutEffect, useState } from "react"
+import { Bars4Icon, WalletIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import useMediaQuery from "@/hooks/useMediaQuery"
 
 const { chains, publicClient } = configureChains([mainnet, hardhat], [publicProvider()])
 
@@ -25,15 +38,14 @@ const wagmiConfig = createConfig({
   publicClient,
 })
 
-import { Grid, Col, Card, Button, Icon, Title } from "@tremor/react"
-import CookieBanner from "@/components/CookieBanner"
-import Sidebar from "@/components/Sidebar"
-import { useEffect, useLayoutEffect, useState } from "react"
-import { Bars4Icon, WalletIcon, XMarkIcon } from "@heroicons/react/24/outline"
-import useMediaQuery from "@/hooks/useMediaQuery"
-import UserAgreement from "@/components/UserAgreement"
-import DialogWindow from "@/components/DialogWindow"
-import CustomConnectBttn from "@/components/CustomConnectBttn"
+const url = "http://localhost:3000"
+
+const Disclaimer: DisclaimerComponent = ({ Text, Link }) => (
+  <Text>
+    By connecting your wallet, you agree to the <Link href={`${url}/tos`}>Terms of Service</Link> and acknowledge you
+    have read and understand the protocol <Link href={`${url}/disclaimer`}>Disclaimer</Link>
+  </Text>
+)
 
 // @todo add env var with the contracts addresses
 const inter = Inter({ subsets: ["latin"] })
@@ -53,7 +65,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="h-full">
       <body className={inter.className + " min-h-[100%]"}>
         <WagmiConfig config={wagmiConfig}>
-          <RainbowKitProvider chains={chains} theme={lightTheme({ accentColor: "#f97316" })}>
+          <RainbowKitProvider
+            chains={chains}
+            appInfo={{
+              appName: "PrepaidGas",
+              disclaimer: Disclaimer,
+            }}
+            theme={lightTheme({ accentColor: "#f97316" })}
+          >
             <>
               <header className={`header ${showSidebar ? "body-pd" : ""}`} id="header">
                 <Card className={`!rounded-none flex flex-row justify-between items-center py-3 px-4`}>
