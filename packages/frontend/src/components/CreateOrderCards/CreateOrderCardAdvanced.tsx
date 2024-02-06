@@ -55,21 +55,6 @@ export default function CreateOrderCardAdvanced({
   const [wasRewardTransferChanged, setWasRewardTransferChanged] = useState(false)
   const [wasGasCostTransferChanged, setWasGasCostTransferChanged] = useState(false)
 
-  const clampNumber = (value, minNum, maxNum) => {
-    console.log("Clamped: ", value)
-    if (value === 0) {
-      return 0
-    }
-
-    if (value < minNum) {
-      return minNum
-    } else if (value > maxNum) {
-      return maxNum
-    } else {
-      return value
-    }
-  }
-
   return (
     <div className="mt-6 flex flex-col w-full">
       {/* Gas Amount and Date & Time Settings */}
@@ -182,10 +167,9 @@ export default function CreateOrderCardAdvanced({
             value={inputValues.rewardValueAmount.toString()}
             onChange={(e) => {
               const rewardValueAmount = Number(e.target.value)
-              wasRewardTransferChanged
-                ? setInputValues({ ...inputValues, rewardValueAmount })
-                : setInputValues({ ...inputValues, rewardValueAmount, rewardTransfer: rewardValueAmount })
+              setInputValues({ ...inputValues, rewardValueAmount })
             }}
+            min={0}
             error={!!validationErrors?.rewardValueAmount}
             errorMessage={validationErrors?.rewardValueAmount}
             spellCheck={false}
@@ -216,23 +200,18 @@ export default function CreateOrderCardAdvanced({
           </SearchSelect>
         </div>
         <div className="flex flex-col lg:grow">
-          <Text>Gas Cost GasPrice</Text>
+          <Text>Gas Price</Text>
           <NumberInput
             className="mt-2"
             value={inputValues.gasCostValueGasPrice.toString()}
             onChange={(e) => {
-              const gasCostValueGasPrice = clampNumber(Number(e.target.value), 0, 100000)
-              wasGasCostTransferChanged
-                ? setInputValues({
-                    ...inputValues,
-                    gasCostValueGasPrice,
-                  })
-                : setInputValues({
-                    ...inputValues,
-                    gasCostValueGasPrice,
-                    gasCostTransfer: inputValues.gasAmount * gasCostValueGasPrice,
-                  })
+              const gasCostValueGasPrice = Number(e.target.value)
+              setInputValues({
+                ...inputValues,
+                gasCostValueGasPrice,
+              })
             }}
+            min={0}
             error={!!validationErrors?.gasCostValueGasPrice}
             errorMessage={validationErrors?.gasCostValueGasPrice}
             spellCheck={false}
@@ -267,9 +246,8 @@ export default function CreateOrderCardAdvanced({
           <NumberInput
             className="mt-2"
             value={inputValues.guaranteeValueGasPrice.toString()}
-            onChange={(e) =>
-              setInputValues({ ...inputValues, guaranteeValueGasPrice: clampNumber(Number(e.target.value), 0, 100000) })
-            }
+            onChange={(e) => setInputValues({ ...inputValues, guaranteeValueGasPrice: Number(e.target.value) })}
+            min={0}
             error={!!validationErrors?.guaranteeValueGasPrice}
             errorMessage={validationErrors?.guaranteeValueGasPrice}
             spellCheck={false}
@@ -284,9 +262,8 @@ export default function CreateOrderCardAdvanced({
           <NumberInput
             className="mt-2"
             value={inputValues.executionWindow.toString()}
-            onChange={(e) =>
-              setInputValues({ ...inputValues, executionWindow: clampNumber(Number(e.target.value), 0, 100000) })
-            }
+            onChange={(e) => setInputValues({ ...inputValues, executionWindow: Number(e.target.value) })}
+            min={0}
             error={!!validationErrors?.executionWindow}
             errorMessage={validationErrors?.executionWindow}
             spellCheck={false}
@@ -298,9 +275,10 @@ export default function CreateOrderCardAdvanced({
             className="mt-2"
             value={inputValues.rewardTransfer.toString()}
             onChange={(e) => {
-              setInputValues({ ...inputValues, rewardTransfer: clampNumber(Number(e.target.value), 0, 100000) })
+              setInputValues({ ...inputValues, rewardTransfer: Number(e.target.value) })
               setWasRewardTransferChanged(true)
             }}
+            min={0}
             error={!!validationErrors?.rewardTransfer}
             errorMessage={validationErrors?.rewardTransfer}
             spellCheck={false}
@@ -312,9 +290,10 @@ export default function CreateOrderCardAdvanced({
             className="mt-2"
             value={inputValues.gasCostTransfer.toString()}
             onChange={(e) => {
-              setInputValues({ ...inputValues, gasCostTransfer: clampNumber(Number(e.target.value), 0, 100000) })
+              setInputValues({ ...inputValues, gasCostTransfer: Number(e.target.value) })
               setWasGasCostTransferChanged(true)
             }}
+            min={0}
             error={!!validationErrors?.gasCostTransfer}
             errorMessage={validationErrors?.gasCostTransfer}
             spellCheck={false}
