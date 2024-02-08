@@ -21,6 +21,7 @@ import { WalletIcon } from "@heroicons/react/24/outline"
 import UserAgreement from "../UserAgreement"
 import CreateTxCardSimple from "./CreateTxCardSimple"
 import CreateTxCardAdvanced from "./CreateTxCardAdvanced"
+import { CHAIN_ID, PROJECT_NAME, PROJECT_VERSION } from "constants/executor"
 
 const formSchema = z.object({
   nonce: z.number(),
@@ -59,6 +60,7 @@ export default function CreateTxCard({
   const [parsedAbi, setParsedAbi] = useState<ABIEntry[] | undefined>()
   const [numberOfOrders, setNumberOfOrders] = useState(0)
   const [showWalletConnectionWindow, setShowWalletConnectionWindow] = useState(false)
+  const [isOrderOnHold, setIsOrderOnHold] = useState(false)
 
   const { address } = useAccount()
 
@@ -147,11 +149,14 @@ export default function CreateTxCard({
   const handleSubmit = () => {
     setIsValidating(true)
 
-    console.log(validateSearchForm())
-
     if (validateSearchForm()) {
-      //executeFunction()
-      signMessage()
+      if (address !== undefined) {
+        signMessage()
+        //executeFunction()
+      } else {
+        setIsOrderOnHold(true)
+        setShowWalletConnectionWindow(true)
+      }
     } else {
       console.log("Form has errors. Please fix them before submitting.")
     }
@@ -353,7 +358,7 @@ export default function CreateTxCard({
     if (address !== undefined && isOrderOnHold) {
       setShowWalletConnectionWindow(false)
       setIsOrderOnHold(false)
-      createOrder()
+      handleSubmit()
     }
   }, [address])
 
@@ -393,6 +398,8 @@ export default function CreateTxCard({
                 setArgInputs={setArgInputs}
                 argValues={argValues}
                 setArgValues={setArgValues}
+                parsedAbi={parsedAbi}
+                setParsedAbi={setParsedAbi}
               />
             </TabPanel>
             <TabPanel>
@@ -407,6 +414,8 @@ export default function CreateTxCard({
                 setArgInputs={setArgInputs}
                 argValues={argValues}
                 setArgValues={setArgValues}
+                parsedAbi={parsedAbi}
+                setParsedAbi={setParsedAbi}
               />
             </TabPanel>
           </TabPanels>

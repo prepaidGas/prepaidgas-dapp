@@ -31,6 +31,8 @@ export default function CreateTxCardSimple({
   setArgInputs,
   argValues,
   setArgValues,
+  parsedAbi,
+  setParsedAbi,
 }: {
   inputValues: TransactionFormState
   setInputValues: Dispatch<SetStateAction<{}>>
@@ -42,10 +44,11 @@ export default function CreateTxCardSimple({
   setArgInputs: Dispatch<SetStateAction<any>>
   argValues: []
   setArgValues: Dispatch<SetStateAction<any>>
+  parsedAbi: ABIEntry[] | undefined
+  setParsedAbi: Dispatch<SetStateAction<any>>
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isAbiParsed, setIsAbiParsed] = useState(false)
-  const [parsedAbi, setParsedAbi] = useState<ABIEntry[] | undefined>()
   const [numberOfOrders, setNumberOfOrders] = useState(0)
 
   // const initialState: TransactionFormState = {

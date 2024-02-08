@@ -272,7 +272,7 @@ export default function CreateOrderCard({
     if (address !== undefined && isOrderOnHold) {
       setShowWalletConnectionWindow(false)
       setIsOrderOnHold(false)
-      createOrder()
+      handleSubmit()
     }
   }, [address])
 
