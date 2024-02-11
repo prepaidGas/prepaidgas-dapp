@@ -22,6 +22,7 @@ import UserAgreement from "../UserAgreement"
 import CreateTxCardSimple from "./CreateTxCardSimple"
 import CreateTxCardAdvanced from "./CreateTxCardAdvanced"
 import { CHAIN_ID, PROJECT_NAME, PROJECT_VERSION } from "constants/executor"
+import { ethers } from "ethers"
 
 const formSchema = z.object({
   nonce: z.number(),
