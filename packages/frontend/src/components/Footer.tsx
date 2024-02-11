@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <div className="flex flex-col w-full h-auto self-end">
       <Divider />
-      <div className="w-full h-auto flex flex-row justify-evenly">
+      <div className="w-full h-auto flex flex-row justify-evenly mb-2">
         <div className="flex flex-col">
           <Title>Title 1</Title>
           <List>

@@ -92,7 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Sidebar showSidebar={showSidebar}></Sidebar>
 
               <div className={`content-main ${showSidebar ? "body-pd" : ""}`} id="content-main">
-                <main className="p-8 max-w-screen-lg overflow-auto">{children}</main>
+                <main className="p-8 max-w-screen-lg overflow-auto min-h-[100vh] w-full lg:w-[1024px]">{children}</main>
                 <Footer />
               </div>
             </>
