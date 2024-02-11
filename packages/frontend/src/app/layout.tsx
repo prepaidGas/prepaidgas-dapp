@@ -21,8 +21,9 @@ import { Grid, Col, Card, Button, Icon, Title } from "@tremor/react"
 import CookieBanner from "@/components/CookieBanner"
 import Sidebar from "@/components/Sidebar"
 import { useEffect, useLayoutEffect, useState } from "react"
-import { Bars4Icon, WalletIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { ArrowLeftIcon, Bars4Icon, WalletIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import useMediaQuery from "@/hooks/useMediaQuery"
+import Footer from "@/components/Footer"
 
 const { chains, publicClient } = configureChains([mainnet, hardhat], [publicProvider()])
 
@@ -71,27 +72,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               appName: "PrepaidGas",
               disclaimer: Disclaimer,
             }}
-            theme={lightTheme({ accentColor: "#f97316" })}
+            //todo: decide wether to use theme attribute cuz it wraps all page in <div data-rk> which causes css problems
+            // theme={lightTheme({ accentColor: "#f97316" })}
           >
             <>
               <header className={`header ${showSidebar ? "body-pd" : ""}`} id="header">
-                <Card className={`!rounded-none flex flex-row justify-between items-center py-3 px-4`}>
+                <div className="w-full flex flex-row justify-between items-center py-3 px-4">
                   <div className="flex flex-row items-center">
                     <Button
                       className="scale-150"
-                      icon={showSidebar ? XMarkIcon : Bars4Icon}
+                      icon={showSidebar ? ArrowLeftIcon : Bars4Icon}
                       variant="light"
                       onClick={() => setShowSidebar(!showSidebar)}
                     />
                   </div>
-                  <ConnectButton />
-                </Card>
+                </div>
               </header>
 
               <Sidebar showSidebar={showSidebar}></Sidebar>
 
               <div className={`content-main ${showSidebar ? "body-pd" : ""}`} id="content-main">
-                <main className="p-8 max-w-screen-lg mt-[4.5rem] overflow-auto">{children}</main>
+                <main className="p-8 max-w-screen-lg overflow-auto">{children}</main>
+                <Footer />
               </div>
             </>
           </RainbowKitProvider>
