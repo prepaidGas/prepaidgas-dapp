@@ -1,5 +1,5 @@
 import { readContract, writeContract, waitForTransaction } from "@wagmi/core"
-import { ABIEntry, GasOrderABI, MockTokenABI } from "helpers/abi"
+import { ABIEntry, GasOrderABI, MockTokenABI } from "@/helpers"
 
 export const readCustomContract = async (address: `0x${string}`, abi: ABIEntry[], functionName: string, args: []) => {
   console.log("ReadCustomContract args: ", { address, abi, functionName, args })
