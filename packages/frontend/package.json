@@ -28,6 +28,7 @@
     "wagmi": "1.3.2"
   },
   "dependencies": {
-    "@floating-ui/react": "^0.26.9"
+    "@floating-ui/react": "^0.26.9",
+    "react-merge-refs": "^2.1.1"
   }
 }
