@@ -154,7 +154,7 @@ export default function CreateOrderCardAdvanced({
             spellCheck={false}
             placeholder="0x1dA..."
           >
-            <SearchSelectItem value="Test0">Test0</SearchSelectItem>
+            <SearchSelectItem value="0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512">MockUSD</SearchSelectItem>
             <SearchSelectItem value="Test1">Test1</SearchSelectItem>
             <SearchSelectItem value="Test2">Test2</SearchSelectItem>
             <SearchSelectItem value="Test3">Test3</SearchSelectItem>
@@ -193,7 +193,7 @@ export default function CreateOrderCardAdvanced({
             spellCheck={false}
             placeholder="0x1dA..."
           >
-            <SearchSelectItem value="Test0">Test0</SearchSelectItem>
+            <SearchSelectItem value="0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512">MockUSD</SearchSelectItem>
             <SearchSelectItem value="Test1">Test1</SearchSelectItem>
             <SearchSelectItem value="Test2">Test2</SearchSelectItem>
             <SearchSelectItem value="Test3">Test3</SearchSelectItem>
@@ -235,7 +235,7 @@ export default function CreateOrderCardAdvanced({
             spellCheck={false}
             placeholder="0x1dA..."
           >
-            <SearchSelectItem value="Test0">Test0</SearchSelectItem>
+            <SearchSelectItem value="0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512">MockUSD</SearchSelectItem>
             <SearchSelectItem value="Test1">Test1</SearchSelectItem>
             <SearchSelectItem value="Test2">Test2</SearchSelectItem>
             <SearchSelectItem value="Test3">Test3</SearchSelectItem>

@@ -131,11 +131,11 @@ export default function CreateOrderCard({
             inputValues.gasCostValueGasPrice * inputValues.gasAmount + inputValues.rewardValueAmount,
           ],
         })
-        console.log("CreateOrderData: ", data)
+        console.log("CreateOrderData Approve: ", data)
         const txData = await waitForTransaction({ hash: data.hash })
         console.log("CreateOrderTXData: ", txData)
       } catch (e) {
-        console.log("CreateOrderError: ", e)
+        console.log("CreateOrderError Approve: ", e)
       }
     } else {
       //Approve reward
@@ -179,9 +179,9 @@ export default function CreateOrderCard({
             combineDateAndTime(inputValues.executionPeriodEndDate, inputValues.executionPeriodEndTime),
           ),
           inputValues.executionWindow,
-          { token: inputValues.rewardValueToken, amount: inputValues.rewardValueAmount } as PaymentStruct,
-          { token: inputValues.gasCostValueToken, gasPrice: inputValues.gasCostValueGasPrice } as GasPaymentStruct,
-          { token: inputValues.guaranteeValueToken, gasPrice: inputValues.guaranteeValueGasPrice } as GasPaymentStruct,
+          [inputValues.rewardValueToken, inputValues.rewardValueAmount], //} as PaymentStruct, @todo remove
+          [inputValues.gasCostValueToken, inputValues.gasCostValueGasPrice],// } as GasPaymentStruct,
+          [inputValues.guaranteeValueToken, inputValues.guaranteeValueGasPrice],//} as GasPaymentStruct,
           inputValues.rewardTransfer,
           inputValues.gasCostTransfer,
         ],
