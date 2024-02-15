@@ -15,8 +15,6 @@ import {
 } from "@floating-ui/react"
 import { useState } from "react"
 
-import { extendTailwindMerge } from "tailwind-merge"
-
 export const useTooltip = (delay?: number) => {
   const [open, setOpen] = useState(false)
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>()
