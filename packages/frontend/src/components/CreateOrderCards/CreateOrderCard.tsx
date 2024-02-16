@@ -180,8 +180,8 @@ export default function CreateOrderCard({
           ),
           inputValues.executionWindow,
           [inputValues.rewardValueToken, inputValues.rewardValueAmount], //} as PaymentStruct, @todo remove
-          [inputValues.gasCostValueToken, inputValues.gasCostValueGasPrice],// } as GasPaymentStruct,
-          [inputValues.guaranteeValueToken, inputValues.guaranteeValueGasPrice],//} as GasPaymentStruct,
+          [inputValues.gasCostValueToken, inputValues.gasCostValueGasPrice], // } as GasPaymentStruct,
+          [inputValues.guaranteeValueToken, inputValues.guaranteeValueGasPrice], //} as GasPaymentStruct,
           inputValues.rewardTransfer,
           inputValues.gasCostTransfer,
         ],
