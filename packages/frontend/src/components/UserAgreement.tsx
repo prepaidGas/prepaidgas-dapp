@@ -10,7 +10,7 @@ export default function UserAgreement() {
   return (
     <div>
       <div className="flex flex-col">
-        <div className="flex flex-row gap-2">
+        {/* <div className="flex flex-row gap-2">
           <label className="w-auto h-[31px] flex flex-row justify-center items-center gap-1">
             <input
               onClick={() => setIsTosAccepted(!isTosAccepted)}
@@ -39,10 +39,9 @@ export default function UserAgreement() {
               disclaimer
             </Link>
           </label>
-        </div>
-        {/* {isTosAccepted ? <div className="flex mt-4 items-center justify-center">{children}</div> : null} */}
+        </div> */}
         <div className="flex mt-4 items-center justify-center">
-          <CustomConnectBttn isActive={isTosAccepted && isDisclaimerAccepted} />
+          <CustomConnectBttn isActive={true} />
         </div>
       </div>
     </div>
