@@ -9,7 +9,7 @@
     "node": "npx hardhat node",
     "deploy-test": "npx hardhat run scripts/deploy/testDeploy.js --network localhost",
     "executor": "npx hardhat run scripts/executor.ts --network localhost",
-    "node-mock": "npm run node & (sleep 12 && npm run deploy-test) & (sleep 13 && npm run executor); wait",
+    "node-mock": "npm run node & (sleep 12 && npm run deploy-test) & (sleep 24 && npm run executor); wait",
     "size-calc": "npx hardhat size-contracts"
   },
   "devDependencies": {
