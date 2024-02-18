@@ -132,6 +132,7 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept, ReentrancyGuard {
     _mint(order(id).manager, id, order(id).maxGas);
 
     _distribute(msg.sender, reward(id).token, _takeFee(Fee.Reward, reward(id).token, reward(id).amount));
+    // TODO: Check why totalSupply(id) is expected to income
     _acceptIncoming(guarantee(id).token, msg.sender, guaranteeTransfer, totalSupply(id) * guarantee(id).gasPrice);
 
     emit OrderAccept(id, msg.sender);
