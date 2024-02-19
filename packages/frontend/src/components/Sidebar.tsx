@@ -17,26 +17,11 @@ import {
   ArchiveBoxIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline"
-import { Card, Text, Icon, Title } from "@tremor/react"
+import { Icon, Title } from "@tremor/react"
 import { SPINNER_COLOR } from "@/constants"
-import { z } from "zod"
-
-const schema = z.object({
-  from: z.string().min(1),
-  nonce: z.number(),
-  gasOrder: z.number(),
-  onBehalf: z.string().min(1),
-  deadlineDate: z.date(),
-  deadlineTime: z.string().min(1),
-  to: z.string().min(1),
-  gas: z.number(),
-  data: z.string().min(1),
-})
-
-type AddTxRequestState = z.infer<typeof schema>
 
 export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean }) {
-  const [activeLink, setActiveLink] = useState("")
+  const [activeLink, setActiveLink] = useState("Create order")
 
   const links = [
     { name: "Create order", icon: DocumentPlusIcon, href: "/order/create" },
