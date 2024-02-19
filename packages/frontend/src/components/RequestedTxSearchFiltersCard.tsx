@@ -4,8 +4,7 @@ import { ZodIssue, z } from "zod"
 import { FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import { Card, TextInput, Select, SelectItem, Button, NumberInput } from "@tremor/react"
 
-import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX } from "../constants/regexConstants"
-import { ICON_BY_STATUS } from "../constants/themeConstants"
+import { ICON_BY_STATUS, ETH_ADDRESS_OR_EMPTY_STRING_REGEX } from "@/constants"
 
 const schema = z.object({
   status: z.number(),

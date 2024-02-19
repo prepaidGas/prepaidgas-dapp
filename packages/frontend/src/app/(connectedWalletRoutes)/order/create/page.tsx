@@ -1,20 +1,16 @@
 "use client"
+import { useState } from "react"
+import { SPINNER_COLOR } from "@/constants"
 
-import { Card, Title, Text, Grid } from "@tremor/react"
-import CreateOrderCard from "../../../../components/CreateOrderCard"
-import { useEffect, useState } from "react"
-import DialogWindow from "../../../../components/DialogWindow"
-import { SPINNER_COLOR } from "../../../../constants/themeConstants"
+import { Title, Text } from "@tremor/react"
 import { TailSpin } from "react-loader-spinner"
+
+import DialogWindow from "@/components/DialogWindow"
+import CreateOrderCard from "@/components/CreateOrderCards/CreateOrderCard"
 
 export default function CreateOrder() {
   const [showDialogWindow, setShowDialogWindow] = useState(false)
   const [transactionDetails, setTransactionDetails] = useState<null | any>(null)
-
-  useEffect(() => {
-    console.log("transactionDetails: ", transactionDetails)
-    console.log("transactionDetails: ", Boolean(transactionDetails))
-  }, [transactionDetails])
 
   return (
     <div>
@@ -65,22 +61,23 @@ export default function CreateOrder() {
           ></DialogWindow>
         )
       ) : null}
+
       <Title>Create Order</Title>
-      <Text>You might create order on this page</Text>
+      <Text>You can create order on this page</Text>
       {/* Main section */}
       <CreateOrderCard setShowDialogWindow={setShowDialogWindow} setTransactionDetails={setTransactionDetails} />
 
       {/* KPI section */}
-      <Grid numItemsMd={2} className="mt-6 gap-6">
-        <Card>
-          {/* Placeholder to set height */}
-          <div className="h-28" />
-        </Card>
-        <Card>
-          {/* Placeholder to set height */}
-          <div className="h-28" />
-        </Card>
-      </Grid>
+      {/* <Grid numItemsMd={2} className="mt-6 gap-6"> */}
+      {/* <Card> */}
+      {/* Placeholder to set height */}
+      {/* <div className="h-28" /> */}
+      {/* </Card> */}
+      {/* <Card> */}
+      {/* Placeholder to set height */}
+      {/* <div className="h-28" /> */}
+      {/* </Card> */}
+      {/* </Grid> */}
     </div>
   )
 }

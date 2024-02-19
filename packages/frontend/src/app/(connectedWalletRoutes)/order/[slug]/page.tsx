@@ -6,14 +6,16 @@ import { useEffect, useState } from "react"
 import format from "date-fns/format"
 
 import { Title, Text, Card, Metric, Flex, ProgressBar, Icon, Button, NumberInput, TextInput } from "@tremor/react"
-import { GasOrderABI } from "helpers/abi"
+import { GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
+
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 import { useAccount } from "wagmi"
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
-import StatusBadge from "../../../../components/StatusBadge"
-import { COLOR_BY_STATUS, SPINNER_COLOR, STATUS } from "../../../../constants/themeConstants"
+import StatusBadge from "@/components/StatusBadge"
+import { COLOR_BY_STATUS, SPINNER_COLOR, STATUS } from "@/constants" // @todo improve path to the constants
+
 import { TailSpin } from "react-loader-spinner"
-import DialogWindow from "../../../../components/DialogWindow"
+import DialogWindow from "@/components/DialogWindow"
 
 export default function Page({ params }: { params: { slug: string } }) {
   const [isLoading, setIsLoading] = useState(true)
@@ -39,7 +41,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     setIsLoading(true)
     try {
       const data = await readContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "getOrdersByIds",
         args: [[params.slug], address],
@@ -56,7 +58,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     try {
       const data = await readContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "balanceAvailable",
         args: [address, params.slug],
@@ -72,7 +74,7 @@ export default function Page({ params }: { params: { slug: string } }) {
   const revokeOrder = async () => {
     try {
       const data = await writeContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "revokeOrder",
         args: [params.slug],
@@ -88,7 +90,7 @@ export default function Page({ params }: { params: { slug: string } }) {
   const retrieveGuarantee = async () => {
     try {
       const data = await writeContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "retrieveGuarantee",
         args: [params.slug],
@@ -104,7 +106,7 @@ export default function Page({ params }: { params: { slug: string } }) {
   const retrieveGasCost = async () => {
     try {
       const data = await writeContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "retrieveGasCost",
         args: [address, params.slug, gasAmountHasChanged ? specifiedBalance : userBalance],
@@ -122,7 +124,7 @@ export default function Page({ params }: { params: { slug: string } }) {
   const transferOrderManagement = async () => {
     try {
       const data = await writeContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "transferOrderManagement",
         args: [params.slug, specifiedManager],

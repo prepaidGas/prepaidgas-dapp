@@ -49,6 +49,11 @@ body {
   margin-top: var(--header-height);
   /* padding: 0 1rem; */
   transition: 0.5s;
+  display: flex;
+  flex-direction: column;
+  /* min-height: 100%; */
+  height: 100%;
+  justify-content: space-between;
 }
 
 a {
@@ -65,7 +70,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--white-color);
+  /* background-color: var(--white-color); */
   z-index: var(--z-fixed);
   transition: 0.5s;
 }
@@ -208,5 +213,9 @@ a {
   /*Add padding body desktop*/
   .body-pd {
     padding-left: calc(var(--nav-width) + 156px);
+  }
+
+  .link {
+    @apply text-[#3b82f6] underline hover:brightness-[0.85];
   }
 }

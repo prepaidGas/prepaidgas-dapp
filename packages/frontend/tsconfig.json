@@ -19,9 +19,9 @@
     ],
     "paths": {
       "abi/*": ["../contracts/artifacts/contracts/*"],
-      "helpers/*": ["./src/helpers/*"],
+      "constants/*": ["../contracts/scripts/constants/*"],
       "typechain-types/*": ["../contracts/typechain-types/contracts/*"],
-      "constants/*": ["../contracts/scripts/constants/*"]
+      "@/*": ["./src/*"],
     }
   },
   "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],

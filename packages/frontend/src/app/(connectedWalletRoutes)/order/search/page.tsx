@@ -5,16 +5,18 @@ import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 import { Title, Text, Metric, Color, Icon, Card } from "@tremor/react"
 
 import { readContract } from "@wagmi/core"
-import SearchFiltersCard, { FilterOptions } from "../../../../components/SearchFiltersCard"
-import OrderCard from "../../../../components/OrderCard"
+import SearchFiltersCard, { FilterOptions } from "@/components/SearchFiltersCard"
+import OrderCard from "@/components/OrderCard"
 import { useEffect, useState } from "react"
-import Pagination from "../../../../components/Pagination"
+import Pagination from "@/components/Pagination"
 
 // @todo display first 100 items
-import { GasOrderABI } from "helpers/abi"
-import ToasterPopup from "../../../../components/ToasterPopup"
+import { GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
+
+import ToasterPopup from "@/components/ToasterPopup"
 import { TailSpin } from "react-loader-spinner"
-import { SPINNER_COLOR } from "../../../../constants/themeConstants"
+import { SPINNER_COLOR } from "@/constants"
+
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
 import { useAccount } from "wagmi"
 
@@ -53,7 +55,7 @@ export default function SearchOrder() {
     console.log("SearchArgs: ", searchArgs)
     try {
       const data = await readContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "getFilteredOrders",
         //@todo replace second argument with users address instead of defaultManager (already done but i'm leaving todo for now)
@@ -71,7 +73,7 @@ export default function SearchOrder() {
   const getTotalEntriesNumber = async (filterOptions) => {
     try {
       const data = await readContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "getMatchingOrdersCount",
         args: [filterOptions.manager || defaultManager, filterOptions.status],

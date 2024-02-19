@@ -1,8 +1,7 @@
 "use client"
 
 import { readContract } from "@wagmi/core"
-import { GasOrderABI } from "helpers/abi"
-
+import { GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
 import {
   ArrowPathIcon,
   CheckCircleIcon,
@@ -16,7 +15,8 @@ import { Card, Grid, Text, Metric, Badge, Title, Icon, Button } from "@tremor/re
 import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
 import StatusBadge from "./StatusBadge"
-import { STATUS } from "../constants/themeConstants"
+import { STATUS } from "@/constants"
+
 
 export default function UserStatsCard() {
   const [totalGas, setTotalGas] = useState<null | number>(null)
@@ -33,7 +33,7 @@ export default function UserStatsCard() {
   const getTotalGas = async () => {
     try {
       const data = await readContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "getTotalBalance",
         args: [address, []],
@@ -50,7 +50,7 @@ export default function UserStatsCard() {
   const getOdersCount = async (status: number) => {
     try {
       const data = await readContract({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
         functionName: "getMatchingOrdersCount",
         args: ["0x0000000000000000000000000000000000000000", status],

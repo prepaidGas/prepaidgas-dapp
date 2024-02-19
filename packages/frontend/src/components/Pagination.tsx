@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Badge, Button, Text } from "@tremor/react"
 import { useContractRead } from "wagmi"
-import { usePagination, DOTS } from "../usePagination"
+import { usePagination, DOTS } from "@/hooks/usePagination"
 import { ArrowLeftIcon, ArrowLongLeftIcon, ArrowLongRightIcon } from "@heroicons/react/24/outline"
 import { Icon } from "@tremor/react"
 import { randomInt } from "crypto"

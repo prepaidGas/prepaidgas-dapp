@@ -1,12 +1,12 @@
 "use client"
 
 import { Card, Title, Text, Grid } from "@tremor/react"
-import CreateOrderCard from "../../../../components/CreateOrderCard"
+import CreateOrderCard from "@/components/CreateOrderCards/CreateOrderCard"
 import { useEffect, useState } from "react"
-import DialogWindow from "../../../../components/DialogWindow"
-import { SPINNER_COLOR } from "../../../../constants/themeConstants"
+import DialogWindow from "@/components/DialogWindow"
+import { SPINNER_COLOR } from "@/constants"
 import { TailSpin } from "react-loader-spinner"
-import AddTxRequestCard from "../../../../components/AddTxRequestCard"
+import AddTxRequestCard from "@/components/AddTxRequestCard"
 
 export default function AddTxRequest() {
   const [showDialogWindow, setShowDialogWindow] = useState(false)

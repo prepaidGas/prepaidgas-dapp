@@ -18,7 +18,7 @@ import {
   ClockIcon,
 } from "@heroicons/react/24/outline"
 import { Card, Text, Icon, Title } from "@tremor/react"
-import { SPINNER_COLOR } from "../constants/themeConstants"
+import { SPINNER_COLOR } from "@/constants"
 import { z } from "zod"
 
 const schema = z.object({
@@ -39,20 +39,14 @@ export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean
   const [activeLink, setActiveLink] = useState("")
 
   const links = [
-    // { name: "Dashboard", icon: TableCellsIcon, href: "#" },
-    // { name: "Users", icon: UserIcon, href: "#" },
-    // { name: "Messages", icon: InboxIcon, href: "#" },
-    // { name: "Favorites", icon: BookmarkIcon, href: "#" },
-    // { name: "Data", icon: FolderIcon, href: "#" },
-    // { name: "Analytics", icon: ChartBarIcon, href: "#" },
     { name: "Create order", icon: DocumentPlusIcon, href: "/order/create" },
-    { name: "Order search", icon: DocumentMagnifyingGlassIcon, href: "/order/search" },
-    { name: "Saved", icon: BookmarkIcon, href: "/order/saved" },
-    { name: "My orders", icon: ClipboardDocumentListIcon, href: "/order/myorders" },
+    // { name: "Order search", icon: DocumentMagnifyingGlassIcon, href: "/order/search" },
+    // { name: "Saved", icon: BookmarkIcon, href: "/order/saved" },
+    // { name: "My orders", icon: ClipboardDocumentListIcon, href: "/order/myorders" },
     { name: "New transaction", icon: DocumentPlusIcon, href: "/tx/create" },
-    { name: "Explorer", icon: FolderIcon, href: "/tx/explorer" },
-    { name: "History", icon: ArchiveBoxIcon, href: "/tx/history" },
-    { name: "Requested", icon: ClockIcon, href: "/tx/requested" },
+    // { name: "Explorer", icon: FolderIcon, href: "/tx/explorer" },
+    // { name: "History", icon: ArchiveBoxIcon, href: "/tx/history" },
+    // { name: "Requested", icon: ClockIcon, href: "/tx/requested" },
   ]
 
   const linkOnClickHandler = (event: React.MouseEvent<HTMLElement>, linkName: string) => {
@@ -82,11 +76,6 @@ export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean
               </Link>
             ))}
           </div>
-
-          <Link className="nav__link" href="#">
-            <Icon className="nav__icon" icon={ArrowLeftOnRectangleIcon}></Icon>
-            <Title className="nav__name">Log Out</Title>
-          </Link>
         </div>
       </nav>
     </div>

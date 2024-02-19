@@ -1,10 +1,10 @@
 "use client"
 
 import { Card, Title, Text, Grid, Color } from "@tremor/react"
-import UserStatsCard from "../../../../components/UserStatsCard"
-import FavoriteOrdersSection from "../../../../components/FavoriteOrdersSection"
+import UserStatsCard from "@/components/UserStatsCard"
+import FavoriteOrdersSection from "@/components/FavoriteOrdersSection"
 import { useState } from "react"
-import ToasterPopup from "../../../../components/ToasterPopup"
+import ToasterPopup from "@/components/ToasterPopup"
 
 export default function MyOrdersOrder() {
   const [showPopup, setShowPopup] = useState(false)

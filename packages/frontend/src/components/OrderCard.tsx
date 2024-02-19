@@ -2,7 +2,7 @@ import format from "date-fns/format"
 
 import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
 
-import { COLOR_BY_STATUS } from "../constants/themeConstants"
+import { COLOR_BY_STATUS } from "@/constants"
 
 import { Badge, Card, Text, Metric, Flex, ProgressBar, Icon, Button } from "@tremor/react"
 
