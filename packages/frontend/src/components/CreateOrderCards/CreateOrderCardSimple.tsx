@@ -1,13 +1,14 @@
 "use client"
 
 import { FireIcon } from "@heroicons/react/24/outline"
-import { Text, NumberInput, Button, SearchSelect, SearchSelectItem } from "@tremor/react"
+import { Text, NumberInput, Button } from "@tremor/react"
 import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useState } from "react"
 import { SPINNER_COLOR } from "@/constants"
 import { CreateOrderState } from "./CreateOrderCard"
 import Receipt from "../Receipt"
 import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
+import TokenSearchSelect from "../TokenSearchSelect"
 
 export default function CreateOrderCardSimple({
   setInputValues,
@@ -52,10 +53,10 @@ export default function CreateOrderCardSimple({
         </div>
         <div className="flex flex-col lg:grow">
           <Text>Gas Cost Token</Text>
-          <SearchSelect
+          <TokenSearchSelect
             className="mt-2"
-            value={inputValues.gasCostValueToken}
-            onValueChange={(value) =>
+            searchSelectValue={inputValues.gasCostValueToken}
+            changeHandler={(value) =>
               setInputValues({
                 ...inputValues,
                 gasCostValueToken: value,
@@ -63,14 +64,7 @@ export default function CreateOrderCardSimple({
                 rewardValueToken: value,
               })
             }
-            spellCheck={false}
-            placeholder="0x1dA..."
-          >
-            <SearchSelectItem value="0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512">MockUSD</SearchSelectItem>
-            <SearchSelectItem value="Test1">Test1</SearchSelectItem>
-            <SearchSelectItem value="Test2">Test2</SearchSelectItem>
-            <SearchSelectItem value="Test3">Test3</SearchSelectItem>
-          </SearchSelect>
+          />
         </div>
         <div className="flex flex-col lg:grow">
           <Text>Gas Cost GasPrice</Text>
