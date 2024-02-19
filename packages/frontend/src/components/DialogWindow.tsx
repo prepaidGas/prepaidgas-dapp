@@ -26,7 +26,12 @@ export default function DialogWindow({
       <div className="w-full h-full flex flex-col justify-center items-center md:w-auto md:h-auto md:max-w-lg">
         <Card className="pt-10 pr-10" decoration="top" decorationColor="orange">
           {isClosable ? (
-            <Icon onClick={onClose} className="absolute right-1 top-1" size="lg" icon={XCircleIcon}></Icon>
+            <Icon
+              onClick={onClose}
+              className="absolute right-1 top-1 cursor-pointer"
+              size="lg"
+              icon={XCircleIcon}
+            ></Icon>
           ) : null}
 
           {typeof title === "object" ? title : <Title>{title}</Title>}
