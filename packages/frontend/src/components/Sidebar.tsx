@@ -19,6 +19,7 @@ import {
 } from "@heroicons/react/24/outline"
 import { Icon, Title } from "@tremor/react"
 import { SPINNER_COLOR } from "@/constants"
+import WalletInfo from "./WalletInfo"
 
 export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean }) {
   const [activeLink, setActiveLink] = useState("Create order")
@@ -48,7 +49,6 @@ export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean
             <Icon className="nav__logo-icon" icon={FireIcon}></Icon>
             <Title className="nav__logo-name">prepaidgas.io</Title>
           </Link>
-
           <div className="nav__list">
             {links.map((item) => (
               <Link
@@ -62,6 +62,7 @@ export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean
             ))}
           </div>
         </div>
+        <WalletInfo />
       </nav>
     </div>
   )

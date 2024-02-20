@@ -1,8 +1,9 @@
+import { ExclamationTriangleIcon, WalletIcon } from "@heroicons/react/24/outline"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { Card, Title, Text, Button } from "@tremor/react"
+import { Card, Title, Text, Button, Icon } from "@tremor/react"
 import { useState, useEffect } from "react"
 
-export default function WalletInfo({ isActive = false }) {
+export default function WalletInfo({ isActive = true }) {
   return (
     <ConnectButton.Custom>
       {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
@@ -25,47 +26,62 @@ export default function WalletInfo({ isActive = false }) {
           >
             {(() => {
               if (!connected) {
+                // return (
+                //   <Button disabled={!isActive} onClick={openConnectModal} type="button" color="sky">
+
+                //   </Button>
+                // )
                 return (
-                  <Button disabled={!isActive} onClick={openConnectModal} type="button" color="sky">
-                    Connect Wallet
-                  </Button>
+                  <div className="nav__link cursor-pointer" onClick={openConnectModal}>
+                    <Icon className="nav__icon" icon={WalletIcon}></Icon>
+                    <Title className="nav__name">Connect Wallet</Title>
+                  </div>
                 )
               }
 
               if (chain.unsupported) {
                 return (
-                  <Button onClick={openChainModal} type="button" color="red">
-                    Wrong network
-                  </Button>
+                  <div className="nav__link cursor-pointer" onClick={openChainModal}>
+                    <Icon
+                      className="nav__icon__wallet"
+                      style={{ color: "#ef4444" }}
+                      icon={ExclamationTriangleIcon}
+                      color="red"
+                    ></Icon>
+                    <Title className="nav__name" color="red">
+                      Wrong network
+                    </Title>
+                  </div>
                 )
               }
 
               return (
-                <div style={{ display: "flex", gap: 12 }}>
-                  <Button onClick={openChainModal} className="flex items-center" type="button" color="emerald">
-                    {chain.hasIcon && (
-                      <div
-                        style={{
-                          background: chain.iconBackground,
-                          width: 12,
-                          height: 12,
-                          borderRadius: 999,
-                          overflow: "hidden",
-                          marginRight: 4,
-                        }}
-                      >
-                        {chain.iconUrl && (
-                          <img alt={chain.name ?? "Chain icon"} src={chain.iconUrl} style={{ width: 12, height: 12 }} />
-                        )}
-                      </div>
-                    )}
-                    {chain.name}
-                  </Button>
+                <div className="flex flex-col gap-2 ">
+                  {/* <div className="nav__link cursor-pointer !mb-0" onClick={openAccountModal}>
+                    <Icon className="nav__icon opacity-0" icon={WalletIcon}></Icon>
+                    <Title className="nav__name break-normal">
+                      {account.displayBalance ? `${account.displayBalance}` : ""}
+                    </Title>
+                  </div> */}
+                  <div className="nav__link cursor-pointer " onClick={openAccountModal}>
+                    <Icon className="nav__icon" icon={WalletIcon}></Icon>
+                    <Title className="nav__name break-normal">{account.displayName}</Title>
+                  </div>
 
-                  <Button onClick={openAccountModal} type="button" color="emerald">
-                    {account.displayName}
-                    {account.displayBalance ? ` (${account.displayBalance})` : ""}
-                  </Button>
+                  <div className="nav__link cursor-pointer" onClick={openChainModal}>
+                    <div
+                      style={{
+                        background: chain.iconBackground,
+                        borderRadius: 999,
+                        overflow: "hidden",
+                      }}
+                    >
+                      {chain.iconUrl && (
+                        <img alt={chain.name ?? "Chain icon"} src={chain.iconUrl} className="nav__icon__wallet" />
+                      )}
+                    </div>
+                    <Title className="nav__name">{chain.name}</Title>
+                  </div>
                 </div>
               )
             })()}
