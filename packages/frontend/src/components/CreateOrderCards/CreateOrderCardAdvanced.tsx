@@ -1,41 +1,15 @@
 "use client"
 
-import {
-  getTomorrowStartDate,
-  getTomorrowEndDate,
-  parseTime,
-  combineDateAndTime,
-  getUnixTimestampInSeconds,
-} from "@/utils/dateAndTime.utils"
-import format from "date-fns/format"
-
-import { writeContract, waitForTransaction } from "@wagmi/core"
-import { MockTokenABI, GasOrderABI } from "@/helpers/abi"
-import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
-
-import { CalendarDaysIcon, CheckIcon, ClockIcon, FireIcon, NoSymbolIcon } from "@heroicons/react/24/outline"
-import {
-  Card,
-  Text,
-  TextInput,
-  NumberInput,
-  DatePicker,
-  Accordion,
-  AccordionHeader,
-  AccordionBody,
-  Icon,
-  Button,
-  DatePickerValue,
-  SearchSelect,
-  SearchSelectItem,
-} from "@tremor/react"
+import { ClockIcon, FireIcon } from "@heroicons/react/24/outline"
+import { Card, Text, TextInput, NumberInput, DatePicker, Button } from "@tremor/react"
 import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { ETH_ADDRESS_REGEX, TIME_STRING_REGEX, SPINNER_COLOR } from "@/constants"
-import { z } from "zod"
+import { SPINNER_COLOR } from "@/constants"
 import { CreateOrderState } from "./CreateOrderCard"
 import Receipt from "../Receipt"
 import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
+import TokenSearchSelect from "../TokenSearchSelect"
+import { TOKEN_NAME } from "@/constants/tokens"
 
 export default function CreateOrderCardAdvanced({
   setInputValues,
@@ -142,23 +116,16 @@ export default function CreateOrderCardAdvanced({
       <div className="flex flex-col mt-4 lg:flex-row gap-6">
         <div className="flex flex-col lg:grow">
           <Text>Reward Token</Text>
-          <SearchSelect
+          <TokenSearchSelect
             className="mt-2"
-            value={inputValues.rewardValueToken}
-            onValueChange={(value) =>
+            searchSelectValue={inputValues.rewardValueToken}
+            changeHandler={(value) =>
               setInputValues({
                 ...inputValues,
                 rewardValueToken: value,
               })
             }
-            spellCheck={false}
-            placeholder="0x1dA..."
-          >
-            <SearchSelectItem value="0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512">MockUSD</SearchSelectItem>
-            <SearchSelectItem value="Test1">Test1</SearchSelectItem>
-            <SearchSelectItem value="Test2">Test2</SearchSelectItem>
-            <SearchSelectItem value="Test3">Test3</SearchSelectItem>
-          </SearchSelect>
+          />
         </div>
         <div className="flex flex-col lg:grow">
           <Text>Reward Amount</Text>
@@ -181,23 +148,16 @@ export default function CreateOrderCardAdvanced({
       <div className="flex flex-col mt-4 lg:flex-row gap-6">
         <div className="flex flex-col lg:grow">
           <Text>Gas Cost Token</Text>
-          <SearchSelect
+          <TokenSearchSelect
             className="mt-2"
-            value={inputValues.gasCostValueToken}
-            onValueChange={(value) =>
+            searchSelectValue={inputValues.gasCostValueToken}
+            changeHandler={(value) =>
               setInputValues({
                 ...inputValues,
                 gasCostValueToken: value,
               })
             }
-            spellCheck={false}
-            placeholder="0x1dA..."
-          >
-            <SearchSelectItem value="0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512">MockUSD</SearchSelectItem>
-            <SearchSelectItem value="Test1">Test1</SearchSelectItem>
-            <SearchSelectItem value="Test2">Test2</SearchSelectItem>
-            <SearchSelectItem value="Test3">Test3</SearchSelectItem>
-          </SearchSelect>
+          />
         </div>
         <div className="flex flex-col lg:grow">
           <Text>Gas Price</Text>
@@ -223,23 +183,16 @@ export default function CreateOrderCardAdvanced({
       <div className="flex flex-col mt-4 lg:flex-row gap-6">
         <div className="flex flex-col lg:grow">
           <Text>Guarantee Token</Text>
-          <SearchSelect
+          <TokenSearchSelect
             className="mt-2"
-            value={inputValues.guaranteeValueToken}
-            onValueChange={(value) =>
+            searchSelectValue={inputValues.guaranteeValueToken}
+            changeHandler={(value) =>
               setInputValues({
                 ...inputValues,
                 guaranteeValueToken: value,
               })
             }
-            spellCheck={false}
-            placeholder="0x1dA..."
-          >
-            <SearchSelectItem value="0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512">MockUSD</SearchSelectItem>
-            <SearchSelectItem value="Test1">Test1</SearchSelectItem>
-            <SearchSelectItem value="Test2">Test2</SearchSelectItem>
-            <SearchSelectItem value="Test3">Test3</SearchSelectItem>
-          </SearchSelect>
+          />
         </div>
         <div className="flex flex-col lg:grow">
           <Text>Guarantee GasPrice</Text>
@@ -306,6 +259,8 @@ export default function CreateOrderCardAdvanced({
           gasAmount={inputValues.gasAmount}
           gasCostValue={inputValues.gasCostValueGasPrice}
           rewardValue={inputValues.rewardValueAmount}
+          gasCostTokenName={TOKEN_NAME[inputValues.gasCostValueToken] ?? inputValues.gasCostValueToken}
+          rewardTokenName={TOKEN_NAME[inputValues.rewardValueToken] ?? inputValues.rewardValueToken}
         />
         <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
           {/* <Button onClick={() => setIsLoading(!isLoading)}> */}

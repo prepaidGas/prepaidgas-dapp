@@ -155,6 +155,11 @@ a {
   color: var(--white-color) !important;
 }
 
+.nav__icon__wallet {
+  font-size: 1.25rem;
+  color: var(--white-color);
+}
+
 /*Show navbar movil*/
 .show {
   left: 0;

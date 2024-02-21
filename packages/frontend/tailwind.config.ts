@@ -1,10 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 /* eslint-disable max-len */
 module.exports = {
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "../../node_modules/@tremor/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./src/**/*.{js,ts,jsx,tsx}", "../../node_modules/@tremor/**/*.{js,ts,jsx,tsx}"],
   theme: {
     transparent: "transparent",
     current: "currentColor",
@@ -92,6 +89,16 @@ module.exports = {
         "tremor-title": ["1.125rem", { lineHeight: "1.75rem" }],
         "tremor-metric": ["1.875rem", { lineHeight: "2.25rem" }],
       },
+      keyframes: {
+        wiggle: {
+          "0%": { transform: "scale(100%)" },
+          "10%": { transform: "scale(90%)" },
+          "100%": { transform: "scale(100%)" },
+        },
+      },
+      animation: {
+        wiggle: "wiggle 100ms ease-in-out",
+      },
     },
   },
   safelist: [
@@ -124,4 +131,4 @@ module.exports = {
     },
   ],
   plugins: [require("@headlessui/tailwindcss")],
-};
+}

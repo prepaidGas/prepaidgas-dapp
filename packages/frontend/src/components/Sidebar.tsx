@@ -17,26 +17,12 @@ import {
   ArchiveBoxIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline"
-import { Card, Text, Icon, Title } from "@tremor/react"
+import { Icon, Title } from "@tremor/react"
 import { SPINNER_COLOR } from "@/constants"
-import { z } from "zod"
-
-const schema = z.object({
-  from: z.string().min(1),
-  nonce: z.number(),
-  gasOrder: z.number(),
-  onBehalf: z.string().min(1),
-  deadlineDate: z.date(),
-  deadlineTime: z.string().min(1),
-  to: z.string().min(1),
-  gas: z.number(),
-  data: z.string().min(1),
-})
-
-type AddTxRequestState = z.infer<typeof schema>
+import WalletInfo from "./WalletInfo"
 
 export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean }) {
-  const [activeLink, setActiveLink] = useState("")
+  const [activeLink, setActiveLink] = useState("Create order")
 
   const links = [
     { name: "Create order", icon: DocumentPlusIcon, href: "/order/create" },
@@ -63,7 +49,6 @@ export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean
             <Icon className="nav__logo-icon" icon={FireIcon}></Icon>
             <Title className="nav__logo-name">prepaidgas.io</Title>
           </Link>
-
           <div className="nav__list">
             {links.map((item) => (
               <Link
@@ -77,6 +62,7 @@ export default function AddTxRequestCard({ showSidebar }: { showSidebar: boolean
             ))}
           </div>
         </div>
+        <WalletInfo />
       </nav>
     </div>
   )

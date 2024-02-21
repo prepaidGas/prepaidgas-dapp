@@ -3,26 +3,6 @@ import { Card, Title, Text, Button } from "@tremor/react"
 import { useState, useEffect } from "react"
 
 export default function CustomConnectBttn({ isActive = false }) {
-  const [showBanner, setShowBanner] = useState(false)
-
-  useEffect(() => {
-    if (localStorage.getItem("consentedToCookies") === null) {
-      setShowBanner(true)
-    } else {
-      setShowBanner(false)
-    }
-  })
-
-  const onAccept = () => {
-    localStorage.setItem("consentedToCookies", "1")
-    setShowBanner(false)
-  }
-
-  const onReject = () => {
-    localStorage.setItem("consentedToCookies", "0")
-    setShowBanner(false)
-  }
-
   return (
     <ConnectButton.Custom>
       {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
