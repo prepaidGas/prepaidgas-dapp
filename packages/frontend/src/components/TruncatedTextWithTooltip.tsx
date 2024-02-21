@@ -1,7 +1,7 @@
 import { MIN_NUM_OF_CHARACTERS_FOR_TRUNCATION } from "@/constants"
 import CustomTooltip from "./CustomTooltip"
 import { useTooltip } from "@/hooks/tremor/useTooltip"
-import React from "react"
+import React, { useState } from "react"
 import { mergeRefs } from "react-merge-refs"
 import { Icon, Text } from "@tremor/react"
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline"
@@ -9,6 +9,7 @@ import { ClipboardDocumentIcon } from "@heroicons/react/24/outline"
 const TruncatedTextWithTooltip = React.forwardRef(
   ({ text, isCopyable = false }: { text: string; isCopyable?: boolean }, ref) => {
     const { tooltipProps, getReferenceProps } = useTooltip()
+    const [isAnimating, setIsAnimating] = useState(false)
 
     const truncateString = (str: string) => {
       if (str.length >= MIN_NUM_OF_CHARACTERS_FOR_TRUNCATION) {
@@ -22,13 +23,17 @@ const TruncatedTextWithTooltip = React.forwardRef(
     }
 
     return (
-      <div className="flex w-auto" ref={mergeRefs([ref, tooltipProps.refs.setReference])} {...getReferenceProps}>
+      <div className={`flex w-auto`} ref={mergeRefs([ref, tooltipProps.refs.setReference])} {...getReferenceProps}>
         <CustomTooltip text={text} {...tooltipProps} />
         <div
-          onClick={copyToClipboard}
+          onClick={() => {
+            setIsAnimating(true)
+            copyToClipboard()
+          }}
           className={`flex flex-row justify-center items-center rounded-md border border-solid gap-2 border-blue-500 px-2 py-1 ${
             isCopyable ? "cursor-pointer" : "cursor-default"
-          }`}
+          } ${isAnimating && "animate-wiggle"}`}
+          onAnimationEnd={() => setIsAnimating(false)}
         >
           {isCopyable && (
             <Icon className="!p-0 !m-0" size="sm" variant="simple" icon={ClipboardDocumentIcon} color="blue" />
