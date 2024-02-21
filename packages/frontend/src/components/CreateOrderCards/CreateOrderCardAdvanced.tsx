@@ -9,6 +9,7 @@ import { CreateOrderState } from "./CreateOrderCard"
 import Receipt from "../Receipt"
 import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
 import TokenSearchSelect from "../TokenSearchSelect"
+import { TOKEN_NAME } from "@/constants/tokens"
 
 export default function CreateOrderCardAdvanced({
   setInputValues,
@@ -258,6 +259,8 @@ export default function CreateOrderCardAdvanced({
           gasAmount={inputValues.gasAmount}
           gasCostValue={inputValues.gasCostValueGasPrice}
           rewardValue={inputValues.rewardValueAmount}
+          gasCostTokenName={TOKEN_NAME[inputValues.gasCostValueToken] ?? inputValues.gasCostValueToken}
+          rewardTokenName={TOKEN_NAME[inputValues.rewardValueToken] ?? inputValues.rewardValueToken}
         />
         <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
           {/* <Button onClick={() => setIsLoading(!isLoading)}> */}

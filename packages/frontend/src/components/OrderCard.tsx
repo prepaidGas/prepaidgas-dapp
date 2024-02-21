@@ -19,6 +19,7 @@ import StatusBadge from "./StatusBadge"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import TruncatedTextWithTooltip from "./TruncatedTextWithTooltip"
+import { TOKEN_NAME } from "@/constants/tokens"
 
 interface OrderCard extends FilteredOrderStructOutput {
   onFavorited(favorited: boolean): void
@@ -111,7 +112,7 @@ export default function OrderCard({
       {/* @dev Order Id */}
       <Metric>#{id.toString()}</Metric>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <div className="flex flex-row gap-2 items-center">
           <Text>Manager:</Text>
           <TruncatedTextWithTooltip text={order.manager} isCopyable />
@@ -127,9 +128,21 @@ export default function OrderCard({
         {/* @dev Order executionWindow */}
         {/* @dev Order data, the details might be found in `TokenAmountWithDetails` structure */}
         {/* todo: how to get token 'symbol'? ${reward.amount} ${reward.symbol} */}
-        <Text>{`Reward: ${reward.amount} ${reward.token}`}</Text>
-        <Text>{`Gas Cost: ${gasCost.gasPrice} ${gasCost.token}`}</Text>
-        <Text>{`Guarantee: ${guarantee.gasPrice} ${guarantee.token}`}</Text>
+        <div className="flex flex-row gap-2 items-center">
+          <Text>{`Reward:`}</Text>
+          <Text color="blue">{`${reward.amount}`}</Text>
+          <TruncatedTextWithTooltip title={TOKEN_NAME[reward.token] ?? ""} text={reward.token} isCopyable />
+        </div>
+        <div className="flex flex-row gap-2 items-center">
+          <Text>{`Gas Cost:`}</Text>
+          <Text color="blue">{`${gasCost.gasPrice}`}</Text>
+          <TruncatedTextWithTooltip title={TOKEN_NAME[gasCost.token] ?? ""} text={gasCost.token} isCopyable />
+        </div>
+        <div className="flex flex-row gap-2 items-center">
+          <Text>{`Guarantee:`}</Text>
+          <Text color="blue">{`${guarantee.gasPrice}`}</Text>
+          <TruncatedTextWithTooltip title={TOKEN_NAME[guarantee.token] ?? ""} text={guarantee.token} isCopyable />
+        </div>
       </div>
       {/* @dev Gas left (maxGas) */}
       <Flex className="mt-4">

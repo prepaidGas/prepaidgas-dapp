@@ -57,12 +57,6 @@ export default function WalletInfo({ isActive = true }) {
 
               return (
                 <div className="flex flex-col gap-2 ">
-                  {/* <div className="nav__link cursor-pointer !mb-0" onClick={openAccountModal}>
-                    <Icon className="nav__icon opacity-0" icon={WalletIcon}></Icon>
-                    <Title className="nav__name break-normal">
-                      {account.displayBalance ? `${account.displayBalance}` : ""}
-                    </Title>
-                  </div> */}
                   <div className="nav__link cursor-pointer " onClick={openAccountModal}>
                     <Icon className="nav__icon" icon={WalletIcon}></Icon>
                     <Title className="nav__name break-normal">{account.displayName}</Title>
