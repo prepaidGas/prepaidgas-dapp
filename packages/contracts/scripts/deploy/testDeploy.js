@@ -34,6 +34,10 @@ async function initDeploymentSetup() {
   // @dev send mock tokens to the tester hardhat address
   await TokenContract.transfer("0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65", "100000000000000000000000")
 
+  // @dev send mock token to executor
+  await TokenContract.transfer(accounts[6].address, "100000000000000000000000")
+  await TokenContract.connect(accounts[6]).approve(GasOrderContract.target, "100000000000000000000000")
+
   // Create and accept order
   await TokenContract.transfer(accounts[10].address, "500000000000000")
   await TokenContract.transfer(accounts[7].address, "500000000000000")
