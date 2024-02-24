@@ -12,9 +12,13 @@ async function listener() {
   let wallet = new ethers.Wallet(privateKey, httpProvider)
 
   // TODO: Get from file
+  // const message_type =
+  //   "tuple(address from, uint256 nonce, uint256 gasOrder, address onBehalf, uint256 deadline, address to, uint256 gas, uint256 tips, bytes data)"
   let abi = [
     "event OrderCreate(uint256 indexed id, uint256 executionWindow)",
+    // "event TransactionAdded(" + message_type + " message, bytes indexed signature)",
     "function acceptOrder(uint256 id, uint256 guaranteeTransfer)",
+    // "function execute(" + message_type + " calldata message, bytes calldata signature)",
     "function order(uint256 id) view returns (tuple(address, uint256 maxGas, uint256, uint256, uint256))",
     "function guarantee(uint256 id) view returns (tuple(address, uint256 gasPrice))",
     "function executor(uint256 id) view returns (address)",
@@ -28,7 +32,7 @@ async function listener() {
   // NOTICE: it will react on the previous event (1) as well
   contract.on(contract.filters.OrderCreate, async (id: any) => {
     const executor = await contract.executor(id)
-    console.log("Executor have seen create event, executor now:", id, executor)
+    console.log("Executor have seen create event:", id, executor)
     if (executor != "0x0000000000000000000000000000000000000000") return
 
     const order = await contract.order(id)
@@ -37,6 +41,11 @@ async function listener() {
 
     console.log("Executor accepted order:", id, await contract.executor(id))
   })
+
+  // contract.on(contract.filters.TransactionAdded, async (message: any, signature: any) => {
+  //   console.log("Executor have seen tx register event:", message.from, message.nonce)
+  //   await contract.execute(message, signature)
+  // })
 }
 
 listener()
