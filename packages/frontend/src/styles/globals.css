@@ -1,0 +1,2753 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer utilities {
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    @apply hidden;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none; /* Firefox */
+  }
+
+}
+
+h1, h2, h3, h4, h5, h6{
+  @apply text-dark dark:text-white/[.87];
+}
+html,
+body,
+.ant-tag,
+.ant-carousel,
+[class*="ant-"] {
+  @apply !font-Jost;
+}
+body.dark{
+  @apply text-theme-gray bg-[#010413];
+}
+
+hr{
+  @apply dark:border-white/10 border-1;
+}
+
+[dir="rtl"] .rtl-true{
+  direction: rtl;
+}
+a:hover {
+  @apply text-primary;
+}
+h1 {
+  @apply text-3xl font-semibold leading-[38px];
+}
+h2 {
+  @apply text-2xl font-semibold leading-[30px];
+}
+h3 {
+  @apply text-[22px] font-semibold leading-[27px];
+}
+h4 {
+  @apply text-xl font-semibold leading-[24px];
+}
+h5 {
+  @apply text-lg font-semibold leading-[22px];
+}
+h6 {
+  @apply text-base font-semibold leading-[20px];
+}
+
+/* tag */
+.ant-tag .ant-tag-close-icon{
+  @apply dark:text-white/60;
+}
+.ant-spin-dot-item {
+  @apply bg-primary !important;
+}
+.ant-btn-primary {
+  @apply bg-primary hover:bg-primary-hbr text-white !important;
+}
+.ant-btn-primary svg,
+.ant-btn-primary i {
+  @apply text-white !important;
+}
+.ant-picker,
+.ant-form-item-control-input input,
+.ant-input-number-input-wrap input {
+  @apply h-10 px-5 border-normal;
+}
+
+.ant-input-number .ant-input-number-input{
+  @apply dark:text-white/60;
+}
+
+/*
+Avoid using the "important" declaration in global CSS,
+as conflicts may arise in other places
+*/
+.ant-select-single:not(.ant-select-customize-input) .ant-select-selector{
+  @apply h-10; 
+}
+
+
+
+.ant-select .ant-select-selector .ant-select-selection-placeholder {
+  @apply leading-[36px] !important;
+}
+.ant-select-single.ant-select-open .ant-select-selection-item{
+  @apply dark:text-white/60;
+}
+
+/* Input */
+.ant-input-number:hover,
+.ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner::before {
+  @apply border-primary;
+}
+.ant-select-selection-search-input{
+  @apply dark:caret-white/60;
+}
+
+
+.ant-checkbox .ant-checkbox-inner:after {
+  @apply bg-primary;
+}
+.ant-checkbox .ant-checkbox-inner:after,
+.ant-radio-wrapper .ant-radio-inner::after {
+  @apply border-white;
+}
+.ant-checkbox-checked .ant-checkbox-inner,
+.ant-radio-wrapper .ant-radio-checked .ant-radio-inner {
+  @apply bg-primary border-primary !important;
+}
+.ant-checkbox-wrapper:hover .ant-checkbox:not(.ant-checkbox-disabled) .ant-checkbox-inner,
+.ant-radio-wrapper:hover .ant-radio:not(.ant-radio-disabled) .ant-radio-inner,
+.ant-radio-wrapper .ant-radio-checked::after {
+  @apply border-primary !important;
+}
+.ant-radio.ant-radio-disabled .ant-radio-inner {
+  @apply border-[#d9d9d9] bg-[#f5f5f5] !important;
+}
+
+.ant-radio-group .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  @apply text-primary border-primary before:!bg-primary;
+}
+.ant-radio-group .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover,
+.ant-input-number .ant-input-number-handler:hover .anticon {
+  @apply text-primary;
+}
+
+.ant-rate-star .anticon-star svg {
+  @apply w-[13px] h-[13px];
+}
+.ant-rate-star-full .anticon-star svg {
+  @apply fill-warning;
+}
+.ant-rate-star-half .ant-rate-star-first {
+  @apply text-warning !important;
+}
+
+.ant-popconfirm-message .ant-popconfirm-message-icon {
+  @apply leading-[18px];
+}
+.ant-popconfirm-buttons .ant-btn-default {
+  @apply hover:text-primary hover:border-primary !important;
+}
+
+.ant-progress .ant-progress-bg {
+  @apply bg-primary;
+}
+.ant-progress .ant-progress-inner:not(.ant-progress-circle-gradient) .ant-progress-circle-path {
+  @apply stroke-primary;
+}
+
+.ant-slider-track {
+  @apply !bg-primary;
+}
+.ant-slider-rail {
+  @apply !bg-primary-transparent;
+}
+.ant-slider-handle {
+  @apply !w-4 !h-4;
+} 
+.ant-slider-handle::after {
+  @apply w-4 h-4 -top-[3px] start-0 bg-white dark:bg-whiteDark border-2 border-primary shadow-none !important;
+}
+
+/* Alert */
+.ant-alert {
+  @apply border-none rounded-4 m-0 px-5 py-4 !important;
+}
+.ant-alert-success {
+  @apply bg-success-transparent border-success;
+}
+.ant-alert-warning {
+  @apply bg-warning-transparent border-warning;
+}
+.ant-alert-error {
+  @apply bg-danger-transparent border-danger;
+}
+.ant-alert-info {
+  @apply bg-info-transparent border-info;
+}
+
+.ant-alert-success .ant-alert-message, 
+.ant-alert-success .ant-alert-description,
+.ant-alert-success .ant-alert-icon {
+  @apply text-success;
+}
+.ant-alert-info .ant-alert-message, 
+.ant-alert-info .ant-alert-description,
+.ant-alert-info .ant-alert-icon {
+  @apply text-info;
+}
+.ant-alert-warning .ant-alert-message, 
+.ant-alert-warning .ant-alert-description,
+.ant-alert-warning .ant-alert-icon {
+  @apply text-warning;
+}
+.ant-alert-error .ant-alert-message, 
+.ant-alert-error .ant-alert-description,
+.ant-alert-error .ant-alert-icon {
+  @apply text-danger;
+}
+.ant-alert-close-icon svg, 
+.ant-alert-close-icon span, 
+.ant-alert-close-icon img, 
+.ant-alert-close-icon i {
+  @apply w-2 h-2;
+}
+
+.ant-alert .ant-alert-close-icon{
+  @apply dark:text-white/60;
+}
+
+/* AutoComplete */
+.ant-select-item-group {
+  @apply text-body;
+}
+.ant-avatar {
+  @apply bg-[#e3e6ef] dark:bg-whiteDark;
+}
+.ant-badge-count {
+  @apply px-1 text-[10px] !important;
+}
+.ant-badge-status-text {
+  @apply text-light dark:text-white/60 ms-2.5 capitalize !important;
+}
+.ant-badge .head-example {
+  @apply block w-[42px] h-[42px] bg-[#f4f5f7] dark:bg-whiteDark rounded-[3px];
+}
+.ant-breadcrumb .ant-breadcrumb-link a,
+.ant-breadcrumb .ant-dropdown-trigger,
+.ant-dropdown .ant-dropdown-menu-item {
+  @apply hover:!bg-transparent;
+}
+
+/* Grid Style */
+.grid-style .ant-row .ant-col, .grid-style .ant-row-flex .ant-col,
+.grid-style-gutter .ant-row .ant-col .gutter-box, .grid-style-gutter .ant-row-flex .ant-col .gutter-box,
+.grid-style-offset .ant-row .ant-col, .grid-style-offset .ant-row-flex .ant-col {
+  @apply bg-primary text-white h-[50px] leading-[50px] mb-[15px] text-center;
+}
+
+.grid-style .ant-row .ant-col:nth-child(even), .grid-style .ant-row-flex .ant-col:nth-child(even) {
+  @apply bg-pink text-dark;
+}
+
+.ant-layout{
+  @apply bg-normalBG dark:bg-[#010413];
+}
+
+.ant-layout-sider-light{
+  @apply dark:!bg-[#1b1d2a];
+}
+.ant-layout-sider .ant-menu{
+  @apply dark:!bg-transparent;
+}
+.ant-layout-sider .ant-menu.ant-menu-inline-collapsed .ant-menu-item-only-child {
+  @apply hidden;
+}
+.ant-layout-sider-collapsed ~ .hexadash-main-layout {
+  @apply ms-[80px];
+}
+
+.ant-layout-sider .ant-layout-sider-children .ant-menu .ant-menu-item {
+  @apply flex items-center px-[15px];
+}
+.ant-layout-sider .ant-layout-sider-children .ant-menu .ant-menu-item,
+.ant-layout-sider .ant-layout-sider-children .ant-menu.ant-menu-inline-collapsed .ant-menu-submenu .ant-menu-submenu-title {
+  @apply px-[20px] justify-center m-0;
+}
+
+.ant-layout-sider .ant-layout-sider-children .ant-menu.ant-menu-inline-collapsed .ant-menu-submenu span,
+.ant-layout-sider .ant-layout-sider-children .ant-menu.ant-menu-inline-collapsed .ant-menu-item span {
+  @apply hidden;
+}
+.ant-menu {
+  @apply !duration-[0s];
+}
+
+.ant-tooltip .ant-tooltip-inner {
+  @apply text-[14px] min-h-[40px] py-[6px] px-[20px] flex items-center bg-white dark:bg-[#1b1d2a] border-1 dark:border-white/10 rounded-[3px] text-theme-gray dark:text-white/60;
+  box-shadow: 0 8px 15px #9299b815;
+}
+
+.ant-tooltip .ant-tooltip-arrow .ant-tooltip-arrow-content {
+  @apply !bg-white dark:!bg-[#1b1d2a] h-[14px] w-[14px] top-[3px] z-[98] border-1 border-regular dark:border-white/10;
+  --antd-arrow-background-color: #fff;
+}
+
+.ant-menu-inline-collapsed-tooltip a, .ant-menu-inline-collapsed-tooltip a:hover{
+  @apply !text-dark hover:!text-primary dark:!text-white/60 dark:hover:!text-white;
+}
+
+
+/* Sidebar Submenu */
+.ant-layout-sider .ant-menu {
+  @apply  !font-Jost !border-none;
+}
+.ant-layout-sider-children .ant-menu-submenu .ant-menu-sub {
+  @apply !bg-transparent;
+}
+.ant-menu-item,
+.ant-menu-submenu-title,
+.ant-menu .ant-menu-submenu .ant-menu-submenu-title {
+  @apply font-medium text-body dark:text-[#a4a5aa];
+}
+.ant-menu-item.ant-menu-item-active,
+.ant-menu-item.ant-menu-item-selected,
+.ant-menu-item.ant-menu-item-active > svg,
+.ant-menu-item.ant-menu-item-selected > svg,
+.ant-menu-submenu-popup .ant-menu-item-selected a,
+.ant-menu-item.ant-menu-item-active > .menuItem-icon,
+.ant-menu-item.ant-menu-item-selected > .menuItem-icon,
+.ant-menu .ant-menu-submenu-open .ant-menu-submenu-title,
+.ant-menu .ant-menu-submenu-active .ant-menu-submenu-title,
+.ant-menu .ant-menu-submenu-open .ant-menu-submenu-title > svg,
+.ant-menu .ant-menu-submenu-active .ant-menu-submenu-title > svg,
+.ant-menu-submenu-popup .ant-menu .ant-menu-item.ant-menu-item-active,
+.ant-menu .ant-menu-item.ant-menu-item-active .ant-menu-item-icon > svg,
+.ant-menu .ant-menu-item.ant-menu-item-selected .ant-menu-item-icon > svg,
+.ant-menu .ant-menu-submenu-open .ant-menu-submenu-title >.ant-menu-submenu-arrow,
+.ant-menu .ant-menu-submenu-active .ant-menu-submenu-title >.ant-menu-submenu-arrow,
+.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item.ant-menu-item-active,
+.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item.ant-menu-item-selected,
+.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item.ant-menu-item-active > svg,
+.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item.ant-menu-item-selected > svg {
+  @apply text-primary !important;
+}
+.ant-layout-sider .ant-menu-item.ant-menu-item-selected {
+  @apply bg-primary-transparent !important;
+}
+.ant-menu-light.ant-menu-horizontal >.ant-menu-item:hover::after,
+.ant-menu-light.ant-menu-horizontal >.ant-menu-item-selected::after{
+  @apply border-primary;
+}
+.ant-layout-sider .ant-menu > .ant-menu-item {
+  @apply w-full !ps-[15px] m-0;
+}
+.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item {
+  @apply !ps-[40px] rounded-s-[0] rounded-e-[20px] !important;
+}
+.ant-layout-sider .ant-menu .ant-menu-submenu .ant-menu-submenu-title {
+  @apply w-full !ps-[15px] p-0 ssm:pe-[30px] m-0 rounded-4;
+}
+.ant-menu-item > svg,
+.ant-menu .ant-menu-item .ant-menu-item-icon,
+.ant-menu-item .ant-menu-item-icon > svg,
+.ant-menu .ant-menu-submenu .ant-menu-submenu-title > svg {
+  @apply w-4 h-4 text-[#a0a0a0] dark:text-[#a4a5aa];
+}
+.ant-menu-item.ant-menu-item-only-child {
+  @apply h-auto;
+}
+.ant-menu.ant-menu-inline .ant-menu-item.ant-menu-item-active,
+.ant-menu .ant-menu-submenu .ant-menu-submenu-title:hover,
+.ant-menu.ant-menu-inline .ant-menu-item:hover,
+.ant-menu-submenu-popup .ant-menu .ant-menu-item.ant-menu-item-active,
+.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item:hover,
+.ant-menu-item.ant-menu-item-selected.ant-menu-item-only-child,
+.ant-menu-item.ant-menu-item-active {
+  @apply bg-transparent !important;
+}
+
+.ant-menu-submenu-popup .ant-menu .ant-menu-item.ant-menu-item-selected,
+.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item.ant-menu-item-selected {
+  @apply bg-primary-transparent !important;
+}
+
+.ant-layout-sider .ant-layout-sider-children .ant-menu .ant-menu-item .badge, .ckbkee .ant-layout-sider .ant-layout-sider-children .ant-menu .ant-menu-submenu-title .badge {
+  @apply absolute ltr:right-[15px] rtl:left-[15px] top-1/2 -translate-y-1/2 inline-block bg-primary text-white text-[10px] leading-[10px] tracking-[1px] rounded-[3px] h-auto pt-[3px] pb-1 px-1;
+}
+.ant-menu .ant-menu-submenu-inline>.ant-menu-submenu-title>.ant-menu-submenu-arrow {
+  @apply rotate-[270deg] text-[#a0a0a0] dark:text-white/[.87];
+}
+.ant-menu .ant-menu-submenu-open.ant-menu-submenu-inline>.ant-menu-submenu-title>.ant-menu-submenu-arrow {
+  @apply rotate-[180deg];
+}
+
+.ant-menu .ant-menu-submenu-arrow {
+  @apply end-4;
+}
+.ant-menu .ant-menu-submenu-arrow::before,
+.ant-menu .ant-menu-submenu-arrow::after {
+  @apply h-[1.2px] dark:bg-white/[.87];
+}
+
+
+.ant-menu-submenu-popup > .ant-menu{
+  @apply bg-white dark:bg-[#1b1d2a];
+}
+.ant-menu-submenu-popup > .ant-menu::-webkit-scrollbar {
+  @apply hidden;
+}
+.ant-menu-submenu-popup > .ant-menu{
+  -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none; 
+}
+.ant-menu-submenu-popup .ant-menu .ant-menu-item {
+  @apply bg-transparent w-full my-1 [&:not(:last-child)]:mb-2 rounded-none !important;
+}
+.ant-tooltip .ant-tooltip-arrow:before {
+  @apply bg-white dark:bg-whiteDark;
+}
+.ant-tooltip .ant-tooltip-content a {
+  @apply capitalize;
+}
+
+
+/* tabs */
+.ant-tabs-top >.ant-tabs-nav::before,
+.ant-tabs-bottom >.ant-tabs-nav::before,
+.ant-tabs-top >div>.ant-tabs-nav::before,
+.ant-tabs-bottom >div>.ant-tabs-nav::before {
+  @apply dark:border-white/10;
+}
+
+
+.ant-tabs .ant-tabs-tab{
+  @apply px-[15px] py-[10px] rounded-[3px] text-[15px] min-h-[44px];
+}
+.ant-tabs .ant-tabs-tab+.ant-tabs-tab{
+  @apply m-0;
+}
+.ant-tabs .ant-tabs-tab:hover{
+  @apply text-primary;
+}
+.ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn{
+  @apply text-primary ;
+}
+.ant-tabs .ant-tabs-ink-bar{
+  @apply bg-primary;
+}
+
+.ant-tabs .ant-tabs-tab .anticon{
+  @apply m-0;
+}
+
+/* tabs bg primary */
+
+.tabs-bg-primary .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn{
+  @apply text-white;
+}
+.tabs-bg-primary.ant-tabs .ant-tabs-tab.ant-tabs-tab-active{
+  @apply bg-primary;
+}
+.tabs-bg-primary.ant-tabs .ant-tabs-ink-bar{
+  @apply bg-transparent;
+}
+.tabs-bg-primary .ant-tabs-content-top{
+  @apply px-[15px] py-[12px] bg-primary;
+}
+/* tabs bg white */
+.tabs-bg-white.ant-tabs .ant-tabs-tab.ant-tabs-tab-active{
+  @apply bg-white;
+}
+.tabs-bg-white.ant-tabs .ant-tabs-ink-bar{
+  @apply bg-transparent;
+}
+.tabs-bg-white .ant-tabs-content-top{
+  @apply px-[15px] py-[12px] bg-white;
+}
+
+/* Top Menu */
+.hexadash-top-menu li {
+  @apply relative transition-all duration-300;
+}
+.hexadash-top-menu >ul >li {
+  @apply pr-[18px] h-[72px];
+}
+.hexadash-top-menu li a {
+  @apply relative inline-block text-[15px] font-medium text-light hover:text-primary;
+}
+.hexadash-top-menu >ul .has-subMenu >a {
+  @apply relative px-0 before:content-['\f107'] before:absolute ltr:before:right-[-14px] rtl:before:left-[-14px] before:top-1/2 before:-translate-y-1/2 before:font-Awesome before:text-light;
+}
+.hexadash-top-menu >ul .has-subMenu-left >a {
+  @apply relative px-0 before:content-['\f105'] before:absolute ltr:before:right-[30px] rtl:before:left-[30px] before:top-1/2 before:-translate-y-1/2 before:font-Awesome before:text-light;
+}
+.hexadash-top-menu li:not(:last-child) {
+  @apply me-[34px];
+}
+.hexadash-top-menu li ul a {
+  @apply h-[45px] transition-all duration-300;
+}
+.hexadash-top-menu .subMenu {
+  @apply w-[250px] flex items-center flex-col flex-wrap bg-white dark:bg-[rgb(27,30,43)] absolute start-0 top-[80px] py-3 rounded-6 shadow-[0px_15px_40px_rgba(82,63,105,0.15)] transition-all ease-in-out delay-0 duration-500 invisible opacity-0;
+} 
+.hexadash-top-menu .has-subMenu:hover >.subMenu {
+  @apply top-[70px] opacity-100 visible;
+}
+.hexadash-top-menu .subMenu li,
+.hexadash-top-menu .mega-item .megaMenu-wrapper li {
+  @apply relative flex flex-col w-full p-0 m-0;
+}
+.hexadash-top-menu .subMenu li a,
+.hexadash-top-menu .mega-item .megaMenu-wrapper li a {
+  @apply relative inline-flex items-center gap-2.5 px-[30px] hover:bg-[rgba(130,49,211,0.024)];
+}
+.hexadash-top-menu .has-subMenu >a,
+.hexadash-top-menu .has-subMenu-left >a {
+  @apply inline-flex items-center gap-2.5 px-[30px];
+}
+.hexadash-top-menu .subMenu li a:hover svg {
+  @apply text-primary;
+}
+.hexadash-top-menu .subMenu li a {
+  @apply hover:ps-[40px];
+}
+.hexadash-top-menu .subMenu li a svg {
+  @apply w-4 h-4 text-light dark:text-white/60;
+}
+.hexadash-top-menu .has-subMenu-left .subMenu {
+  @apply top-[10px] start-full shadow-[0px_15px_40px_rgba(82,63,105,0.15)];
+}
+.hexadash-top-menu .has-subMenu-left:hover >.subMenu {
+  @apply top-0 visible opacity-100;
+}
+.hexadash-top-menu .mega-item .megaMenu-wrapper {
+  @apply w-[1000px] 3xl:w-[800px] flex absolute top-[80px] bg-white dark:bg-[rgb(27,30,43)] overflow-hidden -z-10 py-4 rounded-e-6 shadow-[0px_15px_40px_rgba(82,63,105,0.15)] transition-all ease-in-out delay-0 duration-500 invisible opacity-0;
+}
+.hexadash-top-menu .mega-item .megaMenu-wrapper.megaMenu-small {
+  @apply w-[590px];
+}
+.hexadash-top-menu .mega-item:hover .megaMenu-wrapper {
+  @apply top-[70px] opacity-100 visible;
+}
+.hexadash-top-menu > ul > li .megaMenu-wrapper.megaMenu-wide > li .mega-title {
+  @apply relative ps-[45px] text-dark dark:text-white/[.87] font-medium before:absolute before:h-[5px] before:w-[5px] ltr:before:left-[30px] rtl:before:right-[30px] before:top-1/2 before:-translate-y-1/2 before:bg-[rgb(198,208,220)] dark:before:bg-white/60 before:rounded-full;
+}
+.hexadash-top-menu .mega-item .megaMenu-wrapper li a {
+  @apply relative ltr:hover:pl-[35px] rtl:hover:pr-[35px] before:absolute before:h-[1px] before:w-[6px] ltr:before:left-[20px] rtl:before:right-[20px] before:top-1/2 before:-translate-y-1/2 before:bg-light dark:before:bg-whiteDark before:hidden hover:before:block;
+}
+
+.top-right-wrap {
+  @apply relative ltr:float-right rtl:float-left;
+}
+.search-toggle {
+  @apply flex items-center [&.active>.feather-search]:hidden [&.active>.feather-x]:flex [&>.feather-x]:hidden [&>.feather-search]:flex;
+}
+.search-toggle svg,
+.search-toggle img {
+  @apply w-[20px];
+}
+
+.topMenu-search-form {
+  @apply absolute top-3 start-full ms-[15px] bg-white dark:bg-[#1b1d2a] rounded-6 h-10 w-[260px] hidden [&.show]:block;
+}
+.topMenu-search-form .search-icon {
+  width: fit-content;
+  line-height: 1;
+  position: absolute;
+  inset-inline-start: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9999;
+}
+.topMenu-search-form i,
+.topMenu-search-form svg {
+  @apply w-[18px];
+}
+.topMenu-search-form form {
+  height: auto;
+  display: flex;
+  align-items: center;
+}
+.topMenu-search-form input {
+  position: relative;
+  border-radius: 6px;
+  width: 100%;
+  border: 0 none;
+  height: 38px;
+  padding-left: 40px;
+  z-index: 999;
+  padding-inline-start: 40px;
+}
+.topMenu-search-form input:focus {
+  border: 0 none;
+  box-shadow: 0 0;
+  outline: none;
+}
+
+/* Menu */
+.ant-menu-overflow {
+  @apply flex;
+}
+.ant-menu-horizontal>.ant-menu-item, .ant-menu-horizontal>.ant-menu-submenu {
+  @apply inline-block relative top-[1px] align-bottom;
+}
+
+.ant-menu-inline .ant-menu-item:after, 
+.ant-menu-vertical .ant-menu-item:after, 
+.ant-menu-vertical-left .ant-menu-item:after, 
+.ant-menu-vertical-right .ant-menu-item:after {
+  @apply absolute top-0 bottom-0 opacity-0 end-0 content-[''] scale-y-[0.0001];
+}
+
+.ant-menu-inline .ant-menu-selected:after,
+.ant-menu-inline .ant-menu-item-selected:after {
+  @apply scale-y-100 opacity-100;
+  transition: transform .15s cubic-bezier(.645,.045,.355,1),opacity .15s cubic-bezier(.645,.045,.355,1);
+}
+.ant-menu .ant-menu-submenu:hover::after,
+.ant-menu .ant-menu-submenu-active::after {
+  @apply border-primary !important;
+}
+
+/* Card */
+.ant-card{
+  @apply bg-white dark:bg-white/10 border-regular dark:border-transparent;
+}
+
+.ant-card-head{
+  @apply !bg-white !text-dark dark:!text-white/[.87] dark:!bg-transparent border-b-1 dark:border-white/10 !px-[25px];
+}
+
+.ant-card-body{
+  @apply !p-[25px];
+}
+
+.ant-card-head-title{
+  @apply md:!whitespace-normal md:text-center;
+}
+.ant-card-head-title-lg .ant-card-head-title {
+  @apply py-[18px] text-lg font-semibold;
+}
+.ant-card-head-b-none .ant-card-head {
+  @apply !border-none;
+}
+.ant-card-head-px-25 .ant-card-head {
+  @apply !px-[25px];
+}
+.ant-card-body-p-25 .ant-card-body {
+  @apply !p-[25px];
+}
+.ant-card-body-pt-0 .ant-card-body {
+  @apply !pt-0;
+}
+
+.ant-collapse-content{
+  @apply bg-white dark:bg-[#1b1d2a];
+}
+
+/* Breadcrumb */
+.ant-page-header-heading-title{
+  @apply font-semibold text-22 text-dark dark:text-white/[.87];
+}
+.ant-breadcrumb a,
+.ant-breadcrumb .ant-breadcrumb-link,
+.ant-breadcrumb .ant-breadcrumb-separator,
+.ant-breadcrumb .ant-dropdown-trigger svg,
+.ant-table-column-has-sorters .ant-table-column-sorter,
+.ant-table-column-has-sorters .ant-table-filter-trigger {
+  @apply text-dark dark:text-white/[.87];
+}
+
+.ant-breadcrumb li:last-child .ant-breadcrumb-link{
+  @apply text-breadcrumbs dark:text-white/60;
+}
+
+.ant-page-header-heading-sub-title{
+  @apply text-breadcrumbs dark:text-white/60;
+}
+
+.ant-page-header-heading-extra .ant-space-horizontal {
+  @apply flex-wrap justify-center;
+}
+
+/* Calendar */
+.ant-picker-calendar .ant-radio-button-wrapper {
+  @apply hover:border-primary text-primary;
+}
+.ant-picker-calendar .ant-select .ant-select-selector {
+  @apply h-8 !important;
+}
+.ant-picker-focused,
+.rdrDateDisplayItemActive,
+.ant-picker-focused .ant-picker-input > input,
+.ant-picker-calendar .ant-radio-button-wrapper-checked,
+.ant-picker-calendar .ant-select:hover .ant-select-selector,
+.ant-picker-calendar .ant-select-focused .ant-select-selector {
+  @apply border-primary text-primary !important;
+}
+.ant-picker-calendar .ant-picker-cell:hover:not(.ant-picker-cell-in-view) .ant-picker-cell-inner, 
+.ant-picker-calendar .ant-picker-cell:hover:not(.ant-picker-cell-selected):not(.ant-picker-cell-range-start):not(.ant-picker-cell-range-end):not(.ant-picker-cell-range-hover-start):not(.ant-picker-cell-range-hover-end) .ant-picker-cell-inner {
+  @apply bg-primary-transparent !important;
+}
+.ant-picker-calendar-full .ant-picker-panel .ant-picker-cell-selected .ant-picker-calendar-date, 
+.ant-picker-calendar-full .ant-picker-panel .ant-picker-cell-selected .ant-picker-calendar-date-today, 
+.ant-picker-calendar-full .ant-picker-panel .ant-picker-cell-selected:hover .ant-picker-calendar-date, 
+.ant-picker-calendar-full .ant-picker-panel .ant-picker-cell-selected:hover .ant-picker-calendar-date-today {
+  @apply bg-primary-transparent !important;
+}
+.ant-picker-calendar.ant-picker-calendar-full .ant-picker-calendar-date-today {
+  @apply border-primary;
+}
+.ant-picker-calendar.ant-picker-calendar-full .ant-picker-cell-selected .ant-picker-calendar-date .ant-picker-calendar-date-value, 
+.ant-picker-calendar.ant-picker-calendar-full .ant-picker-cell-selected:hover .ant-picker-calendar-date .ant-picker-calendar-date-value, 
+.ant-picker-calendar.ant-picker-calendar-full .ant-picker-cell-selected .ant-picker-calendar-date-today .ant-picker-calendar-date-value, 
+.ant-picker-calendar.ant-picker-calendar-full .ant-picker-cell-selected:hover .ant-picker-calendar-date-today .ant-picker-calendar-date-value {
+  @apply text-primary;
+}
+
+
+/* Table Bordered*/
+.ant-table{
+  @apply bg-white dark:bg-transparent dark:border-transparent;
+}
+.table-bordered .ant-table-thead>tr>th {
+  @apply bg-white border-b-0 dark:bg-white/10 border-1 dark:border-white/10;
+}
+
+.table-bordered .ant-table-tbody>tr>td {
+  @apply dark:border-white/10 ;
+}
+
+.table-bordered .ant-table-thead tr th,
+.table-bordered .ant-table-tbody tr td {
+  @apply px-[16px] py-[25px];
+}
+
+.table-bordered .ant-table-thead tr th:last-child,
+.table-bordered .ant-table-tbody tr td:last-child {
+  @apply text-center;
+}
+
+.ant-table-thead > tr > th{
+  @apply !bg-regularBG dark:!bg-white/10;
+}
+
+.ant-table-thead > tr > th{
+  @apply dark:text-white/[.87];
+}
+.ant-table-tbody>tr>td {
+  @apply border-b-1 border-[#f0f0f0] dark:border-white/10;
+}
+
+.dark-border-row .ant-table-tbody > tr > td{
+  @apply dark:border-white/10;
+}
+
+.ant-table-column-sorter-down.active, 
+.ant-table-column-sorter-up.active {
+  @apply text-primary !important;
+}
+
+/* Table Responsive */
+.ant-table table {
+  @apply w-full border-collapse text-start rounded-tl-4 rounded-tr-4 border-spacing-0;
+}
+.ant-table tfoot>tr>td, 
+.ant-table tfoot>tr>th, 
+.ant-table-tbody>tr>td, 
+.ant-table-thead>tr>th {
+  @apply relative p-4 break-words;
+}
+.table-responsive .ant-table-content {
+  @apply block w-full overflow-x-auto;
+}
+.ant-table{
+  @apply dark:text-white/60;
+}
+.table-responsive .ant-table-content .ant-table-cell {
+  @apply bg-transparent whitespace-nowrap;
+}
+.ant-table-tbody > tr.ant-table-row:hover > td, 
+.ant-table-tbody > tr > td.ant-table-cell-row-hover {
+  @apply bg-white dark:bg-transparent;
+}
+.ant-table-tbody > tr.ant-table-row-selected > td{
+  @apply dark:bg-transparent;
+}
+.ant-empty-description {
+  @apply dark:text-white/60;
+}
+.table-responsive .ant-table-tbody > tr:hover > td {
+  @apply !bg-transparent;
+  background: none !important;
+}
+
+.ant-table-wrapper .ant-table-tbody>tr.ant-table-placeholder{
+  @apply dark:bg-whiteDark;
+}
+
+.table-responsive .ant-table-tbody > tr > td.ant-table-column-sort {
+  @apply bg-transparent;
+}
+.table-responsive .ant-table-tbody > tr > th {
+  @apply bg-transparent border-light;
+}
+.table-responsive .ant-table-tbody > tr:hover > td,
+.table-bg-transparent .ant-table-wrapper .ant-table,
+.table-tr-selected-background-transparent tbody tr.ant-table-row-selected td {
+ @apply bg-transparent;
+}
+.table-pl-0 tbody tr td:first-child{
+  @apply ps-0;
+}
+.table-pr-0 tbody tr td:last-child{
+  @apply pe-0;
+}
+.table-pt-15 tbody tr:first-child td {
+ @apply pt-[15px];
+}
+.table-pt-8 tbody tr:first-child td {
+  @apply pt-[8px];
+}
+.table-head-rounded table thead > tr:first-child th:first-child{
+  @apply rounded-s-[10px];
+}
+
+.table-head-rounded table thead > tr:first-child th:last-child{
+  @apply rounded-e-[10px];
+}
+.table-th-border-none thead tr th,
+.table-td-border-none tbody tr td,
+.table-td-border-none .ant-table-thead >tr>td {
+  @apply border-none !important;
+}
+.table-head-none table thead,
+.table-th-shape-none thead th:before {
+  @apply hidden;
+}
+.table-th-text-light thead th {
+  @apply text-light dark:text-white/60;
+}
+.table-th-text-light thead th{
+  @apply border-none border-0 !important;
+}
+.ant-table-tbody>tr:last-child td{
+  @apply border-none  border-0 !important;
+}
+.table-last-th-text-right thead th:last-child,
+.table-last-td-text-right tbody tr td:last-child {
+  @apply text-end;
+}
+.table-tr-px-30 table tr th:first-child,
+.table-tr-px-30 table tr td:first-child {
+  @apply ps-[30px];
+}
+.table-border-b-none tbody tr:last-child td{
+  @apply border-b-0;
+}
+.table-selection-col-pl-25 table tr .ant-table-selection-column {
+  @apply ps-[25px];
+}
+.table-tr-hover-shadow tbody tr:hover {
+  @apply shadow-[0px_10px_15px_rgba(116,116,116,0.08)];
+}
+.ant-table-tbody > tr:hover .email-time {
+  @apply text-dark dark:text-white/[.87] font-medium !important;
+}
+
+/* progress */
+.ant-progress-circle-trail{
+  @apply dark:stroke-white/10;
+}
+
+.ant-progress-text{
+  @apply dark:text-white/60;
+}
+
+.ant-progress-circle .ant-progress-text{
+  @apply dark:text-white/[.87];
+}
+
+@media only screen and (max-width: 575px){
+  .ant-card-head-wrapper {
+      @apply flex-col items-center;
+  }
+  .ant-card-extra{
+      @apply !ms-0 !p-0 !pb-[16px];
+  }
+
+  .ant-card-head-title-base .ant-card-head .ant-card-head-title{
+    @apply pb-[5px];
+  }
+}
+
+/* Dropdown */
+
+.ant-table-filter-dropdown{
+  @apply  dark:bg-[#323440];
+}
+
+.ant-table-filter-dropdown-btns{
+  @apply dark:border-white/10;
+}
+.ant-btn-link[disabled]{
+  @apply dark:text-white/60;
+}
+.ant-table-wrapper .ant-table-selection-extra .anticon{
+  @apply dark:text-white/[.87];
+}
+
+.ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item{
+  @apply dark:text-white/[.87]
+}
+
+.ant-tabs-dropdown-menu-item span span {
+  @apply flex items-center gap-2.5;
+}
+.ant-tabs-dropdown-menu-item span span svg {
+  @apply max-w-[16px] max-h-[16px];
+}
+.ant-dropdown .ant-dropdown-menu{
+  @apply block bg-white dark:bg-[#1b1e2b] shadow-regular dark:shadow-[0_5px_30px_rgba(1,4,19,.60)] rounded-4 p-0 m-0;
+}
+
+.ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item{
+  @apply p-0 m-0;
+}
+
+/* Antd drag & drop */
+.row-dragging {
+  @apply flex items-center shadow-[0_15px_50px_#9299b820];
+}
+
+.row-dragging tr {
+  @apply shadow-[0_15px_50px_#9299b820];
+}
+
+.row-dragging td {
+  @apply p-[16px] relative text-dark dark:text-white/[.87] z-[9999] opacity-[50] align-middle;
+}
+
+.row-dragging td .ant-checkbox-checked .ant-checkbox-inner {
+  @apply bg-primary border-primary;
+}
+
+.row-dragging td .todos-action,
+.row-dragging td .table-actions {
+  @apply hidden;
+}
+
+.row-dragging td .user-info figcaption {
+  @apply hidden;
+}
+
+.row-dragging td .feather-move,
+.row-dragging td .drag_email,
+.row-dragging td .drag_company,
+.row-dragging td .drag_designation,
+.row-dragging td .drag_join-date,
+.row-dragging td .active {
+  @apply inline-block;
+}
+
+.row-dragging .drag-visible {
+  @apply visible;
+}
+
+.row-dragging {
+  @apply w-full;
+}
+
+.row-dragging td svg {
+  @apply w-[16px] h-[16px] text-light-extra dark:text-white/60;
+}
+
+.row-dragging td {
+  @apply py-[25px] text-[14px] text-theme-gray dark:text-white/60;
+}
+
+.row-dragging td:first-child {
+  @apply w-auto;
+}
+
+.row-dragging td:not(:first-child) {
+  @apply w-full text-end;
+}
+
+.row-dragging td:last-child>div {
+  @apply justify-end;
+}
+
+/* Modal */
+.ant-modal.primary .ant-modal-body,
+.ant-modal.primary .ant-modal-header,
+.ant-modal.primary .ant-modal-footer {
+  @apply bg-primary dark:bg-primary m-0 !important;
+}
+
+.ant-modal.success .ant-modal-body,
+.ant-modal.success .ant-modal-header,
+.ant-modal.success .ant-modal-footer {
+  @apply bg-success dark:bg-success  m-0 !important;
+}
+.ant-modal.warning .ant-modal-body,
+.ant-modal.warning .ant-modal-header,
+.ant-modal.warning .ant-modal-footer {
+  @apply bg-warning dark:bg-warning m-0 !important;
+}
+.ant-modal.danger .ant-modal-body,
+.ant-modal.danger .ant-modal-header,
+.ant-modal.danger .ant-modal-footer {
+  @apply bg-danger dark:bg-danger m-0 !important;
+}
+
+.ant-modal.primary .ant-modal-body p,
+.ant-modal.primary .ant-modal-close-x svg,
+.ant-modal.primary .ant-modal-header .ant-modal-title,
+.ant-modal.success .ant-modal-body p,
+.ant-modal.success .ant-modal-close-x svg,
+.ant-modal.success .ant-modal-header .ant-modal-title,
+.ant-modal.warning .ant-modal-body p,
+.ant-modal.warning .ant-modal-close-x svg,
+.ant-modal.warning .ant-modal-header .ant-modal-title,
+.ant-modal.danger .ant-modal-body p,
+.ant-modal.danger .ant-modal-close-x svg,
+.ant-modal.danger .ant-modal-header .ant-modal-title {
+  @apply text-white dark:text-white/[.87] !important;
+}
+
+.ant-modal.primary  .ant-modal-footer button,
+.ant-modal.success  .ant-modal-footer button,
+.ant-modal.warning  .ant-modal-footer button,
+.ant-modal.danger  .ant-modal-footer button {
+  @apply bg-white dark:bg-white/10 text-light dark:text-white/60 !important;
+}
+
+.ant-modal .ant-modal-content{
+  @apply dark:bg-[#282b36] !important;
+}
+
+.ant-modal .ant-modal-header{
+  @apply dark:bg-transparent dark:border-white/10 !important;
+}
+
+.ant-modal-title{
+  @apply dark:text-white/[.87];
+}
+.ant-modal-content {
+  @apply !p-0;
+}
+.ant-modal-footer{
+  @apply px-4 py-2.5 border-t border-regular dark:border-white/10;
+}
+
+.ant-modal-close{
+  @apply !flex items-center justify-center !bg-transparent text-body dark:text-white/[.87] h-[54px] w-[54px] text-[17px];
+}
+.ant-modal-content .ant-modal-close-x svg {
+  @apply text-dark dark:text-white/[.87];
+}
+.ant-modal-content .ant-modal-close-x p{
+  @apply text-white dark:text-whiteDark;
+}
+
+.ant-modal-confirm-body .ant-modal-confirm-title {
+  @apply dark:text-white/[.87];
+}
+
+.ant-modal-confirm .ant-modal-confirm-body .ant-modal-confirm-content{
+  @apply dark:text-white/60;
+}
+
+.ant-modal-content, 
+.ant-modal-header {
+  @apply bg-white !important;
+}
+.ant-modal-content {
+  @apply relative p-0 border-none pointer-events-auto rounded-4 bg-clip-padding shadow-[0_3px_6px_-4px_rgb(0_0_0_/_12%),0_6px_16px_0_rgb(0_0_0_/_8%),0_9px_28px_8px_rgb(0_0_0_/_5%)];
+}
+.ant-modal-header {
+  @apply bg-white px-6 py-4 text-[#666d92] border-b-1 border-[#f0f0f0] dark:border-white/10 rounded-t-4;
+}
+.ant-modal-body {
+  @apply break-words text-[15px] leading-[22px] p-6;
+}
+.ant-modal-footer button {
+  @apply bg-white dark:bg-whiteDark text-[#999] border border-white;
+}
+
+.ant-modal-content .ant-modal-confirm-btns button:not(.ant-btn-primary) {
+  @apply hover:text-primary hover:border-primary !important;
+}
+
+.ant-notification-notice{
+  @apply dark:bg-[#323540];
+}
+.ant-notification-notice-close-x svg,
+.ant-notification-notice-message{
+  @apply dark:text-white/[.87];
+}
+
+.ant-notification-notice-description{
+  @apply dark:text-white/60;
+}
+.ant-notification .ant-notification-notice .ant-notification-notice-message {
+  @apply dark:text-white/80;
+}
+.ant-notification .ant-notification-notice .ant-notification-notice-description{
+  @apply dark:text-white/60
+}
+
+/* Event Modal CSS */
+.hexadash-event-form-modal .ant-modal-close {
+  @apply top-[12px] ltr:right-[10px] rtl:left-[10px];
+}
+.hexadash-event-form-modal .ant-modal-close-x {
+  @apply inline-flex justify-center bg-transparent h-[36px] w-[36px] leading-none rounded-full text-white/50 hover:text-white hover:bg-white/10;
+} 
+.hexadash-event-form-modal .ant-modal-close-x svg {
+  @apply w-[14px] h-[14px];
+}
+
+
+/* Nav */
+.ant-radio-button-wrapper:not(:first-child)::before{
+  @apply dark:bg-white/10;
+}
+.ant-radio-button-wrapper:first-child{
+  @apply dark:border-white/10;
+}
+
+.ant-message-notice-content{
+  @apply dark:bg-[#323540] dark:text-white/60;
+}
+
+/* skeleton */
+.ant-skeleton-header .ant-skeleton-avatar,
+.ant-skeleton-content .ant-skeleton-paragraph > li,
+.ant-skeleton-content .ant-skeleton-title{
+  @apply dark:bg-white/10;
+}
+.dark .ant-skeleton-active .ant-skeleton-paragraph > li::after,
+.dark .ant-skeleton-active .ant-skeleton-title::after,
+.dark .ant-skeleton-active .ant-skeleton-avatar::after{
+  background: linear-gradient(90deg, #323440 25%, #272933 37%, #323440 63%);
+}
+
+/* radio */
+.ant-checkbox-wrapper,
+.ant-radio-wrapper{
+  @apply dark:text-white/60;
+}
+
+
+.ant-radio-disabled + span{
+  @apply dark:text-white/60;
+}
+
+.ant-radio-inner{
+@apply dark:bg-white/10 dark:border-white/10;
+}
+
+/* Result */
+
+.ant-result-title{
+  @apply dark:text-white/[.87];
+}
+.ant-typography,
+.ant-result-subtitle{
+  @apply dark:text-white/60;
+}
+
+.ant-result-content{
+  @apply dark:bg-white/10;
+}
+
+.ant-result-image{
+  @apply ssm:!w-full ssm:!h-full [&>svg]:w-full;
+}
+
+.search-result-wrapper .ant-input-group .ant-input{
+  @apply h-[50px] rounded-[30px] border-none px-[20px] text-[15px] placeholder:text-light text-dark dark:text-white/60 dark:placeholder:text-white/60 outline-none;
+}
+
+.search-result-wrapper .ant-input-group-addon .ant-btn{
+  @apply h-[50px] border-none text-theme-gray dark:text-white/[.87] !important;
+}
+
+.search-result-wrapper .ant-input-group{
+  @apply flex items-center;
+}
+.search-result-wrapper .ant-input-group-addon{
+  @apply absolute start-auto end-[55px] bg-transparent z-[99] !important; 
+}
+
+/* list */
+.ant-list-bordered {
+  @apply  !border-regular dark:!border-white/10;
+}
+
+.ant-list-items {
+  @apply  !pt-[20px];
+}
+
+.ant-list-item-meta {
+  @apply py-[10px] px-[24px] border-b-regular dark:border-b-white/10;
+}
+
+/* checkbox */
+.ant-checkbox-checked::after{
+  @apply hidden;
+}
+.ant-checkbox-inner{
+  @apply bg-white dark:bg-white/10 dark:border-white/60;
+}
+.ant-checkbox-disabled .ant-checkbox-inner{
+  @apply dark:bg-white/10 dark:border-white/60;
+}
+.ant-checkbox-indeterminate .ant-checkbox-inner{
+  @apply dark:bg-white/10 dark:border-white/10;
+}
+.ant-checkbox-inner{
+  @apply dark:border-white/10;
+}
+
+.ant-checkbox-disabled .ant-checkbox-inner{
+  @apply dark:!border-white/30;
+}
+
+.ant-tree-select-dropdown .ant-select-tree-checkbox-checked .ant-select-tree-checkbox-inner,
+.ant-tree-select-dropdown .ant-select-tree-checkbox-indeterminate .ant-select-tree-checkbox-inner::after {
+  @apply bg-primary border-primary !important;
+}
+.ant-select-tree-treenode .ant-select-tree-checkbox:hover .ant-select-tree-checkbox-inner {
+  @apply border-primary !important;
+}
+
+/* Form Input */
+.ant-form-item-label{
+  @apply text-start !important;
+}
+.ant-input,
+.ant-picker {
+  @apply dark:!bg-white/10 dark:text-white/60 dark:border-white/10 hover:border-primary focus:border-primary dark:placeholder-white/60;
+}
+
+
+.ant-input-number-handler-wrap{
+  @apply dark:!bg-white/10 ;
+}
+.ant-input-number:hover:not(.ant-input-number-borderless) .ant-input-number-handler-down,
+.ant-input-number-handler{
+  @apply dark:border-white/10;
+}
+
+.ant-input-number-handler:active{
+  @apply !bg-white/30 ;
+}
+
+.ant-input-affix-wrapper{
+  @apply dark:bg-white/10 dark:border-white/10;
+}
+
+.ant-input-affix-wrapper .ant-input{
+  @apply dark:!bg-transparent;
+}
+
+.ant-input-password-icon.anticon{
+@apply dark:text-white/60;
+}
+
+.ant-checkbox-disabled + span{
+  @apply dark:text-white/60;
+}
+
+.ant-picker-input > input,
+.ant-picker-suffix{
+  @apply dark:text-white/60 dark:placeholder-white/60 !important;
+}
+
+.ant-checkbox-disabled.ant-checkbox-checked .ant-checkbox-inner::after{
+  @apply dark:border-white/[.87];
+}
+
+.ant-picker-separator{
+  @apply dark:text-white/60;
+}
+
+.ant-select .ant-select-selection-placeholder{
+  @apply dark:text-white/[.60]
+}
+
+/* List item */
+.ant-menu-item-group-title {
+  @apply text-[15px] text-dark dark:text-white/[.87] !important;
+}
+.ant-menu .ant-menu-submenu .ant-menu-submenu-title {
+  @apply flex items-center;
+}
+
+.ant-menu .ant-menu-submenu .ant-menu-title-content,
+.ant-menu .ant-menu-submenu .ant-menu-title-content>span{
+  @apply flex items-center;
+}
+.ant-menu-submenu-selected>.ant-menu-submenu-title>.ant-menu-title-content svg,
+.ant-menu-item-selected .ant-menu-item-icon svg,
+.ant-menu-item-active .ant-menu-item-icon svg{
+  @apply !text-currentColor;
+}
+
+.ant-menu-submenu.ant-menu-submenu-inline .ant-menu-submenu-title,
+.ant-menu-item {
+  @apply inline-flex;
+}
+
+.ant-menu-submenu-popup {
+  @apply z-[105];
+}
+
+.ant-menu-submenu-popup .ant-menu-sub {
+  @apply py-[8px] px-0;
+}
+
+.ant-menu-submenu-popup .ant-menu-submenu.ant-menu-submenu-inline .ant-menu-submenu-title,
+.ant-menu-submenu-popup .ant-menu-item {
+  @apply block;
+}
+
+.ant-menu-rtl .ant-menu-submenu-title .ant-menu-item-icon {
+  @apply rtl:mr-0;
+}
+
+.ant-menu-submenu-popup .ant-menu-item {
+  @apply mb-0;
+}
+
+.ant-menu-sub.ant-menu-vertical {
+  @apply shadow-[0_2px_8px_rgba(0,0,0,.05)];
+}
+
+.ant-menu-sub.ant-menu-vertical .ant-menu-item a {
+  @apply text-theme-gray hover:text-primary dark:text-white/60 dark:hover:text-white;
+}
+
+.ant-menu-submenu.ant-menu-submenu-vertical.ant-menu-submenu-selected .ant-menu-submenu-title svg {
+  @apply text-primary;
+}
+
+.ant-menu-sub.ant-menu-inline{
+  @apply dark:bg-transparent;
+}
+.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected{
+  @apply dark:bg-white/10;
+}
+
+.ant-menu-submenu .ant-menu .ant-menu-submenu .ant-menu-submenu-title .ant-menu-item-icon{
+  @apply w-[16px] h-[16px] text-light-extra dark:text-white/60;
+}
+.ant-menu-submenu .ant-menu .ant-menu-submenu:hover .ant-menu-submenu-title .ant-menu-item-icon{
+  @apply text-primary dark:text-white/[.87];
+}
+
+.ant-menu-submenu .ant-menu .ant-menu-submenu .ant-menu-submenu-title{
+  @apply text-theme-gray hover:text-primary dark:text-white/60;
+}
+.ant-menu-submenu .ant-menu .ant-menu-submenu .ant-menu-submenu-title .ant-menu-title-content + i{
+  @apply text-light-extra dark:text-white/60;
+}
+.ant-menu-submenu .ant-menu .ant-menu-submenu:hover{
+  @apply dark:!bg-transparent;
+}
+.ant-menu-submenu .ant-menu .ant-menu-submenu:hover .ant-menu-submenu-title .ant-menu-title-content + i{
+  @apply text-primary dark:text-white/[.87];
+}
+.ant-menu-submenu .ant-menu .ant-menu-submenu:hover .ant-menu-submenu-title .ant-menu-title-content{
+  @apply text-primary dark:text-white/[.87];
+}
+
+.ant-menu-rtl.ant-menu-inline,
+.ant-menu-rtl.ant-menu-vertical{
+  @apply !border-none;
+}
+
+/* Select */
+.ant-select-focused:not(.ant-select-disabled).ant-select:not(.ant-select-customize-input) .ant-select-selector{
+  @apply dark:border-white/10;
+}
+.ant-select-item-group {
+  @apply text-body dark:text-white/60 !important;
+}
+.ant-cascader-menu-item{
+  @apply dark:text-white/60 dark:hover:!text-dark;
+}
+.ant-cascader-menu-item-active.ant-cascader-menu-item{
+  @apply dark:!text-dark dark:hover:!text-dark;
+}
+.ant-cascader-menu{
+  @apply dark:border-white/10;
+}
+.ant-cascader-menu-item-expand .ant-cascader-menu-item-expand-icon{
+  @apply dark:text-currentColor;
+}
+
+.ant-cascader-dropdown .ant-cascader-menu-item.ant-cascader-menu-item-expand .ant-cascader-menu-item-expand-icon{
+  @apply dark:text-white/60;
+}
+
+
+/* select */
+.ant-select.ant-select-lg.ant-select-multiple.ant-select-lg .ant-select-selection-item {
+  @apply h-8 dark:text-white/60 !important;
+}
+
+.ant-select-multiple .ant-select-selection-item{
+  @apply dark:border-white/10 h-6 dark:h-auto dark:px-[10px] dark:py-[5px] !important;
+}
+
+.ant-select.ant-select-multiple.ant-select-sm .ant-select-selection-item {
+  @apply h-[22px] !important;
+}
+
+.ant-select .ant-select-arrow,
+.ant-select-multiple .ant-select-selection-item-remove{
+  @apply dark:text-white/60;
+}
+
+.ant-select-tree{
+  @apply dark:bg-[#282b36] dark:text-white/60; 
+}
+.ant-select-tree .ant-select-tree-node-content-wrapper.ant-select-tree-node-selected,
+.ant-select-tree .ant-select-tree-node-content-wrapper:hover{
+  @apply dark:bg-white/10;
+}
+
+.ant-upload.ant-upload-select-picture-card{
+  @apply bg-transparent dark:bg-transparent dark:border-white/10 dark:text-white/60;
+}
+
+.ant-upload{
+  @apply dark:text-white/60;
+}
+.ant-upload-wrapper .ant-upload-list .ant-upload-list-item .ant-upload-icon .anticon,
+.ant-upload-wrapper .ant-upload-list .ant-upload-list-item .ant-upload-list-item-name{
+  @apply dark:text-white/60;
+}
+
+.ant-upload-wrapper.ant-upload-picture-card-wrapper .ant-upload.ant-upload-select{
+  @apply dark:border-white/30;
+}
+
+/* Calendar */
+.ant-picker-panel-container{
+  @apply dark:bg-[#282b36] dark:text-white/60 dark:shadow-[0_5px_30px_rgba(1,4,19,.60)];
+}
+.ant-picker-clear{
+  @apply dark:bg-transparent;
+}
+.ant-picker-content th,
+.ant-picker-header button{
+  @apply dark:text-white/60;
+}
+.ant-picker-header-view button{
+  @apply dark:text-white/[.87];
+}
+.ant-picker-header{
+  @apply dark:text-white/60 dark:border-white/10;
+}
+.ant-picker-panel .ant-picker-footer{
+  @apply dark:border-white/10;
+}
+.ant-picker-cell{
+  @apply dark:text-theme-gray;
+}
+.ant-picker-cell-in-view{
+  @apply dark:text-light;
+}
+.ant-picker-panel{
+  @apply !border-none;
+}
+.ant-picker-today-btn{
+  @apply !text-primary font-semibold;
+}
+.ant-picker.ant-picker-disabled,
+.ant-picker{
+  @apply dark:bg-white/10 dark:border-white/10;
+}
+
+.ant-picker-time-panel-column:not(:first-child),
+.ant-picker-datetime-panel .ant-picker-time-panel{
+  @apply dark:border-white/10;
+}
+
+.ant-btn-primary[disabled], .ant-btn-primary[disabled]:hover, .ant-btn-primary[disabled]:focus, .ant-btn-primary[disabled]:active{
+  @apply dark:bg-white/10 dark:text-white/[.87] dark:border-white/10;
+}
+
+.ant-picker-time-panel-column > li.ant-picker-time-panel-cell .ant-picker-time-panel-cell-inner{
+  @apply dark:text-white/60;
+}
+
+.ant-picker-footer-extra:not(:last-child){
+  @apply dark:border-white/10;
+}
+
+.ant-picker-calendar{
+  @apply dark:bg-transparent;
+}
+.ant-picker-calendar-full .ant-picker-panel{
+  @apply dark:bg-transparent;
+}
+.ant-picker-calendar-full .ant-picker-panel .ant-picker-cell:hover .ant-picker-calendar-date{
+  @apply dark:!bg-white/10;
+}
+.ant-picker-calendar-full .ant-picker-panel .ant-picker-calendar-date{
+  @apply dark:border-white/10;
+}
+.ant-select{
+  @apply dark:text-white/60;
+}
+
+.rdrInputRangeInput,
+.rdrDefinedRangesWrapper{
+  @apply dark:bg-transparent dark:border-white/10;
+}
+.rdrStaticRange{
+  @apply dark:bg-transparent;
+}
+.rdrCalendarWrapper,
+.rdrStaticRange:hover .rdrStaticRangeLabel, .rdrStaticRange:focus .rdrStaticRangeLabel{
+  @apply dark:bg-transparent;
+}
+
+.rdrSelected, .rdrInRange, .rdrStartEdge, .rdrEndEdge{
+  @apply dark:bg-white/30 ;
+}
+
+.rdrDateDisplayWrapper{
+  @apply dark:bg-white/10;
+}
+
+.rdrDateDisplayItem{
+  @apply dark:bg-white/10 dark:border-white/10;
+}
+
+.rdrDateDisplayItemActive input{
+  @apply dark:text-white/[.87];
+}
+
+.rdrStaticRange{
+  @apply dark:border-white/10;
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled){
+  @apply dark:!border-primary;
+}
+
+.dark .ant-picker-calendar-full .ant-picker-panel .ant-picker-cell-selected .ant-picker-calendar-date, .ant-picker-calendar-full .ant-picker-panel .ant-picker-cell-selected:hover .ant-picker-calendar-date{
+  background-color: #ffffff30 !important;
+}
+
+.ant-radio-button-wrapper{
+  @apply dark:bg-white/10 dark:border-white/10 dark:text-white/[.87] dark:hover:text-white/[.87];
+}
+
+.rdrInRange{
+  @apply !text-primary;
+}
+
+/* Notification */
+
+.ant-message .ant-message-custom-content{
+  @apply flex items-center;
+}
+
+.ButtonGroup__root___3lEAn>div>button{
+  @apply flex items-center justify-center dark:bg-white/30;
+}
+
+.Dropdown__root___3ALmx .Dropdown__value___34Py9{
+  @apply dark:text-white/60 border-1 dark:border-white/10;
+}
+
+.ant-message .ant-message-notice .ant-message-notice-content{
+  @apply dark:bg-[#323540];
+}
+
+/* pagination*/
+.ant-pagination-custom-style .ant-pagination-item a{
+  @apply dark:text-white/60;
+}
+.ant-pagination-disabled .ant-pagination-item-link, .ant-pagination-disabled:hover .ant-pagination-item-link{
+  @apply dark:text-white/60;
+}
+
+.ant-pagination-prev .ant-pagination-item-link, 
+.ant-pagination-next .ant-pagination-item-link {
+  @apply dark:bg-white/10 dark:border-white/10 dark:text-white/[.87];
+}
+.ant-pagination-item{
+  @apply dark:bg-white/10 dark:border-white/10 dark:text-white/60 hover:dark:text-primary;
+}
+
+.ant-pagination-jump-prev .ant-pagination-item-container .ant-pagination-item-ellipsis, .ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-ellipsis{
+  @apply dark:text-white/60;
+}
+
+.ant-pagination-custom-style .ant-pagination li{
+  @apply flex items-center justify-center border-1 border-regular dark:border-white/10;
+}
+.ant-pagination-custom-style .ant-pagination-options .ant-select-selector{
+  @apply border-1 border-regular dark:border-white/10;
+}
+.ant-pagination-jump-prev .ant-pagination-item-link,
+.ant-pagination-jump-next .ant-pagination-item-link,
+.ant-pagination-jump-prev .ant-pagination-item-container,
+.ant-pagination-jump-next .ant-pagination-item-container{
+  @apply w-full h-full;
+}
+.ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-link-icon,
+.ant-pagination-jump-prev .ant-pagination-item-container .ant-pagination-item-link-icon{
+  @apply relative bottom-[3px] inline-grid align-middle place-items-center !text-primary;
+}
+
+.ant-select:not(.ant-select-customize-input) .ant-select-selector{
+  @apply dark:bg-white/10 dark:border-white/10;
+}
+.ant-pagination{
+  @apply inline-flex items-center justify-center flex-wrap gap-[8px] after:!hidden;
+}
+.ant-pagination li{
+  @apply m-0 !important;
+}
+.ant-pagination-total-text{
+  @apply border-none dark:text-white/60;
+}
+.ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-ellipsis{
+  @apply dark:text-white/60;
+}
+.ant-pagination-options-quick-jumper{
+  @apply dark:text-white/60;
+}
+.ant-pagination-options-quick-jumper input{
+  @apply dark:bg-white/10 dark:border-white/10;
+}
+
+/* button */
+.ant-btn {
+  @apply p-0 px-3 rounded-6;
+}
+.ant-btn-white {
+  @apply dark:bg-dark dark:border-dark hover:dark:bg-dark hover:dark:border-dark dark:text-white/80;
+}
+.ant-btn-primary{
+  @apply dark:bg-primary dark:border-primary;
+}
+
+/* ProgressBar */
+.ant-progress-inner{
+  @apply dark:bg-white/10;
+}
+
+/* DateRangePicker */
+.rdrInputRangeInput {
+  @apply rtl:ms-2.5 rtl:me-0;
+}
+
+/* Badge */
+.ant-badge-count{
+  box-shadow: 0 0 0 1px currentColor !important;
+  @apply dark:text-dark;
+}
+
+/* Page header */
+
+.ant-page-header-compact .ant-page-header-heading{
+  @apply md:justify-center;
+}
+
+.PreviewArea .rdrMonths{
+  @apply md:flex-col;
+}
+
+.rdrDefinedRangesWrapper{
+  @apply md:!w-[120px];
+}
+
+/* popover */
+
+.ant-popover {
+  @apply fixed z-[99999] ssm:start-0 ssm:left-auto ssm:right-auto ssm:w-[calc(100%-30px)] ssm:ps-[15px] !important;
+}
+
+.ant-popover-arrow-content::before{
+  @apply bg-white dark:bg-[#323541];
+}
+
+.ant-popover .ant-popover-arrow:before{
+  @apply dark:bg-[#32333f];
+}
+
+.ant-popover-inner {
+  @apply shadow-custom rounded-b-[6px] bg-white dark:bg-[#1b1d2a] dark:shadow-[0_5px_30px_rgba(1,4,19,.60)] !important;
+  background-clip: padding-box;
+}
+
+.ant-popover-inner .ant-popover-title {
+  @apply pt-[10px] px-[10px] pb-[10px] mb-0 [&>p]:mb-0;
+}
+
+.ant-popover-inner .ant-popover-inner-content a {
+  @apply text-theme-gray dark:text-white/60;
+}
+
+.ant-popover-title{
+  @apply dark:text-white/[.87] dark:border-white/10;
+}
+
+.ant-popover-placement-bottom, 
+.ant-popover-placement-bottomLeft,
+.ant-popover-placement-bottomRight {
+  @apply pt-[8px];
+}
+
+.ant-popover-placement-bottomRight .ant-popover-arrow{
+  @apply top-[8px];
+}
+
+.rdrStaticRangeLabel{
+  @apply dark:text-white/60 dark:hover:text-primary;
+}
+
+.rdrInputRange{
+  @apply dark:text-white/60;
+}
+
+.ant-popover-message{
+  @apply dark:text-white/60;
+}
+
+/* Accordion */
+.ant-collapse .ant-collapse-content{
+  @apply border-t-regular !important;
+}
+
+/* Drawer */
+
+.ant-drawer {
+  @apply z-[99999];
+}
+
+/* Select Dropdown */
+.ant-dropdown-menu{
+  @apply dark:bg-[#323541];
+}
+
+.ant-dropdown-menu-item, .ant-dropdown-menu-submenu-title{
+  @apply dark:text-white/60;
+}
+
+.ant-menu-item-group-title {
+  @apply dark:text-white/[.87];
+}
+
+.ant-dropdown-menu-item:hover{
+  @apply dark:bg-white/10;
+}
+
+.ant-select-dropdown {
+  @apply py-[18px] shadow-custom rounded-b-[6px] dark:bg-[#323541];
+}
+.ant-select-dropdown .ant-select-item{
+  @apply text-[13px] text-start;
+}
+.ant-select-item {
+  @apply min-h-[20px] py-[4px] px-[12px] text-[13px];
+}
+
+.ant-select-item-group {
+  @apply text-theme-gray dark:text-white/60;
+}
+
+.ant-select-item.ant-select-item-option-grouped {
+  @apply ltr:pl-[25px] rtl:pr-[25px];
+}
+
+.ant-select-dropdown .ant-select-item.ant-select-item-option-active {
+  @apply bg-dark/[.05];
+}
+
+.ant-select-dropdown .ant-select-item.ant-select-item-option-selected {
+  @apply text-primary bg-dark/[.05];
+}
+
+.ant-select-dropdown .ant-select-item.ant-select-item-option-selected .ant-select-item-option-content {
+  @apply font-medium text-primary;
+}
+
+.ant-select-dropdown .ant-select-item .ant-select-item-option-content {
+  @apply duration-300 ease-in-out text-theme-gray dark:text-white/60 flex items-center gap-[10px];
+}
+
+/* Upload */
+.ant-upload-list-item:hover .ant-upload-list-item-info{
+  @apply !bg-transparent;
+}
+.ant-upload.ant-upload-drag{
+  @apply dark:bg-white/10 dark:border-white/10;
+}
+.ant-upload.ant-upload-drag p.ant-upload-text{
+  @apply dark:text-white/60;
+}
+
+/* Range slider */
+.ant-slider-handle{
+@apply dark:bg-[#1b1d2a];
+}
+.ant-slider-vertical .ant-slider-handle,
+.ant-slider-vertical .ant-slider-handle:hover::after, 
+.ant-slider-vertical .ant-slider-handle:active::after, 
+.ant-slider-vertical .ant-slider-handle:focus::after {
+  @apply -start-[1px];
+}
+.ant-slider-vertical .ant-slider-mark {
+  @apply w-full start-4 !important;
+}
+
+.ant-slider-step .ant-slider-dot {
+  @apply !border-[#c198e9];
+}
+.ant-input-number{
+  @apply dark:bg-white/10 dark:border-white/10 dark:text-white/60;
+}
+.ant-slider .ant-slider-mark-text-active{
+  @apply dark:text-white/60;
+}
+
+/* Statistics */
+.ant-statistic-title,
+.ant-statistic-content{
+  @apply dark:text-white/60;
+}
+
+/* Timeline */
+.ant-timeline-item-content{
+  @apply dark:text-white/60;
+}
+
+.ant-timeline-item-tail{
+  @apply dark:border-white/10;
+}
+
+/*  timePicker*/
+.ant-picker-time-panel-column > li.ant-picker-time-panel-cell .ant-picker-time-panel-cell-inner:hover,
+.ant-picker-time-panel-column > li.ant-picker-time-panel-cell-selected .ant-picker-time-panel-cell-inner{
+  @apply dark:bg-white/10;
+}
+
+/* star */
+.ant-rate-star-first, .ant-rate-star-second{
+  @apply dark:text-white/60;
+}
+
+/* Autho */
+.auth0-lock.auth0-lock .auth0-lock-header-welcome .auth0-lock-header-logo {
+  @apply h-[32px] mb-[3px];
+}
+.auth0-lock.auth0-lock .auth0-lock-header-welcome .auth0-lock-name {
+  @apply text-base;
+}
+
+/* Knowledge Base */
+.custom-knowledgebadge-search-form .ant-select .ant-select-selector {
+  @apply h-[54px] leading-[54px] bg-white dark:bg-whiteDark p-0 border-none shadow-none rounded-none ltr:rounded-tl-[6px] ltr:rounded-bl-[6px] rtl:rounded-tr-[6px] rtl:rounded-br-[6px] sm:rounded-[6px] !important;
+}
+.custom-knowledgebadge-search-form .ant-select .ant-select-selector .ant-select-selection-item {
+  @apply text-body dark:text-white h-[54px] leading-[54px] px-5 text-[15px] border-normal dark:border-white/10 ltr:border-r rtl:border-l sm:border sm:border-normal sm:dark:border-white/10 sm:rounded-[6px] !important;
+}
+.custom-knowledgebadge-search-form .ant-select .ant-select-arrow {
+  @apply ltr:right-[10px] sm:ltr:right-[30px] rtl:left-[10px] sm:rtl:left-[30px] text-body dark:text-white;
+}
+.custom-collapse-style .ant-collapse-header .ant-collapse-expand-icon {
+  @apply dark:text-white/60;
+}
+
+/* Collapse */
+.ant-collapse > .ant-collapse-item > .ant-collapse-header{
+  @apply dark:text-white/60;
+}
+
+
+/* comment */
+.ant-comment-content-author-name,
+.ant-comment-content-author-name > *,
+.ant-comment-content-author-name > *:hover{
+  @apply dark:text-white/[.87];
+}
+
+.ant-comment-actions li:not(:last-child):after{
+  @apply dark:!bg-white/10;
+}
+
+.ant-comment-rtl .ant-comment-actions > li > span{
+  @apply ms-2 me-0;
+}
+.ant-comment{
+  @apply dark:text-white/[.87] dark:bg-transparent;
+}
+
+.ant-comment .ant-comment-actions >li >span{
+  @apply dark:text-white/60;
+}
+
+.ant-comment-content-author-time{
+  @apply dark:text-white/60;
+}
+
+.ant-list .ant-list-header{
+  @apply dark:text-white/[.87];
+}
+/* Drawer */
+.ant-drawer-content{
+  @apply dark:bg-[#323541];
+}
+.ant-drawer-title{
+  @apply dark:text-white/60;
+}
+.ant-drawer-header{
+  @apply dark:border-white/10;
+}
+.ant-drawer-body p {
+  @apply dark:text-white/60;
+}
+.ant-form-item-label > label{
+  @apply dark:text-white/60;
+}
+
+.ant-input-group-addon{
+  @apply dark:bg-white/10 dark:border-white/10 dark:text-white/60;
+}
+
+.ant-input-affix-wrapper {
+  @apply flex items-center py-2 !important;
+}
+
+.ant-input-affix-wrapper input {
+  @apply text-body dark:text-white/60 placeholder:text-light dark:placeholder:text-white/60 !important;
+}
+
+.ant-input-affix-wrapper .ant-input-prefix {
+  @apply me-[15px];
+}
+
+.ant-card-body-p-25 .ant-card-body {
+  @apply p-[25px] !important;
+}
+  
+.ant-card-body-px-0 .ant-card-body {
+  @apply ps-0 pr-0 !important;
+}
+
+.ant-card-body-py-25 .ant-card-body {
+  @apply pt-[25px] pb-[25px] !important;
+}
+
+.ant-card-body-p-0 .ant-card-body {
+  @apply p-0 !important;
+}
+
+.ant-card-body-pt-0 .ant-card-body {
+  @apply pt-0 !important;
+}
+
+.ant-card-body-pb-0 .ant-card-body {
+  @apply pb-0 !important;
+}
+
+.ant-card-head-px-25 .ant-card-head {
+  @apply px-[25px] !important;
+}
+.ant-card-title-py-16 .ant-card-head-title {
+  @apply py-4 !important;
+}
+
+.ant-card-head-mb-0 .ant-card-head {
+  @apply mb-0 !important;
+}
+
+.ant-card-body-center .ant-card-body {
+  @apply flex justify-center;
+}
+
+.ant-card-body-align-center .ant-card-body {
+  @apply text-center;
+}
+
+.bg-regularBG-header-bg .ant-card-head {
+  @apply bg-light dark:bg-[#1b1d2a];
+}
+
+.ant-card-title-bb-default .ant-card-head {
+  @apply border-b border-regular dark:border-white/10;
+}
+
+.ant-card-head-b-none .ant-card-head {
+  @apply border-none;
+}
+
+.ant-card-head-title-base .ant-card-head .ant-card-head-title {
+  @apply py-[18px] text-dark dark:text-white/[.87] text-lg font-semibold;
+}
+
+.ant-card-title-mb-22 .ant-card-body h1 {
+  @apply mb-[22px];
+}
+
+.ant-card-extra .ant-dropdown-trigger >svg,
+.ant-card-extra .ant-dropdown-trigger >img {
+  @apply w-6 h-6 text-light dark:text-white/60;
+}
+
+/* Testimonial Style */
+.testimonial-custom-style .swiper-pagination .swiper-pagination-bullet {
+  @apply w-2.5 h-2.5 bg-[rgba(220,221,250,1)] opacity-100;
+}
+.testimonial-custom-style .swiper-pagination .swiper-pagination-bullet.swiper-pagination-bullet-active {
+  @apply bg-primary;
+}
+.testimonial-custom-style .swiper-button-prev, 
+.testimonial-custom-style .swiper-button-next {
+  @apply bg-white dark:bg-[#1b1e2b] dark:text-white/60 w-11 h-11 lg:w-[35px] lg:h-[35px] shadow-[0_3px_10px_rgba(10,10,10,.09)] rounded-full !important;
+}
+.testimonial-custom-style .swiper-button-prev:after, 
+.testimonial-custom-style .swiper-button-next:after {
+  @apply hidden !important;
+}
+.testimonial-custom-style .theme-1 .swiper-container .swiper-slide {
+  @apply dark:shadow-none !important;
+}
+.testimonial-custom-style .theme-4 .swiper-container {
+  @apply sm:pb-[100px] sm:-mb-[30px] !important;
+}
+.testimonial-custom-style .theme-4 .swiper-button-prev, 
+.testimonial-custom-style .theme-4 .swiper-button-next {
+  @apply sm:top-auto sm:bottom-2.5 !important;
+}
+.testimonial-custom-style .theme-4 .swiper-button-prev {
+  @apply sm:start-[36%] !important;
+}
+.testimonial-custom-style .theme-4 .swiper-button-next {
+  @apply sm:end-[36%] !important;
+}
+
+/* Chartjs Tooltip */
+.chartjs-tooltip {
+  @apply z-10 min-sm:-translate-x-[70%] sm:-translate-x-[80%]  -translate-y-[5%];
+}
+
+/* Radial Chart */
+.apexcharts-canvas .apexcharts-datalabels-group .apexcharts-text {
+  @apply fill-dark dark:fill-white;
+}
+
+/* Chat */
+.ant-upload-list-picture-card .ant-upload-list-item-actions button svg,
+.ant-upload-list-picture-card .ant-upload-list-item-actions a svg{
+  @apply text-white dark:text-white/60;
+}
+
+/* Social */
+
+.emoji-picker-react{
+  @apply z-998;
+}
+
+.social-post .ant-upload-list-picture-card-container{
+  @apply w-[30px] h-[30px] m-0;
+}
+
+.social-post .ant-upload-list-picture-card .ant-upload-list-item{
+  @apply !p-[2px];
+}
+
+.social-post .ant-upload-list{
+  @apply gap-[3px];
+}
+
+/* Product Grid */
+.ant-layout-content.overlay {
+  @apply relative z-[1];
+}
+.ant-layout-content.overlay:after {
+  @apply content-[''] w-full h-full ltr:left-0 rtl:right-0 top-0 xl:absolute xl:bg-dark/30;
+}
+
+/* Faq */
+.ant-card-custom-style.ant-collapse-item-active {
+  @apply shadow-faq dark:shadow-none;
+}
+.ant-card-custom-style .ant-collapse-header {
+  @apply bg-white dark:bg-transparent !important;
+}
+
+/* Datepicker */
+
+.ant-picker-range .ant-picker-active-bar,
+.ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-range-start .ant-picker-cell-inner,
+.ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner {
+  @apply bg-primary;
+}
+.rdrDayToday > .rdrDayNumber {
+  @apply rounded-full
+}
+.rdrDayToday > .rdrDayNumber,
+.rdrDayHovered > .rdrDayStartPreview,
+.rdrDayHovered > .rdrDayEndPreview {
+  @apply bg-primary border-primary !important;
+}
+.rdrDayHovered span {
+  @apply text-white dark:text-white/[.87] !important;
+}
+
+.ant-picker{
+  @apply w-full py-1.5 px-[11px] rounded-[5px];
+}
+.ant-picker-range .ant-picker-input > input{
+  @apply font-medium text-center;
+}
+.ant-picker-range-separator .ant-picker-separator{
+  @apply flex;
+}
+.rdrDayNumber,
+.rdrSelected, 
+.rdrInRange, 
+.rdrStartEdge, 
+.rdrEndEdge, 
+.rdrDayInPreview,
+.rdrDayStartPreview, 
+.rdrDayEndPreview {
+  @apply top-0 bottom-0 start-0 end-0 !important;
+}
+.rdrDayNumber span {
+  @apply text-body dark:text-white/[.87] !important;
+}
+.rdrDayToday .rdrDayNumber span:after {
+  @apply hidden;
+}
+.rdrDayToday .rdrDayNumber span,
+.rdrDayHovered .rdrDayNumber span,
+.rdrStartEdge ~.rdrDayNumber span,
+.rdrEndEdge ~.rdrDayNumber span {
+  @apply text-white z-10 !important;
+}
+.rdrDayStartPreview, 
+.rdrDayEndPreview, 
+.rdrDayInPreview {
+  @apply border-primary !important;
+}
+.rdrInRange {
+  @apply bg-insideBG dark:bg-whiteDark text-body dark:text-white/60 !important;
+}
+.rdrStartEdge,
+.rdrDayStartPreview {
+  @apply bg-primary border-none top-0 bottom-0 rounded-tl-[18px] rounded-bl-[18px] !important;
+}
+.rdrEndEdge,
+.rdrDayEndPreview {
+  @apply bg-primary border-none top-0 bottom-0 rounded-tr-[18px] rounded-br-[18px] !important;
+}
+
+/* Drawer */
+.ant-drawer {
+  @apply fixed top-0 bottom-0 pointer-events-none end-0 start-0 z-998;
+}
+.ant-drawer-content {
+  position: unset !important;
+}
+
+/* alert */
+.ant-alert-close-icon .anticon-close{
+  @apply dark:text-white/60 dark:hover:text-white/[.87];
+}
+
+/* Timeline */
+.ant-timeline .ant-timeline-item-head {
+  @apply text-primary border-primary dark:bg-transparent;
+}
+.ant-timeline .ant-timeline-item-head-red {
+  @apply text-danger border-danger;
+}
+
+
+/* Video Modal */
+@keyframes modal-video {
+  from {
+      opacity: 0
+  }
+  to {
+      opacity: 1
+  }
+}
+
+@keyframes modal-video-inner {
+  from {
+      transform: translate(0, 100px)
+  }
+  to {
+      transform: translate(0, 0)
+  }
+}
+
+.modal-video {
+  @apply fixed w-full h-full bg-[rgba(0,0,0,0.5)] z-[1000000] cursor-pointer opacity-100 transition-opacity duration-[0.3s] ease-[ease-out] top-0;
+  inset-inline-start: 0;
+  animation-timing-function: ease-out;
+  animation-duration: 0.3s;
+  animation-name: modal-video;
+  -webkit-transition: opacity .3s ease-out;
+  -moz-transition: opacity .3s ease-out;
+  -ms-transition: opacity .3s ease-out;
+  -o-transition: opacity .3s ease-out;
+  transition: opacity .3s ease-out
+}
+.modal-video-effect-exit {
+  @apply opacity-0;
+}
+.modal-video-effect-exit .modal-video-movie-wrap {
+  -webkit-transform: translate(0, 100px);
+  -moz-transform: translate(0, 100px);
+  -ms-transform: translate(0, 100px);
+  -o-transform: translate(0, 100px);
+  transform: translate(0, 100px)
+}
+.modal-video-body {
+  @apply max-w-[940px] w-full h-full table mx-auto my-0;
+}
+.modal-video-inner {
+  display: table-cell;
+  vertical-align: middle;
+  width: 100%;
+  height: 100%
+}
+.modal-video-movie-wrap {
+  @apply w-full h-0 relative bg-[#333] translate-x-0 translate-y-0 transition-transform duration-[0.3s] ease-[ease-out] pb-[56.25%];
+  animation-timing-function: ease-out;
+  animation-duration: 0.3s;
+  animation-name: modal-video-inner;
+  -webkit-transform: translate(0, 0);
+  -moz-transform: translate(0, 0);
+  -ms-transform: translate(0, 0);
+  -o-transform: translate(0, 0);
+  transform: translate(0, 0);
+  -webkit-transition: -webkit-transform .3s ease-out;
+  -moz-transition: -moz-transform .3s ease-out;
+  -ms-transition: -ms-transform .3s ease-out;
+  -o-transition: -o-transform .3s ease-out;
+  transition: transform .3s ease-out
+}
+.modal-video-movie-wrap iframe {
+  position: absolute;
+  top: 0;
+  inset-block-start: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16.9;
+}
+.modal-video-close-btn {
+  @apply absolute z-[2] top-[-35px] inline-block w-[35px] h-[35px] overflow-hidden border-[none] before:rotate-45 after:-rotate-45;
+  inset-inline-end: -35px;
+  background: transparent;
+}
+.modal-video-close-btn:before,
+.modal-video-close-btn:after {
+  @apply content-[''] absolute h-0.5 w-full -mt-1.5 rounded-[5px] top-2/4 start-0 bg-white dark:bg-dark;
+}
+
+.modal-video-close-btn:before, .modal-video-close-btn:after {
+  content: '';
+  position: absolute;
+  height: 2px;
+  width: 100%;
+  top: 50%;
+  inset-inline-start: 0;
+  margin-top: -1px;
+  background: #fff;
+  border-radius: 5px;
+  margin-top: -6px
+}
+
+
+/* Steps */
+.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-description,
+.ant-steps-item-wait > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-description,
+.ant-steps-item-finish > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-description{
+  @apply dark:text-white/60;
+}
+
+.ant-steps-item-wait > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title,
+.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title,
+.ant-steps-item-finish > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title{
+  @apply dark:text-white/[.87];
+}
+
+.ant-steps-item-wait > .ant-steps-item-container > .ant-steps-item-tail::after,
+.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-tail::after,
+.ant-steps-item-wait > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title::after,
+.ant-steps-item-error > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title::after,
+.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title::after{
+  @apply dark:bg-white/10;
+}
+
+.ant-steps-navigation .ant-steps-item::after{
+  @apply dark:border-white/10;
+}
+.ant-steps-item-wait .ant-steps-item-icon > .ant-steps-icon{
+  @apply dark:text-dark;
+}
+.ant-popover-inner-content{
+  @apply dark:text-white/60;
+}
+.ant-steps-dot .ant-steps-item .ant-steps-item-container {
+  @apply flex-col !important;
+}
+.ant-steps-dot .ant-steps-item .ant-steps-item-icon .ant-steps-icon-dot::after {
+  @apply absolute start-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[8px] h-[8px] bg-normal rounded-full !important;
+}
+.ant-steps-dot .ant-steps-item .ant-steps-item-container .ant-steps-item-title::before {
+  @apply hidden !important;
+}
+.ant-steps .ant-steps-item-description {
+  @apply text-body dark:text-white/60 !important;
+}
+.ant-steps-dot .ant-steps-item .ant-steps-item-container .ant-steps-item-tail {
+  @apply block top-2.5 after:bg-regular !important;
+}
+.ant-steps-dot .ant-steps-item-finish .ant-steps-item-container .ant-steps-item-tail {
+  @apply after:bg-primary !important;
+}
+
+.ant-steps.ant-steps-dot .ant-steps-item .ant-steps-item-icon,
+.ant-steps.ant-steps-dot .ant-steps-item .ant-steps-icon-dot {
+  @apply bg-transparent w-[140px] border-none !important;
+}
+.ant-steps-dot .ant-steps-item-finish .ant-steps-item-icon .ant-steps-icon-dot::after,
+.ant-steps-dot .ant-steps-item-process .ant-steps-item-icon .ant-steps-icon-dot::after,
+.ant-steps-navigation .ant-steps-item-finish::before,
+.ant-steps-navigation .ant-steps-item-process::before,
+.ant-steps-navigation .ant-steps-item-wait::before {
+  @apply bg-primary !important;
+}
+.ant-steps-navigation .ant-steps-item {
+  @apply mb-[60px] border-b-[2px] border-regular !important;
+}
+.ant-steps-navigation .ant-steps-item-container[role='button']:hover .ant-steps-item-icon .ant-steps-icon,
+.ant-steps-navigation .ant-steps-item-container[role='button']:hover .ant-steps-item-title {
+  @apply text-primary !important;
+}
+.ant-steps-navigation .ant-steps-item-process .ant-steps-item-container[role='button']:hover .ant-steps-item-icon .ant-steps-icon{
+  @apply text-white dark:text-white/[.87] !important;
+}
+.ant-steps.ant-steps-navigation .ant-steps-item::before {
+  @apply start-0 -bottom-[2px] !important;
+}
+.ant-steps-navigation .ant-steps-item-container {
+  @apply justify-center !important;
+}
+.ant-steps-navigation .ant-steps-item-content {
+  @apply w-auto text-center !important;
+}
+
+.ant-steps-item .ant-steps-item-icon {
+  @apply w-[30px] min-w-[30px] h-[30px] m-0 me-2 p-0 bg-white dark:bg-[#1b1d2a] text-xs font-normal leading-[30px] border border-solid border-normal z-10 !important;
+}
+.ant-steps-item-wait .ant-steps-item-icon > .ant-steps-icon .ant-steps-icon-dot{
+  @apply dark:bg-white/10;
+}
+.ant-steps .ant-steps-item-process .ant-steps-item-icon{
+  @apply bg-primary !important;
+}
+.ant-steps-item-active .ant-steps-item-icon {
+  @apply text-white bg-primary;
+}
+.ant-steps .ant-steps-item-finish .ant-steps-item-icon {
+  @apply border-primary !important;
+}
+.ant-steps .ant-steps-item-finish .ant-steps-item-icon >.ant-steps-icon {
+  @apply text-primary;
+}
+.ant-steps .ant-steps-item-error .ant-steps-item-icon {
+  @apply bg-transparent border-danger [&>span]:text-danger !important;
+}
+.ant-steps .ant-steps-item-error .ant-steps-item-container .ant-steps-item-title {
+  @apply text-danger !important;
+}
+.ant-steps-item .ant-steps-item-container {
+  @apply w-full flex flex-row overflow-hidden after:hidden [&>.ant-steps-item-tail]:hidden !important;
+}
+.ant-steps-item .ant-steps-item-content {
+  @apply w-full m-0 text-start !overflow-visible;
+}
+.ant-steps-item .ant-steps-item-container .ant-steps-item-title {
+  @apply relative m-0 text-body dark:text-white/60 text-[15px] leading-[24px] font-normal before:absolute before:start-full before:top-3 before:w-[9999px] before:h-[1px] before:bg-section dark:before:bg-white/10 !important;
+}
+.ant-steps-item .ant-steps-item-container .ant-steps-item-title::after {
+  @apply bg-section h-[1px] w-[9999px] absolute top-40 start-full content-[''] !important;
+}
+.ant-steps-vertical .ant-steps-item .ant-steps-item-container .ant-steps-item-title::before {
+  @apply w-[1px] h-[100px] top-full -start-[22px] !important;
+}
+.ant-steps-vertical .ant-steps-item:last-child .ant-steps-item-container .ant-steps-item-title::before {
+  @apply hidden !important;
+}
+.ant-steps-item-finish .ant-steps-item-container .ant-steps-item-title {
+  @apply text-light before:bg-primary !important;
+}
+.ant-steps-item-wait .ant-steps-icon {
+  @apply text-light-extra dark:text-white/[.87] !important;
+}
+
+.ant-steps-item.ant-steps-item-custom .ant-steps-item-icon {
+  @apply w-auto min-w-max h-auto bg-transparent border-none !important;
+}
+.ant-steps-item.ant-steps-item-custom .ant-steps-item-icon .ant-steps-icon svg,
+.ant-steps-item.ant-steps-item-custom.ant-steps-item-finish .ant-steps-item-title {
+  @apply text-light dark:text-white/60;
+}
+.ant-steps-item.ant-steps-item-custom.ant-steps-item-process .ant-steps-item-icon .ant-steps-icon svg, 
+.ant-steps-item.ant-steps-item-custom.ant-steps-item-finish .ant-steps-item-icon .ant-steps-icon svg {
+  @apply text-primary;
+}
+.steps-action {
+  @apply w-full max-w-[530px] flex justify-around mt-[138px] mb-0 mx-auto;
+}
+
+.steps-action button {
+  @apply flex items-center px-5 h-11;
+}
+.steps-action button.ant-btn-light {
+  @apply text-[rgb(116,116,116)] border border-solid border-[rgb(241,242,246)];
+}
+
+
+
+/* Checkout Step Widget */
+.checkout-widget .steps-action {
+  @apply mt-10;
+}
+.checkout-widget .steps-action button {
+  @apply h-11;
+}
+.checkout-widget .steps-action button svg {
+  @apply text-body dark:text-white/60;
+}
+
+.checkout-widget .ant-steps {
+  @apply md:flex md:flex-col md:gap-5;
+}
+.checkout-widget .ant-steps-item-icon {
+  @apply w-[50px] h-[50px] leading-[50px] !important;
+}
+.checkout-widget .ant-steps-item-wait .ant-steps-item-icon {
+  @apply bg-white dark:bg-white/10 border-none shadow-[10px_0_20px_rgba(64,64,64,0.08)] !important;
+}
+
+.checkout-widget .ant-steps-item-container {
+  @apply relative flex flex-col items-center w-1/2 md:w-full pt-2.5 ps-[15px] overflow-visible !important;
+}
+
+.checkout-widget .ant-steps-item:last-child .ant-steps-item-container {
+  @apply w-full !important;
+}
+
+.checkout-widget .ant-steps-item-container::after {
+  @apply absolute block start-full top-[35px] text-body dark:text-white/60 w-full h-1.5 md:hidden !important;
+  content: "";
+  background-image: url('../../public/img/default-progress.png');
+  background-size: 100%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+}
+.checkout-widget .success-step-item .ant-steps-item-container::after, 
+.checkout-widget .ant-steps-item-finish .ant-steps-item-container::after {
+  background-image: url('../../public/img/success-progress.png');
+}
+
+.checkout-widget .ant-steps-item-title::after,
+.checkout-widget .ant-steps-item-container .ant-steps-item-title::before,
+.checkout-widget .ant-steps-item:last-child .ant-steps-item-container::after {
+  @apply hidden !important;
+}
+
+.checkout-widget .ant-steps-item-container .ant-steps-item-content {
+  @apply md:text-center;
+}
+
+.checkout-widget .ant-steps-item .ant-steps-item-title {
+  @apply text-[15px] font-medium text-light dark:text-white/60 p-0 pe-2.5 mt-2 !important;
+}
+.checkout-widget .ant-steps-item.ant-steps-item-active .ant-steps-item-title {
+  @apply text-dark dark:text-white/[.87];
+}
+.checkout-widget .ant-steps-item-active .ant-steps-item-icon {
+  @apply bg-primary border-primary !important;
+}
+.checkout-widget .ant-steps-item-finish .ant-steps-item-icon {
+  @apply bg-success border-success !important;
+}
+.checkout-widget .ant-steps-item-active .ant-steps-item-icon .ant-steps-finish-icon svg,
+.checkout-widget .ant-steps-item-finish .ant-steps-item-icon .ant-steps-finish-icon svg {
+  @apply fill-[#ffffff] dark:fill-white/[.87];
+}
+
+.checkout-widget .step-action-wrap{
+  @apply flex justify-center;
+}
+.checkout-widget .step-action-wrap .step-action-inner{
+  @apply w-[580px] px-[25px];
+}
+.checkout-widget .steps-action{
+  @apply mt-[38px] w-full flex justify-between ltr:float-right rtl:float-left;
+}
+
+.checkout-widget .steps-action button{
+  @apply flex items-center h-[44px] px-5;
+}
+
+.checkout-widget .steps-action button.ant-btn-light{
+  @apply text-light dark:text-white/60 dark:border-white/10 border-regular;
+}
+.checkout-widget .steps-action button.btn-next svg{
+  @apply ms-2.5;
+}
+.checkout-widget .steps-action button.btn-prev svg{
+  @apply me-2.5;
+}
+
+.summary-table-title{
+  @apply text-[18px] font-medium mb-[25px] text-dark dark:text-white/[.87];
+}
+.order-summary-inner{
+  @apply pb-[6px];
+}
+
+/* select */
+.ant-select .ant-select-arrow{
+  @apply dark:text-white/60;
+}
+.ant-select .ant-select-selection-item{
+  @apply font-medium dark:text-white/[.87];
+}
+.invoice-summary-inner .summary-list{
+  @apply my-[22px];
+}
+.invoice-summary-inner .summary-list li:not(:last-child){
+  @apply mb-3;
+}
+.invoice-summary-inner .summary-total-amount{
+  @apply text-primary;
+}
+.summary-list li {
+  @apply flex justify-between;
+}
+.summary-list li:not(:last-child){
+  @apply mb-[18px];
+}
+.summary-list li:not(:last-child) span{
+  @apply font-medium;
+}
+.summary-list li:not(:last-child) .summary-list-title{
+  @apply text-light-extra dark:text-white/60;
+}
+.summary-list li:not(:last-child) .summary-list-text{
+  @apply text-dark dark:text-white/[.87];
+}
+
+.promo-apply-form{
+  @apply flex justify-end mt-[5px] mb-[18px] mx-0;
+}
+.promo-apply-form .ant-form-item{
+  @apply mb-0;
+}
+.promo-apply-form .ant-row{
+  @apply flex-col flex-auto;
+}
+.promo-apply-form .ant-form-item-label{
+  @apply text-start;
+}
+.promo-apply-form .ant-form-item-label label{
+  @apply mb-1 font-normal text-light-extra dark:text-white/60 h-fit;
+}
+.promo-apply-form .ant-form-item-control-input-content{
+  @apply flex;
+}
+.promo-apply-form .ant-form-item-control-input-content input{
+  @apply w-full h-10 m-0 ms-1.5;
+}
+
+.promo-apply-form .ant-form-item-control-input-content button{
+  @apply h-10;
+}
+.summary-total{
+  @apply inline-flex justify-between w-full;
+}
+.summary-total .summary-total-label{
+  @apply text-base font-medium text-dark dark:text-white/[.87];
+}
+.summary-total .summary-total-amount{
+  @apply text-lg font-semibold text-primary;
+}
+.btn-proceed{
+  @apply text-[15px] font-medium w-full h-[50px] rounded-[8px] mt-[22px];
+}
+
+.btn-proceed a{
+  @apply flex items-center;
+}
+.btn-proceed a i,
+.btn-proceed a svg{
+  @apply ms-2.5;
+}
+.checkout-successful > .ant-card > .ant-card-body {
+  @apply bg-[rgb(248,249,251)] border-[rgb(241,242,246)] text-center;
+}
+.checkout-successful .ant-card .ant-card {
+  @apply p-[25px] mb-0;
+}
+.checkout-successful .icon-success {
+  @apply text-white bg-success flex items-center justify-center w-[34px] h-[34px] mx-auto mb-4;
+}
+.checkout-successful h1 {
+  @apply mb-4 text-xl font-medium text-dark dark:text-white/[.87]; 
+}
+.checkout-successful p {
+  @apply mb-0 text-body;
+}
+
+/* Inbox */
+.inbox-checkbox-all .ant-dropdown-trigger .anticon {
+  @apply text-[10px] align-middle text-light dark:text-white/60;
+}
+
+
+/* Map */
+.gmnoprint,
+.gmnoscreen,
+.leaflet-control-attribution {
+  @apply hidden;
+}
+.leaflet-top, 
+.leaflet-bottom {
+  @apply !z-10;
+}
+
+/* Editor */
+.tox-tinymce {
+  @apply rounded-none !important;
+}
+.tox-edit-area__iframe {
+  @apply bg-transparent dark:bg-white/20 !important;
+}
+.tox .tox-mbtn {
+  @apply dark:text-white !important;
+}
+.tox .tox-mbtn:hover,
+.tox .tox-tbtn:hover,
+.tox .tox-collection--list .tox-collection__item--active {
+  @apply bg-primary-transparent dark:bg-white/30 !important;
+}
+.tox-editor-header,
+.tox .tox-menubar,
+.tox .tox-menubar+.tox-toolbar, .tox .tox-menubar+.tox-toolbar-overlord,
+.tox .tox-toolbar, .tox .tox-toolbar__overflow, .tox .tox-toolbar__primary {
+  @apply bg-transparent !important;
+}
+.tox-editor-header {
+  @apply shadow-none border-b-1 border-solid border-[#ddd] dark:border-white/20 !important;
+}
+.tox .tox-menubar {
+  @apply !p-0;
+}
+.tox-icon svg {
+  @apply dark:fill-white !important;
+}
+
+/* scrollbar */
+.scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #e3e6ee white;
+}
+.scrollbar::-webkit-scrollbar {
+  @apply w-[11px];
+}
+.scrollbar::-webkit-scrollbar-track {
+  background-color: white;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+}
+.scrollbar::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+  background-color: #e3e6ee;
+  border: 3px solid white;
+}
+.dark .scrollbar {
+  scrollbar-color: #484848 #1b1c29;
+}
+.dark .scrollbar::-webkit-scrollbar-track {
+  @apply bg-[#1b1c29];
+}
+.dark .scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-[#484848] border-[#1b1c29];
+}
+
+.tox-notifications-container {
+  @apply hidden;
+}
+
+@media only screen and (max-width: 379px){
+  .steps-action {
+    @apply flex-col;
+  }
+  .steps-action button {
+    @apply justify-center;
+  }
+  .steps-action button + button {
+    @apply mt-[15px];
+  }
+}
+
+@media only screen and (max-width: 479px){
+  .promo-apply-form {
+    @apply flex-col items-start;
+  }
+  .promo-apply-form .ant-form-item-control-input-content{
+    @apply flex-col;
+  }
+  .promo-apply-form .ant-form-item-control-input-content input{
+    @apply w-full mt-0 mb-2.5 ms-1.5;
+  }
+}
+@media only screen and (max-width: 575px){
+  .btn-proceed {
+    @apply text-[15px];
+  }
+  .step-action-wrap .step-action-inner {
+    @apply w-full px-[25px];
+  }
+}
+@media only screen and (max-width: 991px){
+  .steps-action {
+    @apply mt-[25px];
+  }
+}
+@media only screen and (max-width: 1599px){
+  .order-summary-inner {
+    @apply max-w-[600px] mx-auto;
+  }
+}

@@ -1,0 +1,32 @@
+[
+    {
+      "id": 1,
+      "name": "Duran Clayton",
+      "img": "img/sellers/10.png"
+    },
+    {
+      "id": 2,
+      "name": "Shane Watson",
+      "img": "img/sellers/11.png"
+    },
+    {
+      "id": 3,
+      "name": "Chris Dohan",
+      "img": "img/sellers/12.png"
+    },
+    {
+      "id": 4,
+      "name": "Robert Clinton",
+      "img": "img/sellers/13.png"
+    },
+    {
+      "id": 5,
+      "name": "Daniel White",
+      "img": "img/sellers/14.png"
+    },
+    {
+      "id": 6,
+      "name": "Black Smith",
+      "img": "img/sellers/11.png"
+    }
+]
