@@ -61,25 +61,26 @@ function App({ Component, pageProps }: AppProps) {
       )
     } else {
       return (
-        <UserProvider profileUrl="/hexadash-nextjs/api/auth/me">
-          <AuthContextProvider>
-            <AdminLayout>
-              <WagmiConfig config={wagmiConfig}>
-                <RainbowKitProvider
-                  chains={chains}
-                  appInfo={{
-                    appName: "PrepaidGas",
-                    disclaimer: Disclaimer,
-                  }}
-                  //todo: decide wether to use theme attribute cuz it wraps all page in <div data-rk> which causes css problems
-                  // theme={lightTheme({ accentColor: "#f97316" })}
-                >
+        <WagmiConfig config={wagmiConfig}>
+          <RainbowKitProvider
+            chains={chains}
+            appInfo={{
+              appName: "PrepaidGas",
+              disclaimer: Disclaimer,
+            }}
+            //todo: decide wether to use theme attribute cuz it wraps all page in <div data-rk> which causes css problems
+            // theme={lightTheme({ accentColor: "#f97316" })}
+          >
+            <UserProvider profileUrl="/hexadash-nextjs/api/auth/me">
+              <AuthContextProvider>
+                <AdminLayout>
                   <Component {...pageProps} />
-                </RainbowKitProvider>
-              </WagmiConfig>
-            </AdminLayout>
-          </AuthContextProvider>
-        </UserProvider>
+                  <ConnectButton />
+                </AdminLayout>
+              </AuthContextProvider>
+            </UserProvider>
+          </RainbowKitProvider>
+        </WagmiConfig>
       )
     }
   }
