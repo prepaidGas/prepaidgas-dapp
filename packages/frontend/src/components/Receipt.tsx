@@ -1,5 +1,5 @@
-import { DocumentTextIcon } from "@heroicons/react/24/outline"
-import { Callout, Icon, List, ListItem, Text, Title } from "@tremor/react"
+import { List } from "antd"
+import { UilQuestionCircle } from "@iconscout/react-unicons"
 import Tooltip from "./Tooltip"
 
 export default function Receipt({
@@ -16,27 +16,47 @@ export default function Receipt({
   rewardValue: number
 }) {
   return (
-    <div className="relative">
-      <div className="flex flex-row gap-1 items-center">
-        <Title>Receipt</Title>
-        <Tooltip tooltipText="This is just a placeholder" iconSize="md" />
-      </div>
-      <List className="flex flex-col" title="Receipt">
-        {gasCostTokenName === rewardTokenName ? (
-          <ListItem>
-            {rewardValue + gasCostValue * gasAmount} {gasCostTokenName}
-          </ListItem>
-        ) : (
-          <>
+    <>
+      <List
+        className="&>.ant-list-header]:border-regular dark:[&>.ant-list-header]:border-white/10  relative"
+        header={
+          <div className="flex flex-row justify-between items-center">
+            <div className="dark:text-white/[.87]">Receipt</div>
+            <span className="absolute [&>*]:fill-secondary right-1 top-1">
+              <UilQuestionCircle />
+            </span>
+          </div>
+        }
+        dataSource={
+          gasCostTokenName === rewardTokenName
+            ? [`${rewardValue + gasCostValue * gasAmount} ${gasCostTokenName}`]
+            : [`${gasCostValue * gasAmount} ${gasCostTokenName}`, `${gasCostValue * gasAmount} ${rewardTokenName}`]
+        }
+        bordered={true}
+        renderItem={(item) => <List.Item.Meta className="dark:[&>div>div]:text-white/60" description={item} />}
+      />
+      {/* <div className="relative">
+        <div className="flex flex-row gap-1 items-center">
+          <Title>Receipt</Title>
+          <Tooltip tooltipText="This is just a placeholder" iconSize="md" />
+        </div>
+        <List className="flex flex-col" title="Receipt">
+          {gasCostTokenName === rewardTokenName ? (
             <ListItem>
-              {gasCostValue * gasAmount} {gasCostTokenName}
+              {rewardValue + gasCostValue * gasAmount} {gasCostTokenName}
             </ListItem>
-            <ListItem>
-              {rewardValue} {rewardTokenName}
-            </ListItem>
-          </>
-        )}
-      </List>
-    </div>
+          ) : (
+            <>
+              <ListItem>
+                {gasCostValue * gasAmount} {gasCostTokenName}
+              </ListItem>
+              <ListItem>
+                {rewardValue} {rewardTokenName}
+              </ListItem>
+            </>
+          )}
+        </List>
+      </div> */}
+    </>
   )
 }
