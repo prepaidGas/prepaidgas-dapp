@@ -5,77 +5,74 @@ const { Option } = Select
 
 import { Cards } from "@/components/cards/frame/cards-frame"
 import { Buttons } from "@/components/buttons"
-import OrderCard, { OrderCardProps } from "@/components/cards/orderCard"
+// import OrderCard, { OrderCardProps } from "@/components/cards/orderCard"
+import { useEffect, useState } from "react"
+import SearchFiltersCard, { FilterOptions } from "@/components/SearchFiltersCard"
+import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
+import { readContract } from "@wagmi/core"
+import Pagination from "@/components/Pagination"
+import { useAccount } from "wagmi"
+import { GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
+import { TailSpin } from "react-loader-spinner"
+import { SPINNER_COLOR } from "@/constants"
+import OrderCard from "@/components/OrderCard"
 
-const items: TabsProps["items"] = [
-  {
-    key: "1",
-    label: "Simple",
-    children: null,
-  },
-  {
-    key: "2",
-    label: "Advanced",
-    children: null,
-  },
-]
-
-const cardData: OrderCardProps[] = [
-  {
-    id: "0",
-    manager: "",
-    timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-    window: "60",
-    reward: "200",
-    gasCost: "100",
-    guarantee: "100",
-  },
-  {
-    id: "1",
-    manager: "",
-    timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-    window: "60",
-    reward: "200",
-    gasCost: "100",
-    guarantee: "100",
-  },
-  {
-    id: "2",
-    manager: "",
-    timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-    window: "60",
-    reward: "200",
-    gasCost: "100",
-    guarantee: "100",
-  },
-  {
-    id: "3",
-    manager: "",
-    timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-    window: "60",
-    reward: "200",
-    gasCost: "100",
-    guarantee: "100",
-  },
-  {
-    id: "4",
-    manager: "",
-    timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-    window: "60",
-    reward: "200",
-    gasCost: "100",
-    guarantee: "100",
-  },
-  {
-    id: "5",
-    manager: "",
-    timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-    window: "60",
-    reward: "200",
-    gasCost: "100",
-    guarantee: "100",
-  },
-]
+// const cardData: OrderCardProps[] = [
+//   {
+//     id: "0",
+//     manager: "",
+//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
+//     window: "60",
+//     reward: "200",
+//     gasCost: "100",
+//     guarantee: "100",
+//   },
+//   {
+//     id: "1",
+//     manager: "",
+//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
+//     window: "60",
+//     reward: "200",
+//     gasCost: "100",
+//     guarantee: "100",
+//   },
+//   {
+//     id: "2",
+//     manager: "",
+//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
+//     window: "60",
+//     reward: "200",
+//     gasCost: "100",
+//     guarantee: "100",
+//   },
+//   {
+//     id: "3",
+//     manager: "",
+//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
+//     window: "60",
+//     reward: "200",
+//     gasCost: "100",
+//     guarantee: "100",
+//   },
+//   {
+//     id: "4",
+//     manager: "",
+//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
+//     window: "60",
+//     reward: "200",
+//     gasCost: "100",
+//     guarantee: "100",
+//   },
+//   {
+//     id: "5",
+//     manager: "",
+//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
+//     window: "60",
+//     reward: "200",
+//     gasCost: "100",
+//     guarantee: "100",
+//   },
+// ]
 
 const OrderSearch = () => {
   const PageRoutes = [
@@ -89,7 +86,126 @@ const OrderSearch = () => {
     },
   ]
 
-  const onChange = (key: string) => {}
+  const { address, isConnecting, isDisconnected } = useAccount()
+
+  const initialState: FilterOptions = {
+    manager: "",
+    status: 0,
+    numberOfEntries: 50,
+  }
+  const [filterState, setFilterState] = useState({ ...initialState })
+  const [data, setOrdersData] = useState<undefined | FilteredOrderStructOutput[]>(undefined)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalEntries, setTotalEntries] = useState<undefined | number>(undefined)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [showError, setShowError] = useState<boolean>(false)
+
+  const defaultManager = "0x0000000000000000000000000000000000000000"
+
+  const executeSearch = async (filterOptions: FilterOptions, pageNumber: number) => {
+    setIsLoading(true)
+    setShowError(false)
+    console.log("executeSearch", { pageNumber })
+    await getTotalEntriesNumber(filterOptions)
+
+    console.log("starting search")
+    const { manager, status, numberOfEntries } = filterOptions
+    const searchArgs = [
+      manager === "" ? defaultManager : manager,
+      address,
+      status,
+      numberOfEntries,
+      (pageNumber - 1) * numberOfEntries,
+    ]
+    console.log("SearchArgs: ", searchArgs)
+    try {
+      const data = await readContract({
+        address: prepaidGasCoreContractAddress(),
+        abi: GasOrderABI,
+        functionName: "getFilteredOrders",
+        //@todo replace second argument with users address instead of defaultManager (already done but i'm leaving todo for now)
+        args: searchArgs,
+      })
+      // console.log("DATA", data)
+      setOrdersData(data as FilteredOrderStructOutput[])
+    } catch (e) {
+      console.log("ERROR: ", e)
+      setShowError(true)
+    }
+    setIsLoading(false)
+  }
+
+  const getTotalEntriesNumber = async (filterOptions) => {
+    try {
+      const data = await readContract({
+        address: prepaidGasCoreContractAddress(),
+        abi: GasOrderABI,
+        functionName: "getMatchingOrdersCount",
+        args: [filterOptions.manager || defaultManager, filterOptions.status],
+      })
+      console.log("getTotalEntriesNumber", { filterOptions })
+      console.log("getMaxEntriesNumber", data)
+      console.log("getMaxEntriesNumber2", Number(data))
+
+      setTotalEntries(Number(data))
+    } catch (e) {
+      console.log("ERROR: ", e)
+    }
+  }
+
+  useEffect(() => {
+    executeSearch(filterState, currentPage)
+  }, [])
+
+  // const [showPopup, setShowPopup] = useState(false)
+  // const [popupTimer, setPopupTimer] = useState<NodeJS.Timeout | undefined>()
+  // const [popupProps, setPopupProps] = useState<{ msgTitle: string; msgBody: string; color: Color }>({
+  //   msgTitle: "",
+  //   msgBody: "",
+  //   color: "blue",
+  // })
+
+  // const onOrderCardAction = (favorited: boolean) => {
+  //   if (favorited) {
+  //     setPopupProps({
+  //       msgTitle: "Order was added to favorites",
+  //       msgBody: "",
+  //       color: "green",
+  //     })
+  //   } else {
+  //     setPopupProps({
+  //       msgTitle: "Order was removed from favorites",
+  //       msgBody: "",
+  //       color: "amber",
+  //     })
+  //   }
+  //   setShowPopup(true)
+  //   if (popupTimer !== undefined) {
+  //     clearTimeout(popupTimer)
+  //   }
+  //   const timer = setTimeout(() => setShowPopup(false), 5000)
+  //   setPopupTimer(timer)
+  // }
+
+  const handleFilterSubmit = (filterOptions: FilterOptions) => {
+    console.log("handleFilterSubmit START")
+    setFilterState(filterOptions)
+    setCurrentPage(1)
+    executeSearch(filterOptions, 1)
+    console.log("handleFilterSubmit END")
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    executeSearch(filterState, page)
+    console.log("handlePageChange")
+  }
+
+  useEffect(() => {
+    if (data?.length === 0) {
+      setShowError(true)
+    }
+  }, [data])
 
   return (
     <>
@@ -103,65 +219,63 @@ const OrderSearch = () => {
           <Cards headless className="max-w-[1024px] mx-auto">
             <div className="px-[25px] py-0">
               <div className="flex flex-row items-center gap-4 w-full grow">
-                {/* Gas Amount, Token and Gas Price inputs */}
-                <Form className="mt-4 grow">
-                  <div className="flex flex-row gap-6 items-start">
-                    <div className="flex flex-col grow">
-                      <label htmlFor="input-number-manager" className="text-[#404040] dark:text-[#A4A5AA]">
-                        Manager
-                      </label>
-                      <Form.Item name="input-number-manager">
-                        <Input
-                          placeholder="0x1dA..."
-                          size="middle"
-                          className="h-[40px] p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-                        />
-                      </Form.Item>
-                    </div>
-                    <div className="flex flex-col grow">
-                      <label htmlFor="status-select" className="text-[#404040] dark:text-[#A4A5AA]">
-                        Status
-                      </label>
-                      <Form.Item name="status-select" initialValue={["1"]}>
-                        <Select className="[&>div]:border-normal dark:[&>div]:border-white/10 [&>div]:rounded-6 [&>.ant-select-arrow]:text-theme-gray dark:[&>.ant-select-arrow]:text-white/60 [&>div>div>div>span]:bg-transparent [&>div>div>div>span]:h-[26px] [&>div>div>div>span]:items-center h-[48px] py-0">
-                          <Option value="1">Any</Option>
-                          <Option value="2">Test Token 1</Option>
-                          <Option value="3">Test Token 2</Option>
-                        </Select>
-                      </Form.Item>
-                    </div>
-                    <div className="flex flex-col grow">
-                      <label htmlFor="ipp-select" className="text-[#404040] dark:text-[#A4A5AA]">
-                        Items Per Page
-                      </label>
-                      <Form.Item name="ipp-select" initialValue={["1"]}>
-                        <Select className="[&>div]:border-normal dark:[&>div]:border-white/10 [&>div]:rounded-6 [&>.ant-select-arrow]:text-theme-gray dark:[&>.ant-select-arrow]:text-white/60 [&>div>div>div>span]:bg-transparent [&>div>div>div>span]:h-[26px] [&>div>div>div>span]:items-center h-[48px] py-0">
-                          <Option value="1">50</Option>
-                          <Option value="2">Test Token 1</Option>
-                          <Option value="3">Test Token 2</Option>
-                        </Select>
-                      </Form.Item>
-                    </div>
-                    <div className="flex flex-col grow">
-                      <label className="text-[#404040] dark:text-[#A4A5AA]">&nbsp;</label>
-                      <Form.Item name="ipp-select" className="flex flex-row gap-4">
-                        <Buttons className="bg-primary h-[40px] hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px]">
-                          {"Apply"}
-                        </Buttons>
-                        <Buttons className=" ml-4 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[40px]">
-                          {"Clear"}
-                        </Buttons>
-                      </Form.Item>
-                    </div>
-                  </div>
-                </Form>
+                <SearchFiltersCard initialValue={initialState} onSubmit={handleFilterSubmit} />
               </div>
             </div>
           </Cards>
 
-          {cardData.map((item, index) => (
-            <OrderCard {...item} />
-          ))}
+          {data && (
+            <Pagination
+              className="flex flex-col"
+              onPageChange={handlePageChange}
+              currentPage={currentPage}
+              totalCount={totalEntries ? totalEntries : 0}
+              pageSize={filterState.numberOfEntries}
+            />
+          )}
+
+          {isLoading ? (
+            <div className="flex justify-center my-4">
+              <TailSpin
+                height={40}
+                width={40}
+                color={SPINNER_COLOR}
+                ariaLabel="tail-spin-loading"
+                radius="0"
+                wrapperStyle={{}}
+                wrapperClass=""
+                visible={true}
+              />
+            </div>
+          ) : (
+            data?.map((item: any, index) => (
+              <OrderCard
+                {...item}
+                className={index === 0 ? "mt-4" : "mt-4"}
+                // onFavorited={onOrderCardAction}
+                key={`order-${item.id}`}
+              />
+            ))
+          )}
+
+          {data && (
+            <Pagination
+              className="flex flex-col"
+              onPageChange={handlePageChange}
+              currentPage={currentPage}
+              totalCount={totalEntries ? totalEntries : 0}
+              pageSize={filterState.numberOfEntries}
+            />
+          )}
+
+          {showError && (
+            <Cards className="mt-4">
+              <div className="flex flex-row gap-4 justify-center items-center">
+                {/* <Icon icon={ExclamationCircleIcon} size="xl"></Icon> */}
+                <span>Sorry, we couldn&#39;t find any results</span>
+              </div>
+            </Cards>
+          )}
         </div>
       </div>
     </>
