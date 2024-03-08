@@ -4,11 +4,11 @@ const { Option } = Select
 
 export default function TokenSearchSelect({
   changeHandler,
-  className,
+  className = "",
   searchSelectValue,
 }: {
   changeHandler: any
-  className: string
+  className?: string
   searchSelectValue: any
 }) {
   //old searchSelect that uses TremorJS
