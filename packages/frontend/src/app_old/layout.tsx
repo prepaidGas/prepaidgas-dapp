@@ -65,7 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="h-full">
       <body className={inter.className + " min-h-[100%]"}>
-        {/* <WagmiConfig config={wagmiConfig}>
+        <WagmiConfig config={wagmiConfig}>
           <RainbowKitProvider
             chains={chains}
             appInfo={{
@@ -98,7 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </>
           </RainbowKitProvider>
         </WagmiConfig>
-        <CookieBanner /> */}
+        <CookieBanner />
       </body>
     </html>
   )
