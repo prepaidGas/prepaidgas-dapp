@@ -21,6 +21,7 @@ import CreateOrderCardAdvanced from "./CreateOrderCardAdvanced"
 import DialogWindow from "../DialogWindow"
 import { WalletIcon } from "@heroicons/react/24/outline"
 import UserAgreement from "../UserAgreement"
+import { Tabs, TabsProps } from "antd"
 
 const schema = z.object({
   gasAmount: z.number().int().gt(0),
@@ -230,30 +231,34 @@ export default function CreateOrderCard({
     }
   }
 
-  const setAdvancedInputsToDefault = () => {
-    setInputValues({
-      //save current gas amount
-      gasAmount: inputValues.gasAmount,
-      //apply new time
-      executionPeriodStartDate: getTomorrowStartDate(),
-      executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
-      executionPeriodEndDate: getTomorrowEndDate(),
-      executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
-      //set all tokens to be equal to gas value token
-      gasCostValueToken: inputValues.gasCostValueToken,
-      guaranteeValueToken: inputValues.gasCostValueToken,
-      rewardValueToken: inputValues.gasCostValueToken,
-      //save current gasCostValueGasPrice
-      gasCostValueGasPrice: inputValues.gasCostValueGasPrice,
-      //recalculate reward and guarantee
-      guaranteeValueGasPrice: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
-      rewardValueAmount: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
-      //set execution window to initial value
-      executionWindow: initialState.executionWindow,
-      //TODO: recalculate reward transfer and gasCost transfer
-      rewardTransfer: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
-      gasCostTransfer: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
-    })
+  const setAdvancedInputsToDefault = (tabKey: string) => {
+    if (tabKey === "1") {
+      console.log("SETTING INPUTS TO DEFAULT")
+
+      setInputValues({
+        //save current gas amount
+        gasAmount: inputValues.gasAmount,
+        //apply new time
+        executionPeriodStartDate: getTomorrowStartDate(),
+        executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
+        executionPeriodEndDate: getTomorrowEndDate(),
+        executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
+        //set all tokens to be equal to gas value token
+        gasCostValueToken: inputValues.gasCostValueToken,
+        guaranteeValueToken: inputValues.gasCostValueToken,
+        rewardValueToken: inputValues.gasCostValueToken,
+        //save current gasCostValueGasPrice
+        gasCostValueGasPrice: inputValues.gasCostValueGasPrice,
+        //recalculate reward and guarantee
+        guaranteeValueGasPrice: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
+        rewardValueAmount: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
+        //set execution window to initial value
+        executionWindow: initialState.executionWindow,
+        //TODO: recalculate reward transfer and gasCost transfer
+        rewardTransfer: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
+        gasCostTransfer: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
+      })
+    }
   }
 
   useEffect(() => {
@@ -276,6 +281,35 @@ export default function CreateOrderCard({
     }
   }, [address])
 
+  //todo: make sure this is the best way to store data for tabs. const inside of function may lead to re-renders
+  const items: TabsProps["items"] = [
+    {
+      key: "1",
+      label: "Simple",
+      children: (
+        <CreateOrderCardSimple
+          setInputValues={setInputValues}
+          inputValues={inputValues}
+          validationErrors={validationErrors}
+          handleSubmit={handleSubmit}
+        />
+      ),
+    },
+
+    {
+      key: "2",
+      label: "Advanced",
+      children: (
+        <CreateOrderCardAdvanced
+          setInputValues={setInputValues}
+          inputValues={inputValues}
+          validationErrors={validationErrors}
+          handleSubmit={handleSubmit}
+        />
+      ),
+    },
+  ]
+
   return (
     <>
       {showWalletConnectionWindow && (
@@ -294,30 +328,7 @@ export default function CreateOrderCard({
         />
       )}
       <Card className="mt-6 flex flex-col w-full">
-        <TabGroup>
-          <TabList className="mt-8">
-            <Tab onClick={setAdvancedInputsToDefault}>Simple</Tab>
-            <Tab>Advanced</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <CreateOrderCardSimple
-                setInputValues={setInputValues}
-                inputValues={inputValues}
-                validationErrors={validationErrors}
-                handleSubmit={handleSubmit}
-              />
-            </TabPanel>
-            <TabPanel>
-              <CreateOrderCardAdvanced
-                setInputValues={setInputValues}
-                inputValues={inputValues}
-                validationErrors={validationErrors}
-                handleSubmit={handleSubmit}
-              />
-            </TabPanel>
-          </TabPanels>
-        </TabGroup>
+        <Tabs defaultActiveKey="1" items={items} onChange={setAdvancedInputsToDefault} />
       </Card>
     </>
   )
