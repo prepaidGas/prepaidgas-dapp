@@ -327,9 +327,9 @@ export default function CreateOrderCard({
           onClose={() => setShowWalletConnectionWindow(false)}
         />
       )}
-      <Card className="mt-6 flex flex-col w-full">
+      <div className="flex flex-col w-full">
         <Tabs defaultActiveKey="1" items={items} onChange={setAdvancedInputsToDefault} />
-      </Card>
+      </div>
     </>
   )
 }
