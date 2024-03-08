@@ -63,8 +63,8 @@ export default function Pagination({
 
           return (
             <li
-              className={`flex align-middle justify-center items-center cursor-pointer p-2 text-base box-border border-transparent border hover:border-blue-500 rounded 
-              ${pageNumber === currentPage ? "text-blue-500" : "text-white"}`}
+              className={`flex align-middle justify-center items-center cursor-pointer p-2 text-base box-border border-transparent border hover:border-primary rounded 
+              ${pageNumber === currentPage ? "text-primary" : "text-[#404040] dark:text-[#A4A5AA]"}`}
               key={`pageBtt-${index}`}
               onClick={() => onPageChange(pageNumber)}
             >
