@@ -22,6 +22,7 @@ import DialogWindow from "../DialogWindow"
 import { WalletIcon } from "@heroicons/react/24/outline"
 import UserAgreement from "../UserAgreement"
 import { Tabs, TabsProps } from "antd"
+import { Dayjs } from "dayjs"
 
 const schema = z.object({
   gasAmount: z.number().int().gt(0),
@@ -41,6 +42,13 @@ const schema = z.object({
 })
 
 export type CreateOrderState = z.infer<typeof schema>
+
+// export interface CreateOrderState extends CreateOrderStateZod {
+//   executionPeriodStartDate: Date
+//   executionPeriodStartTime: Dayjs
+//   executionPeriodEndDate: Date
+//   executionPeriodEndTime: Dayjs
+// }
 
 export default function CreateOrderCard({
   setShowDialogWindow,
