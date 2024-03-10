@@ -17,63 +17,6 @@ import { TailSpin } from "react-loader-spinner"
 import { SPINNER_COLOR } from "@/constants"
 import OrderCard from "@/components/OrderCard"
 
-// const cardData: OrderCardProps[] = [
-//   {
-//     id: "0",
-//     manager: "",
-//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-//     window: "60",
-//     reward: "200",
-//     gasCost: "100",
-//     guarantee: "100",
-//   },
-//   {
-//     id: "1",
-//     manager: "",
-//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-//     window: "60",
-//     reward: "200",
-//     gasCost: "100",
-//     guarantee: "100",
-//   },
-//   {
-//     id: "2",
-//     manager: "",
-//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-//     window: "60",
-//     reward: "200",
-//     gasCost: "100",
-//     guarantee: "100",
-//   },
-//   {
-//     id: "3",
-//     manager: "",
-//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-//     window: "60",
-//     reward: "200",
-//     gasCost: "100",
-//     guarantee: "100",
-//   },
-//   {
-//     id: "4",
-//     manager: "",
-//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-//     window: "60",
-//     reward: "200",
-//     gasCost: "100",
-//     guarantee: "100",
-//   },
-//   {
-//     id: "5",
-//     manager: "",
-//     timeframe: "Mar 3 2024, 18:19:10 - Mar 31 2081, 23:06:35",
-//     window: "60",
-//     reward: "200",
-//     gasCost: "100",
-//     guarantee: "100",
-//   },
-// ]
-
 const OrderSearch = () => {
   const PageRoutes = [
     {
@@ -269,7 +212,7 @@ const OrderSearch = () => {
           )}
 
           {showError && (
-            <Cards className="mt-4">
+            <Cards headless className="mt-4 max-w-[1024px] mx-auto">
               <div className="flex flex-row gap-4 justify-center items-center">
                 {/* <Icon icon={ExclamationCircleIcon} size="xl"></Icon> */}
                 <span>Sorry, we couldn&#39;t find any results</span>

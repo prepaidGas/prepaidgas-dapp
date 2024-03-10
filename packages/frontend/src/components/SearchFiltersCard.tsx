@@ -66,8 +66,8 @@ export default function SearchFiltersCard({
 
   return (
     <Form className="mt-4 grow">
-      <div className="flex flex-row gap-6 items-start">
-        <div className="flex flex-col grow">
+      <div className="flex flex-col old-lg:flex-row old-lg:items-start old-lg:gap-6">
+        <div className="flex flex-col grow w-full">
           <label htmlFor="input-number-manager" className="text-[#404040] dark:text-[#A4A5AA]">
             Manager
           </label>
@@ -84,7 +84,7 @@ export default function SearchFiltersCard({
             />
           </Form.Item>
         </div>
-        <div className="flex flex-col grow">
+        <div className="flex flex-col grow w-full">
           <label htmlFor="status-select" className="text-[#404040] dark:text-[#A4A5AA]">
             Status
           </label>
@@ -104,7 +104,7 @@ export default function SearchFiltersCard({
             </Select>
           </Form.Item>
         </div>
-        <div className="flex flex-col grow">
+        <div className="flex flex-col grow w-full">
           <label htmlFor="ipp-select" className="text-[#404040] dark:text-[#A4A5AA]">
             Items Per Page
           </label>
@@ -124,9 +124,9 @@ export default function SearchFiltersCard({
             </Select>
           </Form.Item>
         </div>
-        <div className="flex flex-col grow">
+        <div className="flex flex-col grow w-full">
           <label className="text-[#404040] dark:text-[#A4A5AA]">&nbsp;</label>
-          <Form.Item name="ipp-select" className="flex flex-row gap-4">
+          <div className="flex flex-col gap-4 old-lg:flex-row">
             <Buttons
               onClick={() => handleSubmit()}
               className="bg-primary h-[40px] hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px]"
@@ -135,11 +135,11 @@ export default function SearchFiltersCard({
             </Buttons>
             <Buttons
               onClick={() => handleSubmit(true)}
-              className=" ml-4 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[40px]"
+              className="bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[40px]"
             >
               {"Clear"}
             </Buttons>
-          </Form.Item>
+          </div>
         </div>
       </div>
     </Form>
