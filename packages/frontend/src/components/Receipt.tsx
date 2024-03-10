@@ -8,15 +8,17 @@ export default function Receipt({
   gasCostValue,
   rewardTokenName = "NULL",
   rewardValue,
+  className = "",
 }: {
   gasAmount: number
   gasCostTokenName?: string
   gasCostValue: number
   rewardTokenName?: string
   rewardValue: number
+  className?: string
 }) {
   return (
-    <>
+    <div className={className}>
       <List
         className="&>.ant-list-header]:border-regular dark:[&>.ant-list-header]:border-white/10  relative"
         header={
@@ -35,28 +37,6 @@ export default function Receipt({
         bordered={true}
         renderItem={(item) => <List.Item.Meta className="dark:[&>div>div]:text-white/60" description={item} />}
       />
-      {/* <div className="relative">
-        <div className="flex flex-row gap-1 items-center">
-          <Title>Receipt</Title>
-          <Tooltip tooltipText="This is just a placeholder" iconSize="md" />
-        </div>
-        <List className="flex flex-col" title="Receipt">
-          {gasCostTokenName === rewardTokenName ? (
-            <ListItem>
-              {rewardValue + gasCostValue * gasAmount} {gasCostTokenName}
-            </ListItem>
-          ) : (
-            <>
-              <ListItem>
-                {gasCostValue * gasAmount} {gasCostTokenName}
-              </ListItem>
-              <ListItem>
-                {rewardValue} {rewardTokenName}
-              </ListItem>
-            </>
-          )}
-        </List>
-      </div> */}
-    </>
+    </div>
   )
 }

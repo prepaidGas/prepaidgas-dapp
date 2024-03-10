@@ -60,7 +60,7 @@ export default function CreateOrderCardSimple({
             className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
           />
         </div>
-        <div className="flex flex-row gap-8">
+        <div className="flex flex-col old-md:flex-row gap-4">
           <div className="flex flex-col grow justify-start ">
             <label htmlFor="token-select" className="text-[#404040] dark:text-[#A4A5AA] mb-1">
               Token
@@ -104,8 +104,9 @@ export default function CreateOrderCardSimple({
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-4 mt-4">
+      <div className="flex flex-col old-sm:flex-row old-sm:items-end old-sm:justify-between gap-4 mt-4 old-sm:mt-8">
         <Receipt
+          className=""
           //TODO pass correct token names
           gasAmount={inputValues.gasAmount}
           gasCostValue={inputValues.gasCostValueGasPrice}
@@ -115,7 +116,7 @@ export default function CreateOrderCardSimple({
         />
         <Buttons
           onClick={handleSubmit}
-          className="grow md:grow-0 bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
+          className="bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
         >
           {"Create Gas Order"}
         </Buttons>
