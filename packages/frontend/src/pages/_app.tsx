@@ -15,6 +15,7 @@ import { WagmiConfig, configureChains, createConfig } from "wagmi"
 import { hardhat, mainnet } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
 import { ConnectButton, DisclaimerComponent, getDefaultWallets, lightTheme } from "@rainbow-me/rainbowkit"
+import Head from "next/head"
 
 const { chains, publicClient } = configureChains([mainnet, hardhat], [publicProvider()])
 
@@ -51,42 +52,55 @@ function App({ Component, pageProps }: AppProps) {
       pathname.startsWith("/login")
     ) {
       return (
-        <UserProvider profileUrl="/hexadash-nextjs/api/auth/me">
-          <AuthContextProvider>
-            <AuthLayout>
-              <Component {...pageProps} />
-            </AuthLayout>
-          </AuthContextProvider>
-        </UserProvider>
+        <>
+          <Head>
+            <title>prepaidGas</title>
+          </Head>
+          <UserProvider profileUrl="/hexadash-nextjs/api/auth/me">
+            <AuthContextProvider>
+              <AuthLayout>
+                <Component {...pageProps} />
+              </AuthLayout>
+            </AuthContextProvider>
+          </UserProvider>
+        </>
       )
     } else {
       return (
-        <WagmiConfig config={wagmiConfig}>
-          <RainbowKitProvider
-            chains={chains}
-            appInfo={{
-              appName: "PrepaidGas",
-              disclaimer: Disclaimer,
-            }}
-            //todo: decide wether to use theme attribute cuz it wraps all page in <div data-rk> which causes css problems
-            // theme={lightTheme({ accentColor: "#f97316" })}
-          >
-            <UserProvider profileUrl="/hexadash-nextjs/api/auth/me">
-              <AuthContextProvider>
-                <AdminLayout>
-                  <Component {...pageProps} />
-                  <ConnectButton />
-                </AdminLayout>
-              </AuthContextProvider>
-            </UserProvider>
-          </RainbowKitProvider>
-        </WagmiConfig>
+        <>
+          <Head>
+            <title>prepaidGas</title>
+          </Head>
+          <WagmiConfig config={wagmiConfig}>
+            <RainbowKitProvider
+              chains={chains}
+              appInfo={{
+                appName: "PrepaidGas",
+                disclaimer: Disclaimer,
+              }}
+              //todo: decide wether to use theme attribute cuz it wraps all page in <div data-rk> which causes css problems
+              // theme={lightTheme({ accentColor: "#f97316" })}
+            >
+              <UserProvider profileUrl="/hexadash-nextjs/api/auth/me">
+                <AuthContextProvider>
+                  <AdminLayout>
+                    <Component {...pageProps} />
+                    <ConnectButton />
+                  </AdminLayout>
+                </AuthContextProvider>
+              </UserProvider>
+            </RainbowKitProvider>
+          </WagmiConfig>
+        </>
       )
     }
   }
 
   return (
     <>
+      <Head>
+        <title>prepaidGas</title>
+      </Head>
       <Provider store={store}>{renderLayout()}</Provider>
     </>
   )
