@@ -246,6 +246,10 @@ export default function CreateTxCardAdvanced({
     console.log("Arg Values: ", argValues)
   }, [argValues])
 
+  console.log("isAbiParsed: ", { isAbiParsed })
+  console.log("selectedFunction: ", { selectedFunction })
+  console.log("argInputs: ", { argInputs })
+
   return (
     <div className="mt-6 flex flex-col w-full gap-6">
       <div className="flex flex-col">
