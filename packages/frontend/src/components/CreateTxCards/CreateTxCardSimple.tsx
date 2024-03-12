@@ -75,15 +75,6 @@ export default function CreateTxCardSimple({
           return (
             <div className="flex flex-col">
               <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
-              {/* <NumberInput
-                onChange={(e) => {
-                  setArgValues((prevState) => {
-                    const nextState = [...prevState]
-                    nextState[index] = { ...nextState[index], [comp.name]: Number(e.target.value) }
-                    return nextState
-                  })
-                }}
-              ></NumberInput> */}
               <Input
                 onChange={(e) => {
                   setArgValues((prevState) => {
@@ -252,8 +243,8 @@ export default function CreateTxCardSimple({
         <label className="text-[#404040] dark:text-[#A4A5AA] mb-1">Execution period End</label>
         <div className="flex flex-col gap-4">
           <DatePicker
-            defaultValue={dayjs().add(1, "d")}
-            // value={dayjs(inputValues.executionPeriodEndDate)}
+            // defaultValue={dayjs().add(1, "d")}
+            value={inputValues.deadlineDate}
             presets={[
               {
                 label: "Tommorrow",
@@ -270,16 +261,16 @@ export default function CreateTxCardSimple({
             ]}
             onChange={(date) => {
               if (date) {
-                // setInputValues({ ...inputValues, executionPeriodEndDate: date })
+                setInputValues({ ...inputValues, deadlineDate: date })
               }
             }}
           />
           <TimePicker
             className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
-            defaultValue={dayjs("00:00", "HH:mm")}
+            // defaultValue={dayjs("00:00", "HH:mm")}
             format={"HH:mm"}
-            // value={inputValues.executionPeriodEndTime}
-            // onChange={(value) => setInputValues({ ...inputValues, executionPeriodEndTime: value })}
+            value={inputValues.deadlineTime}
+            onChange={(value) => setInputValues({ ...inputValues, deadlineTime: value })}
             // error={!!validationErrors?.executionPeriodEndTime}
             // errorMessage={validationErrors?.executionPeriodEndTime}
           />

@@ -1,11 +1,6 @@
 "use client"
 
-import {
-  getTomorrowStartDate,
-  getTomorrowEndDate,
-  combineDateAndTime,
-  getUnixTimestampInSeconds,
-} from "@/utils/dateAndTime.utils"
+import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTime.utils"
 import format from "date-fns/format"
 
 import { writeContract, waitForTransaction } from "@wagmi/core"
@@ -22,14 +17,14 @@ import DialogWindow from "../DialogWindow"
 import { WalletIcon } from "@heroicons/react/24/outline"
 import UserAgreement from "../UserAgreement"
 import { Tabs, TabsProps } from "antd"
-import { Dayjs } from "dayjs"
+import dayjs, { type Dayjs } from "dayjs"
 
 const schema = z.object({
   gasAmount: z.number().int().gt(0),
-  executionPeriodStartDate: z.date(),
-  executionPeriodStartTime: z.string(),
-  executionPeriodEndDate: z.date(),
-  executionPeriodEndTime: z.string(),
+  executionPeriodStartDate: z.instanceof(dayjs as unknown as typeof Dayjs),
+  executionPeriodStartTime: z.instanceof(dayjs as unknown as typeof Dayjs),
+  executionPeriodEndDate: z.instanceof(dayjs as unknown as typeof Dayjs),
+  executionPeriodEndTime: z.instanceof(dayjs as unknown as typeof Dayjs),
   rewardValueToken: z.string(),
   rewardValueAmount: z.number().int().gt(0),
   gasCostValueToken: z.string(),
@@ -81,10 +76,10 @@ export default function CreateOrderCard({
   //TODO: execution window and dates?
   const initialState: CreateOrderState = {
     gasAmount: 10,
-    executionPeriodStartDate: getTomorrowStartDate(),
-    executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
-    executionPeriodEndDate: getTomorrowEndDate(),
-    executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
+    executionPeriodStartDate: dayjs().add(1, "day"),
+    executionPeriodStartTime: dayjs("00:00", "HH:mm"),
+    executionPeriodEndDate: dayjs().add(2, "day"),
+    executionPeriodEndTime: dayjs("00:00", "HH:mm"),
     rewardValueToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     rewardValueAmount: 10,
     gasCostValueToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
@@ -247,10 +242,10 @@ export default function CreateOrderCard({
         //save current gas amount
         gasAmount: inputValues.gasAmount,
         //apply new time
-        executionPeriodStartDate: getTomorrowStartDate(),
-        executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
-        executionPeriodEndDate: getTomorrowEndDate(),
-        executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
+        executionPeriodStartDate: dayjs().add(1, "day"),
+        executionPeriodStartTime: dayjs("00:00", "HH:mm"),
+        executionPeriodEndDate: dayjs().add(2, "day"),
+        executionPeriodEndTime: dayjs("00:00", "HH:mm"),
         //set all tokens to be equal to gas value token
         gasCostValueToken: inputValues.gasCostValueToken,
         guaranteeValueToken: inputValues.gasCostValueToken,

@@ -26,12 +26,14 @@ import { ethers } from "ethers"
 import { TEST_ABI_STRING } from "@/constants"
 import { Tabs, TabsProps } from "antd"
 
+import dayjs, { type Dayjs } from "dayjs"
+
 const formSchema = z.object({
   nonce: z.number(),
   gasOrder: z.number(),
   onBehalf: z.string(),
-  deadlineDate: z.date(),
-  deadlineTime: z.string().min(1),
+  deadlineDate: z.instanceof(dayjs as unknown as typeof Dayjs),
+  deadlineTime: z.instanceof(dayjs as unknown as typeof Dayjs),
   to: z.string().min(1),
   gas: z.number(),
   tips: z.number(),
@@ -67,12 +69,14 @@ export default function CreateTxCard({
 
   const { address } = useAccount()
 
+  console.log(dayjs("00:00", "HH:mm"))
+
   const initialState: TransactionFormState = {
     nonce: Date.now(),
     gasOrder: 0,
     onBehalf: address,
-    deadlineDate: null,
-    deadlineTime: "00:00:00",
+    deadlineDate: dayjs().add(1, "d"),
+    deadlineTime: dayjs("00:00", "HH:mm"),
     to: "",
     gas: 0,
     tips: 0,
