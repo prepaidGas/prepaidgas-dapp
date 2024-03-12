@@ -425,7 +425,7 @@ export default function CreateTxCardAdvanced({
       )}
 
       {isAbiParsed ? (
-        <div className="flex flex-row md:justify-end mt-4">
+        <div className="flex flex-row old-md:justify-end mt-4">
           <span className="text-[#404040] dark:text-[#A4A5AA]">Abi was successfully parsed</span>
           <Buttons
             onClick={() => {
