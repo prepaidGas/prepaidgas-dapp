@@ -3,11 +3,8 @@
 import { CheckIcon, ClockIcon, NoSymbolIcon, WalletIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import { DatePicker, Form, Input, List, Select, Tabs, TabsProps, TimePicker } from "antd"
 
-import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { SPINNER_COLOR } from "@/constants"
 import { TransactionFormState } from "./CreateTxCard"
-import JsonFormatter from "react-json-formatter"
 import { ABIEntry, FieldEntry, prepaidGasCoreContractAddress } from "@/helpers"
 import dayjs from "dayjs"
 import { Buttons } from "../buttons"
@@ -237,20 +234,6 @@ export default function CreateTxCardSimple({
 
   return (
     <div className="mt-6 flex flex-col w-full gap-6">
-      {/* <div className="flex flex-col">
-        <Text>Gas Order</Text>
-        <div className="flex flex-col">
-          <NumberInput
-            className="mt-2"
-            value={inputValues.gasOrder.toString()}
-            onChange={(e) => setInputValues({ ...inputValues, gasOrder: Number(e.target.value) })}
-            error={!!validationErrors?.gasOrder}
-            errorMessage={validationErrors?.gasOrder}
-            spellCheck={false}
-          />
-        </div>
-      </div> */}
-
       <div className="flex flex-col">
         <label className="text-[#404040] dark:text-[#A4A5AA]">Gas Order</label>
         <Input
@@ -264,30 +247,6 @@ export default function CreateTxCardSimple({
           className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
         />
       </div>
-
-      {/* <div className="flex flex-col justify-between">
-        <Text>Execution period End</Text>
-        <div className="flex flex-row gap-2 mt-2">
-          <div className="flex flex-col">
-            <DatePicker
-              value={inputValues.deadlineDate}
-              onValueChange={(value) => setInputValues({ ...inputValues, deadlineDate: value })}
-              minDate={new Date()}
-            />
-          </div>
-          <div className="flex flex-col">
-            <TextInput
-              icon={ClockIcon}
-              value={inputValues.deadlineTime}
-              onChange={(e) => setInputValues({ ...inputValues, deadlineTime: e.target.value })}
-              placeholder={inputValues.deadlineTime}
-              error={!!validationErrors?.deadlineTime}
-              errorMessage={validationErrors?.deadlineTime}
-              spellCheck={false}
-            ></TextInput>
-          </div>
-        </div>
-      </div> */}
 
       <div className="flex flex-col">
         <label className="text-[#404040] dark:text-[#A4A5AA] mb-1">Execution period End</label>
@@ -327,21 +286,6 @@ export default function CreateTxCardSimple({
         </div>
       </div>
 
-      {/* <div className="flex flex-col">
-        <Text>To</Text>
-        <div className="flex flex-col mt-2">
-          <TextInput
-            icon={WalletIcon}
-            value={inputValues.to}
-            onChange={(e) => setInputValues({ ...inputValues, to: e.target.value })}
-            placeholder={inputValues.to}
-            error={!!validationErrors?.to}
-            errorMessage={validationErrors?.to}
-            spellCheck={false}
-          ></TextInput>
-        </div>
-      </div> */}
-
       <div className="flex flex-col">
         <label className="text-[#404040] dark:text-[#A4A5AA]">To</label>
         <Input
@@ -355,19 +299,6 @@ export default function CreateTxCardSimple({
           className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
         />
       </div>
-
-      {/* <div className="flex flex-col">
-        <Text>Gas</Text>
-        <div className="flex flex-row mt-2">
-          <NumberInput
-            value={inputValues.gas.toString()}
-            onChange={(e) => setInputValues({ ...inputValues, gas: Number(e.target.value) })}
-            error={!!validationErrors?.gas}
-            errorMessage={validationErrors?.gas}
-            spellCheck={false}
-          />
-        </div>
-      </div> */}
 
       <div className="flex flex-col">
         <label className="text-[#404040] dark:text-[#A4A5AA]">Gas</label>
@@ -403,8 +334,8 @@ export default function CreateTxCardSimple({
       )}
 
       {isAbiParsed ? (
-        <div className="flex flex-row md:justify-between mt-4">
-          <span className="text-[#404040] dark:text-[#A4A5AA]">Abi is successfully parsed</span>
+        <div className="flex flex-row old-md:justify-between mt-4">
+          <span className="text-primary">Abi was successfully parsed</span>
           <Buttons
             onClick={() => {
               setIsAbiParsed(false)
@@ -421,9 +352,6 @@ export default function CreateTxCardSimple({
         </div>
       ) : (
         <div className="flex flex-row old-md:justify-end mt-4">
-          {/* <Button className="grow md:grow-0" disabled={isLoading} onClick={parseAbi} variant="secondary">
-            {isLoading ? "" : "Parse ABI"}
-          </Button> */}
           <Buttons
             onClick={parseAbi}
             className="grow old-md:grow-0 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
