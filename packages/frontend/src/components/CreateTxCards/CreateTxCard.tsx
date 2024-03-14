@@ -1,17 +1,13 @@
 "use client"
 
-import {
-  getTomorrowStartDate,
-  getTomorrowEndDate,
-  combineDateAndTime,
-  getUnixTimestampInSeconds,
-} from "@/utils/dateAndTime.utils"
+import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTime.utils"
 import format from "date-fns/format"
 
 import { readContract, writeContract, waitForTransaction, signTypedData } from "@wagmi/core"
 import { MockTokenABI, GasOrderABI, prepaidGasCoreContractAddress, ABIEntry } from "@/helpers"
 import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
 import { useAccount } from "wagmi"
+import { UilWallet } from "@iconscout/react-unicons"
 
 import { Card, Icon, Tab, TabGroup, TabList, TabPanel, TabPanels, Title } from "@tremor/react"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
@@ -424,9 +420,9 @@ export default function CreateTxCard({
           isClosable={true}
           withoutDescription={true}
           title={
-            <div className="flex flex-row items-center">
-              <Icon color="orange" variant="outlined" size="lg" icon={WalletIcon}></Icon>
-              <Title className="ml-4">Wallet Connection</Title>
+            <div className="flex flex-row items-center [&>*]:fill-[#404040] [&>*]:dark:fill-[#A4A5AA]">
+              <UilWallet />
+              <span className="ml-4 text-[#404040] dark:text-[#A4A5AA] text-xl">Wallet Connection</span>
             </div>
           }
           description="Please accept our terms of service and connect your wallet to continue with order creation"
