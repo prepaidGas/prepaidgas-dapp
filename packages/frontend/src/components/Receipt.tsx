@@ -1,6 +1,6 @@
 import { List } from "antd"
 import { UilQuestionCircle } from "@iconscout/react-unicons"
-import Tooltip from "./Tooltip"
+import { Tooltip } from "antd"
 
 export default function Receipt({
   gasAmount,
@@ -25,7 +25,9 @@ export default function Receipt({
           <div className="flex flex-row justify-between items-center">
             <div className="dark:text-white/[.87]">Receipt</div>
             <span className="absolute [&>*]:fill-secondary right-1 top-1">
-              <UilQuestionCircle />
+              <Tooltip className="" title="This is just a placeholder">
+                <UilQuestionCircle />
+              </Tooltip>
             </span>
           </div>
         }
