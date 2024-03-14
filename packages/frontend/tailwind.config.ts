@@ -140,6 +140,15 @@ module.exports = {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic": "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      keyframes: {
+        btnclick: {
+          "0%": { transform: "scale(90%)" },
+          "100%": { transform: "scale(100%)" },
+        },
+      },
+      animation: {
+        btnclick: "btnclick 250ms ease-in-out",
+      },
     },
     screens: {
       "4xl": { max: "1699px" },
