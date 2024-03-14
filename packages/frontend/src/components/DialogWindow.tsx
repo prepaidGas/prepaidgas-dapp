@@ -23,6 +23,14 @@ export default function DialogWindow({
   actionButtons = null,
   onClose = null,
 }: DialogWindowProps) {
+  const renderDivider = () => {
+    if (!withoutDescription && actionButtons !== null) {
+      return <Divider />
+    }
+
+    return null
+  }
+
   return (
     <div className="fixed left-0 top-0 w-full h-full bg-black/80 z-99998 flex justify-center items-center p-10">
       <div className="flex flex-col justify-center items-center md:w-auto md:h-auto md:max-w-lg">
@@ -36,11 +44,15 @@ export default function DialogWindow({
             </div>
           ) : null}
 
-          {typeof title === "object" ? title : <span>{title}</span>}
+          {typeof title === "object" ? (
+            title
+          ) : (
+            <span className="ml-4 text-[#404040] dark:text-[#A4A5AA] text-xl">{title}</span>
+          )}
 
           <Divider />
           {withoutDescription ? null : typeof description === "object" ? description : <span> {description}</span>}
-          {withoutDescription ? null : <Divider />}
+          {renderDivider()}
           <div className="flex flex-col gap-2">{actionButtons}</div>
         </Cards>
       </div>
