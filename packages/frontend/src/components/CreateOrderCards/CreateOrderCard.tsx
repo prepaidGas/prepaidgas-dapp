@@ -7,14 +7,13 @@ import { writeContract, waitForTransaction } from "@wagmi/core"
 import { MockTokenABI, GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
 import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
 import { useAccount } from "wagmi"
+import { UilWallet } from "@iconscout/react-unicons"
 
-import { Card, Icon, Tab, TabGroup, TabList, TabPanel, TabPanels, Title } from "@tremor/react"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { z } from "zod"
 import CreateOrderCardSimple from "./CreateOrderCardSimple"
 import CreateOrderCardAdvanced from "./CreateOrderCardAdvanced"
 import DialogWindow from "../DialogWindow"
-import { WalletIcon } from "@heroicons/react/24/outline"
 import UserAgreement from "../UserAgreement"
 import { Tabs, TabsProps } from "antd"
 import dayjs, { type Dayjs } from "dayjs"
@@ -320,9 +319,9 @@ export default function CreateOrderCard({
           isClosable={true}
           withoutDescription={true}
           title={
-            <div className="flex flex-row items-center">
-              <Icon color="orange" variant="outlined" size="lg" icon={WalletIcon}></Icon>
-              <Title className="ml-4">Wallet Connection</Title>
+            <div className="flex flex-row items-center [&>*]:fill-[#404040] [&>*]:dark:fill-[#A4A5AA]">
+              <UilWallet />
+              <span className="ml-4 text-[#404040] dark:text-[#A4A5AA] text-xl">Wallet Connection</span>
             </div>
           }
           description="Please accept our terms of service and connect your wallet to continue with order creation"
