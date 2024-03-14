@@ -176,18 +176,9 @@ export default function OrderCard({
           </Buttons>
           <span className="text-[#404040] dark:text-[#A4A5AA] font-bold text-2xl">{`#${id.toString()}`}</span>
 
-          <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-row items-center gap-2">
             <span className="text-[#404040] dark:text-[#A4A5AA]">Manager: </span>
-            <div className={`flex w-auto`}>
-              <div
-                className={`flex flex-row justify-center items-center rounded-md border border-solid gap-2 [&>*]:fill-primary border-primary px-2 py-1 ${
-                  true ? "cursor-pointer" : "cursor-default"
-                } `}
-              >
-                {true && <UilClipboardNotes />}
-                <span className="text-primary">{order.manager}</span>
-              </div>
-            </div>
+            <TruncatedTextWithTooltip text={order.manager} />
           </div>
 
           <span className="text-[#404040] dark:text-[#A4A5AA]">
@@ -199,46 +190,22 @@ export default function OrderCard({
             Execution window: {order.executionWindow.toString()}
           </span>
 
-          <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-row items-center gap-2">
             <span className="text-[#404040] dark:text-[#A4A5AA]">Reward:</span>
-            <div className={`flex w-auto`}>
-              <div
-                className={`flex flex-row justify-center items-center rounded-md border border-solid gap-2 [&>*]:fill-primary border-primary px-2 py-1 ${
-                  true ? "cursor-pointer" : "cursor-default"
-                } `}
-              >
-                {true && <UilClipboardNotes />}
-                <span className="text-primary">{`${reward.amount}`}</span>
-              </div>
-            </div>
+            <span className="text-primary">{` ${reward.amount}`}</span>
+            <TruncatedTextWithTooltip title={TOKEN_NAME[reward.token] ?? ""} text={reward.token} isCopyable />
           </div>
 
-          <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-row items-center gap-2">
             <span className="text-[#404040] dark:text-[#A4A5AA]">Gas Cost:</span>
-            <div className={`flex w-auto`}>
-              <div
-                className={`flex flex-row justify-center items-center rounded-md border border-solid gap-2 [&>*]:fill-primary border-primary px-2 py-1 ${
-                  true ? "cursor-pointer" : "cursor-default"
-                } `}
-              >
-                {true && <UilClipboardNotes />}
-                <span className="text-primary">{`${gasCost.gasPrice}`}</span>
-              </div>
-            </div>
+            <span className="text-primary">{` ${gasCost.gasPrice}`}</span>
+            <TruncatedTextWithTooltip title={TOKEN_NAME[gasCost.token] ?? ""} text={gasCost.token} isCopyable />
           </div>
 
-          <div className="flex flex-row items-center gap-4">
-            <span className="text-[#404040] dark:text-[#A4A5AA]">Guarantee: </span>
-            <div className={`flex w-auto`}>
-              <div
-                className={`flex flex-row justify-center items-center rounded-md border border-solid gap-2 [&>*]:fill-primary border-primary px-2 py-1 ${
-                  true ? "cursor-pointer" : "cursor-default"
-                } `}
-              >
-                {true && <UilClipboardNotes />}
-                <span className="text-primary">{`${guarantee.gasPrice}`}</span>
-              </div>
-            </div>
+          <div className="flex flex-row items-center gap-2">
+            <span className="text-[#404040] dark:text-[#A4A5AA]">Guarantee:</span>
+            <span className="text-primary">{`${guarantee.gasPrice}`}</span>
+            <TruncatedTextWithTooltip title={TOKEN_NAME[guarantee.token] ?? ""} text={guarantee.token} isCopyable />
           </div>
         </div>
       </Cards>
