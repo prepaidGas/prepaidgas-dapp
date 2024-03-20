@@ -3,7 +3,7 @@ import "@rainbow-me/rainbowkit/styles.css"
 import { useRouter } from "next/router"
 import type { AppProps } from "next/app"
 
-import { Provider } from "react-redux"
+import { Provider, useDispatch } from "react-redux"
 import { UserProvider } from "@auth0/nextjs-auth0/client"
 import AdminLayout from "./adminLayout"
 import AuthLayout from "./authLayout"
@@ -19,7 +19,7 @@ import { ConnectButton, DisclaimerComponent, getDefaultWallets, lightTheme } fro
 import Head from "next/head"
 import { useEffect } from "react"
 
-const { login } = useAuth()
+import { logInAction } from "@/redux/authentication/actionCreator"
 
 const { chains, publicClient } = configureChains([mainnet, hardhat], [publicProvider()])
 
@@ -48,12 +48,17 @@ function App({ Component, pageProps }: AppProps) {
   const router = useRouter()
   const { pathname } = router
 
-  useEffect(() => {
-    // await login("blank@blank.com", "123456")
-    // // @ts-ignore
-    // dispatch(logInAction(() => router.push("/admin")))
-    // console.log("Succesfully Logged In!")
+  const { login } = useAuth()
+  const dispatch = useDispatch()
 
+  useEffect(() => {
+    const falseLogin = async () => {
+      await login("blank@blank.com", "123456")
+      // @ts-ignore
+      dispatch(logInAction(() => router.push("/admin")))
+      console.log("Succesfully Logged In!")
+    }
+    falseLogin()
     router.push("/admin")
   }, [])
 
@@ -73,10 +78,14 @@ function App({ Component, pageProps }: AppProps) {
             //todo: decide wether to use theme attribute cuz it wraps all page in <div data-rk> which causes css problems
             // theme={lightTheme({ accentColor: "#f97316" })}
           >
-            <AdminLayout>
-              <Component {...pageProps} />
-              <ConnectButton />
-            </AdminLayout>
+            <UserProvider>
+              <AuthContextProvider>
+                <AdminLayout>
+                  <Component {...pageProps} />
+                  <ConnectButton />
+                </AdminLayout>
+              </AuthContextProvider>
+            </UserProvider>
           </RainbowKitProvider>
         </WagmiConfig>
       </>

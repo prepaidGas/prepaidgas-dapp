@@ -1,80 +1,74 @@
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { Form, Input, Button, Row, Col } from 'antd';
-import { useDispatch } from 'react-redux';
-import { logInAction } from '@/redux/authentication/actionCreator';
-import { ReactSVG } from 'react-svg';
-import {
-  UilFacebook,
-  UilTwitter,
-  UilGithub,
- } from '@iconscout/react-unicons';
-import { CheckBox } from '@/components/checkbox';
+import React, { useState, useEffect } from "react"
+import Link from "next/link"
+import { useRouter } from "next/router"
+import { Form, Input, Button, Row, Col } from "antd"
+import { useDispatch } from "react-redux"
+import { logInAction } from "@/redux/authentication/actionCreator"
+import { ReactSVG } from "react-svg"
+import { UilFacebook, UilTwitter, UilGithub } from "@iconscout/react-unicons"
+import { CheckBox } from "@/components/checkbox"
 
-import { useUser } from '@auth0/nextjs-auth0/client';
-import { useAuth } from './AuthContext'
+import { useUser } from "@auth0/nextjs-auth0/client"
+import { useAuth } from "./AuthContext"
 
- 
 function SignIn() {
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch()
 
-  const dispatch = useDispatch();
-  
-  const router = useRouter();
-  const { user } = useUser();
-  const { currentUser } = useAuth();
+  const router = useRouter()
+  const { user } = useUser()
+  const { currentUser } = useAuth()
 
   if (user) {
-    router.push('/admin');
+    router.push("/admin")
     // @ts-ignore
-    dispatch(logInAction(() => router.push('/admin')));
+    dispatch(logInAction(() => router.push("/admin")))
   }
 
   const { login } = useAuth()
   const [data, setData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   })
 
   const handleLogin = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       await login(data.email, data.password)
-      setError("");
-      setLoading(true);
+      setError("")
+      setLoading(true)
       // @ts-ignore
-      dispatch(logInAction(() => router.push('/admin')));
-      console.log('Succesfully Logged In!');
+      dispatch(logInAction(() => router.push("/admin")))
+      console.log("Succesfully Logged In!")
     } catch (err) {
-      console.log(err);
-      setLoading(false);
-      setError("Failed to Login!");
+      console.log(err)
+      setLoading(false)
+      setError("Failed to Login!")
     }
   }
 
-  const [form] = Form.useForm();
+  const [form] = Form.useForm()
   const [state, setState] = useState({
     checked: false,
-  });
+  })
 
-  const checkboxChange = (checked:boolean) => {
-    setState({ ...state, checked });
-  };
+  const checkboxChange = (checked: boolean) => {
+    setState({ ...state, checked })
+  }
 
   useEffect(() => {
     // Use Initial Email & Password
-    let email = document.querySelector('input[type="email"]');
-    let emailValue = (email as HTMLInputElement).value;
-    let password = document.querySelector('input[type="password"]');
-    let passwordValue = (password as HTMLInputElement).value;
-    
+    let email = document.querySelector('input[type="email"]')
+    let emailValue = (email as HTMLInputElement).value
+    let password = document.querySelector('input[type="password"]')
+    let passwordValue = (password as HTMLInputElement).value
+
     setData({
       email: emailValue,
       password: passwordValue,
     })
-  }, []);
+  }, [])
 
   return (
     <Row justify="center">
@@ -87,15 +81,15 @@ function SignIn() {
             <Form name="login" form={form} onFinish={handleLogin} layout="vertical">
               <Form.Item
                 name="email"
-                rules={[{ message: 'Please input your username or Email!', required: true }]}
+                rules={[{ message: "Please input your username or Email!", required: true }]}
                 initialValue="hexadash@dm.com"
                 label="Username or Email Address"
                 className="[&>div>div>label]:text-sm [&>div>div>label]:text-dark dark:[&>div>div>label]:text-white/60 [&>div>div>label]:font-medium"
               >
-                <Input 
+                <Input
                   type="email"
                   value={data.email}
-                  placeholder="name@example.com" 
+                  placeholder="name@example.com"
                   className="h-12 p-3 hover:border-primary focus:border-primary rounded-4"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setData({
@@ -111,7 +105,7 @@ function SignIn() {
                 label="Password"
                 className="[&>div>div>label]:text-sm [&>div>div>label]:text-dark dark:[&>div>div>label]:text-white/60 [&>div>div>label]:font-medium"
               >
-                <Input.Password 
+                <Input.Password
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setData({
                       ...data,
@@ -125,7 +119,11 @@ function SignIn() {
                 />
               </Form.Item>
               <div className="flex flex-wrap items-center justify-between gap-[10px]">
-                <CheckBox onChange={checkboxChange} checked={state.checked} className="text-xs text-light dark:text-white/60">
+                <CheckBox
+                  onChange={checkboxChange}
+                  checked={state.checked}
+                  className="text-xs text-light dark:text-white/60"
+                >
                   Keep me logged in
                 </CheckBox>
                 <Link className=" text-primary text-13" href="/forgotPassword">
@@ -139,7 +137,7 @@ function SignIn() {
                   type="primary"
                   size="large"
                 >
-                  {loading ? 'Loading...' : 'Sign In'}
+                  {loading ? "Loading..." : "Sign In"}
                 </Button>
               </Form.Item>
               {error && <p className="text-danger mb-10 text-center text-base">{error}</p>}
@@ -154,7 +152,7 @@ function SignIn() {
                   >
                     <ReactSVG
                       className="[&>div>svg>path]:fill-google-plus group-hover:[&>div>svg>path]:fill-white"
-                      src='/hexadash-nextjs/img/icon/google-plus.svg'
+                      src="/hexadash-nextjs/img/icon/google-plus.svg"
                     />
                   </Link>
                 </li>
@@ -204,7 +202,7 @@ function SignIn() {
         </div>
       </Col>
     </Row>
-  );
+  )
 }
 
-export default SignIn;
+export default SignIn
