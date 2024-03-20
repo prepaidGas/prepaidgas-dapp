@@ -54,7 +54,8 @@ function App({ Component, pageProps }: AppProps) {
     ) {
       return (
         <>
-          <Head>
+          {/* todo: remove old login layout */}
+          {/* <Head>
             <title>prepaidGas</title>
           </Head>
           <UserProvider profileUrl="/hexadash-nextjs/api/auth/me">
@@ -63,7 +64,30 @@ function App({ Component, pageProps }: AppProps) {
                 <Component {...pageProps} />
               </AuthLayout>
             </AuthContextProvider>
-          </UserProvider>
+          </UserProvider> */}
+          <Head>
+            <title>prepaidGas</title>
+          </Head>
+          <WagmiConfig config={wagmiConfig}>
+            <RainbowKitProvider
+              chains={chains}
+              appInfo={{
+                appName: "PrepaidGas",
+                disclaimer: Disclaimer,
+              }}
+              //todo: decide wether to use theme attribute cuz it wraps all page in <div data-rk> which causes css problems
+              // theme={lightTheme({ accentColor: "#f97316" })}
+            >
+              <UserProvider profileUrl="/api/auth/me">
+                <AuthContextProvider>
+                  <AdminLayout>
+                    <Component {...pageProps} />
+                    <ConnectButton />
+                  </AdminLayout>
+                </AuthContextProvider>
+              </UserProvider>
+            </RainbowKitProvider>
+          </WagmiConfig>
         </>
       )
     } else {
@@ -82,13 +106,11 @@ function App({ Component, pageProps }: AppProps) {
               //todo: decide wether to use theme attribute cuz it wraps all page in <div data-rk> which causes css problems
               // theme={lightTheme({ accentColor: "#f97316" })}
             >
-              <UserProvider profileUrl="/hexadash-nextjs/api/auth/me">
-                <AuthContextProvider>
-                  <AdminLayout>
-                    <Component {...pageProps} />
-                    <ConnectButton />
-                  </AdminLayout>
-                </AuthContextProvider>
+              <UserProvider profileUrl="/api/auth/me">
+                <AdminLayout>
+                  <Component {...pageProps} />
+                  <ConnectButton />
+                </AdminLayout>
               </UserProvider>
             </RainbowKitProvider>
           </WagmiConfig>

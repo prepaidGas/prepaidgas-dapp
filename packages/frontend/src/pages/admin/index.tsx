@@ -1,62 +1,61 @@
-import dynamic from 'next/dynamic'
-import { Row, Col, Skeleton } from 'antd';
-import { PageHeaders } from '@/components/page-headers';
+import dynamic from "next/dynamic"
+import { Row, Col, Skeleton } from "antd"
+import { PageHeaders } from "@/components/page-headers"
 
-const OverviewDataList = dynamic(() => import('@/dashboard/demo-1/OverviewDataList'), {
+const OverviewDataList = dynamic(() => import("@/dashboard/demo-1/OverviewDataList"), {
   loading: () => (
     <>
       <Skeleton active />
     </>
   ),
-});
-const SalesReport = dynamic(() => import('@/dashboard/demo-1/SalesReport'), {
+})
+const SalesReport = dynamic(() => import("@/dashboard/demo-1/SalesReport"), {
   loading: () => (
     <>
       <Skeleton active />
     </>
   ),
-});
-const SalesGrowth = dynamic(() => import('@/dashboard/demo-1/SalesGrowth'), {
+})
+const SalesGrowth = dynamic(() => import("@/dashboard/demo-1/SalesGrowth"), {
   loading: () => (
     <>
       <Skeleton active />
     </>
   ),
-});
-const SalesByLocation = dynamic(() => import('@/dashboard/demo-1/SalesByLocation'), {
+})
+const SalesByLocation = dynamic(() => import("@/dashboard/demo-1/SalesByLocation"), {
   loading: () => (
     <>
       <Skeleton active />
     </>
   ),
-});
-const TopSellingProduct = dynamic(() => import('@/dashboard/demo-1/TopSellingProducts'), {
+})
+const TopSellingProduct = dynamic(() => import("@/dashboard/demo-1/TopSellingProducts"), {
   loading: () => (
     <>
       <Skeleton active />
     </>
   ),
-});
-const BrowserState = dynamic(() => import('@/dashboard/demo-1/BrowserState'), {
+})
+const BrowserState = dynamic(() => import("@/dashboard/demo-1/BrowserState"), {
   loading: () => (
     <>
       <Skeleton active />
     </>
   ),
-});
+})
 
 const DemoOne = () => {
-
   const PageRoutes = [
     {
-      path: 'admin',
-      breadcrumbName: 'Dashboard',
+      path: "admin",
+      breadcrumbName: "Dashboard",
     },
     {
-      path: 'first',
-      breadcrumbName: 'Demo 1',
+      path: "first",
+      breadcrumbName: "Demo 1",
     },
-  ];
+  ]
   return (
     <>
       <PageHeaders
@@ -93,4 +92,3 @@ const DemoOne = () => {
 }
 
 export default DemoOne
-
