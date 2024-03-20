@@ -1,61 +1,58 @@
-import React, { useState } from 'react';
-import { Spin } from 'antd';
-import Link from 'next/link';
-import {
-  UilArrowDown,
-  UilArrowUp,
-} from '@iconscout/react-unicons';
-import { Cards } from '@/components/cards/frame/cards-frame';
-import DashboardChart from '@/components/charts/DashboardChart';
+import React, { useState } from "react"
+import { Spin } from "antd"
+import Link from "next/link"
+import { UilArrowDown, UilArrowUp } from "@iconscout/react-unicons"
+import { Cards } from "@/components/cards/frame/cards-frame"
+import DashboardChart from "@/components/charts/DashboardChart"
 
-import chartData from '../../demoData/dashboardChartContent.json';
+import chartData from "../../demoData/dashboardChartContent.json"
 
 const SalesGrowth = React.memo(() => {
-  const salesGrowthData:any = chartData.salesGrowth;
+  const salesGrowthData: any = chartData.salesGrowth
 
   const [state, setState] = useState({
-    sellingTab: 'today',
-  });
+    sellingTab: "today",
+  })
 
   /* State destructuring */
-  const {sellingTab}: {sellingTab: string} = state;
+  const { sellingTab }: { sellingTab: string } = state
 
-  const handleChangePeriod = (value:string, event:React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    event.preventDefault();
+  const handleChangePeriod = (value: string, event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    event.preventDefault()
     setState({
       ...state,
       sellingTab: value,
-    });
-  };
+    })
+  }
 
   const salesGrowthDataset = [
     {
       data: salesGrowthData[sellingTab].orders,
-      backgroundColor: '#C097E9',
-      hoverBackgroundColor: '#8231D3',
-      label: 'Orders',
-      average: '50.8',
+      backgroundColor: "#C097E9",
+      hoverBackgroundColor: "#8231D3",
+      label: "Orders",
+      average: "50.8",
       maxBarThickness: 10,
       barThickness: 12,
       percent: 49,
     },
     {
       data: salesGrowthData[sellingTab].sales,
-      backgroundColor: '#7FD4FF',
-      hoverBackgroundColor: '#00AAFF',
-      label: 'Sales',
-      average: '$28k',
+      backgroundColor: "#7FD4FF",
+      hoverBackgroundColor: "#00AAFF",
+      label: "Sales",
+      average: "$28k",
       maxBarThickness: 10,
       barThickness: 12,
       percent: 60,
     },
-  ];
+  ]
 
   interface Tooltip {
-    formattedValue: number;
+    formattedValue: number
     dataset: {
-      label: string;
-      hoverBackgroundColor: string;
+      label: string
+      hoverBackgroundColor: string
     }
   }
 
@@ -67,11 +64,11 @@ const SalesGrowth = React.memo(() => {
             <li>
               <Link
                 className={
-                  sellingTab === 'today'
-                    ? 'inline-flex items-center bg-primary-transparent dark:bg-white/10 px-3 h-8 text-primary dark:text-white/[.87] text-13 font-medium rounded-md'
-                    : 'inline-flex items-center px-3 h-8 text-light dark:text-white/60 hover:text-primary text-13'
+                  sellingTab === "today"
+                    ? "inline-flex items-center bg-primary-transparent dark:bg-white/10 px-3 h-8 text-primary dark:text-white/[.87] text-13 font-medium rounded-md"
+                    : "inline-flex items-center px-3 h-8 text-light dark:text-white/60 hover:text-primary text-13"
                 }
-                onClick={(e) => handleChangePeriod('today', e)}
+                onClick={(e) => handleChangePeriod("today", e)}
                 href="#"
               >
                 Today
@@ -80,11 +77,11 @@ const SalesGrowth = React.memo(() => {
             <li>
               <Link
                 className={
-                  sellingTab === 'week'
-                    ? 'inline-flex items-center bg-primary-transparent dark:bg-white/10 px-3 h-8 text-primary dark:text-white/[.87] text-13 font-medium rounded-md'
-                    : 'inline-flex items-center px-3 h-8 text-light dark:text-white/60 dark:hover:text-white hover:text-primary text-13 font-medium rounded-md'
+                  sellingTab === "week"
+                    ? "inline-flex items-center bg-primary-transparent dark:bg-white/10 px-3 h-8 text-primary dark:text-white/[.87] text-13 font-medium rounded-md"
+                    : "inline-flex items-center px-3 h-8 text-light dark:text-white/60 dark:hover:text-white hover:text-primary text-13 font-medium rounded-md"
                 }
-                onClick={(e) => handleChangePeriod('week', e)}
+                onClick={(e) => handleChangePeriod("week", e)}
                 href="#"
               >
                 Week
@@ -93,11 +90,11 @@ const SalesGrowth = React.memo(() => {
             <li>
               <Link
                 className={
-                  sellingTab === 'month'
-                    ? 'inline-flex items-center bg-primary-transparent dark:bg-white/10 px-3 h-8 text-primary dark:text-white/[.87] text-13 font-medium rounded-md'
-                    : 'inline-flex items-center px-3 h-8 text-light dark:text-white/60 dark:hover:text-white hover:text-primary text-13 font-medium rounded-md'
+                  sellingTab === "month"
+                    ? "inline-flex items-center bg-primary-transparent dark:bg-white/10 px-3 h-8 text-primary dark:text-white/[.87] text-13 font-medium rounded-md"
+                    : "inline-flex items-center px-3 h-8 text-light dark:text-white/60 dark:hover:text-white hover:text-primary text-13 font-medium rounded-md"
                 }
-                onClick={(e) => handleChangePeriod('month', e)}
+                onClick={(e) => handleChangePeriod("month", e)}
                 href="#"
               >
                 Month
@@ -149,26 +146,26 @@ const SalesGrowth = React.memo(() => {
                 }}
                 tooltip={{
                   callbacks: {
-                    label(t:Tooltip) {
-                      const dstLabel = t.dataset.label;
-                      const { formattedValue } = t;
-                      return `  ${formattedValue} ${dstLabel}`;
+                    label(t: Tooltip) {
+                      const dstLabel = t.dataset.label
+                      const { formattedValue } = t
+                      return `  ${formattedValue} ${dstLabel}`
                     },
-                    labelColor(t:Tooltip) {
+                    labelColor(t: Tooltip) {
                       return {
                         backgroundColor: t.dataset.hoverBackgroundColor,
-                        borderColor: 'transparent',
-                      };
+                        borderColor: "transparent",
+                      }
                     },
                   },
                 }}
                 scales={{
                   y: {
-                    border: { 
+                    border: {
                       dash: [4, 4],
-                     },
+                    },
                     grid: {
-                      color: '#485e9029',
+                      color: "#485e9029",
                       tickLength: 0,
                       drawBorder: false,
                     },
@@ -181,12 +178,12 @@ const SalesGrowth = React.memo(() => {
                         family: "'Jost', sans-serif",
                       },
                       padding: 10,
-                      color: '#747474',
+                      color: "#747474",
                     },
                   },
 
                   x: {
-                    border:{
+                    border: {
                       display: false,
                     },
                     grid: {
@@ -198,19 +195,19 @@ const SalesGrowth = React.memo(() => {
                         size: 12,
                         family: "'Jost', sans-serif",
                       },
-                      color: '#747474',
+                      color: "#747474",
                       min: 0,
                     },
                   },
                 }}
-                height={window.innerWidth < 1399 ? (window.innerWidth < 575 ? 300 : 100) : 188}
+                height={1399}
               />
             </div>
           </>
         )}
       </Cards>
     </div>
-  );
-});
+  )
+})
 
-export default SalesGrowth;
+export default SalesGrowth
