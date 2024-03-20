@@ -10,16 +10,12 @@ import AuthLayout from "./authLayout"
 import { wrapper, store } from "../redux/store"
 import "../i18n/config"
 
-import { AuthContextProvider, useAuth } from "../authentication/AuthContext"
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit"
 import { WagmiConfig, configureChains, createConfig } from "wagmi"
 import { hardhat, mainnet } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
 import { ConnectButton, DisclaimerComponent, getDefaultWallets, lightTheme } from "@rainbow-me/rainbowkit"
 import Head from "next/head"
-import { useEffect } from "react"
-
-import { logInAction } from "@/redux/authentication/actionCreator"
 
 const { chains, publicClient } = configureChains([mainnet, hardhat], [publicProvider()])
 
@@ -46,21 +42,6 @@ const Disclaimer: DisclaimerComponent = ({ Text, Link }) => (
 
 function App({ Component, pageProps }: AppProps) {
   const router = useRouter()
-  const { pathname } = router
-
-  const { login } = useAuth()
-  const dispatch = useDispatch()
-
-  useEffect(() => {
-    const falseLogin = async () => {
-      await login("blank@blank.com", "123456")
-      // @ts-ignore
-      dispatch(logInAction(() => router.push("/admin")))
-      console.log("Succesfully Logged In!")
-    }
-    falseLogin()
-    router.push("/admin")
-  }, [])
 
   const renderLayout = () => {
     return (
@@ -78,14 +59,10 @@ function App({ Component, pageProps }: AppProps) {
             //todo: decide wether to use theme attribute cuz it wraps all page in <div data-rk> which causes css problems
             // theme={lightTheme({ accentColor: "#f97316" })}
           >
-            <UserProvider>
-              <AuthContextProvider>
-                <AdminLayout>
-                  <Component {...pageProps} />
-                  <ConnectButton />
-                </AdminLayout>
-              </AuthContextProvider>
-            </UserProvider>
+            <AdminLayout>
+              <Component {...pageProps} />
+              <ConnectButton />
+            </AdminLayout>
           </RainbowKitProvider>
         </WagmiConfig>
       </>
