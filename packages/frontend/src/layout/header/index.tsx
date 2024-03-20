@@ -4,8 +4,7 @@ import { useState, useEffect } from "react"
 import { UilEllipsisV } from "@iconscout/react-unicons"
 import Customizer from "../customizer"
 import TopMenu from "@/layout/TopMenu"
-import Search from "@/layout/auth-info/Search"
-import AuthInfo from "@/layout/auth-info/info"
+
 import { ReactSVG } from "react-svg"
 
 import { Col, Layout, Row } from "antd"
@@ -111,15 +110,11 @@ const HeaderTop = () => {
               {isBrowser && window.innerWidth > 1200 && topMenu ? (
                 <div className="flex top-right-wrap">
                   <Customizer rtl={rtl} />
-                  <AuthInfo rtl={rtl} />
                 </div>
-              ) : (
-                <AuthInfo rtl={rtl} />
-              )}
+              ) : null}
             </div>
           </div>
           <div className="hidden md:flex items-center ltr:pr-[25px] rtl:pl-[25px] ltr:ssm:pr-[10px] rtl:ssm:pl-[10px] sm:gap-x-[10px]">
-            <Search />
             <Link className="inline-flex text-light dark:text-white/60" onClick={onShowHide} href="#">
               <UilEllipsisV className="w-[18px] h-[18px]" />
             </Link>
@@ -132,9 +127,7 @@ const HeaderTop = () => {
             className={`w-full fixed top-0 ltr:left-0 rtl:right-0 py-2.5 md:px-[15px] md:py-2.5 shadow-[0px_2px_30px_#9299b810] [&>.hexadash-nav-actions__searchbar]:hidden dark:bg-[#1b1e2b] bg-white ${
               hide ? "mt-0 opacity-0 -z-10" : "mt-[72px] opacity-100 z-10"
             }`}
-          >
-            <AuthInfo rtl={rtl} />
-          </div>
+          ></div>
         </Col>
       </Row>
     </>
