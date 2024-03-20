@@ -10,13 +10,16 @@ import AuthLayout from "./authLayout"
 import { wrapper, store } from "../redux/store"
 import "../i18n/config"
 
-import { AuthContextProvider } from "../authentication/AuthContext"
+import { AuthContextProvider, useAuth } from "../authentication/AuthContext"
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit"
 import { WagmiConfig, configureChains, createConfig } from "wagmi"
 import { hardhat, mainnet } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
 import { ConnectButton, DisclaimerComponent, getDefaultWallets, lightTheme } from "@rainbow-me/rainbowkit"
 import Head from "next/head"
+import { useEffect } from "react"
+
+const { login } = useAuth()
 
 const { chains, publicClient } = configureChains([mainnet, hardhat], [publicProvider()])
 
@@ -44,6 +47,15 @@ const Disclaimer: DisclaimerComponent = ({ Text, Link }) => (
 function App({ Component, pageProps }: AppProps) {
   const router = useRouter()
   const { pathname } = router
+
+  useEffect(() => {
+    // await login("blank@blank.com", "123456")
+    // // @ts-ignore
+    // dispatch(logInAction(() => router.push("/admin")))
+    // console.log("Succesfully Logged In!")
+
+    router.push("/admin")
+  }, [])
 
   const renderLayout = () => {
     return (
