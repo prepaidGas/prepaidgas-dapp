@@ -1,24 +1,24 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { ReactSVG } from 'react-svg';
-import CountUp from 'react-countup';
+import { useEffect, useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
+import { ReactSVG } from "react-svg"
+import CountUp from "react-countup"
 
-function OverviewCardMesh( data:any, circleIcon:string ) {
-  const [didViewCountUp, setDidViewCountUp] = useState(false);
+function OverviewCardMesh(data: any, circleIcon: string) {
+  const [didViewCountUp, setDidViewCountUp] = useState(false)
 
-  const router = useRouter();
-  const { pathname } = router;
-  
+  const router = useRouter()
+  const pathname = usePathname()
+
   useEffect(() => {
-    setDidViewCountUp(true);
-  }, [pathname]);
+    setDidViewCountUp(true)
+  }, [pathname])
 
-  const { type, icon, label, total, status, statusRate, suffix, prefix, decimel } = data;
-  const totalNumber = Number(total);
+  const { type, icon, label, total, status, statusRate, suffix, prefix, decimel } = data
+  const totalNumber = Number(total)
   return (
     <div
       className={`relative p-[25px] 3xl:p-5 after:absolute after:top-1/2 after:-translate-y-1/2 ltr:after:-right-[60px] ltr:3xl:after:right-0 rtl:after:-left-[60px] rtl:3xl:after:left-0 ltr:sm:after:left-1/2 sm:after:-translate-x-1/2 sm:after:top-full after:w-[1px] sm:after:w-[70%] after:h-[70px] sm:after:h-[1px] after:bg-regular dark:after:bg-white/10 last:after:hidden ${
-        circleIcon ? 'hexadash-icon-circle' : ''
+        circleIcon ? "hexadash-icon-circle" : ""
       }`}
     >
       <div>
@@ -50,20 +50,20 @@ function OverviewCardMesh( data:any, circleIcon:string ) {
             </div>
             <span
               className={`flex items-center mt-1.5 text-sm font-medium ${
-                status === 'growth' ? 'text-success' : 'text-danger'
+                status === "growth" ? "text-success" : "text-danger"
               }`}
             >
-              {status === 'growth' ? 'UilUp' : 'UilDown'} {statusRate}%
+              {status === "growth" ? "UilUp" : "UilDown"} {statusRate}%
             </span>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
 OverviewCardMesh.propTypes = {
   data: {},
   circleIcon: false,
-};
+}
 
-export default OverviewCardMesh;
+export default OverviewCardMesh

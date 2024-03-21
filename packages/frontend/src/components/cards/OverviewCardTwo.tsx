@@ -1,39 +1,43 @@
-import { useEffect, useState } from 'react';
-import CountUp from 'react-countup';
-import { ReactSVG } from 'react-svg';
-import { useRouter } from 'next/router';
-import {
-  UilArrowDown,
-  UilArrowUp,
-} from '@iconscout/react-unicons';
+import { useEffect, useState } from "react"
+import CountUp from "react-countup"
+import { ReactSVG } from "react-svg"
+import { useRouter } from "next/navigation"
+import { UilArrowDown, UilArrowUp } from "@iconscout/react-unicons"
 
-function OverviewCardTwo( data:any, contentFirst?:boolean, bottomStatus?:boolean, halfCircleIcon?:boolean, className?:string ) {
-  const [didViewCountUp, setDidViewCountUp] = useState(false);
-  
-  const router = useRouter();
+function OverviewCardTwo(
+  data: any,
+  contentFirst?: boolean,
+  bottomStatus?: boolean,
+  halfCircleIcon?: boolean,
+  className?: string,
+) {
+  const [didViewCountUp, setDidViewCountUp] = useState(false)
+
+  const router = useRouter()
   useEffect(() => {
-    setDidViewCountUp(true);
-  }, [router]);
+    setDidViewCountUp(true)
+  }, [router])
 
-  contentFirst = data.contentFirst;
-  bottomStatus = data.bottomStatus;
-  halfCircleIcon = data.halfCircleIcon;
+  contentFirst = data.contentFirst
+  bottomStatus = data.bottomStatus
+  halfCircleIcon = data.halfCircleIcon
 
-  const { type, icon, label, total, status, statusRate, dataPeriod, suffix, prefix, decimels, statusColor, separator } = data.data;
-  const totalNumber = Number(total);
+  const { type, icon, label, total, status, statusRate, dataPeriod, suffix, prefix, decimels, statusColor, separator } =
+    data.data
+  const totalNumber = Number(total)
   return (
     <div className={className}>
       <div
         className={
           halfCircleIcon
-            ? 'bg-white dark:bg-white/10 py-[25px] px-[25px] pb-[12px] overflow-hidden rounded-10 relative text-[15px] text-theme-gray dak:text-white/60'
-            : 'bg-white dark:bg-white/10 py-[25px] px-[25px] pb-[12px] overflow-hidden rounded-10 relative text-[15px] text-theme-gray dak:text-white/60'
+            ? "bg-white dark:bg-white/10 py-[25px] px-[25px] pb-[12px] overflow-hidden rounded-10 relative text-[15px] text-theme-gray dak:text-white/60"
+            : "bg-white dark:bg-white/10 py-[25px] px-[25px] pb-[12px] overflow-hidden rounded-10 relative text-[15px] text-theme-gray dak:text-white/60"
         }
       >
         <>
           <div className="flex justify-between">
             <div>
-              <div className={contentFirst ? '' : 'text-end'}>
+              <div className={contentFirst ? "" : "text-end"}>
                 {halfCircleIcon ? (
                   <>
                     <span className="text-sm font-normal text-body dark:text-white/60 text-[15px] ">{label}</span>
@@ -72,14 +76,14 @@ function OverviewCardTwo( data:any, contentFirst?:boolean, bottomStatus?:boolean
                 <div>
                   <span className="inline-flex items-center w-full rounded-lg h-11">
                     <span className={`flex items-center text-sm font-medium text-${statusColor}`}>
-                      {status === 'growth' ? <UilArrowUp /> : <UilArrowDown />}
+                      {status === "growth" ? <UilArrowUp /> : <UilArrowDown />}
                       {statusRate}%
                     </span>
                     <span className="ltr:ml-2.5 rtl:mr-2.5 text-light dark:text-white/60 text-sm">{dataPeriod}</span>
                   </span>
                 </div>
               ) : (
-                ''
+                ""
               )}
             </div>
             <div
@@ -87,9 +91,7 @@ function OverviewCardTwo( data:any, contentFirst?:boolean, bottomStatus?:boolean
             >
               <div
                 className={
-                  contentFirst
-                    ? `flex items-center hexadash-overview-card__top--icon justify-center text-${type}`
-                    : ''
+                  contentFirst ? `flex items-center hexadash-overview-card__top--icon justify-center text-${type}` : ""
                 }
               >
                 <ReactSVG
@@ -102,7 +104,7 @@ function OverviewCardTwo( data:any, contentFirst?:boolean, bottomStatus?:boolean
         </>
       </div>
     </div>
-  );
+  )
 }
 
-export default OverviewCardTwo;
+export default OverviewCardTwo
