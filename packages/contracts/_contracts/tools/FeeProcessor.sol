@@ -20,7 +20,7 @@ abstract contract FeeProcessor is Ownable2Step, Distributor {
   event UpdateProtocolFee(Fee fee, uint256 old, uint256 current);
 
   function setFee(Fee id, uint256 value) public onlyOwner {
-    if (value > Const.MAX_FEE) revert Error.ExceedsMax(value, Const.MAX_FEE);
+    if (value > Const.MAX_FEE) revert Error.OverflowValue(value, Const.MAX_FEE);
 
     uint256 old = _fee[id];
     _fee[id] = value;
@@ -38,7 +38,7 @@ abstract contract FeeProcessor is Ownable2Step, Distributor {
     if (length > amounts.length) length = amounts.length;
 
     for (uint256 i = 0; i < length; i++) {
-      _claim(Const.TREASURY, receivers[i], tokens[i], amounts[i]);
+      _claim(receivers[i], Const.TREASURY, tokens[i], amounts[i]);
     }
   }
 

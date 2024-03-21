@@ -19,14 +19,14 @@ contract Distributor {
     _claim(msg.sender, msg.sender, token, amount);
   }
 
-  function claimable(address holder, address token) external view returns (uint256) {
+  function claimable(address holder, address token) public view returns (uint256) {
     return _balance[holder][token];
   }
 
-  function _claim(address holder, address receiver, address token, uint256 amount) internal {
+  function _claim(address receiver, address holder, address token, uint256 amount) internal {
     if (amount == 0) return;
 
-    uint256 available = _balance[holder][token];
+    uint256 available = claimable(holder, token);
     if (amount > available) revert Error.BalanceExhausted(amount, available);
     _balance[holder][token] -= amount;
 
@@ -41,7 +41,7 @@ contract Distributor {
     emit Distribute(holder, token, amount);
   }
 
-  function _acceptIncoming(address from, address token, uint256 amount, uint256 expected) internal {
+  function _acceptIncoming(address token, address from, uint256 amount, uint256 expected) internal {
     uint256 pre = IERC20(token).balanceOf(address(this));
     IERC20(token).safeTransferFrom(from, address(this), amount);
     uint256 incoming = IERC20(token).balanceOf(address(this)) - pre;
