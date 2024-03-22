@@ -2,6 +2,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useState, useEffect } from "react"
 import { Buttons } from "./buttons"
 import { UilWallet } from "@iconscout/react-unicons"
+import { UilUser } from "@iconscout/react-unicons"
 
 export default function CustomConnectBttn({ isActive = true, collapsed }: { isActive?: boolean; collapsed: boolean }) {
   return (
@@ -79,8 +80,14 @@ export default function CustomConnectBttn({ isActive = true, collapsed }: { isAc
                     onClick={openAccountModal}
                     className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] w-full gap-4`}
                   >
-                    {account.displayName}
-                    {account.displayBalance ? ` (${account.displayBalance})` : ""}
+                    {collapsed ? (
+                      <UilUser />
+                    ) : (
+                      <p>
+                        {account.displayName}
+                        {account.displayBalance ? ` (${account.displayBalance})` : ""}
+                      </p>
+                    )}
                   </Buttons>
                 </div>
               )
