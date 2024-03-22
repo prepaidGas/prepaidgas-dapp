@@ -1,8 +1,9 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useState, useEffect } from "react"
 import { Buttons } from "./buttons"
+import { UilWallet } from "@iconscout/react-unicons"
 
-export default function CustomConnectBttn({ isActive = false }) {
+export default function CustomConnectBttn({ isActive = true, collapsed }: { isActive?: boolean; collapsed: boolean }) {
   return (
     <ConnectButton.Custom>
       {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
@@ -14,6 +15,7 @@ export default function CustomConnectBttn({ isActive = false }) {
 
         return (
           <div
+            className={`${collapsed ? "pl-[15px] pr-[20px]" : "pl-[15px] pr-[20px] "} box-border`}
             {...(!ready && {
               "aria-hidden": true,
               style: {
@@ -32,9 +34,9 @@ export default function CustomConnectBttn({ isActive = false }) {
                   <Buttons
                     disabled={!isActive}
                     onClick={openConnectModal}
-                    className="bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
+                    className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px]   w-full `}
                   >
-                    Connect Wallet
+                    {collapsed ? <UilWallet size="16" /> : "Connect Wallet"}
                   </Buttons>
                 )
               }
@@ -48,31 +50,38 @@ export default function CustomConnectBttn({ isActive = false }) {
               }
 
               return (
-                <div style={{ display: "flex", gap: 12 }}>
-                  <button onClick={openChainModal} style={{ display: "flex", alignItems: "center" }} type="button">
+                <div className="flex flex-col gap-4">
+                  <Buttons
+                    disabled={!isActive}
+                    onClick={openChainModal}
+                    className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] w-full gap-1`}
+                  >
                     {chain.hasIcon && (
                       <div
                         style={{
                           background: chain.iconBackground,
-                          width: 12,
-                          height: 12,
+                          width: 20,
+                          height: 20,
                           borderRadius: 999,
                           overflow: "hidden",
-                          marginRight: 4,
                         }}
                       >
                         {chain.iconUrl && (
-                          <img alt={chain.name ?? "Chain icon"} src={chain.iconUrl} style={{ width: 12, height: 12 }} />
+                          <img alt={chain.name ?? "Chain icon"} src={chain.iconUrl} style={{ width: 20, height: 20 }} />
                         )}
                       </div>
                     )}
-                    {chain.name}
-                  </button>
+                    {!collapsed && <span className="my-auto">{chain.name}</span>}
+                  </Buttons>
 
-                  <button onClick={openAccountModal} type="button">
+                  <Buttons
+                    disabled={!isActive}
+                    onClick={openAccountModal}
+                    className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] w-full gap-4`}
+                  >
                     {account.displayName}
                     {account.displayBalance ? ` (${account.displayBalance})` : ""}
-                  </button>
+                  </Buttons>
                 </div>
               )
             })()}

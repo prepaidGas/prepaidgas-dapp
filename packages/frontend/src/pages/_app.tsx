@@ -61,7 +61,6 @@ function App({ Component, pageProps }: AppProps) {
           >
             <AdminLayout>
               <Component {...pageProps} />
-              <ConnectButton />
             </AdminLayout>
           </RainbowKitProvider>
         </WagmiConfig>
