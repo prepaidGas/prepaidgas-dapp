@@ -25,7 +25,6 @@ describe("VerifierMessage", function () {
       const from = "0x376a2a023a105bc2e19ce19ad275b9bbbcb23e1a",
         nonce = 70,
         gasOrder = 55,
-        onBehalf = "0x95222290dd7278aa3ddd389cc1e1d165cc4bafe5",
         deadline = 1400000000,
         to = "0xfb071837728455c581f370704b225ac9eabdfa4a",
         gas = 2222222222,
@@ -33,8 +32,8 @@ describe("VerifierMessage", function () {
         data = "0xbe08ee9e57050c",
         signer = accounts[3]
 
-      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data]
-      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data }
+      const messageTuple = [from, nonce, gasOrder, deadline, to, gas, tips, data]
+      const messageStruct = { from, nonce, gasOrder, deadline, to, gas, tips, data }
 
       const messageHash = await MessageContract.messageHash(messageTuple)
       const signedMessage = await signer.signTypedData(
@@ -52,7 +51,6 @@ describe("VerifierMessage", function () {
       const from = "0x376a2a023a105bc2e19ce19ad275b9bbbcb23e1a",
         nonce = 0,
         gasOrder = 0,
-        onBehalf = "0x00222290dd7278aa3ddd389cc1e1d165cc4bafe5",
         deadline = 0,
         to = "0xfb071837728455c581f370704b225ac9eabdfa4a",
         gas = 0,
@@ -60,8 +58,8 @@ describe("VerifierMessage", function () {
         data = "0x",
         signer = accounts[3]
 
-      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data]
-      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data }
+      const messageTuple = [from, nonce, gasOrder, deadline, to, gas, tips, data]
+      const messageStruct = { from, nonce, gasOrder, deadline, to, gas, tips, data }
 
       const messageHash = await MessageContract.messageHash(messageTuple)
       const signedMessage = await signer.signTypedData(
@@ -79,7 +77,6 @@ describe("VerifierMessage", function () {
         const from = randomBytes(20),
           nonce = randomNumber(100),
           gasOrder = randomNumber(100),
-          onBehalf = randomBytes(20),
           deadline = randomNumber(1000000),
           to = randomBytes(20),
           gas = randomNumber(10000),
@@ -87,8 +84,8 @@ describe("VerifierMessage", function () {
           data = randomBytes(randomNumber(200)),
           signer = accounts[randomNumber(7)]
 
-        const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data]
-        const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data }
+        const messageTuple = [from, nonce, gasOrder, deadline, to, gas, tips, data]
+        const messageStruct = { from, nonce, gasOrder, deadline, to, gas, tips, data }
 
         const messageHash = await MessageContract.messageHash(messageTuple)
         const signedMessage = await signer.signTypedData(
@@ -107,7 +104,6 @@ describe("VerifierMessage", function () {
         const from = randomBytes(20),
           nonce = randomNumber(100),
           gasOrder = randomNumber(100),
-          onBehalf = randomBytes(20),
           deadline = randomNumber(1000000),
           to = randomBytes(20),
           gas = randomNumber(10000),
@@ -115,8 +111,8 @@ describe("VerifierMessage", function () {
           data = randomBytes(randomNumber(199) + 1),
           signer = accounts[randomNumber(7)]
 
-        const messageTupleInitial = [from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data]
-        const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data }
+        const messageTupleInitial = [from, nonce, gasOrder, deadline, to, gas, tips, data]
+        const messageStruct = { from, nonce, gasOrder, deadline, to, gas, tips, data }
 
         for (let i = 0; i < messageTupleInitial.length; i++) {
           const field = messageTupleInitial[i].toString()

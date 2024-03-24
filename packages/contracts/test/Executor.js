@@ -144,15 +144,14 @@ describe("Executor", function () {
         from = signer.address,
         nonce = 0,
         gasOrder = 0,
-        onBehalf = "0x00222290dd7278aa3ddd389cc1e1d165cc4bafe5",
         deadline = 0,
         to = "0xfb071837728455c581f370704b225ac9eabdfa4a",
         gas = 1000,
         tips = 0,
         data = "0xbe08ee9e57050c"
 
-      const messageTuple = [from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data]
-      const messageStruct = { from, nonce, gasOrder, onBehalf, deadline, to, gas, tips, data }
+      const messageTuple = [from, nonce, gasOrder, deadline, to, gas, tips, data]
+      const messageStruct = { from, nonce, gasOrder, deadline, to, gas, tips, data }
 
       const signedMessage = await accounts[8].signTypedData(
         domain(PROJECT_NAME, PROJECT_VERSION, CHAIN_ID, GasOrderContract),

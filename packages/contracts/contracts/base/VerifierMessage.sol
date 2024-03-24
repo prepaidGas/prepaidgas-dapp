@@ -9,7 +9,6 @@ bytes32 constant MESSAGE_TYPE_HASH = keccak256(
   "address from,"
   "uint256 nonce,"
   "uint256 gasOrder,"
-  "address onBehalf,"
   "uint256 deadline,"
   "address to,"
   "uint256 gas,"
@@ -22,7 +21,6 @@ struct Message {
   address from;
   uint256 nonce;
   uint256 gasOrder;
-  address onBehalf;
   uint256 deadline;
   address to;
   uint256 gas;
@@ -42,7 +40,6 @@ abstract contract HashMessage {
             message.from,
             message.nonce,
             message.gasOrder,
-            message.onBehalf,
             message.deadline,
             message.to,
             message.gas,

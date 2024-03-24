@@ -13,7 +13,7 @@ async function listener() {
 
   // TODO: Get from file
   const message_type =
-    "tuple(address from, uint256 nonce, uint256 gasOrder, address onBehalf, uint256 deadline, address to, uint256 gas, uint256 tips, bytes data)"
+    "tuple(address from, uint256 nonce, uint256 gasOrder, uint256 deadline, address to, uint256 gas, uint256 tips, bytes data)"
   let abi = [
     "event OrderCreate(uint256 indexed id, uint256 executionWindow)",
     "event TransactionAdded(" + message_type + " message, bytes indexed signature)",
