@@ -112,6 +112,7 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
   }
 
   function _update(address holder, address receiver, uint256[] memory ids, uint256[] memory values) internal override {
+    //require(receiver == address(0) || holder == address);
     super._update(holder, receiver, ids, values);
 
     /// @dev ids may contain duplications => pre-validation requires a lot of memory => post-validation is used

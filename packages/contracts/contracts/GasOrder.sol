@@ -242,8 +242,6 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept, ReentrancyGuard {
       address unlockToken = guarantee(id).token;
       _distribute(fulfiller, unlockToken, _takeFee(Fee.Guarantee, unlockToken, unlockAmount));
     }
-
-    _unlockGasTokens(message);
   }
 
   /**
@@ -302,10 +300,13 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept, ReentrancyGuard {
    * After execution the registered executor will be rewarded.
    */
   function execute(Message calldata message, bytes calldata signature) external nonReentrant {
+
     uint256 gasSpent = _execute(message, signature, false);
+
 
     /// @dev address(0) means registered executor should be rewarded
     _reportExecution(message, address(0), gasSpent, INFR_GAS_EXECUTE);
+    nonce[message.from][message.nonce] = NonceStatus.EXECUTED;
   }
 
   /**
@@ -318,15 +319,19 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept, ReentrancyGuard {
    * After execution the liquidator will be rewarded.
    */
   function liquidate(Message calldata message, bytes calldata signature) external nonReentrant {
+
     uint256 gasSpent = _execute(message, signature, true);
     //@todo recheck the corectness of these operations
     uint256 infrastructureGas = INFR_GAS_LIQUIDATE + INFR_GAS_RECOVER_SIGNER;
     _reportExecution(message, msg.sender, gasSpent, infrastructureGas);
+    nonce[message.from][message.nonce] = NonceStatus.EXECUTED;
   }
 
   // @todo check if reentrancy protection is needed
   function liquidateWithoutExecution(Message calldata message) external nonReentrant {
+
     _reportExecution(message, message.from, 0, 0);
+    nonce[message.from][message.nonce] = NonceStatus.EXECUTED;
   }
 
   /**
