@@ -21,12 +21,6 @@ abstract contract ERC1155ish is ERC1155Supply, Ownable2Step {
     _mint(holder, id, amount, "Mint GasOrder Tokens");
   }
 
-  function _utilizeAllowance(uint256 id, address spender, uint256 amount) internal {
-    uint256 balance = balanceOf(spender, id);
-    if (balance < amount) revert Error.BalanceExhausted(amount, balance);
-    _burn(spender, id, amount);
-  }
-
   function _update(address holder, address receiver, uint256[] memory ids, uint256[] memory values) internal override {
     require(receiver == address(0) || holder == address(0));
     super._update(holder, receiver, ids, values);
