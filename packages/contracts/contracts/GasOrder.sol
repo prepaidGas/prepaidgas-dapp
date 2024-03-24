@@ -145,6 +145,7 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept, ReentrancyGuard {
    *
    * This function decreses the amout of Gas tokens in the order and repays the tokens ot the holder.
    */
+   // @todo rework the logic to get rid of this function
   function retrieveGasCost(uint256 id, uint256 amount) external {
     _burn(msg.sender, id, amount);
 
@@ -240,25 +241,6 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept, ReentrancyGuard {
       address unlockToken = guarantee(id).token;
       _distribute(fulfiller, unlockToken, _takeFee(Fee.Guarantee, unlockToken, unlockAmount));
     }
-  }
-
-  /**
-   * @dev Order management transfer
-   *
-   * @param _orderId The ID of the order which management should be transfered.
-   * @param _newManager The addres to which order is trying to be transfered.
-   *
-   */
-  function transferOrderManagement(uint256 _orderId, address _newManager) external {
-    address oldManager = order(_orderId).manager;
-    if (msg.sender != oldManager) revert Unauthorized(msg.sender, oldManager);
-    // @dev disallow setting manager address to zero, zero manager address is used to detect that the order is not created
-    // if it is needed to set empty manager, it is recomended to set another dead address
-    if (oldManager == _newManager || _newManager == address(0)) revert IncorrectAddressArgument(_newManager);
-
-    _order[_orderId].manager = _newManager;
-
-    emit OrderManagerChanged(_orderId, oldManager, _newManager);
   }
 
   // @notice getter functions implementations
