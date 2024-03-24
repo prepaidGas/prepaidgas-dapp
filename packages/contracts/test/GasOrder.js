@@ -111,9 +111,8 @@ describe("GasOrder", function () {
       let withdrawableAmount = (INITIAL_EXECUTOR_REWARD * (10000 - SYSTEM_FEE)) / 10000
       await GasOrderContract.connect(accounts[0]).claim(TokenContract.target, withdrawableAmount)
 
-      await GasOrderContract.connect(admin).safeTransferFrom(admin.address, accounts[0].address, 0, GAS_AMOUNT, "0x")
-
-      const txToBeReverted = GasOrderContract.connect(admin).retrieveGasCost(admin.address, 0, GAS_AMOUNT)
+      const txToBeReverted = GasOrderContract.connect(admin).retrieveGasCost(0, GAS_AMOUNT * GAS_AMOUNT)
+      // @todo replace `GAS_AMOUNT * GAS_AMOUNT` with unreasonable big num
 
       await expect(txToBeReverted).to.be.reverted
     })
@@ -219,7 +218,7 @@ describe("GasOrder", function () {
       await createOrder(accounts[2], GasOrderContract, TokenContract)
       await createOrder(accounts[2], GasOrderContract, TokenContract)
 
-      const totalUserGasHoldings = await GasOrderContract.getTotalBalance(accounts[1], [])
+      const totalUserGasHoldings = await GasOrderContract.getTotalBalance(accounts[1])
 
       expect(totalUserGasHoldings).to.be.eq(GAS_AMOUNT * 2)
     })

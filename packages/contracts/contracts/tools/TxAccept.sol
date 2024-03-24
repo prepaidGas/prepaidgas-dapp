@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../base/GasOrderGetters.sol";
 import {VerifierMessage, Message} from "../base/VerifierMessage.sol";
 import {OrderStatus} from "../interfaces/IGasOrder.sol";
-import "hardhat/console.sol";
+
 abstract contract TxAccept is VerifierMessage, GasOrderGetters {
   using ECDSA for bytes32;
   enum NonceStatus {NONE, REQUESTED, EXECUTED}
@@ -36,13 +36,8 @@ abstract contract TxAccept is VerifierMessage, GasOrderGetters {
     nonce[message.from][message.nonce] = NonceStatus.REQUESTED;
 
     // @todo add validation for the Gas amount, it should be bigger than infrastructure call gas costs
-    uint256 balance = usable(message.onBehalf, message.gasOrder, message.from);
+    uint256 balance = balanceOf(message.from, message.gasOrder);
     if (message.gas >= balance) revert GasLimitExceedBalance(message.gas, balance);
-
-
-    // @todo add validation and throw error on revert
-    // @dev the recipient should be able to accept such tokens
-    _safeTransferFrom(message.from, msg.sender, message.gasOrder, message.tips, "");
 
     emit TransactionAdded(message, signature);
   }
@@ -56,12 +51,7 @@ abstract contract TxAccept is VerifierMessage, GasOrderGetters {
       message.deadline - executionWindow > block.timestamp &&
       nonce[message.from][message.nonce] == NonceStatus.REQUESTED
     ) return true;
-    else {
-            console.log(uint(nonce[message.from][message.nonce]));
-
-      return false;
-
-    }
+    else return false;
   }
 
   function isLiquidatable(Message calldata message) public view returns (bool) {

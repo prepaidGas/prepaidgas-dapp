@@ -130,19 +130,12 @@ abstract contract GasOrderGetters is ERC1155ish {
   }
 
   /// @notice over high amount of orders may lead tot the function call failure
-  /// @notice over high holders array length may cause function call failure
-  /// @notice the holders array should not contain duplications or the user inside
-  function getTotalBalance(address user, address[] memory holders) external view returns (uint256) {
+  function getTotalBalance(address user) external view returns (uint256) {
     uint256 gasBalance = 0;
-    uint256 allowances = holders.length;
     uint256 orders = ordersCount();
 
     for (uint256 id = 0; id < orders; id++) {
       uint256 allowed = 0;
-
-      for (uint256 i = 0; i < allowances; i++) {
-        allowed += allowance(holders[i], id, user);
-      }
 
       gasBalance += balanceOf(user, id) + allowed;
     }

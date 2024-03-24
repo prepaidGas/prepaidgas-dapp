@@ -140,20 +140,19 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept, ReentrancyGuard {
   /**
    * @dev Retrieves prepaid tokens form the order.
    *
-   * @param holder The address of the Gas holder.
    * @param id The ID of the order.
    * @param amount The amount of gas tokens to retrieve.
    *
    * This function decreses the amout of Gas tokens in the order and repays the tokens ot the holder.
    */
-  function retrieveGasCost(address holder, uint256 id, uint256 amount) external {
-    _utilizeOperator(holder, id, msg.sender, amount);
+  function retrieveGasCost(uint256 id, uint256 amount) external {
+    _burn(msg.sender, id, amount);
 
     OrderStatus orderStatus = status(id);
     if (orderStatus == OrderStatus.Active || orderStatus == OrderStatus.Inactive)
       _distribute(executor(id), guarantee(id).token, guarantee(id).gasPrice * amount);
 
-    IERC20(gasCost(id).token).safeTransfer(holder, gasCost(id).gasPrice * amount);
+    IERC20(gasCost(id).token).safeTransfer(msg.sender, gasCost(id).gasPrice * amount);
   }
 
   /**
@@ -211,17 +210,16 @@ contract GasOrder is IGasOrder, FeeProcessor, TxAccept, ReentrancyGuard {
   ) internal specificStatus(message.gasOrder, OrderStatus.Active) {
     uint256 id = message.gasOrder;
     address from = message.from;
-    address onBehalf = message.onBehalf;
     uint256 transactionNonce = message.nonce;
     uint256 deadline = message.deadline;
-    uint256 balance = usable(onBehalf, id, from);
+    uint256 balance = balanceOf(from, id);
     // @todo verify correctness
     uint256 gasLimit = message.gas - infrastructureGas;
     if (gasLimit > balance) revert GasLimitExceedBalance(gasLimit, balance);
 
     /// @dev should not happen in ordinary situations
     if (gasSpent > balance) gasSpent = balance;
-    _utilizeAllowance(onBehalf, id, from, gasSpent);
+    _burn(from, id, gasSpent);
 
     if (fulfiller == address(0)) {
       if (!isExecutable(message)) revert ExecutionImpossible(from, transactionNonce, message.deadline, block.timestamp);
