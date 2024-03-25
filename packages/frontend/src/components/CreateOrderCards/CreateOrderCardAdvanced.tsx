@@ -323,10 +323,7 @@ export default function CreateOrderCardAdvanced({
           gasCostTokenName={TOKEN_NAME[inputValues.gasCostValueToken] ?? inputValues.gasCostValueToken}
           rewardTokenName={TOKEN_NAME[inputValues.rewardValueToken] ?? inputValues.rewardValueToken}
         />
-        <Buttons
-          onClick={handleSubmit}
-          className="bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
-        >
+        <Buttons onClick={handleSubmit} className="primary_btn">
           {"Create Gas Order"}
         </Buttons>
       </div>

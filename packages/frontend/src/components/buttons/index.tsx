@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Button } from 'antd';
+import { useState } from "react"
+import { Button } from "antd"
 
-function Buttons(props:any) {
+function Buttons(props: any) {
   const {
     type,
     shape,
@@ -15,16 +15,17 @@ function Buttons(props:any) {
     color,
     social,
     load,
+    className,
     children,
     ...rest
-  } = props;
+  } = props
   const [state, setState] = useState({
     loading: false,
-  });
+  })
 
   const enterLoading = () => {
-    setState({ loading: true });
-  };
+    setState({ loading: true })
+  }
 
   return (
     <Button
@@ -42,15 +43,16 @@ function Buttons(props:any) {
       social={social}
       onClick={load && enterLoading}
       loading={state.loading}
+      className={className}
       {...rest}
     >
       {children}
     </Button>
-  );
+  )
 }
 
-function BtnGroup({ children }:any) {
-  return <Button.Group>{children}</Button.Group>;
+function BtnGroup({ children }: any) {
+  return <Button.Group>{children}</Button.Group>
 }
 
-export { Buttons, BtnGroup };
+export { Buttons, BtnGroup }

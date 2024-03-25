@@ -336,17 +336,14 @@ export default function CreateTxCardSimple({
               setArgValues([])
               setSelectedFunction("")
             }}
-            className="grow old-md:grow-0 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
+            className="secondary_btn"
           >
             {isLoading ? "" : "Clear ABI"}
           </Buttons>
         </div>
       ) : (
         <div className="flex flex-row old-md:justify-end mt-4">
-          <Buttons
-            onClick={parseAbi}
-            className="grow old-md:grow-0 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
-          >
+          <Buttons onClick={parseAbi} className="secondary_btn">
             {isLoading ? "" : "Parse ABI"}
           </Buttons>
         </div>
@@ -378,10 +375,7 @@ export default function CreateTxCardSimple({
 
       {isAbiParsed && (
         <div className="flex flex-row old-md:justify-end mt-4">
-          <Buttons
-            onClick={handleSubmit}
-            className="grow old-md:grow-0 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
-          >
+          <Buttons onClick={handleSubmit} className="primary_btn">
             {"Submit"}
           </Buttons>
         </div>

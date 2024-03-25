@@ -2787,3 +2787,11 @@ as conflicts may arise in other places
 .base-text {
   @apply text-[#404040] dark:text-[#A4A5AA];
 }
+
+.primary_btn {
+  @apply bg-primary h-[40px] hover:!bg-primary/80 border-solid border-1 !border-primary !text-white dark:!text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px];
+}
+
+.secondary_btn {
+  @apply bg-transparent h-[40px]  border-solid border-1 !border-primary !text-primary text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px];
+}

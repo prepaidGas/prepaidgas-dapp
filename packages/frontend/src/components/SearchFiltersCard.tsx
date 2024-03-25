@@ -127,16 +127,10 @@ export default function SearchFiltersCard({
         <div className="flex flex-col grow w-full">
           <label className="base-text">&nbsp;</label>
           <div className="flex flex-col gap-4 old-lg:flex-row">
-            <Buttons
-              onClick={() => handleSubmit()}
-              className="bg-primary h-[40px] hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px]"
-            >
+            <Buttons onClick={() => handleSubmit()} className="primary_btn">
               {"Apply"}
             </Buttons>
-            <Buttons
-              onClick={() => handleSubmit(true)}
-              className="bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[40px]"
-            >
+            <Buttons onClick={() => handleSubmit(true)} className="secondary_btn">
               {"Clear"}
             </Buttons>
           </div>
