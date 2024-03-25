@@ -68,7 +68,7 @@ export default function SearchFiltersCard({
     <Form className="mt-4 grow">
       <div className="flex flex-col old-lg:flex-row old-lg:items-start old-lg:gap-6">
         <div className="flex flex-col grow w-full">
-          <label htmlFor="input-number-manager" className="text-[#404040] dark:text-[#A4A5AA]">
+          <label htmlFor="input-number-manager" className="base-text">
             Manager
           </label>
           <Form.Item name="input-number-manager">
@@ -85,7 +85,7 @@ export default function SearchFiltersCard({
           </Form.Item>
         </div>
         <div className="flex flex-col grow w-full">
-          <label htmlFor="status-select" className="text-[#404040] dark:text-[#A4A5AA]">
+          <label htmlFor="status-select" className="base-text">
             Status
           </label>
           <Form.Item name="status-select" initialValue={["0"]}>
@@ -105,7 +105,7 @@ export default function SearchFiltersCard({
           </Form.Item>
         </div>
         <div className="flex flex-col grow w-full">
-          <label htmlFor="ipp-select" className="text-[#404040] dark:text-[#A4A5AA]">
+          <label htmlFor="ipp-select" className="base-text">
             Items Per Page
           </label>
           <Form.Item name="ipp-select" initialValue={["50"]}>
@@ -125,7 +125,7 @@ export default function SearchFiltersCard({
           </Form.Item>
         </div>
         <div className="flex flex-col grow w-full">
-          <label className="text-[#404040] dark:text-[#A4A5AA]">&nbsp;</label>
+          <label className="base-text">&nbsp;</label>
           <div className="flex flex-col gap-4 old-lg:flex-row">
             <Buttons
               onClick={() => handleSubmit()}

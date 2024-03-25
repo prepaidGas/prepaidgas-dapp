@@ -35,7 +35,7 @@ export default function CreateOrderCardSimple({
       {/* Gas Amount, Token and Gas Price inputs */}
       <div className="flex flex-col gap-4">
         <div className="flex flex-col">
-          <label htmlFor="input-number-gas" className="text-[#404040] dark:text-[#A4A5AA] mb-1">
+          <label htmlFor="input-number-gas" className="base-text mb-1">
             Gas Amount
           </label>
           <Input
@@ -62,7 +62,7 @@ export default function CreateOrderCardSimple({
         </div>
         <div className="flex flex-col old-md:flex-row gap-4">
           <div className="flex flex-col grow justify-start ">
-            <label htmlFor="token-select" className="text-[#404040] dark:text-[#A4A5AA] mb-1">
+            <label htmlFor="token-select" className="base-text mb-1">
               Token
             </label>
             <TokenSearchSelect
@@ -78,7 +78,7 @@ export default function CreateOrderCardSimple({
             />
           </div>
           <div className="flex flex-col grow justify-start">
-            <label htmlFor="input-number-gasCost" className="text-[#404040] dark:text-[#A4A5AA] mb-1">
+            <label htmlFor="input-number-gasCost" className="base-text mb-1">
               Gas Cost
             </label>
             <Input

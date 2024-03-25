@@ -31,7 +31,7 @@ export default function CreateOrderCardAdvanced({
     <div className="mt-6 flex flex-col w-full">
       <div className="flex flex-col old-lg:flex-row gap-6">
         <div className="flex flex-col flex-1">
-          <label htmlFor="input-number-gas" className="text-[#404040] dark:text-[#A4A5AA] mb-1">
+          <label htmlFor="input-number-gas" className="base-text mb-1">
             Gas Amount
           </label>
           <Input
@@ -68,7 +68,7 @@ export default function CreateOrderCardAdvanced({
         </div>
 
         <div className="flex flex-col">
-          <label className="text-[#404040] dark:text-[#A4A5AA] mb-1">Execution period Start</label>
+          <label className="base-text mb-1">Execution period Start</label>
           <div className="flex flex-col gap-4">
             <DatePicker
               defaultValue={dayjs().add(0, "d")}
@@ -106,7 +106,7 @@ export default function CreateOrderCardAdvanced({
         </div>
 
         <div className="flex flex-col">
-          <label className="text-[#404040] dark:text-[#A4A5AA] mb-1">Execution period End</label>
+          <label className="base-text mb-1">Execution period End</label>
           <div className="flex flex-col gap-4">
             <DatePicker
               defaultValue={dayjs().add(0, "d")}
@@ -147,7 +147,7 @@ export default function CreateOrderCardAdvanced({
       {/* Reward Settings */}
       <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
         <div className="flex flex-col flex-1">
-          <label className="text-[#404040] dark:text-[#A4A5AA] mb-1">Reward Token</label>
+          <label className="base-text mb-1">Reward Token</label>
           <TokenSearchSelect
             className=""
             searchSelectValue={inputValues.rewardValueToken}
@@ -161,7 +161,7 @@ export default function CreateOrderCardAdvanced({
         </div>
 
         <div className="flex flex-col flex-1">
-          <label htmlFor="input-number-gas" className="text-[#404040] dark:text-[#A4A5AA] mb-1">
+          <label htmlFor="input-number-gas" className="base-text mb-1">
             Reward Amount
           </label>
           <Input
@@ -184,7 +184,7 @@ export default function CreateOrderCardAdvanced({
       {/* Gas Cost Settings */}
       <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
         <div className="flex flex-col flex-1">
-          <label className="text-[#404040] dark:text-[#A4A5AA] mb-1">Gas Cost Token</label>
+          <label className="base-text mb-1">Gas Cost Token</label>
           <TokenSearchSelect
             className=""
             searchSelectValue={inputValues.gasCostValueToken}
@@ -198,7 +198,7 @@ export default function CreateOrderCardAdvanced({
         </div>
 
         <div className="flex flex-col flex-1">
-          <label htmlFor="input-number-gas" className="text-[#404040] dark:text-[#A4A5AA] mb-1">
+          <label htmlFor="input-number-gas" className="base-text mb-1">
             Gas Price
           </label>
           <Input
@@ -224,7 +224,7 @@ export default function CreateOrderCardAdvanced({
       {/* Guarantee Settings */}
       <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
         <div className="flex flex-col flex-1">
-          <label className="text-[#404040] dark:text-[#A4A5AA] mb-1">Guarantee Token</label>
+          <label className="base-text mb-1">Guarantee Token</label>
           <TokenSearchSelect
             className=""
             searchSelectValue={inputValues.guaranteeValueToken}
@@ -238,7 +238,7 @@ export default function CreateOrderCardAdvanced({
         </div>
 
         <div className="flex flex-col flex-1">
-          <label htmlFor="input-number-gas" className="text-[#404040] dark:text-[#A4A5AA] mb-1">
+          <label htmlFor="input-number-gas" className="base-text mb-1">
             Guarantee GasPrice
           </label>
           <Input
@@ -258,7 +258,7 @@ export default function CreateOrderCardAdvanced({
       {/* Advanced Settings */}
       <div className="flex flex-col old-lg:flex-row gap-6 mt-4">
         <div className="flex flex-col flex-1">
-          <label htmlFor="input-number-gas" className="text-[#404040] dark:text-[#A4A5AA] mb-1">
+          <label htmlFor="input-number-gas" className="base-text mb-1">
             Execution window
           </label>
           <Input
@@ -275,7 +275,7 @@ export default function CreateOrderCardAdvanced({
         </div>
 
         <div className="flex flex-col flex-1">
-          <label htmlFor="input-number-gas" className="text-[#404040] dark:text-[#A4A5AA] mb-1">
+          <label htmlFor="input-number-gas" className="base-text mb-1">
             Reward transfer
           </label>
           <Input
@@ -295,7 +295,7 @@ export default function CreateOrderCardAdvanced({
         </div>
 
         <div className="flex flex-col flex-1">
-          <label htmlFor="input-number-gas" className="text-[#404040] dark:text-[#A4A5AA] mb-1">
+          <label htmlFor="input-number-gas" className="base-text mb-1">
             Gas cost transfer
           </label>
           <Input

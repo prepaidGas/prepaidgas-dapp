@@ -96,7 +96,7 @@ export default function CreateTxCardAdvanced({
     if (comp.components) {
       return (
         <div className="flex flex-col mt-4 ml-4">
-          <span className="text-[#404040] dark:text-[#A4A5AA]">{comp.name}</span>
+          <span className="base-text">{comp.name}</span>
           <div className="ml-4">{comp.components.map((item) => resolveComponent(item, index, true))}</div>
         </div>
       )
@@ -107,7 +107,7 @@ export default function CreateTxCardAdvanced({
         case "uint256":
           return (
             <div className="flex flex-col">
-              <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+              <label className="mt-4 base-text">{comp.name}</label>
               {/* <NumberInput
                 onChange={(e) => {
                   setArgValues((prevState) => {
@@ -132,7 +132,7 @@ export default function CreateTxCardAdvanced({
         case "bool":
           return (
             <div className="flex flex-col">
-              <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+              <label className="mt-4 base-text">{comp.name}</label>
               <Select
                 className="min-w-[8rem]"
                 onChange={(value) => {
@@ -153,7 +153,7 @@ export default function CreateTxCardAdvanced({
         default:
           return (
             <div className="flex flex-col">
-              <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+              <label className="mt-4 base-text">{comp.name}</label>
               {/* <TextInput
                 onChange={(e) => {
                   setArgValues((prevState) => {
@@ -183,7 +183,7 @@ export default function CreateTxCardAdvanced({
       case "address":
         return (
           <div className="flex flex-col">
-            <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+            <label className="mt-4 base-text">{comp.name}</label>
             {/* <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput> */}
             <Input
               onChange={(e) => handleArgInputChange(e.target.value, index)}
@@ -194,7 +194,7 @@ export default function CreateTxCardAdvanced({
       case "uint256":
         return (
           <div className="flex flex-col">
-            <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+            <label className="mt-4 base-text">{comp.name}</label>
             {/* <NumberInput onChange={(e) => handleArgInputChange(Number(e.target.value), index)}></NumberInput> */}
             <Input
               onChange={(e) => handleArgInputChange(Number(e.target.value), index)}
@@ -205,7 +205,7 @@ export default function CreateTxCardAdvanced({
       case "bool":
         return (
           <div className="flex flex-col">
-            <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+            <label className="mt-4 base-text">{comp.name}</label>
             <Select className="min-w-[8rem]" onChange={(value) => handleArgInputChange(value, index)}>
               <Select.Option value="false">No</Select.Option>
               <Select.Option value="true">Yes</Select.Option>
@@ -215,7 +215,7 @@ export default function CreateTxCardAdvanced({
       default:
         return (
           <div className="flex flex-col">
-            <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+            <label className="mt-4 base-text">{comp.name}</label>
             {/* <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput> */}
             <Input
               onChange={(e) => handleArgInputChange(e.target.value, index)}
@@ -268,7 +268,7 @@ export default function CreateTxCardAdvanced({
   return (
     <div className="mt-6 flex flex-col w-full gap-6">
       <div className="flex flex-col">
-        <label className="text-[#404040] dark:text-[#A4A5AA]">Nonce</label>
+        <label className="base-text">Nonce</label>
         <Input
           value={inputValues.nonce.toString()}
           onChange={(e) => setInputValues({ ...inputValues, nonce: Number(e.target.value) })}
@@ -282,7 +282,7 @@ export default function CreateTxCardAdvanced({
       </div>
 
       <div className="flex flex-col">
-        <label className="text-[#404040] dark:text-[#A4A5AA]">Gas Order</label>
+        <label className="base-text">Gas Order</label>
         <Input
           value={inputValues.gasOrder.toString()}
           onChange={(e) => setInputValues({ ...inputValues, gasOrder: Number(e.target.value) })}
@@ -296,7 +296,7 @@ export default function CreateTxCardAdvanced({
       </div>
 
       <div className="flex flex-col">
-        <label className="text-[#404040] dark:text-[#A4A5AA]">On Behalf</label>
+        <label className="base-text">On Behalf</label>
         <Input
           value={inputValues.onBehalf}
           onChange={(e) => setInputValues({ ...inputValues, onBehalf: e.target.value })}
@@ -310,7 +310,7 @@ export default function CreateTxCardAdvanced({
       </div>
 
       <div className="flex flex-col">
-        <label className="text-[#404040] dark:text-[#A4A5AA] mb-1">Execution period End</label>
+        <label className="base-text mb-1">Execution period End</label>
         <div className="flex flex-col gap-4">
           <DatePicker
             // defaultValue={dayjs().add(1, "d")}
@@ -348,7 +348,7 @@ export default function CreateTxCardAdvanced({
       </div>
 
       <div className="flex flex-col">
-        <label className="text-[#404040] dark:text-[#A4A5AA]">To</label>
+        <label className="base-text">To</label>
         <Input
           value={inputValues.to}
           onChange={(e) => setInputValues({ ...inputValues, to: e.target.value })}
@@ -362,7 +362,7 @@ export default function CreateTxCardAdvanced({
       </div>
 
       <div className="flex flex-col">
-        <label className="text-[#404040] dark:text-[#A4A5AA]">Gas</label>
+        <label className="base-text">Gas</label>
         <Input
           value={inputValues.gas.toString()}
           onChange={(e) => setInputValues({ ...inputValues, gas: Number(e.target.value) })}
@@ -376,7 +376,7 @@ export default function CreateTxCardAdvanced({
       </div>
 
       <div className="flex flex-col">
-        <label className="text-[#404040] dark:text-[#A4A5AA]">Tips</label>
+        <label className="base-text">Tips</label>
         <Input
           value={inputValues.tips.toString()}
           onChange={(e) => setInputValues({ ...inputValues, tips: Number(e.target.value) })}
@@ -392,7 +392,7 @@ export default function CreateTxCardAdvanced({
       {isAbiParsed ? (
         <div className="flex flex-col old-lg:flex-row gap-6 mt-4">
           <div className="flex flex-col grow">
-            <span className="text-[#404040] dark:text-[#A4A5AA]">Functions parsed from provided ABI</span>
+            <span className="base-text">Functions parsed from provided ABI</span>
             <div className="max-h-[30rem] overflow-auto mt-2 tremor-TextInput-root flex flex-col relative w-full  min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
               <JsonFormatter
                 json={JSON.stringify(parsedAbi)}
@@ -407,7 +407,7 @@ export default function CreateTxCardAdvanced({
         </div>
       ) : (
         <div className="flex flex-col">
-          <label className="text-[#404040] dark:text-[#A4A5AA]">ABI</label>
+          <label className="base-text">ABI</label>
           <Input.TextArea
             value={inputValues.userAbi}
             onChange={(e) => {
@@ -426,7 +426,7 @@ export default function CreateTxCardAdvanced({
 
       {isAbiParsed ? (
         <div className="flex flex-row old-md:justify-end mt-4">
-          <span className="text-[#404040] dark:text-[#A4A5AA]">Abi was successfully parsed</span>
+          <span className="base-text">Abi was successfully parsed</span>
           <Buttons
             onClick={() => {
               setIsAbiParsed(false)
@@ -455,7 +455,7 @@ export default function CreateTxCardAdvanced({
       {isAbiParsed && (
         <div className="flex flex-col old-lg:flex-row gap-6 mt-4">
           <div className="flex flex-col grow">
-            <span className="text-[#404040] dark:text-[#A4A5AA]">Function</span>
+            <span className="base-text">Function</span>
             <div className="flex flex-col mt-2">
               <Select value={selectedFunction} onChange={setSelectedFunction}>
                 {parsedAbi
@@ -471,7 +471,7 @@ export default function CreateTxCardAdvanced({
 
       {isAbiParsed && selectedFunction && argInputs.length !== 0 && (
         <div className="mt-8 flex flex-col">
-          <span className="text-[#404040] dark:text-[#A4A5AA]">Function Arguments</span>
+          <span className="base-text">Function Arguments</span>
           {argInputs}
         </div>
       )}

@@ -422,7 +422,7 @@ export default function CreateTxCard({
           title={
             <div className="flex flex-row items-center [&>*]:fill-[#404040] [&>*]:dark:fill-[#A4A5AA]">
               <UilWallet />
-              <span className="ml-4 text-[#404040] dark:text-[#A4A5AA] text-xl">Wallet Connection</span>
+              <span className="ml-4 base-text text-xl">Wallet Connection</span>
             </div>
           }
           description="Please accept our terms of service and connect your wallet to continue with order creation"

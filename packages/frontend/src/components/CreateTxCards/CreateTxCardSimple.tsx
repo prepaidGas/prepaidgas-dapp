@@ -63,7 +63,7 @@ export default function CreateTxCardSimple({
     if (comp.components) {
       return (
         <div className="flex flex-col mt-4 ml-4">
-          <span className="text-[#404040] dark:text-[#A4A5AA]">{comp.name}</span>
+          <span className="base-text">{comp.name}</span>
           <div className="ml-4">{comp.components.map((item) => resolveComponent(item, index, true))}</div>
         </div>
       )
@@ -74,7 +74,7 @@ export default function CreateTxCardSimple({
         case "uint256":
           return (
             <div className="flex flex-col">
-              <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+              <label className="mt-4 base-text">{comp.name}</label>
               <Input
                 onChange={(e) => {
                   setArgValues((prevState) => {
@@ -90,7 +90,7 @@ export default function CreateTxCardSimple({
         case "bool":
           return (
             <div className="flex flex-col">
-              <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+              <label className="mt-4 base-text">{comp.name}</label>
               <Select
                 className="min-w-[8rem]"
                 onChange={(value) => {
@@ -111,7 +111,7 @@ export default function CreateTxCardSimple({
         default:
           return (
             <div className="flex flex-col">
-              <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+              <label className="mt-4 base-text">{comp.name}</label>
               {/* <TextInput
                 onChange={(e) => {
                   setArgValues((prevState) => {
@@ -141,7 +141,7 @@ export default function CreateTxCardSimple({
       case "address":
         return (
           <div className="flex flex-col">
-            <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+            <label className="mt-4 base-text">{comp.name}</label>
             {/* <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput> */}
             <Input
               onChange={(e) => handleArgInputChange(e.target.value, index)}
@@ -152,7 +152,7 @@ export default function CreateTxCardSimple({
       case "uint256":
         return (
           <div className="flex flex-col">
-            <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+            <label className="mt-4 base-text">{comp.name}</label>
             {/* <NumberInput onChange={(e) => handleArgInputChange(Number(e.target.value), index)}></NumberInput> */}
             <Input
               onChange={(e) => handleArgInputChange(Number(e.target.value), index)}
@@ -163,7 +163,7 @@ export default function CreateTxCardSimple({
       case "bool":
         return (
           <div className="flex flex-col">
-            <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+            <label className="mt-4 base-text">{comp.name}</label>
             <Select className="min-w-[8rem]" onChange={(value) => handleArgInputChange(value, index)}>
               <Select.Option value="false">No</Select.Option>
               <Select.Option value="true">Yes</Select.Option>
@@ -173,7 +173,7 @@ export default function CreateTxCardSimple({
       default:
         return (
           <div className="flex flex-col">
-            <label className="mt-4 text-[#404040] dark:text-[#A4A5AA]">{comp.name}</label>
+            <label className="mt-4 base-text">{comp.name}</label>
             {/* <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput> */}
             <Input
               onChange={(e) => handleArgInputChange(e.target.value, index)}
@@ -226,7 +226,7 @@ export default function CreateTxCardSimple({
   return (
     <div className="mt-6 flex flex-col w-full gap-6">
       <div className="flex flex-col">
-        <label className="text-[#404040] dark:text-[#A4A5AA]">Gas Order</label>
+        <label className="base-text">Gas Order</label>
         <Input
           value={inputValues.gasOrder.toString()}
           onChange={(e) => setInputValues({ ...inputValues, gasOrder: Number(e.target.value) })}
@@ -240,7 +240,7 @@ export default function CreateTxCardSimple({
       </div>
 
       <div className="flex flex-col">
-        <label className="text-[#404040] dark:text-[#A4A5AA] mb-1">Execution period End</label>
+        <label className="base-text mb-1">Execution period End</label>
         <div className="flex flex-col gap-4">
           <DatePicker
             // defaultValue={dayjs().add(1, "d")}
@@ -278,7 +278,7 @@ export default function CreateTxCardSimple({
       </div>
 
       <div className="flex flex-col">
-        <label className="text-[#404040] dark:text-[#A4A5AA]">To</label>
+        <label className="base-text">To</label>
         <Input
           value={inputValues.to}
           onChange={(e) => setInputValues({ ...inputValues, to: e.target.value })}
@@ -292,7 +292,7 @@ export default function CreateTxCardSimple({
       </div>
 
       <div className="flex flex-col">
-        <label className="text-[#404040] dark:text-[#A4A5AA]">Gas</label>
+        <label className="base-text">Gas</label>
         <Input
           value={inputValues.gas.toString()}
           onChange={(e) => setInputValues({ ...inputValues, gas: Number(e.target.value) })}
@@ -307,7 +307,7 @@ export default function CreateTxCardSimple({
 
       {isAbiParsed ? null : (
         <div className="flex flex-col">
-          <label className="text-[#404040] dark:text-[#A4A5AA]">ABI</label>
+          <label className="base-text">ABI</label>
           <Input.TextArea
             value={inputValues.userAbi}
             onChange={(e) => {
@@ -355,7 +355,7 @@ export default function CreateTxCardSimple({
       {isAbiParsed && (
         <div className="flex flex-col old-lg:flex-row gap-6 mt-4">
           <div className="flex flex-col grow">
-            <span className="text-[#404040] dark:text-[#A4A5AA]">Function</span>
+            <span className="base-text">Function</span>
             <div className="flex flex-col mt-2">
               <Select value={selectedFunction} onChange={setSelectedFunction}>
                 {parsedAbi
@@ -371,7 +371,7 @@ export default function CreateTxCardSimple({
 
       {isAbiParsed && selectedFunction && argInputs.length !== 0 && (
         <div className="mt-8 flex flex-col">
-          <span className="text-[#404040] dark:text-[#A4A5AA]">Function Arguments</span>
+          <span className="base-text">Function Arguments</span>
           {argInputs}
         </div>
       )}
