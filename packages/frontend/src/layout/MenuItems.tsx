@@ -75,20 +75,18 @@ function MenuItems() {
   const mainPath = pathArray.length > 1 ? pathArray[1] : ""
   const mainPathSplit = mainPath.split("/")
 
-  const [openKeys, setOpenKeys] = React.useState(
-    !topMenu ? [`${mainPathSplit.length > 2 ? mainPathSplit[1] : "dashboard"}`] : [],
-  )
-  const [openItems, setOpenItems] = React.useState(
-    !topMenu
-      ? [`${mainPathSplit.length === 1 ? "demo-1" : mainPathSplit.length === 2 ? mainPathSplit[1] : mainPathSplit[2]}`]
-      : [],
-  )
+  const [openKeys, setOpenKeys] = React.useState(["order"])
+  const [openItems, setOpenItems] = React.useState(["create"])
 
   useEffect(() => {
     // Check if the current route matches the base path.
-    if (pathname === path) {
-      setOpenKeys(["dashboard"]) // active menu key.
-      setOpenItems(["demo-1"]) // active menu item.
+    // if (pathname === path) {
+    //   setOpenKeys(["dashboard"]) // active menu key.
+    //   setOpenItems(["demo-1"]) // active menu item.
+    // }
+    if (pathname === "/admin/orders/create") {
+      setOpenKeys(["orders"]) // active menu key.
+      setOpenItems(["create"]) // active menu item.
     }
   }, [pathname])
 

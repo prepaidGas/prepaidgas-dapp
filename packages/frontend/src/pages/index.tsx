@@ -1,5 +1,8 @@
+"use client"
+import { useEffect } from "react"
 import DemoOne from "./admin"
 import CreateOrder from "./admin/order/create"
+import Router from "next/router"
 
 // Function to check if the user is logged in
 const isUserLoggedIn = () => {
@@ -13,7 +16,9 @@ const Home = () => {
 
   //todo: remove old login logic
   // return isLoggedIn ? <DemoOne /> : <SignIn />
-  return <DemoOne />
+  useEffect(() => {
+    Router.push("/admin/order/create")
+  }, [])
 }
 
 export default Home
