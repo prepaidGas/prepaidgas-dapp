@@ -1,6 +1,5 @@
 "use client"
 import { useEffect } from "react"
-import DemoOne from "./admin"
 import CreateOrder from "./admin/order/create"
 import Router from "next/router"
 
@@ -16,9 +15,11 @@ const Home = () => {
 
   //todo: remove old login logic
   // return isLoggedIn ? <DemoOne /> : <SignIn />
-  useEffect(() => {
-    Router.push("/admin/order/create")
-  }, [])
+  // useEffect(() => {
+  //   Router.push("/admin/order/create")
+  // }, [])
+
+  return <CreateOrder />
 }
 
 export default Home

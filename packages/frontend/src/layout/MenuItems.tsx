@@ -84,10 +84,13 @@ function MenuItems() {
     //   setOpenKeys(["dashboard"]) // active menu key.
     //   setOpenItems(["demo-1"]) // active menu item.
     // }
-    if (pathname === "/admin/orders/create") {
+    if (pathname === "/admin/orders/create" || pathname === "/") {
       setOpenKeys(["orders"]) // active menu key.
-      setOpenItems(["create"]) // active menu item.
+      setOpenItems(["createOrder"]) // active menu item.
     }
+    console.log("SIDE PATHNAME: ", { pathname })
+    console.log("SIDE openKeys: ", { openKeys })
+    console.log("SIDE openItems: ", { openItems })
   }, [pathname])
 
   const onOpenChange = (keys: string[]) => {
@@ -155,106 +158,106 @@ function MenuItems() {
   }
 
   const items = [
-    getItem(t("dashboard"), "dashboard", !topMenu && <UilCreateDashboard />, [
-      getItem(
-        <Link href={`${path}`}>
-          {t("demo")} {t("1")}
-        </Link>,
-        "demo-1",
-        null,
-        null,
-      ),
-      getItem(
-        <Link href={`${path}/demo-2`}>
-          {t("demo")} {t("2")}
-        </Link>,
-        "demo-2",
-        null,
-        null,
-      ),
-    ]),
-    getItem(t("layouts"), "layout", !topMenu && <UilWindowSection />, [
-      getItem(
-        <Link
-          onClick={() => {
-            darkmodeDiactivated()
-            changeLayout("lightMode")
-          }}
-          href="#"
-        >
-          {t("light")} {t("mode")}
-        </Link>,
-        "light",
-        null,
-        null,
-      ),
-      getItem(
-        <Link
-          onClick={() => {
-            darkmodeActivated()
-            changeLayout("darkMode")
-          }}
-          href="#"
-        >
-          {t("dark")} {t("mode")}
-        </Link>,
-        "dark",
-        null,
-        null,
-      ),
-      getItem(
-        <Link
-          onClick={() => {
-            changeNavbar(true)
-          }}
-          href="#"
-        >
-          {t("top")} {t("menu")}
-        </Link>,
-        "topMenu",
-        null,
-        null,
-      ),
-      getItem(
-        <Link
-          onClick={() => {
-            changeNavbar(false)
-          }}
-          href="#"
-        >
-          {t("side")} {t("menu")}
-        </Link>,
-        "sideMenu",
-        null,
-        null,
-      ),
-      getItem(
-        <Link
-          onClick={() => {
-            changeLayoutDirection(true)
-          }}
-          href="#"
-        >
-          RTL
-        </Link>,
-        "rtl",
-        null,
-        null,
-      ),
-      getItem(
-        <Link
-          onClick={() => {
-            changeLayoutDirection(false)
-          }}
-          href="#"
-        >
-          LTR
-        </Link>,
-        "ltr",
-        null,
-        null,
-      ),
-    ]),
+    // getItem(t("dashboard"), "dashboard", !topMenu && <UilCreateDashboard />, [
+    //   getItem(
+    //     <Link href={`${path}`}>
+    //       {t("demo")} {t("1")}
+    //     </Link>,
+    //     "demo-1",
+    //     null,
+    //     null,
+    //   ),
+    //   getItem(
+    //     <Link href={`${path}/demo-2`}>
+    //       {t("demo")} {t("2")}
+    //     </Link>,
+    //     "demo-2",
+    //     null,
+    //     null,
+    //   ),
+    // ]),
+    // getItem(t("layouts"), "layout", !topMenu && <UilWindowSection />, [
+    //   getItem(
+    //     <Link
+    //       onClick={() => {
+    //         darkmodeDiactivated()
+    //         changeLayout("lightMode")
+    //       }}
+    //       href="#"
+    //     >
+    //       {t("light")} {t("mode")}
+    //     </Link>,
+    //     "light",
+    //     null,
+    //     null,
+    //   ),
+    //   getItem(
+    //     <Link
+    //       onClick={() => {
+    //         darkmodeActivated()
+    //         changeLayout("darkMode")
+    //       }}
+    //       href="#"
+    //     >
+    //       {t("dark")} {t("mode")}
+    //     </Link>,
+    //     "dark",
+    //     null,
+    //     null,
+    //   ),
+    //   getItem(
+    //     <Link
+    //       onClick={() => {
+    //         changeNavbar(true)
+    //       }}
+    //       href="#"
+    //     >
+    //       {t("top")} {t("menu")}
+    //     </Link>,
+    //     "topMenu",
+    //     null,
+    //     null,
+    //   ),
+    //   getItem(
+    //     <Link
+    //       onClick={() => {
+    //         changeNavbar(false)
+    //       }}
+    //       href="#"
+    //     >
+    //       {t("side")} {t("menu")}
+    //     </Link>,
+    //     "sideMenu",
+    //     null,
+    //     null,
+    //   ),
+    //   getItem(
+    //     <Link
+    //       onClick={() => {
+    //         changeLayoutDirection(true)
+    //       }}
+    //       href="#"
+    //     >
+    //       RTL
+    //     </Link>,
+    //     "rtl",
+    //     null,
+    //     null,
+    //   ),
+    //   getItem(
+    //     <Link
+    //       onClick={() => {
+    //         changeLayoutDirection(false)
+    //       }}
+    //       href="#"
+    //     >
+    //       LTR
+    //     </Link>,
+    //     "ltr",
+    //     null,
+    //     null,
+    //   ),
+    // ]),
     getItem(
       <Link href={`${path}/pages/changelog`}>
         {t("changelog")}
