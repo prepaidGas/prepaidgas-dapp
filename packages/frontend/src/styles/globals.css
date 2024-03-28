@@ -26,7 +26,7 @@ body,
 .ant-tag,
 .ant-carousel,
 [class*="ant-"] {
-  @apply !font-Jost;
+  @apply !font-Jost noselect;
 }
 body.dark {
   @apply text-theme-gray bg-[#010413];
@@ -2794,4 +2794,14 @@ as conflicts may arise in other places
 
 .secondary_btn {
   @apply bg-transparent h-[40px]  border-solid border-1 !border-primary !text-primary text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px];
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 }
