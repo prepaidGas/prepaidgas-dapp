@@ -1,16 +1,18 @@
 {
   "name": "prepaidgas-contracts",
+  "description": "prepaidGas smart contracts",
+  "license": "GPL-3.0-only",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "npx hardhat compile",
     "test": "npx hardhat test",
     "coverage": "npx hardhat coverage",
+    "size": "npx hardhat size-contracts",
     "node": "npx hardhat node",
-    "deploy-test": "npx hardhat run scripts/deploy/testDeploy.js --network localhost",
+    "deploy": "npx hardhat run scripts/deploy/testDeploy.js --network localhost",
     "executor": "npx hardhat run scripts/executor.ts --network localhost",
-    "node-mock": "npm run node & (sleep 12 && npm run deploy-test) & (sleep 24 && npm run executor); wait",
-    "size-calc": "npx hardhat size-contracts"
+    "dev": "npm run node & (sleep 12 && npm run deploy) & (sleep 24 && npm run executor); wait"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.4",
@@ -18,8 +20,10 @@
     "@openzeppelin/contracts": "5.0.0",
     "@types/date-fns": "^2.6.0",
     "date-fns": "^2.30.0",
+    "ethers": "^6.11.0",
     "hardhat": "2.17.0",
     "hardhat-contract-sizer": "^2.10.0",
+    "prettier-plugin-solidity": "^1.3.1",
     "solidity-coverage": "^0.8.4",
     "ts-node": "^10.9.1"
   }

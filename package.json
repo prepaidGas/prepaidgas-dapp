@@ -1,5 +1,7 @@
 {
   "name": "prepaidgas-dapp",
+  "description": "prepaidGas packages root",
+  "license": "GPL-3.0-only",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
@@ -8,18 +10,10 @@
   ],
   "scripts": {
     "fe-dev": "npm run dev -w prepaidgas-frontend",
-    "fe-lint": "npm run lint -w prepaidgas-frontend",
-    "sc-node-mock": "npm run node-mock -w prepaidgas-contracts",
-    "sc-test": "npm run test -w prepaidgas-contracts",
-    "sc-coverage": "npm run coverage -w prepaidgas-contracts",
-    "dev-setup": "npm run fe-dev & npm run sc-node-mock; wait",
+    "sc-dev": "npm run dev -w prepaidgas-contracts",
+    "dev": "npm run fe-dev & npm run sc-dev; wait",
     "docker-build": "docker build -t wednesday .",
-    "docker-setup": "docker run --rm -v /${PWD}:/app -p 3000:3000 -p 8545:8545 wednesday npm run dev-setup"
-  },
-  "dependencies": {
-    "ethers": "^6.11.0",
-    "react-json-formatter": "^0.4.0",
-    "react-loader-spinner": "^5.4.5",
-    "zod": "^3.22.4"
+    "docker-dev": "docker run -it --rm -v .:/app -p 3000:3000 -p 8545:8545 wednesday npm run dev",
+    "docker-dev-windows": "docker run -it --rm -v /${PWD}:/app -p 3000:3000 -p 8545:8545 wednesday npm run dev"
   }
 }
