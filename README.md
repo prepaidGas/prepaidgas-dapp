@@ -8,21 +8,26 @@ TBD Explain main idea and actors
 
 ## Order Life Cycle
 
-TBD Add diagram with statuses explanation
+TBD Add statuses explanation
 
 ```mermaid
 graph TB;
-Pending -- expire <= time --> Untaken
-Untaken -- orderRefund --> Closed
-Accepted -- unwrap all --> Closed
-%% Main stream
-None -- orderNew --> Pending
-Pending -- orderAccept --> Accepted
+
+None -- orderCreate
+[gas: 0 => some] --> Pending
+Pending -- orderAccept
+[executor: 0x0 => some] --> Accepted
 Accepted -- start <= time --> Active
 Active -- end <= time --> Inactive
-Inactive -- orderClose --> Closed
-Pending -- orderRevoke --> Closed
-Active -- unwrap/use all --> Closed
+Inactive -- orderClose
+[closed: false => true] --> Closed
+
+Pending -- expire <= time --> Untaken
+Untaken -- orderWithdraw
+[closed: false => true] --> Closed
+
+Active -- all gas used
+[used: 0 => gas] --> Closed
 ```
 
 ## Transaction Life Cycle
