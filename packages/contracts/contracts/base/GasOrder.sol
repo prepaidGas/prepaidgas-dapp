@@ -6,6 +6,7 @@ import { GasPayment, Payment, Order, OrderStatus } from "../common/Order.sol";
 import { Message, Resolution } from "../common/Message.sol";
 
 import "../common/Constants.sol" as Const;
+import "../common/Errors.sol" as Error;
 
 contract GasOrder {
   uint256 public orders;
@@ -24,7 +25,7 @@ contract GasOrder {
   modifier specificStatus(uint256 id, OrderStatus expected) {
     OrderStatus real = status(id);
 
-    if (real != expected) revert();
+    if (real != expected) revert Error.WrongOrderStatus(real, expected);
     _;
   }
 
@@ -54,18 +55,20 @@ contract GasOrder {
   }
 
   function orderCreate(Order calldata order) public virtual returns (uint256 id) {
-    if (order.gas == 0) revert();
+    if (order.gas < Const.MIN_GAS) revert Error.BelowMin(order.gas, Const.MIN_GAS);
 
-    if (order.end <= order.start) revert();
-    if (order.end <= order.expire) revert();
+    if (order.end <= order.start) revert Error.BadOrderStartEnd(order.start, order.end);
+    if (order.end <= order.expire) revert Error.BadOrderExpireEnd(order.expire, order.end);
 
-    if (order.expire <= block.timestamp) revert();
-    if (order.expire - block.timestamp > Const.MAX_PENDING) revert();
+    if (order.expire <= block.timestamp) revert Error.BadOrderNowExpire(block.timestamp, order.expire);
+    if (order.expire - block.timestamp > Const.MAX_PENDING)
+      revert Error.BadOrderNowExpire(block.timestamp, order.expire);
 
-    if (order.start <= block.timestamp && order.start != 0) revert();
+    if (order.start <= block.timestamp && order.start != 0) revert Error.BadOrderNowStart(block.timestamp, order.start);
 
-    if (order.txWindow < Const.MIN_TX_WINDOW) revert();
-    if (order.redeemWindow > Const.MAX_REDEEM_WINDOW) revert();
+    if (order.txWindow < Const.MIN_TX_WINDOW) revert Error.BelowMin(order.txWindow, Const.MIN_TX_WINDOW);
+    if (order.redeemWindow > Const.MAX_REDEEM_WINDOW)
+      revert Error.ExceedMax(order.redeemWindow, Const.MAX_REDEEM_WINDOW);
 
     id = orders++;
     _order[id] = order;
@@ -104,21 +107,28 @@ contract GasOrder {
     Order storage order = _order[id];
     uint256 left = gasLeft[id];
 
-    if (order.manager != message.from) revert();
-    if (message.gas > left) revert();
+    if (order.manager != message.from) revert Error.Unauthorized(message.from, order.manager);
+    if (message.gas > left) revert Error.BalanceExhausted(message.gas, left);
 
-    if (message.deadline > order.end) revert();
-    if (message.deadline - 2 * order.txWindow < order.start) revert();
+    if (message.deadline > order.end) revert Error.ExceedMax(message.deadline, order.end);
+    if (message.deadline - 2 * order.txWindow < order.start)
+      revert Error.BelowMin(message.deadline - 2 * order.txWindow, order.start);
 
     if (resolution == Resolution.Execute) {
-      if (message.deadline - 2 * order.txWindow > block.timestamp) revert();
-      if (message.deadline - order.txWindow < block.timestamp) revert();
+      uint256 start = message.deadline - 2 * order.txWindow;
+      uint256 end = message.deadline - order.txWindow;
+      if (start > block.timestamp) revert Error.WindowNotOpen(block.timestamp, start);
+      if (end < block.timestamp) revert Error.WindowClosed(block.timestamp, end);
     } else if (resolution == Resolution.Liquidate) {
-      if (message.deadline - order.txWindow >= block.timestamp) revert();
-      if (message.deadline < block.timestamp) revert();
+      uint256 start = message.deadline - order.txWindow;
+      uint256 end = message.deadline;
+      if (start >= block.timestamp) revert Error.WindowNotOpen(block.timestamp, start + 1);
+      if (end < block.timestamp) revert Error.WindowClosed(block.timestamp, end);
     } else if (resolution == Resolution.Redeem) {
-      if (message.deadline >= block.timestamp) revert();
-      if (message.deadline + order.redeemWindow < block.timestamp) revert();
+      uint256 start = message.deadline;
+      uint256 end = message.deadline + order.redeemWindow;
+      if (start >= block.timestamp) revert Error.WindowNotOpen(block.timestamp, start + 1);
+      if (end < block.timestamp) revert Error.WindowClosed(block.timestamp, end);
     }
 
     gasLeft[id] -= gasSpent;

@@ -8,6 +8,7 @@ import { Validators } from "../tools/Validators.sol";
 import { Message, MessageHash, Resolution } from "../common/Message.sol";
 
 import "../common/Constants.sol" as Const;
+import "../common/Errors.sol" as Error;
 
 abstract contract Executor is Validators, MessageHash {
   using ECDSA for bytes32;
@@ -26,21 +27,21 @@ abstract contract Executor is Validators, MessageHash {
   );
 
   modifier useNonce(address signer, uint256 id) {
-    if (nonce[signer][id]) revert();
+    if (nonce[signer][id]) revert Error.NonceExhausted(signer, id);
     nonce[signer][id] = true;
     _;
   }
 
   modifier checkValidations(Message calldata message, bytes[] calldata validations) {
-    if (validatorThreshold > validations.length) revert();
+    if (validatorThreshold > validations.length) revert Error.FewValidations(validations.length, validatorThreshold);
 
     bytes32 digest = messageHash(message);
 
     address last;
     for (uint256 i = 0; i < validatorThreshold; i++) {
       address recovered = digest.recover(validations[i]);
-      if (last >= recovered) revert();
-      if (!isValidator[recovered]) revert();
+      if (last >= recovered) revert Error.IncorrectSignatureOrder(recovered, last);
+      if (!isValidator[recovered]) revert Error.UnknownRecovered(recovered);
     }
 
     _;
@@ -50,7 +51,7 @@ abstract contract Executor is Validators, MessageHash {
     bytes32 digest = messageHash(message);
     address recovered = digest.recover(signature);
 
-    if (recovered != message.from) revert();
+    if (recovered != message.from) revert Error.UnexpectedRecovered(recovered, message.from);
 
     _;
   }

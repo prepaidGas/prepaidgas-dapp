@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.25;
 
+import "../common/Errors.sol" as Error;
+
 contract Distributor {
   mapping(address holder => mapping(address token => uint256 balance)) public claimable;
 
@@ -12,7 +14,7 @@ contract Distributor {
     if (amount == 0) return;
 
     uint256 available = claimable[holder][token];
-    if (amount > available) revert();
+    if (amount > available) revert Error.BalanceExhausted(amount, available);
     claimable[holder][token] -= amount;
 
     emit Claim(holder, token, amount);

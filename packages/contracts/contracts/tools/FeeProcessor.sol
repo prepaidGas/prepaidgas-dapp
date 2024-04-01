@@ -5,6 +5,7 @@ pragma solidity 0.8.25;
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 import "../common/Constants.sol" as Const;
+import "../common/Errors.sol" as Error;
 
 enum Fee {
   AcceptReward,
@@ -19,7 +20,7 @@ abstract contract FeeProcessor is Ownable2Step {
   event UpdateProtocolFee(Fee indexed fee, uint256 old, uint256 current);
 
   function setFee(Fee id, uint256 value) public onlyOwner {
-    if (value > Const.MAX_FEE) revert();
+    if (value > Const.MAX_FEE) revert Error.ExceedMax(value, Const.MAX_FEE);
 
     uint256 old = fee[id];
     fee[id] = value;

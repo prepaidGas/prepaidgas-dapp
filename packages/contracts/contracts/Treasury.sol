@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { PrepaidGas } from "./PrepaidGas.sol";
 import { Order } from "./common/Order.sol";
 
+import "./common/Errors.sol" as Error;
+
 contract Treasury {
   using SafeERC20 for IERC20;
 
@@ -64,6 +66,6 @@ contract Treasury {
     IERC20(token).safeTransferFrom(from, address(this), amount);
     uint256 incoming = IERC20(token).balanceOf(address(this)) - pre;
 
-    if (incoming < amount) revert();
+    if (incoming < amount) revert Error.BadIncomeTransfer(incoming, amount);
   }
 }

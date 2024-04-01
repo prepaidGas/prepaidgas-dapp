@@ -17,12 +17,13 @@ import { Order } from "./common/Order.sol";
 import { GasOrderGetters } from "./extensions/GasOrderGetters.sol";
 
 import "./common/Constants.sol" as Const;
+import "./common/Errors.sol" as Error;
 
 contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor, GasOrderGetters {
   address public immutable treasury;
 
   modifier onlyTreasury() {
-    if (msg.sender != treasury) revert();
+    if (msg.sender != treasury) revert Error.Unauthorized(msg.sender, treasury);
     _;
   }
 
