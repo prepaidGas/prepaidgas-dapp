@@ -6,6 +6,8 @@ Buy Gas now and use it later — First ETH Gas futures market
 
 TBD Explain main idea and actors
 
+We support meta transactions `constructor(..) .. ERC2771Context(address(0x...)) {..}`
+
 ## Order Life Cycle
 
 TBD Add statuses explanation
