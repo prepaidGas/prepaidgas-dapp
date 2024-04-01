@@ -3,6 +3,7 @@
 pragma solidity 0.8.25;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 import { Executor } from "./base/Executor.sol";
 import { GasOrder } from "./base/GasOrder.sol";
@@ -10,7 +11,7 @@ import { GasOrder } from "./base/GasOrder.sol";
 import { Distributor } from "./tools/Distributor.sol";
 import { Fee, FeeProcessor } from "./tools/FeeProcessor.sol";
 
-import { Message, MessageHash, Resolution } from "./common/Message.sol";
+import { Message, Resolution } from "./common/Message.sol";
 import { Order } from "./common/Order.sol";
 
 import "./common/Constants.sol" as Const;
@@ -28,7 +29,7 @@ contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor {
     address admin,
     string memory name,
     string memory version
-  ) Ownable(admin) MessageHash(name, version) {
+  ) Ownable(admin) EIP712(name, version) {
     treasury = relayer;
   }
 

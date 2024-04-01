@@ -16,7 +16,7 @@ enum Fee {
 abstract contract FeeProcessor is Ownable2Step {
   mapping(Fee => uint256) public fee;
 
-  event UpdateProtocolFee(Fee fee, uint256 old, uint256 current);
+  event UpdateProtocolFee(Fee indexed fee, uint256 old, uint256 current);
 
   function setFee(Fee id, uint256 value) public onlyOwner {
     if (value > Const.MAX_FEE) revert();

@@ -32,14 +32,12 @@ bytes32 constant MESSAGE_TYPE_HASH = keccak256(
   ")"
 );
 
-contract MessageHash is EIP712 {
-  constructor(string memory name, string memory version) EIP712(name, version) {}
-
+abstract contract MessageHash is EIP712 {
   function domainSeparator() external view returns (bytes32) {
     return _domainSeparatorV4();
   }
 
-  function messageHash(Message memory message) public view returns (bytes32) {
+  function messageHash(Message calldata message) public view returns (bytes32) {
     return
       _hashTypedDataV4(
         keccak256(

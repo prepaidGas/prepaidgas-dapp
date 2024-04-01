@@ -18,7 +18,7 @@ None -- orderCreate
 Pending -- orderAccept
 [executor: 0x0 => some] --> Accepted
 Accepted -- start <= time --> Active
-Active -- end <= time --> Inactive
+Active -- end + redeeem <= time --> Inactive
 Inactive -- orderClose
 [closed: false => true] --> Closed
 

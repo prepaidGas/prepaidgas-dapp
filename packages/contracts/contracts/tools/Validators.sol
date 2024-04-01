@@ -12,7 +12,7 @@ abstract contract Validators is Ownable2Step {
   mapping(address => bool) public isValidator;
 
   event UpdateValidatorThreshold(uint256 old, uint256 current);
-  event UpdateValidatorStatus(address validator, bool old, bool current);
+  event UpdateValidatorStatus(address indexed validator, bool old, bool current);
 
   function setValidatorThreshold(uint256 value) external onlyOwner {
     if (value < Const.MIN_VALIDATIONS) revert();
