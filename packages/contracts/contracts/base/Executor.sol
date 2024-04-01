@@ -5,7 +5,9 @@ pragma solidity 0.8.25;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import { Validators } from "../tools/Validators.sol";
-import { Message, MessageHash } from "../common/Message.sol";
+import { Message, MessageHash, Resolution } from "../common/Message.sol";
+
+import "../common/Constants.sol" as Const;
 
 abstract contract Executor is Validators, MessageHash {
   using ECDSA for bytes32;
@@ -13,14 +15,14 @@ abstract contract Executor is Validators, MessageHash {
   mapping(address signer => mapping(uint256 id => bool used)) public nonce;
 
   event Execution(
-    address signer,
-    uint256 nonce,
-    uint256 order,
+    address indexed signer,
+    uint256 indexed nonce,
+    uint256 indexed order,
     bool status,
     bytes result,
     uint256 timestamp,
     address executor,
-    bool liquidation
+    Resolution resolution
   );
 
   modifier useNonce(address signer, uint256 id) {
@@ -44,7 +46,7 @@ abstract contract Executor is Validators, MessageHash {
     _;
   }
 
-  modifier validSignature(Message calldata message, bytes calldata signature) {
+  modifier chaeckSignature(Message calldata message, bytes calldata signature) {
     bytes32 digest = messageHash(message);
     address recovered = digest.recover(signature);
 
@@ -56,10 +58,10 @@ abstract contract Executor is Validators, MessageHash {
   function execute(
     Message calldata message,
     bytes calldata signature
-  ) external useNonce(message.from, message.nonce) validSignature(message, signature) {
-    uint256 gasSpent = _execute(message, false);
+  ) external useNonce(message.from, message.nonce) chaeckSignature(message, signature) {
+    uint256 gasSpent = _execute(message, Resolution.Execute);
 
-    _reportExecution(message, address(0), gasSpent);
+    _reportExecution(message, msg.sender, gasSpent + Const.INFRASTRUCTURE_GAS, Resolution.Execute);
   }
 
   function liquidate(
@@ -69,12 +71,12 @@ abstract contract Executor is Validators, MessageHash {
   )
     external
     useNonce(message.from, message.nonce)
-    validSignature(message, signature)
+    chaeckSignature(message, signature)
     checkValidations(message, validations)
   {
-    uint256 gasSpent = _execute(message, true);
+    uint256 gasSpent = _execute(message, Resolution.Liquidate);
 
-    _reportExecution(message, msg.sender, gasSpent);
+    _reportExecution(message, msg.sender, gasSpent + Const.INFRASTRUCTURE_GAS, Resolution.Liquidate);
   }
 
   function redeem(
@@ -84,18 +86,44 @@ abstract contract Executor is Validators, MessageHash {
   )
     external
     useNonce(message.from, message.nonce)
-    validSignature(message, signature)
+    chaeckSignature(message, signature)
     checkValidations(message, validations)
   {
-    _reportExecution(message, message.from, 0);
+    emit Execution(
+      message.from,
+      message.nonce,
+      message.order,
+      false,
+      "",
+      block.timestamp,
+      msg.sender,
+      Resolution.Redeem
+    );
+
+    _reportExecution(message, msg.sender, message.gas, Resolution.Redeem);
   }
 
-  function _execute(Message calldata message, bool liquidation) private returns (uint256 gasSpent) {
+  function _execute(Message calldata message, Resolution resolution) private returns (uint256 gasSpent) {
     uint256 gas = gasleft();
-    // @audit bomb here
-    (bool success, bytes memory returndata) = message.to.call{ gas: message.gas }(
-      abi.encodePacked(message.data, message.from)
-    );
+
+    bool success;
+    bytes memory returndata = new bytes(Const.MAX_RETURNDATA);
+
+    uint256 gasLimit = message.gas;
+    address target = message.to;
+    bytes memory data = abi.encodePacked(message.data, message.from);
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      success := call(gasLimit, target, 0, add(data, 0x20), mload(data), 0, 0)
+
+      let length := returndatasize()
+      if lt(length, mload(returndata)) {
+        mstore(returndata, length)
+      }
+
+      returndatacopy(add(returndata, 0x20), 0, mload(returndata))
+    }
 
     gasSpent = gas - gasleft();
 
@@ -107,9 +135,14 @@ abstract contract Executor is Validators, MessageHash {
       returndata,
       block.timestamp,
       msg.sender,
-      liquidation
+      resolution
     );
   }
 
-  function _reportExecution(Message calldata message, address fulfiller, uint256 gasSpent) internal virtual {}
+  function _reportExecution(
+    Message calldata /* message */,
+    address /* fulfiller */,
+    uint256 /* gasSpent */,
+    Resolution /* resolution*/
+  ) internal virtual {}
 }

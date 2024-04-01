@@ -4,6 +4,12 @@ pragma solidity 0.8.25;
 
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
+enum Resolution {
+  Execute,
+  Liquidate,
+  Redeem
+}
+
 struct Message {
   address from;
   uint256 nonce;

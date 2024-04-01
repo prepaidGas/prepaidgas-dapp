@@ -3,7 +3,7 @@
 pragma solidity 0.8.25;
 
 import { GasPayment, Payment, Order, OrderStatus } from "../common/Order.sol";
-import { Message } from "../common/Message.sol";
+import { Message, Resolution } from "../common/Message.sol";
 
 import "../common/Constants.sol" as Const;
 
@@ -47,7 +47,7 @@ contract GasOrder {
     uint256 left = gasLeft[id];
     if (left == 0) return OrderStatus.Closed;
 
-    if (order.end <= block.timestamp) return OrderStatus.Inactive;
+    if (order.end + order.redeemWindow < block.timestamp) return OrderStatus.Inactive;
     if (order.start <= block.timestamp) return OrderStatus.Active;
 
     return OrderStatus.Accepted;
@@ -89,10 +89,6 @@ contract GasOrder {
   }
 
   function orderClose(uint256 id) public virtual specificStatus(id, OrderStatus.Inactive) {
-    Order storage order = _order[id];
-
-    if (order.end + order.redeemWindow >= block.timestamp) revert();
-
     _closed[id] = true;
 
     emit OrderClose(id, gasLeft[id]);
@@ -101,7 +97,8 @@ contract GasOrder {
   function _reportExecution(
     Message calldata message,
     address /* fulfiller */,
-    uint256 gasSpent
+    uint256 gasSpent,
+    Resolution resolution
   ) internal virtual specificStatus(message.order, OrderStatus.Active) {
     uint256 id = message.order;
     Order storage order = _order[id];
@@ -109,6 +106,20 @@ contract GasOrder {
 
     if (order.manager != message.from) revert();
     if (message.gas > left) revert();
+
+    if (message.deadline > order.end) revert();
+    if (message.deadline - 2 * order.txWindow < order.start) revert();
+
+    if (resolution == Resolution.Execute) {
+      if (message.deadline - 2 * order.txWindow > block.timestamp) revert();
+      if (message.deadline - order.txWindow < block.timestamp) revert();
+    } else if (resolution == Resolution.Liquidate) {
+      if (message.deadline - order.txWindow >= block.timestamp) revert();
+      if (message.deadline < block.timestamp) revert();
+    } else if (resolution == Resolution.Redeem) {
+      if (message.deadline >= block.timestamp) revert();
+      if (message.deadline + order.redeemWindow < block.timestamp) revert();
+    }
 
     gasLeft[id] -= gasSpent;
   }

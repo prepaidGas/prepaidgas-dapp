@@ -10,7 +10,7 @@ import { GasOrder } from "./base/GasOrder.sol";
 import { Distributor } from "./tools/Distributor.sol";
 import { Fee, FeeProcessor } from "./tools/FeeProcessor.sol";
 
-import { Message, MessageHash } from "./common/Message.sol";
+import { Message, MessageHash, Resolution } from "./common/Message.sol";
 import { Order } from "./common/Order.sol";
 
 import "./common/Constants.sol" as Const;
@@ -88,27 +88,34 @@ contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor {
   function _reportExecution(
     Message calldata message,
     address fulfiller,
-    uint256 gasSpent
+    uint256 gasSpent,
+    Resolution resolution
   ) internal override(Executor, GasOrder) {
     uint256 id = message.order;
     Order storage order = _order[id];
     uint256 left = gasLeft[id];
 
     if (gasSpent > left) gasSpent = left;
-    if (fulfiller == address(0)) fulfiller = executor[id];
 
-    super._reportExecution(message, fulfiller, gasSpent);
+    if (resolution == Resolution.Execute) fulfiller = executor[id];
+    if (resolution == Resolution.Redeem) fulfiller = message.from;
+
+    super._reportExecution(message, fulfiller, gasSpent, resolution);
 
     _distribute(fulfiller, order.gasPrice.token, order.gasPrice.gasPrice * gasSpent);
 
     uint256 amount = order.gasGuarantee.gasPrice * gasSpent;
-    if (fulfiller == executor[id]) _distribute(fulfiller, order.gasGuarantee.token, amount);
-    else
+    if (fulfiller == executor[id]) {
+      _distribute(fulfiller, order.gasGuarantee.token, amount);
+    } else if (resolution == Resolution.Liquidate) {
       _distribute(
         fulfiller,
         order.gasGuarantee.token,
         _takeFee(Fee.LiquidateGuarantee, order.gasGuarantee.token, amount)
       );
+    } else if (resolution == Resolution.Redeem) {
+      _distribute(fulfiller, order.gasGuarantee.token, _takeFee(Fee.RedeemGuarantee, order.gasGuarantee.token, amount));
+    }
   }
 
   function _takeFee(Fee id, address token, uint256 amount) internal override returns (uint256) {

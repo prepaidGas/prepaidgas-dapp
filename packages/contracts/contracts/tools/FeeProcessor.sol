@@ -9,6 +9,7 @@ import "../common/Constants.sol" as Const;
 enum Fee {
   AcceptReward,
   LiquidateGuarantee,
+  RedeemGuarantee,
   UnspentGas
 }
 
