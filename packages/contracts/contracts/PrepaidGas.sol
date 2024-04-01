@@ -14,9 +14,11 @@ import { Fee, FeeProcessor } from "./tools/FeeProcessor.sol";
 import { Message, Resolution } from "./common/Message.sol";
 import { Order } from "./common/Order.sol";
 
+import { GasOrderGetters } from "./extensions/GasOrderGetters.sol";
+
 import "./common/Constants.sol" as Const;
 
-contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor {
+contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor, GasOrderGetters {
   address public immutable treasury;
 
   modifier onlyTreasury() {
