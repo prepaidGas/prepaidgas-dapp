@@ -42,6 +42,14 @@ contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor {
 
   function orderAccept(uint256 id, address promisor) public override onlyTreasury {
     super.orderAccept(id, promisor);
+
+    Order storage order = _order[id];
+
+    _distribute(
+      promisor,
+      order.acceptReward.token,
+      _takeFee(Fee.AcceptReward, order.acceptReward.token, order.acceptReward.amount)
+    );
   }
 
   function orderClose(uint256 id) public override {
@@ -51,8 +59,9 @@ contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor {
     Order storage order = _order[id];
     uint256 left = gasLeft[id];
 
-    _distribute(promisor, order.gasGuarantee.token, order.gasGuarantee.gasPrice * left);
-    _distribute(promisor, order.gasPrice.token, order.gasPrice.gasPrice * left);
+    uint256 amount = order.gasGuarantee.gasPrice * left;
+    _distribute(promisor, order.gasGuarantee.token, amount);
+    _distribute(promisor, order.gasPrice.token, _takeFee(Fee.UnspentGas, order.gasPrice.token, amount));
   }
 
   function claim(address holder, address token, uint256 amount) external onlyTreasury {
@@ -86,19 +95,20 @@ contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor {
     uint256 left = gasLeft[id];
 
     if (gasSpent > left) gasSpent = left;
+    if (fulfiller == address(0)) fulfiller = executor[id];
 
     super._reportExecution(message, fulfiller, gasSpent);
-
-    if (fulfiller == address(0)) fulfiller = executor[id];
 
     _distribute(fulfiller, order.gasPrice.token, order.gasPrice.gasPrice * gasSpent);
 
     uint256 amount = order.gasGuarantee.gasPrice * gasSpent;
-    if (fulfiller == executor[id]) {
-      _distribute(fulfiller, order.gasGuarantee.token, amount);
-    } else {
-      _distribute(fulfiller, order.gasGuarantee.token, amount);
-    }
+    if (fulfiller == executor[id]) _distribute(fulfiller, order.gasGuarantee.token, amount);
+    else
+      _distribute(
+        fulfiller,
+        order.gasGuarantee.token,
+        _takeFee(Fee.LiquidateGuarantee, order.gasGuarantee.token, amount)
+      );
   }
 
   function _takeFee(Fee id, address token, uint256 amount) internal override returns (uint256) {

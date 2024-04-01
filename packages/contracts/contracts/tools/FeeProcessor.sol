@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "../common/Constants.sol" as Const;
 
 enum Fee {
-  Reward,
-  Gas,
-  Guarantee
+  AcceptReward,
+  LiquidateGuarantee,
+  UnspentGas
 }
 
 abstract contract FeeProcessor is Ownable2Step {

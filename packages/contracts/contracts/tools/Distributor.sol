@@ -22,6 +22,7 @@ contract Distributor {
     if (amount == 0) return;
 
     claimable[holder][token] += amount;
+
     emit Distribute(holder, token, amount);
   }
 }

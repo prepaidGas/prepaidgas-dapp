@@ -39,7 +39,6 @@ contract Treasury {
     pgas.orderAccept(id, msg.sender);
 
     _acceptIncoming(order.gasGuarantee.token, msg.sender, order.gasGuarantee.gasPrice * order.gas);
-    IERC20(order.acceptReward.token).safeTransfer(msg.sender, order.acceptReward.amount);
   }
 
   function claim(address token, uint256 amount) external {
