@@ -48,6 +48,18 @@ contract Treasury {
     IERC20(token).safeTransfer(msg.sender, amount);
   }
 
+  function claimFee(address[] calldata receivers, address[] calldata tokens, uint256[] calldata amounts) external {
+    uint256 length = receivers.length;
+    if (length > tokens.length) length = tokens.length;
+    if (length > amounts.length) length = amounts.length;
+
+    pgas.claimFee(receivers, tokens, amounts, msg.sender);
+
+    for (uint256 i = 0; i < length; i++) {
+      IERC20(receivers[i]).safeTransfer(tokens[i], amounts[i]);
+    }
+  }
+
   function _acceptIncoming(address token, address from, uint256 amount) internal {
     uint256 pre = IERC20(token).balanceOf(address(this));
     IERC20(token).safeTransferFrom(from, address(this), amount);

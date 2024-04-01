@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { Validators } from "../tools/Validators.sol";
 import { Message, MessageHash } from "../common/Message.sol";
 
-contract Executor is Validators, MessageHash {
+abstract contract Executor is Validators, MessageHash {
   using ECDSA for bytes32;
 
   mapping(address signer => mapping(uint256 id => bool used)) public nonce;
@@ -52,8 +52,6 @@ contract Executor is Validators, MessageHash {
 
     _;
   }
-
-  constructor(address admin, string memory name, string memory version) MessageHash(name, version) Validators(admin) {}
 
   function execute(
     Message calldata message,

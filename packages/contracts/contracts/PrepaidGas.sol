@@ -2,13 +2,20 @@
 
 pragma solidity 0.8.25;
 
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
+
 import { Executor } from "./base/Executor.sol";
 import { GasOrder } from "./base/GasOrder.sol";
+
 import { Distributor } from "./tools/Distributor.sol";
-import { Message } from "./common/Message.sol";
+import { Fee, FeeProcessor } from "./tools/FeeProcessor.sol";
+
+import { Message, MessageHash } from "./common/Message.sol";
 import { Order } from "./common/Order.sol";
 
-contract PrepaidGas is Executor, GasOrder, Distributor {
+import "./common/Constants.sol" as Const;
+
+contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor {
   address public immutable treasury;
 
   modifier onlyTreasury() {
@@ -21,7 +28,7 @@ contract PrepaidGas is Executor, GasOrder, Distributor {
     address admin,
     string memory name,
     string memory version
-  ) Executor(admin, name, version) {
+  ) Ownable(admin) MessageHash(name, version) {
     treasury = relayer;
   }
 
@@ -52,6 +59,23 @@ contract PrepaidGas is Executor, GasOrder, Distributor {
     _claim(holder, token, amount);
   }
 
+  function claimFee(
+    address[] calldata receivers,
+    address[] calldata tokens,
+    uint256[] calldata amounts,
+    address requestor
+  ) public override onlyTreasury {
+    super.claimFee(receivers, tokens, amounts, requestor);
+
+    uint256 length = receivers.length;
+    if (length > tokens.length) length = tokens.length;
+    if (length > amounts.length) length = amounts.length;
+
+    for (uint256 i = 0; i < length; i++) {
+      _claim(Const.TREASURY, tokens[i], amounts[i]);
+    }
+  }
+
   function _reportExecution(
     Message calldata message,
     address fulfiller,
@@ -75,5 +99,13 @@ contract PrepaidGas is Executor, GasOrder, Distributor {
     } else {
       _distribute(fulfiller, order.gasGuarantee.token, amount);
     }
+  }
+
+  function _takeFee(Fee id, address token, uint256 amount) internal override returns (uint256) {
+    uint256 left = super._takeFee(id, token, amount);
+
+    _distribute(Const.TREASURY, token, amount - left);
+
+    return left;
   }
 }

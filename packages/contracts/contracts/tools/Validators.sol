@@ -6,15 +6,13 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 import "../common/Constants.sol" as Const;
 
-contract Validators is Ownable2Step {
+abstract contract Validators is Ownable2Step {
   uint256 public validatorThreshold;
 
   mapping(address => bool) public isValidator;
 
   event UpdateValidatorThreshold(uint256 old, uint256 current);
   event UpdateValidatorStatus(address validator, bool old, bool current);
-
-  constructor(address admin) Ownable(admin) {}
 
   function setValidatorThreshold(uint256 value) external onlyOwner {
     if (value < Const.MIN_VALIDATIONS) revert();
