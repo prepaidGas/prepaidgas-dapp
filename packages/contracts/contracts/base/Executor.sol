@@ -47,7 +47,7 @@ abstract contract Executor is Validators, MessageHash {
     _;
   }
 
-  modifier chaeckSignature(Message calldata message, bytes calldata signature) {
+  modifier checkSignature(Message calldata message, bytes calldata signature) {
     bytes32 digest = messageHash(message);
     address recovered = digest.recover(signature);
 
@@ -59,7 +59,7 @@ abstract contract Executor is Validators, MessageHash {
   function execute(
     Message calldata message,
     bytes calldata signature
-  ) external useNonce(message.from, message.nonce) chaeckSignature(message, signature) {
+  ) external useNonce(message.from, message.nonce) checkSignature(message, signature) {
     uint256 gasSpent = _execute(message, Resolution.Execute);
 
     _reportExecution(message, msg.sender, gasSpent + Const.INFRASTRUCTURE_GAS, Resolution.Execute);
@@ -72,7 +72,7 @@ abstract contract Executor is Validators, MessageHash {
   )
     external
     useNonce(message.from, message.nonce)
-    chaeckSignature(message, signature)
+    checkSignature(message, signature)
     checkValidations(message, validations)
   {
     uint256 gasSpent = _execute(message, Resolution.Liquidate);
@@ -87,7 +87,7 @@ abstract contract Executor is Validators, MessageHash {
   )
     external
     useNonce(message.from, message.nonce)
-    chaeckSignature(message, signature)
+    checkSignature(message, signature)
     checkValidations(message, validations)
   {
     emit Execution(
