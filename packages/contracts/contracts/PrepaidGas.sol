@@ -46,14 +46,6 @@ contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor, GasOrderGe
 
   function orderAccept(uint256 id, address promisor) public override onlyTreasury {
     super.orderAccept(id, promisor);
-
-    Order storage order = _order[id];
-
-    _distribute(
-      promisor,
-      order.acceptReward.token,
-      _takeFee(Fee.AcceptReward, order.acceptReward.token, order.acceptReward.amount)
-    );
   }
 
   function orderClose(uint256 id) public override {
@@ -65,7 +57,7 @@ contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor, GasOrderGe
 
     uint256 amount = order.gasGuarantee.gasPrice * left;
     _distribute(promisor, order.gasGuarantee.token, amount);
-    _distribute(promisor, order.gasPrice.token, _takeFee(Fee.UnspentGas, order.gasPrice.token, amount));
+    _distribute(promisor, order.gasPrice.token, _takeFee(Fee.UnspentPrice, order.gasPrice.token, amount));
   }
 
   function claim(address holder, address token, uint256 amount) external onlyTreasury {

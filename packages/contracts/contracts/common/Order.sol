@@ -20,7 +20,6 @@ struct Order {
   uint256 end;
   uint256 txWindow;
   uint256 redeemWindow;
-  Payment acceptReward;
   GasPayment gasPrice;
   GasPayment gasGuarantee;
 }

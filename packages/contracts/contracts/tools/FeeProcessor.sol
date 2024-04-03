@@ -8,10 +8,9 @@ import "../common/Constants.sol" as Const;
 import "../common/Errors.sol" as Error;
 
 enum Fee {
-  AcceptReward,
   LiquidateGuarantee,
   RedeemGuarantee,
-  UnspentGas
+  UnspentPrice
 }
 
 abstract contract FeeProcessor is Ownable2Step {

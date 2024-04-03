@@ -22,7 +22,6 @@ contract Treasury {
   function orderCreate(Order calldata order) external returns (uint256 id) {
     id = pgas.orderCreate(order);
 
-    _acceptIncoming(order.acceptReward.token, msg.sender, order.acceptReward.amount);
     _acceptIncoming(order.gasPrice.token, msg.sender, order.gasPrice.gasPrice * order.gas);
   }
 
@@ -31,7 +30,6 @@ contract Treasury {
 
     pgas.orderWithdraw(id);
 
-    IERC20(order.acceptReward.token).safeTransfer(order.manager, order.acceptReward.amount);
     IERC20(order.gasPrice.token).safeTransfer(order.manager, order.gasPrice.gasPrice * order.gas);
   }
 
