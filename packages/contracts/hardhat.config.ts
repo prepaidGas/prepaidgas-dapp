@@ -15,6 +15,9 @@ const config: HardhatUserConfig = {
       },
     },
   },
+  networks: {
+    hardhat: {},
+  },
 }
 
 export default config
