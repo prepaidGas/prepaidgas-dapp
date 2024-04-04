@@ -14,7 +14,7 @@ import {
   START_ASAP,
   MIN_VALIDATIONS,
 } from "../scripts/common/constants"
-import { MessageTypedFields, Order, Message } from "../scripts/common/types"
+import { MessageTypedFields, Order, Message, OrderStatus } from "../scripts/common/types"
 
 describe("System", function () {
   async function deployFixture() {
@@ -117,6 +117,48 @@ describe("System", function () {
           (BigInt(order.gas) * BigInt(order.gasPrice.perUnit) * (BigInt(DENOM) - fee)) / BigInt(DENOM),
           BigInt(order.gas) * BigInt(order.gasPrice.perUnit),
         )
+    })
+  })
+
+  describe("Flow Tests", function () {
+    it("Withdraw expired", async function () {
+      const { treasury, pgas, admin, users, guaranteeT, priceT } = await loadFixture(deployFixture)
+      const client = users[0]
+
+      const order: Order = {
+        manager: client.address,
+        gas: 1000000000,
+        expire: (await time.latest()) + 100,
+        start: START_ASAP,
+        end: (await time.latest()) + MAX_PENDING,
+        txWindow: MIN_TX_WINDOW,
+        redeemWindow: MAX_REDEEM_WINDOW,
+        gasPrice: { token: priceT.target.toString(), perUnit: 8 },
+        gasGuarantee: { token: guaranteeT.target.toString(), perUnit: 9 },
+      }
+
+      const balance = await priceT.balanceOf(client.address)
+
+      expect(await pgas.orders()).to.be.equal(0)
+      expect(await pgas.status(0)).to.be.equal(OrderStatus.None)
+
+      await treasury.connect(client).orderCreate(order)
+
+      expect(await pgas.orders()).to.be.equal(1)
+      expect(await pgas.status(0)).to.be.equal(OrderStatus.Pending)
+      expect((await pgas.gasOrder(0)).manager).to.be.equal(client.address)
+      expect(await priceT.balanceOf(client.address)).to.be.equal(
+        balance - BigInt(order.gasPrice.perUnit) * BigInt(order.gas),
+      )
+
+      await time.increaseTo(order.expire)
+
+      expect(await pgas.status(0)).to.be.equal(OrderStatus.Untaken)
+
+      await treasury.connect(client).orderWithdraw(0)
+
+      expect(await pgas.status(0)).to.be.equal(OrderStatus.Closed)
+      expect(await priceT.balanceOf(client.address)).to.be.equal(balance)
     })
   })
 })

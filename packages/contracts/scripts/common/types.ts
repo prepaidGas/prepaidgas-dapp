@@ -36,3 +36,13 @@ export type Order = {
   gasPrice: GasPayment
   gasGuarantee: GasPayment
 }
+
+export enum OrderStatus {
+  None,
+  Pending,
+  Accepted,
+  Active,
+  Inactive,
+  Untaken,
+  Closed,
+}
