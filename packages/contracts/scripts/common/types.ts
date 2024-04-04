@@ -1,6 +1,6 @@
-import { TypedDataField } from "ethers"
+import { BigNumberish, TypedDataField } from "ethers"
 
-export const Message: TypedDataField[] = [
+export const MessageTypedFields: TypedDataField[] = [
   { name: "from", type: "address" },
   { name: "nonce", type: "uint256" },
   { name: "order", type: "uint256" },
@@ -10,19 +10,29 @@ export const Message: TypedDataField[] = [
   { name: "data", type: "bytes" },
 ]
 
-export const GasPayment: TypedDataField[] = [
-  { name: "token", type: "address" },
-  { name: "perUnit", type: "uint256" },
-]
+export type Message = {
+  from: string
+  nonce: BigNumberish
+  order: BigNumberish
+  deadline: BigNumberish
+  to: string
+  gas: BigNumberish
+  data: string
+}
 
-export const Order: TypedDataField[] = [
-  { name: "manager", type: "address" },
-  { name: "gas", type: "uint256" },
-  { name: "expire", type: "uint256" },
-  { name: "start", type: "uint256" },
-  { name: "end", type: "uint256" },
-  { name: "txWindow", type: "uint256" },
-  { name: "redeemWindow", type: "uint256" },
-  { name: "gasPrice", type: "GasPayment" },
-  { name: "gasGuarantee", type: "GasPayment" },
-]
+export type GasPayment = {
+  token: string
+  perUnit: BigNumberish
+}
+
+export type Order = {
+  manager: string
+  gas: BigNumberish
+  expire: BigNumberish
+  start: BigNumberish
+  end: BigNumberish
+  txWindow: BigNumberish
+  redeemWindow: BigNumberish
+  gasPrice: GasPayment
+  gasGuarantee: GasPayment
+}

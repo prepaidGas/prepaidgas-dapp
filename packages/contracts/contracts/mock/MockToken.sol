@@ -10,13 +10,7 @@ import "../common/Constants.sol" as Const;
 contract MockToken is ERC20, Ownable {
   uint256 fee;
 
-  constructor(
-    string memory mockName,
-    string memory mockSymbol,
-    uint256 supply
-  ) Ownable(msg.sender) ERC20(mockName, mockSymbol) {
-    _mint(msg.sender, supply);
-  }
+  constructor(string memory mockName, string memory mockSymbol) Ownable(msg.sender) ERC20(mockName, mockSymbol) {}
 
   function mint(address recipient, uint256 value) external onlyOwner {
     _mint(recipient, value);
