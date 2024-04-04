@@ -5,7 +5,7 @@ pragma solidity 0.8.25;
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 import { GasOrder } from "../base/GasOrder.sol";
-import { GasPayment, Payment, Order, OrderStatus } from "../common/Order.sol";
+import { Order, OrderStatus } from "../common/Order.sol";
 
 struct TokenDetails {
   address token;

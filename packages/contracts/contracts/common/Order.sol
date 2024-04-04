@@ -4,12 +4,7 @@ pragma solidity 0.8.25;
 
 struct GasPayment {
   address token;
-  uint256 gasPrice;
-}
-
-struct Payment {
-  address token;
-  uint256 amount;
+  uint256 perUnit;
 }
 
 struct Order {

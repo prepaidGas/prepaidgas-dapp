@@ -55,7 +55,7 @@ contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor, GasOrderGe
     Order storage order = _order[id];
     uint256 left = gasLeft[id];
 
-    uint256 amount = order.gasGuarantee.gasPrice * left;
+    uint256 amount = order.gasGuarantee.perUnit * left;
     _distribute(promisor, order.gasGuarantee.token, amount);
     _distribute(promisor, order.gasPrice.token, _takeFee(Fee.UnspentPrice, order.gasPrice.token, amount));
   }
@@ -98,9 +98,9 @@ contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor, GasOrderGe
 
     super._reportExecution(message, fulfiller, gasSpent, resolution);
 
-    _distribute(fulfiller, order.gasPrice.token, order.gasPrice.gasPrice * gasSpent);
+    _distribute(fulfiller, order.gasPrice.token, order.gasPrice.perUnit * gasSpent);
 
-    uint256 amount = order.gasGuarantee.gasPrice * gasSpent;
+    uint256 amount = order.gasGuarantee.perUnit * gasSpent;
     if (fulfiller == executor[id]) {
       _distribute(fulfiller, order.gasGuarantee.token, amount);
     } else if (resolution == Resolution.Liquidate) {

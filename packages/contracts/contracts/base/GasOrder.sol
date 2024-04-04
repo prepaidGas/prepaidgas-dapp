@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.25;
 
-import { GasPayment, Payment, Order, OrderStatus } from "../common/Order.sol";
+import { Order, OrderStatus } from "../common/Order.sol";
 import { Message, Resolution } from "../common/Message.sol";
 
 import "../common/Constants.sol" as Const;

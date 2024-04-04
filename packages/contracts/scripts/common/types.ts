@@ -9,3 +9,20 @@ export const Message: TypedDataField[] = [
   { name: "gas", type: "uint256" },
   { name: "data", type: "bytes" },
 ]
+
+export const GasPayment: TypedDataField[] = [
+  { name: "token", type: "address" },
+  { name: "perUnit", type: "uint256" },
+]
+
+export const Order: TypedDataField[] = [
+  { name: "manager", type: "address" },
+  { name: "gas", type: "uint256" },
+  { name: "expire", type: "uint256" },
+  { name: "start", type: "uint256" },
+  { name: "end", type: "uint256" },
+  { name: "txWindow", type: "uint256" },
+  { name: "redeemWindow", type: "uint256" },
+  { name: "gasPrice", type: "GasPayment" },
+  { name: "gasGuarantee", type: "GasPayment" },
+]
