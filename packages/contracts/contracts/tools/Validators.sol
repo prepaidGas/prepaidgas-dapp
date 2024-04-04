@@ -8,7 +8,7 @@ import "../common/Constants.sol" as Const;
 import "../common/Errors.sol" as Error;
 
 abstract contract Validators is Ownable2Step {
-  uint256 public validatorThreshold;
+  uint256 public validatorThreshold = Const.MIN_VALIDATIONS;
 
   mapping(address => bool) public isValidator;
 

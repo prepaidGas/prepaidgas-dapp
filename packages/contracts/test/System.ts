@@ -12,6 +12,7 @@ import {
   MAX_REDEEM_WINDOW,
   MAX_PENDING,
   START_ASAP,
+  MIN_VALIDATIONS,
 } from "../scripts/common/constants"
 import { MessageTypedFields, Order, Message } from "../scripts/common/types"
 
@@ -29,6 +30,8 @@ describe("System", function () {
 
     const treasury = await Treasury.deploy(pgasExpected)
     const pgas = await PrepaidGas.deploy(treasuryExpected, admin.address, NAME, VERSION)
+
+    await pgas.connect(admin).setValidatorStatus(admin.address, true)
 
     const MockToken = await ethers.getContractFactory("MockToken")
 
@@ -57,6 +60,13 @@ describe("System", function () {
       const { treasury, pgas, admin } = await loadFixture(deployFixture)
 
       expect(await pgas.owner()).to.be.equal(admin.address)
+    })
+
+    it("Correct validators", async function () {
+      const { treasury, pgas, admin } = await loadFixture(deployFixture)
+
+      expect(await pgas.validatorThreshold()).to.be.equal(MIN_VALIDATIONS)
+      expect(await pgas.isValidator(admin.address)).to.be.equal(true)
     })
 
     it("Correct domain", async function () {

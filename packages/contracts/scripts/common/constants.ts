@@ -10,3 +10,5 @@ export const MAX_REDEEM_WINDOW = 60 * 60 * 24 * 7
 export const MAX_PENDING = 60 * 60 * 24 * 3
 
 export const START_ASAP = 0
+
+export const MIN_VALIDATIONS = 1
