@@ -1,4 +1,5 @@
-const GasOrder = require("abi/GasOrder.sol/GasOrder.json")
+const Treasury = require("abi/Treasury.sol/Treasury.json")
+const PrepaidGas = require("abi/PrepaidGas.sol/PrepaidGas.json")
 const MockToken = require("abi/mock/MockToken.sol/MockToken.json")
 
 export interface FieldEntry {
@@ -18,7 +19,8 @@ export interface ABIEntry {
   name?: string // Optional if it's a function
 }
 
-const GasOrderABI: ABIEntry[] = GasOrder.abi
+const TreasuryABI: ABIEntry[] = Treasury.abi
+const PrepaidGasABI: ABIEntry[] = PrepaidGas.abi
 const MockTokenABI: ABIEntry[] = MockToken.abi
 
-export { GasOrderABI, MockTokenABI }
+export { TreasuryABI, PrepaidGasABI, MockTokenABI }
