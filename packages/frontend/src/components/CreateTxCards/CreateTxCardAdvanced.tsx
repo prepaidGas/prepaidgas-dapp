@@ -1,24 +1,16 @@
 "use client"
 
 import { CheckIcon, ClockIcon, NoSymbolIcon, WalletIcon, XMarkIcon } from "@heroicons/react/24/outline"
-import {
-  Text,
-  TextInput,
-  NumberInput,
-  DatePicker,
-  Button,
-  SearchSelect,
-  SearchSelectItem,
-  Select,
-  SelectItem,
-  Title,
-} from "@tremor/react"
+import { DatePicker, Input, Select, TimePicker } from "antd"
+
 import { TailSpin } from "react-loader-spinner"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { SPINNER_COLOR } from "@/constants"
 import { TransactionFormState } from "./CreateTxCard"
 import JsonFormatter from "react-json-formatter"
 import { ABIEntry, FieldEntry, prepaidGasCoreContractAddress } from "@/helpers"
+import dayjs from "dayjs"
+import { Buttons } from "../buttons"
 
 export default function CreateTxCardAdvanced({
   setInputValues,
@@ -104,8 +96,7 @@ export default function CreateTxCardAdvanced({
     if (comp.components) {
       return (
         <div className="flex flex-col mt-4 ml-4">
-          <Title>{comp.name}</Title>
-          {/* <div className="ml-4">{comp.components.map(resolveComponent)}</div> */}
+          <span className="base-text">{comp.name}</span>
           <div className="ml-4">{comp.components.map((item) => resolveComponent(item, index, true))}</div>
         </div>
       )
@@ -116,8 +107,8 @@ export default function CreateTxCardAdvanced({
         case "uint256":
           return (
             <div className="flex flex-col">
-              <Text className="mt-4">{comp.name}</Text>
-              <NumberInput
+              <label className="mt-4 base-text">{comp.name}</label>
+              {/* <NumberInput
                 onChange={(e) => {
                   setArgValues((prevState) => {
                     const nextState = [...prevState]
@@ -125,16 +116,26 @@ export default function CreateTxCardAdvanced({
                     return nextState
                   })
                 }}
-              ></NumberInput>
+              ></NumberInput> */}
+              <Input
+                onChange={(e) => {
+                  setArgValues((prevState) => {
+                    const nextState = [...prevState]
+                    nextState[index] = { ...nextState[index], [comp.name]: Number(e.target.value) }
+                    return nextState
+                  })
+                }}
+                className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+              />
             </div>
           )
         case "bool":
           return (
             <div className="flex flex-col">
-              <Text className="mt-4">{comp.name}</Text>
+              <label className="mt-4 base-text">{comp.name}</label>
               <Select
                 className="min-w-[8rem]"
-                onValueChange={(value) => {
+                onChange={(value) => {
                   setArgValues((prevState) => {
                     const nextState = [...prevState]
                     nextState[index] = { ...nextState[index], [comp.name]: value }
@@ -142,12 +143,8 @@ export default function CreateTxCardAdvanced({
                   })
                 }}
               >
-                <SelectItem icon={NoSymbolIcon} value="false">
-                  No
-                </SelectItem>
-                <SelectItem icon={CheckIcon} value="true">
-                  Yes
-                </SelectItem>
+                <Select.Option value="false">No</Select.Option>
+                <Select.Option value="true">Yes</Select.Option>
               </Select>
             </div>
           )
@@ -156,8 +153,8 @@ export default function CreateTxCardAdvanced({
         default:
           return (
             <div className="flex flex-col">
-              <Text className="mt-4">{comp.name}</Text>
-              <TextInput
+              <label className="mt-4 base-text">{comp.name}</label>
+              {/* <TextInput
                 onChange={(e) => {
                   setArgValues((prevState) => {
                     const nextState = [...prevState]
@@ -165,7 +162,17 @@ export default function CreateTxCardAdvanced({
                     return nextState
                   })
                 }}
-              ></TextInput>
+              ></TextInput> */}
+              <Input
+                onChange={(e) => {
+                  setArgValues((prevState) => {
+                    const nextState = [...prevState]
+                    nextState[index] = { ...nextState[index], [comp.name]: e.target.value }
+                    return nextState
+                  })
+                }}
+                className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+              />
             </div>
           )
       }
@@ -176,36 +183,44 @@ export default function CreateTxCardAdvanced({
       case "address":
         return (
           <div className="flex flex-col">
-            <Text className="mt-4">{comp.name}</Text>
-            <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput>
+            <label className="mt-4 base-text">{comp.name}</label>
+            {/* <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput> */}
+            <Input
+              onChange={(e) => handleArgInputChange(e.target.value, index)}
+              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+            />
           </div>
         )
       case "uint256":
         return (
           <div className="flex flex-col">
-            <Text className="mt-4">{comp.name}</Text>
-            <NumberInput onChange={(e) => handleArgInputChange(Number(e.target.value), index)}></NumberInput>
+            <label className="mt-4 base-text">{comp.name}</label>
+            {/* <NumberInput onChange={(e) => handleArgInputChange(Number(e.target.value), index)}></NumberInput> */}
+            <Input
+              onChange={(e) => handleArgInputChange(Number(e.target.value), index)}
+              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+            />
           </div>
         )
       case "bool":
         return (
           <div className="flex flex-col">
-            <Text className="mt-4">{comp.name}</Text>
-            <Select className="min-w-[8rem]" onValueChange={(value) => handleArgInputChange(value, index)}>
-              <SelectItem icon={NoSymbolIcon} value="false">
-                No
-              </SelectItem>
-              <SelectItem icon={CheckIcon} value="true">
-                Yes
-              </SelectItem>
+            <label className="mt-4 base-text">{comp.name}</label>
+            <Select className="min-w-[8rem]" onChange={(value) => handleArgInputChange(value, index)}>
+              <Select.Option value="false">No</Select.Option>
+              <Select.Option value="true">Yes</Select.Option>
             </Select>
           </div>
         )
       default:
         return (
           <div className="flex flex-col">
-            <Text className="mt-4">{comp.name}</Text>
-            <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput>
+            <label className="mt-4 base-text">{comp.name}</label>
+            {/* <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput> */}
+            <Input
+              onChange={(e) => handleArgInputChange(e.target.value, index)}
+              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+            />
           </div>
         )
     }
@@ -246,116 +261,138 @@ export default function CreateTxCardAdvanced({
     console.log("Arg Values: ", argValues)
   }, [argValues])
 
+  console.log("isAbiParsed: ", { isAbiParsed })
+  console.log("selectedFunction: ", { selectedFunction })
+  console.log("argInputs: ", { argInputs })
+
   return (
     <div className="mt-6 flex flex-col w-full gap-6">
       <div className="flex flex-col">
-        <Text>Nonce</Text>
-        <div className="flex flex-row mt-2">
-          <NumberInput
-            value={inputValues.nonce.toString()}
-            onChange={(e) => setInputValues({ ...inputValues, nonce: Number(e.target.value) })}
-            error={!!validationErrors?.nonce}
-            errorMessage={validationErrors?.nonce}
-            spellCheck={false}
-          />
-        </div>
+        <label className="base-text">Nonce</label>
+        <Input
+          value={inputValues.nonce.toString()}
+          onChange={(e) => setInputValues({ ...inputValues, nonce: Number(e.target.value) })}
+          // error={!!validationErrors?.nonce}
+          // errorMessage={validationErrors?.nonce}
+          spellCheck={false}
+          placeholder="123"
+          size="middle"
+          className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+        />
       </div>
+
       <div className="flex flex-col">
-        <Text>Gas Order</Text>
-        <div className="flex flex-col">
-          <NumberInput
-            className="mt-2"
-            value={inputValues.gasOrder.toString()}
-            onChange={(e) => setInputValues({ ...inputValues, gasOrder: Number(e.target.value) })}
-            error={!!validationErrors?.gasOrder}
-            errorMessage={validationErrors?.gasOrder}
-            spellCheck={false}
+        <label className="base-text">Gas Order</label>
+        <Input
+          value={inputValues.gasOrder.toString()}
+          onChange={(e) => setInputValues({ ...inputValues, gasOrder: Number(e.target.value) })}
+          // error={!!validationErrors?.gasOrder}
+          // errorMessage={validationErrors?.gasOrder}
+          spellCheck={false}
+          placeholder="123"
+          size="middle"
+          className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+        />
+      </div>
+
+      <div className="flex flex-col">
+        <label className="base-text">On Behalf</label>
+        <Input
+          value={inputValues.onBehalf}
+          onChange={(e) => setInputValues({ ...inputValues, onBehalf: e.target.value })}
+          placeholder={inputValues.onBehalf}
+          // error={!!validationErrors?.onBehalf}
+          // errorMessage={validationErrors?.onBehalf}
+          spellCheck={false}
+          size="middle"
+          className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+        />
+      </div>
+
+      <div className="flex flex-col">
+        <label className="base-text mb-1">Execution period End</label>
+        <div className="flex flex-col gap-4">
+          <DatePicker
+            // defaultValue={dayjs().add(1, "d")}
+            value={inputValues.deadlineDate}
+            presets={[
+              {
+                label: "Tommorrow",
+                value: dayjs().add(1, "d"),
+              },
+              {
+                label: "Next Week",
+                value: dayjs().add(7, "d"),
+              },
+              {
+                label: "Next Month",
+                value: dayjs().add(1, "month"),
+              },
+            ]}
+            onChange={(date) => {
+              if (date) {
+                setInputValues({ ...inputValues, deadlineDate: date })
+              }
+            }}
+          />
+          <TimePicker
+            className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
+            // defaultValue={dayjs("00:00", "HH:mm")}
+            format={"HH:mm"}
+            value={inputValues.deadlineTime}
+            onChange={(value) => setInputValues({ ...inputValues, deadlineTime: value })}
+            // error={!!validationErrors?.executionPeriodEndTime}
+            // errorMessage={validationErrors?.executionPeriodEndTime}
           />
         </div>
       </div>
 
       <div className="flex flex-col">
-        <Text>On Behalf</Text>
-        <div className="flex flex-col mt-2">
-          <TextInput
-            icon={WalletIcon}
-            value={inputValues.onBehalf}
-            onChange={(e) => setInputValues({ ...inputValues, onBehalf: e.target.value })}
-            placeholder={inputValues.onBehalf}
-            error={!!validationErrors?.onBehalf}
-            errorMessage={validationErrors?.onBehalf}
-            spellCheck={false}
-          ></TextInput>
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-between">
-        <Text>Execution period End</Text>
-        <div className="flex flex-row gap-2 mt-2">
-          <div className="flex flex-col">
-            <DatePicker
-              value={inputValues.deadlineDate}
-              onValueChange={(value) => setInputValues({ ...inputValues, deadlineDate: value })}
-              minDate={new Date()}
-            />
-          </div>
-          <div className="flex flex-col">
-            <TextInput
-              icon={ClockIcon}
-              value={inputValues.deadlineTime}
-              onChange={(e) => setInputValues({ ...inputValues, deadlineTime: e.target.value })}
-              placeholder={inputValues.deadlineTime}
-              error={!!validationErrors?.deadlineTime}
-              errorMessage={validationErrors?.deadlineTime}
-              spellCheck={false}
-            ></TextInput>
-          </div>
-        </div>
+        <label className="base-text">To</label>
+        <Input
+          value={inputValues.to}
+          onChange={(e) => setInputValues({ ...inputValues, to: e.target.value })}
+          placeholder={inputValues.to}
+          // error={!!validationErrors?.to}
+          // errorMessage={validationErrors?.to}
+          spellCheck={false}
+          size="middle"
+          className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+        />
       </div>
 
       <div className="flex flex-col">
-        <Text>To</Text>
-        <div className="flex flex-col mt-2">
-          <TextInput
-            icon={WalletIcon}
-            value={inputValues.to}
-            onChange={(e) => setInputValues({ ...inputValues, to: e.target.value })}
-            placeholder={inputValues.to}
-            error={!!validationErrors?.to}
-            errorMessage={validationErrors?.to}
-            spellCheck={false}
-          ></TextInput>
-        </div>
+        <label className="base-text">Gas</label>
+        <Input
+          value={inputValues.gas.toString()}
+          onChange={(e) => setInputValues({ ...inputValues, gas: Number(e.target.value) })}
+          // error={!!validationErrors?.gas}
+          // errorMessage={validationErrors?.gas}
+          spellCheck={false}
+          placeholder="123"
+          size="middle"
+          className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+        />
       </div>
 
       <div className="flex flex-col">
-        <Text>Gas</Text>
-        <div className="flex flex-row mt-2">
-          <NumberInput
-            value={inputValues.gas.toString()}
-            onChange={(e) => setInputValues({ ...inputValues, gas: Number(e.target.value) })}
-            error={!!validationErrors?.gas}
-            errorMessage={validationErrors?.gas}
-            spellCheck={false}
-          />
-        </div>
+        <label className="base-text">Tips</label>
+        <Input
+          value={inputValues.tips.toString()}
+          onChange={(e) => setInputValues({ ...inputValues, tips: Number(e.target.value) })}
+          // error={!!validationErrors?.tips}
+          // errorMessage={validationErrors?.tips}
+          spellCheck={false}
+          placeholder="123"
+          size="middle"
+          className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+        />
       </div>
-      <div className="flex flex-col">
-        <Text>Tips</Text>
-        <div className="flex flex-row mt-2">
-          <NumberInput
-            value={inputValues.tips.toString()}
-            onChange={(e) => setInputValues({ ...inputValues, tips: Number(e.target.value) })}
-            error={!!validationErrors?.tips}
-            errorMessage={validationErrors?.tips}
-            spellCheck={false}
-          />
-        </div>
-      </div>
+
       {isAbiParsed ? (
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">
+        <div className="flex flex-col old-lg:flex-row gap-6 mt-4">
           <div className="flex flex-col grow">
-            <Text>Functions parsed from provided ABI</Text>
+            <span className="base-text">Functions parsed from provided ABI</span>
             <div className="max-h-[30rem] overflow-auto mt-2 tremor-TextInput-root flex flex-col relative w-full  min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
               <JsonFormatter
                 json={JSON.stringify(parsedAbi)}
@@ -369,35 +406,28 @@ export default function CreateTxCardAdvanced({
           </div>
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">
-          <div className="flex flex-col grow">
-            <Text>ABI</Text>
-            <div className="tremor-TextInput-root flex flex-col mt-2 relative w-full items-center min-w-[10rem] outline-none rounded-tremor-default shadow-tremor-input dark:shadow-dark-tremor-input bg-tremor-background dark:bg-dark-tremor-background hover:bg-tremor-background-muted dark:hover:bg-dark-tremor-background-muted text-tremor-content dark:text-dark-tremor-content border-tremor-border dark:border-dark-tremor-border border">
-              <textarea
-                value={inputValues.userAbi}
-                onChange={(e) => {
-                  e.target.style.height = ""
-                  e.target.style.height = e.target.scrollHeight + "px"
-                  setInputValues({ ...inputValues, userAbi: e.target.value })
-                }}
-                // error={!!validationErrors?.userAbi}
-                // errorMessage={validationErrors?.userAbi}
-                placeholder="Copy and paste your ABI here"
-                spellCheck={false}
-                className="tremor-TextInput-input w-full focus:outline-none focus:ring-0 border-none bg-transparent text-tremor-default text-tremor-content-emphasis dark:text-dark-tremor-content-emphasis [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none pl-3 pr-4 py-2 placeholder:text-tremor-content dark:placeholder:text-dark-tremor-content resize-none"
-              ></textarea>
-            </div>
-          </div>
+        <div className="flex flex-col">
+          <label className="base-text">ABI</label>
+          <Input.TextArea
+            value={inputValues.userAbi}
+            onChange={(e) => {
+              e.target.style.height = ""
+              e.target.style.height = e.target.scrollHeight + "px"
+              setInputValues({ ...inputValues, userAbi: e.target.value })
+            }}
+            // error={!!validationErrors?.userAbi}
+            // errorMessage={validationErrors?.userAbi}
+            placeholder="Copy and paste your ABI here"
+            spellCheck={false}
+            className="border-normal dark:border-whiteDark hover:border-primary focus:border-primary"
+          />
         </div>
       )}
 
       {isAbiParsed ? (
-        <div className="flex flex-row md:justify-end mt-4">
-          <Button
-            className="grow md:grow-0"
-            disabled={isLoading}
-            color="red"
-            icon={XMarkIcon}
+        <div className="flex flex-row old-md:justify-end mt-4">
+          <span className="base-text">Abi was successfully parsed</span>
+          <Buttons
             onClick={() => {
               setIsAbiParsed(false)
               setParsedAbi(undefined)
@@ -406,42 +436,34 @@ export default function CreateTxCardAdvanced({
               setArgValues([])
               setSelectedFunction("")
             }}
-            variant="secondary"
+            className="grow old-md:grow-0 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
           >
             {isLoading ? "" : "Clear ABI"}
-          </Button>
+          </Buttons>
         </div>
       ) : (
-        <div className="flex flex-row md:justify-end mt-4">
-          <Button className="grow md:grow-0" disabled={isLoading} onClick={parseAbi} variant="secondary">
-            {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-            <TailSpin
-              height={20}
-              width={20}
-              color={SPINNER_COLOR}
-              ariaLabel="tail-spin-loading"
-              radius="0"
-              wrapperStyle={{}}
-              wrapperClass=""
-              visible={isLoading}
-            />
+        <div className="flex flex-row old-md:justify-end mt-4">
+          <Buttons
+            onClick={parseAbi}
+            className="grow old-md:grow-0 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
+          >
             {isLoading ? "" : "Parse ABI"}
-          </Button>
+          </Buttons>
         </div>
       )}
 
       {isAbiParsed && (
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">
+        <div className="flex flex-col old-lg:flex-row gap-6 mt-4">
           <div className="flex flex-col grow">
-            <Text>Function</Text>
+            <span className="base-text">Function</span>
             <div className="flex flex-col mt-2">
-              <SearchSelect value={selectedFunction} onValueChange={setSelectedFunction}>
+              <Select value={selectedFunction} onChange={setSelectedFunction}>
                 {parsedAbi
                   .filter((item) => item.type === "function")
                   .map((item, index) => {
-                    return <SearchSelectItem value={item.name}>{item.name}</SearchSelectItem>
+                    return <Select.Option value={item.name}>{item.name}</Select.Option>
                   })}
-              </SearchSelect>
+              </Select>
             </div>
           </div>
         </div>
@@ -449,27 +471,19 @@ export default function CreateTxCardAdvanced({
 
       {isAbiParsed && selectedFunction && argInputs.length !== 0 && (
         <div className="mt-8 flex flex-col">
-          <Title>Function Arguments</Title>
+          <span className="base-text">Function Arguments</span>
           {argInputs}
         </div>
       )}
 
       {isAbiParsed && (
-        <div className="flex flex-row md:justify-end mt-4">
-          <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
-            {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-            <TailSpin
-              height={20}
-              width={20}
-              color={SPINNER_COLOR}
-              ariaLabel="tail-spin-loading"
-              radius="0"
-              wrapperStyle={{}}
-              wrapperClass=""
-              visible={isLoading}
-            />
-            {isLoading ? "" : "Submit"}
-          </Button>
+        <div className="flex flex-row old-md:justify-end mt-4">
+          <Buttons
+            onClick={handleSubmit}
+            className="grow old-md:grow-0 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
+          >
+            {"Submit"}
+          </Buttons>
         </div>
       )}
     </div>

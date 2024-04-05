@@ -11,6 +11,12 @@ import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
 import TokenSearchSelect from "../TokenSearchSelect"
 import { TOKEN_NAME } from "@/constants/tokens"
 
+import { Form, Input, List, Select, Tabs, TabsProps } from "antd"
+const { Option } = Select
+
+import { Buttons } from "@/components/buttons"
+import CreateOrderCard from "@/components/CreateOrderCards/CreateOrderCard"
+
 export default function CreateOrderCardSimple({
   setInputValues,
   inputValues,
@@ -27,70 +33,80 @@ export default function CreateOrderCardSimple({
   return (
     <div className="mt-6 flex flex-col w-full">
       {/* Gas Amount, Token and Gas Price inputs */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col">
-          <Text>Gas</Text>
-          <div className="flex flex-col mt-2">
-            <NumberInput
-              icon={FireIcon}
-              value={inputValues.gasAmount.toString()}
-              onChange={(e) => {
-                const gasAmount = Number(e.target.value)
-                setInputValues({
-                  ...inputValues,
-                  gasAmount,
-                  guaranteeValueGasPrice: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
-                  rewardValueAmount: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
-                  gasCostTransfer: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
-                  rewardTransfer: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
-                })
-              }}
-              min={0}
-              error={!!validationErrors?.gasAmount}
-              errorMessage={validationErrors?.gasAmount}
-              spellCheck={false}
-            ></NumberInput>
-          </div>
-        </div>
-        <div className="flex flex-col lg:grow">
-          <Text>Gas Cost Token</Text>
-          <TokenSearchSelect
-            className="mt-2"
-            searchSelectValue={inputValues.gasCostValueToken}
-            changeHandler={(value) =>
-              setInputValues({
-                ...inputValues,
-                gasCostValueToken: value,
-                guaranteeValueToken: value,
-                rewardValueToken: value,
-              })
-            }
-          />
-        </div>
-        <div className="flex flex-col lg:grow">
-          <Text>Gas Cost GasPrice</Text>
-          <NumberInput
-            className="mt-2"
-            value={inputValues.gasCostValueGasPrice.toString()}
+          <label htmlFor="input-number-gas" className="base-text mb-1">
+            Gas Amount
+          </label>
+          <Input
+            value={inputValues.gasAmount.toString()}
             onChange={(e) => {
-              const gasCostValueGasPrice = Number(e.target.value)
+              const gasAmount = Number(e.target.value)
               setInputValues({
                 ...inputValues,
-                gasCostValueGasPrice,
-                guaranteeValueGasPrice: getGuaranteeValue(inputValues.gasAmount, gasCostValueGasPrice),
-                rewardValueAmount: getRewardValue(inputValues.gasAmount, gasCostValueGasPrice),
-                gasCostTransfer: getGuaranteeValue(inputValues.gasAmount, gasCostValueGasPrice),
-                rewardTransfer: getRewardValue(inputValues.gasAmount, gasCostValueGasPrice),
+                gasAmount,
+                guaranteeValueGasPrice: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
+                rewardValueAmount: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
+                gasCostTransfer: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
+                rewardTransfer: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
               })
             }}
-            error={!!validationErrors?.gasCostValueGasPrice}
-            errorMessage={validationErrors?.gasCostValueGasPrice}
+            min={0}
+            // error={!!validationErrors?.gasAmount}
+            // errorMessage={validationErrors?.gasAmount}
             spellCheck={false}
+            placeholder="123"
+            size="middle"
+            className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
           />
         </div>
+        <div className="flex flex-col old-md:flex-row gap-4">
+          <div className="flex flex-col grow justify-start ">
+            <label htmlFor="token-select" className="base-text mb-1">
+              Token
+            </label>
+            <TokenSearchSelect
+              searchSelectValue={inputValues.gasCostValueToken}
+              changeHandler={(value) =>
+                setInputValues({
+                  ...inputValues,
+                  gasCostValueToken: value,
+                  guaranteeValueToken: value,
+                  rewardValueToken: value,
+                })
+              }
+            />
+          </div>
+          <div className="flex flex-col grow justify-start">
+            <label htmlFor="input-number-gasCost" className="base-text mb-1">
+              Gas Cost
+            </label>
+            <Input
+              value={inputValues.gasCostValueGasPrice.toString()}
+              onChange={(e) => {
+                const gasCostValueGasPrice = Number(e.target.value)
+                setInputValues({
+                  ...inputValues,
+                  gasCostValueGasPrice,
+                  guaranteeValueGasPrice: getGuaranteeValue(inputValues.gasAmount, gasCostValueGasPrice),
+                  rewardValueAmount: getRewardValue(inputValues.gasAmount, gasCostValueGasPrice),
+                  gasCostTransfer: getGuaranteeValue(inputValues.gasAmount, gasCostValueGasPrice),
+                  rewardTransfer: getRewardValue(inputValues.gasAmount, gasCostValueGasPrice),
+                })
+              }}
+              // error={!!validationErrors?.gasCostValueGasPrice}
+              // errorMessage={validationErrors?.gasCostValueGasPrice}
+              spellCheck={false}
+              placeholder="123"
+              size="middle"
+              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+            />
+          </div>
+        </div>
       </div>
-      <div className="flex flex-col gap-4 md:gap-0 md:items-end md:flex-row md:justify-between mt-4">
+      <div className="flex flex-col old-sm:flex-row old-sm:items-end old-sm:justify-between gap-4 mt-4 old-sm:mt-8">
         <Receipt
+          className=""
           //TODO pass correct token names
           gasAmount={inputValues.gasAmount}
           gasCostValue={inputValues.gasCostValueGasPrice}
@@ -98,20 +114,9 @@ export default function CreateOrderCardSimple({
           gasCostTokenName={TOKEN_NAME[inputValues.gasCostValueToken] ?? inputValues.gasCostValueToken}
           rewardTokenName={TOKEN_NAME[inputValues.rewardValueToken] ?? inputValues.rewardValueToken}
         />
-        <Button className="grow md:grow-0" disabled={isLoading} onClick={handleSubmit}>
-          {/* <Button onClick={() => setIsLoading(!isLoading)}> */}
-          <TailSpin
-            height={20}
-            width={20}
-            color={SPINNER_COLOR}
-            ariaLabel="tail-spin-loading"
-            radius="0"
-            wrapperStyle={{}}
-            wrapperClass=""
-            visible={isLoading}
-          />
-          {isLoading ? "" : "Create Gas Order"}
-        </Button>
+        <Buttons onClick={handleSubmit} className="primary_btn">
+          {"Create Gas Order"}
+        </Buttons>
       </div>
     </div>
   )

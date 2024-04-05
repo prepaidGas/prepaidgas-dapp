@@ -1,0 +1,22 @@
+[
+    {
+      "id": 1,
+      "name": "Facebook",
+      "icon": "facebook"
+    },
+    {
+      "id": 2,
+      "name": "Twitter",
+      "icon": "twitter"
+    },
+    {
+      "id": 3,
+      "name": "Dribble",
+      "icon": "dribbble"
+    },
+    {
+      "id": 4,
+      "name": "Instagram",
+      "icon": "instagram"
+    }
+  ]

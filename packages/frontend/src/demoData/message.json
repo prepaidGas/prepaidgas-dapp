@@ -1,0 +1,50 @@
+[
+    {
+      "id": 1,
+      "author": "App Developer",
+      "count": "3",
+      "time": "2.5 hrs ago",
+      "img": "img/avatar/app-developer.png",
+      "text": "Lorem ipsum dolor amet cosec..."
+    },
+    {
+        "id": 2,
+        "author": "Product Manager",
+        "count": "4",
+        "time": "3 hrs ago",
+        "img": "img/avatar/product.png",
+        "text": "Lorem ipsum dolor amet cosec..."
+    },
+    {
+        "id": 3,
+        "author": "UI/UX Design",
+        "count": "5",
+        "time": "3.5 hrs ago",
+        "img": "img/avatar/ui-ux-design.png",
+        "text": "Lorem ipsum dolor amet cosec..."
+    },
+    {
+        "id": 4,
+        "author": "Software Engineering",
+        "count": "2",
+        "time": "2.5 hrs ago",
+        "img": "img/avatar/web-design-software-engineering.png",
+        "text": "Lorem ipsum dolor amet cosec..."
+    },
+    {
+        "id": 5,
+        "author": "App Developer",
+        "count": "5",
+        "time": "1.5 hrs ago",
+        "img": "img/avatar/app-developer.png",
+        "text": "Lorem ipsum dolor amet cosec..."
+    },
+    {
+        "id": 6,
+        "author": "Product Manager",
+        "count": "3",
+        "time": "2 hrs ago",
+        "img": "img/avatar/product.png",
+        "text": "Lorem ipsum dolor amet cosec..."
+    }
+]

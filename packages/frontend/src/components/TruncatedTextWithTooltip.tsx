@@ -5,6 +5,8 @@ import React, { useState } from "react"
 import { mergeRefs } from "react-merge-refs"
 import { Icon, Text } from "@tremor/react"
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline"
+import { Tooltip } from "antd"
+import { UilQuestionCircle, UilClipboardNotes, UilFavorite } from "@iconscout/react-unicons"
 
 const TruncatedTextWithTooltip = React.forwardRef(
   ({ text, isCopyable = false, title = "" }: { text: string; isCopyable?: boolean; title?: string }, ref) => {
@@ -23,24 +25,25 @@ const TruncatedTextWithTooltip = React.forwardRef(
     }
 
     return (
-      <div className={`flex w-auto`} ref={mergeRefs([ref, tooltipProps.refs.setReference])} {...getReferenceProps}>
-        <CustomTooltip text={text} {...tooltipProps} />
-        <div
-          onClick={() => {
-            setIsAnimating(true)
-            copyToClipboard()
-          }}
-          className={`flex flex-row justify-center items-center rounded-md border border-solid gap-2 border-blue-500 px-2 py-1 ${
-            isCopyable ? "cursor-pointer" : "cursor-default"
-          } ${isAnimating && "animate-wiggle"}`}
-          onAnimationEnd={() => setIsAnimating(false)}
-        >
-          {isCopyable && (
-            <Icon className="!p-0 !m-0" size="sm" variant="simple" icon={ClipboardDocumentIcon} color="blue" />
-          )}
-          <Text color="blue">{title ? title : truncateString(text)}</Text>
+      <>
+        <div className={`flex w-auto`}>
+          <Tooltip className="!w-auto !max-w-none" title={text} overlayStyle={{ maxWidth: "500px" }}>
+            <div
+              onClick={() => {
+                setIsAnimating(true)
+                copyToClipboard()
+              }}
+              onAnimationEnd={() => setIsAnimating(false)}
+              className={`flex flex-row justify-center items-center rounded-md border border-solid gap-2 [&>*]:fill-primary border-primary px-2 py-1 ${
+                isCopyable ? "cursor-pointer" : "cursor-default"
+              } ${isAnimating && "animate-btnclick"} `}
+            >
+              {isCopyable && <UilClipboardNotes />}
+              <span className="text-primary">{title ? title : truncateString(text)}</span>
+            </div>
+          </Tooltip>
         </div>
-      </div>
+      </>
     )
   },
 )

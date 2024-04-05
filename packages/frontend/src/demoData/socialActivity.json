@@ -1,0 +1,47 @@
+{
+    "activityList": [
+      {
+        "icon": "inbox",
+        "authorImg": "img/chat-author/t1.jpg",
+        "authorName": "James",
+        "activityType": "message",
+        "time": "5 hours ago"
+      },
+      {
+        "icon": "upload",
+        "authorImg": "img/chat-author/t2.jpg",
+        "authorName": "Adam",
+        "activityType": "upload",
+        "time": "5 hours ago"
+      },
+      {
+        "icon": "signout",
+        "authorImg": "img/chat-author/t3.jpg",
+        "authorName": "Mumtahin",
+        "activityType": "registered",
+        "time": "5 hours ago"
+      },
+      {
+        "icon": "at",
+        "authorImg": "img/chat-author/t4.jpg",
+        "authorName": "James",
+        "activityType": "message",
+        "time": "5 hours ago"
+      },
+      {
+        "icon": "heart",
+        "authorImg": "img/chat-author/t5.png",
+        "authorName": "Adam",
+        "activityType": "upload",
+        "time": "5 hours ago"
+      },
+      {
+        "icon": "comment-alt",
+        "authorImg": "img/chat-author/t1.jpg",
+        "authorName": "Mumtahin",
+        "activityType": "registered",
+        "time": "5 hours ago"
+      }
+    ]
+  }
+  

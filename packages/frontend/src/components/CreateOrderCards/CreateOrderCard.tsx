@@ -1,33 +1,29 @@
 "use client"
 
-import {
-  getTomorrowStartDate,
-  getTomorrowEndDate,
-  combineDateAndTime,
-  getUnixTimestampInSeconds,
-} from "@/utils/dateAndTime.utils"
+import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTime.utils"
 import format from "date-fns/format"
 
 import { writeContract, waitForTransaction } from "@wagmi/core"
 import { MockTokenABI, GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
 import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
 import { useAccount } from "wagmi"
+import { UilWallet } from "@iconscout/react-unicons"
 
-import { Card, Icon, Tab, TabGroup, TabList, TabPanel, TabPanels, Title } from "@tremor/react"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { z } from "zod"
 import CreateOrderCardSimple from "./CreateOrderCardSimple"
 import CreateOrderCardAdvanced from "./CreateOrderCardAdvanced"
 import DialogWindow from "../DialogWindow"
-import { WalletIcon } from "@heroicons/react/24/outline"
 import UserAgreement from "../UserAgreement"
+import { Tabs, TabsProps } from "antd"
+import dayjs, { type Dayjs } from "dayjs"
 
 const schema = z.object({
   gasAmount: z.number().int().gt(0),
-  executionPeriodStartDate: z.date(),
-  executionPeriodStartTime: z.string(),
-  executionPeriodEndDate: z.date(),
-  executionPeriodEndTime: z.string(),
+  executionPeriodStartDate: z.instanceof(dayjs as unknown as typeof Dayjs),
+  executionPeriodStartTime: z.instanceof(dayjs as unknown as typeof Dayjs),
+  executionPeriodEndDate: z.instanceof(dayjs as unknown as typeof Dayjs),
+  executionPeriodEndTime: z.instanceof(dayjs as unknown as typeof Dayjs),
   rewardValueToken: z.string(),
   rewardValueAmount: z.number().int().gt(0),
   gasCostValueToken: z.string(),
@@ -40,6 +36,13 @@ const schema = z.object({
 })
 
 export type CreateOrderState = z.infer<typeof schema>
+
+// export interface CreateOrderState extends CreateOrderStateZod {
+//   executionPeriodStartDate: Date
+//   executionPeriodStartTime: Dayjs
+//   executionPeriodEndDate: Date
+//   executionPeriodEndTime: Dayjs
+// }
 
 export default function CreateOrderCard({
   setShowDialogWindow,
@@ -72,15 +75,15 @@ export default function CreateOrderCard({
   //TODO: execution window and dates?
   const initialState: CreateOrderState = {
     gasAmount: 10,
-    executionPeriodStartDate: getTomorrowStartDate(),
-    executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
-    executionPeriodEndDate: getTomorrowEndDate(),
-    executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
-    rewardValueToken: "",
+    executionPeriodStartDate: dayjs().add(1, "day"),
+    executionPeriodStartTime: dayjs("00:00", "HH:mm"),
+    executionPeriodEndDate: dayjs().add(2, "day"),
+    executionPeriodEndTime: dayjs("00:00", "HH:mm"),
+    rewardValueToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     rewardValueAmount: 10,
-    gasCostValueToken: "",
+    gasCostValueToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     gasCostValueGasPrice: 10,
-    guaranteeValueToken: "",
+    guaranteeValueToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     guaranteeValueGasPrice: 10,
     executionWindow: 1000,
     rewardTransfer: 10,
@@ -230,30 +233,34 @@ export default function CreateOrderCard({
     }
   }
 
-  const setAdvancedInputsToDefault = () => {
-    setInputValues({
-      //save current gas amount
-      gasAmount: inputValues.gasAmount,
-      //apply new time
-      executionPeriodStartDate: getTomorrowStartDate(),
-      executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
-      executionPeriodEndDate: getTomorrowEndDate(),
-      executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
-      //set all tokens to be equal to gas value token
-      gasCostValueToken: inputValues.gasCostValueToken,
-      guaranteeValueToken: inputValues.gasCostValueToken,
-      rewardValueToken: inputValues.gasCostValueToken,
-      //save current gasCostValueGasPrice
-      gasCostValueGasPrice: inputValues.gasCostValueGasPrice,
-      //recalculate reward and guarantee
-      guaranteeValueGasPrice: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
-      rewardValueAmount: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
-      //set execution window to initial value
-      executionWindow: initialState.executionWindow,
-      //TODO: recalculate reward transfer and gasCost transfer
-      rewardTransfer: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
-      gasCostTransfer: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
-    })
+  const setAdvancedInputsToDefault = (tabKey: string) => {
+    if (tabKey === "1") {
+      console.log("SETTING INPUTS TO DEFAULT")
+
+      setInputValues({
+        //save current gas amount
+        gasAmount: inputValues.gasAmount,
+        //apply new time
+        executionPeriodStartDate: dayjs().add(1, "day"),
+        executionPeriodStartTime: dayjs("00:00", "HH:mm"),
+        executionPeriodEndDate: dayjs().add(2, "day"),
+        executionPeriodEndTime: dayjs("00:00", "HH:mm"),
+        //set all tokens to be equal to gas value token
+        gasCostValueToken: inputValues.gasCostValueToken,
+        guaranteeValueToken: inputValues.gasCostValueToken,
+        rewardValueToken: inputValues.gasCostValueToken,
+        //save current gasCostValueGasPrice
+        gasCostValueGasPrice: inputValues.gasCostValueGasPrice,
+        //recalculate reward and guarantee
+        guaranteeValueGasPrice: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
+        rewardValueAmount: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
+        //set execution window to initial value
+        executionWindow: initialState.executionWindow,
+        //TODO: recalculate reward transfer and gasCost transfer
+        rewardTransfer: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
+        gasCostTransfer: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
+      })
+    }
   }
 
   useEffect(() => {
@@ -276,6 +283,35 @@ export default function CreateOrderCard({
     }
   }, [address])
 
+  //todo: make sure this is the best way to store data for tabs. const inside of function may lead to re-renders
+  const items: TabsProps["items"] = [
+    {
+      key: "1",
+      label: "Simple",
+      children: (
+        <CreateOrderCardSimple
+          setInputValues={setInputValues}
+          inputValues={inputValues}
+          validationErrors={validationErrors}
+          handleSubmit={handleSubmit}
+        />
+      ),
+    },
+
+    {
+      key: "2",
+      label: "Advanced",
+      children: (
+        <CreateOrderCardAdvanced
+          setInputValues={setInputValues}
+          inputValues={inputValues}
+          validationErrors={validationErrors}
+          handleSubmit={handleSubmit}
+        />
+      ),
+    },
+  ]
+
   return (
     <>
       {showWalletConnectionWindow && (
@@ -283,9 +319,9 @@ export default function CreateOrderCard({
           isClosable={true}
           withoutDescription={true}
           title={
-            <div className="flex flex-row items-center">
-              <Icon color="orange" variant="outlined" size="lg" icon={WalletIcon}></Icon>
-              <Title className="ml-4">Wallet Connection</Title>
+            <div className="flex flex-row items-center [&>*]:fill-[#404040] [&>*]:dark:fill-[#A4A5AA]">
+              <UilWallet />
+              <span className="ml-4 base-text text-xl">Wallet Connection</span>
             </div>
           }
           description="Please accept our terms of service and connect your wallet to continue with order creation"
@@ -293,32 +329,9 @@ export default function CreateOrderCard({
           onClose={() => setShowWalletConnectionWindow(false)}
         />
       )}
-      <Card className="mt-6 flex flex-col w-full">
-        <TabGroup>
-          <TabList className="mt-8">
-            <Tab onClick={setAdvancedInputsToDefault}>Simple</Tab>
-            <Tab>Advanced</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <CreateOrderCardSimple
-                setInputValues={setInputValues}
-                inputValues={inputValues}
-                validationErrors={validationErrors}
-                handleSubmit={handleSubmit}
-              />
-            </TabPanel>
-            <TabPanel>
-              <CreateOrderCardAdvanced
-                setInputValues={setInputValues}
-                inputValues={inputValues}
-                validationErrors={validationErrors}
-                handleSubmit={handleSubmit}
-              />
-            </TabPanel>
-          </TabPanels>
-        </TabGroup>
-      </Card>
+      <div className="flex flex-col w-full">
+        <Tabs defaultActiveKey="1" items={items} onChange={setAdvancedInputsToDefault} />
+      </div>
     </>
   )
 }
