@@ -14,8 +14,7 @@
     "dev": "npm run fe-dev & npm run sc-dev; wait",
     "docker-build": "docker build -t wednesday .",
     "docker-dev": "docker run -it --rm -v .:/app -p 3000:3000 -p 8545:8545 wednesday npm run dev",
-    "docker-dev-windows": "docker run -it --rm -v /${PWD}:/app -p 3000:3000 -p 8545:8545 wednesday npm run dev",
-    "docker-setup": "docker run --rm -v /${PWD}:/app -p 3000:3000 -p 8545:8545 wednesday npm run dev-setup"
+    "docker-dev-windows": "docker run -it --rm -v /${PWD}:/app -p 3000:3000 -p 8545:8545 wednesday npm run dev"
   },
   "overrides": {
     "react-lightbox-pack": {
