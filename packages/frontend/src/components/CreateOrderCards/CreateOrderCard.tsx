@@ -4,8 +4,8 @@ import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTi
 import format from "date-fns/format"
 
 import { writeContract, waitForTransaction } from "@wagmi/core"
-import { MockTokenABI, GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
-import { PaymentStruct, GasPaymentStruct } from "typechain-types/GasOrder"
+import { MockTokenABI, PrepaidGasABI, prepaidGasCoreContractAddress } from "@/helpers"
+import { GasPaymentStruct } from "typechain-types/PrepaidGas"
 import { useAccount } from "wagmi"
 import { UilWallet } from "@iconscout/react-unicons"
 
@@ -20,29 +20,21 @@ import dayjs, { type Dayjs } from "dayjs"
 
 const schema = z.object({
   gasAmount: z.number().int().gt(0),
-  executionPeriodStartDate: z.instanceof(dayjs as unknown as typeof Dayjs),
-  executionPeriodStartTime: z.instanceof(dayjs as unknown as typeof Dayjs),
-  executionPeriodEndDate: z.instanceof(dayjs as unknown as typeof Dayjs),
-  executionPeriodEndTime: z.instanceof(dayjs as unknown as typeof Dayjs),
-  rewardValueToken: z.string(),
-  rewardValueAmount: z.number().int().gt(0),
-  gasCostValueToken: z.string(),
-  gasCostValueGasPrice: z.number().int().gt(0),
-  guaranteeValueToken: z.string(),
-  guaranteeValueGasPrice: z.number().int().gt(0),
-  executionWindow: z.number().int().gt(0),
-  rewardTransfer: z.number().int().gt(0),
-  gasCostTransfer: z.number().int().gt(0),
+  expireDate: z.instanceof(dayjs as unknown as typeof Dayjs),
+  expireTime: z.instanceof(dayjs as unknown as typeof Dayjs),
+  startDate: z.instanceof(dayjs as unknown as typeof Dayjs),
+  startTime: z.instanceof(dayjs as unknown as typeof Dayjs),
+  endDate: z.instanceof(dayjs as unknown as typeof Dayjs),
+  endTime: z.instanceof(dayjs as unknown as typeof Dayjs),
+  txWindow: z.number().int().gt(0),
+  redeemWindow: z.number().int().gt(0),
+  gasPriceToken: z.string(),
+  gasPricePerUnit: z.number().int().gt(0),
+  guaranteeToken: z.string(),
+  guaranteePerUnit: z.number().int().gt(0),
 })
 
 export type CreateOrderState = z.infer<typeof schema>
-
-// export interface CreateOrderState extends CreateOrderStateZod {
-//   executionPeriodStartDate: Date
-//   executionPeriodStartTime: Dayjs
-//   executionPeriodEndDate: Date
-//   executionPeriodEndTime: Dayjs
-// }
 
 export default function CreateOrderCard({
   setShowDialogWindow,
@@ -51,43 +43,22 @@ export default function CreateOrderCard({
   setShowDialogWindow: Dispatch<SetStateAction<boolean>>
   setTransactionDetails: Dispatch<SetStateAction<{}>>
 }) {
-  // const initialState: CreateOrderState = {
-  //   gasAmount: 0,
-  //   executionPeriodStartDate: getTomorrowStartDate(),
-  //   executionPeriodStartTime: format(getTomorrowStartDate(), "HH:mm:ss"),
-  //   executionPeriodEndDate: getTomorrowEndDate(),
-  //   executionPeriodEndTime: format(getTomorrowEndDate(), "HH:mm:ss"),
-  //   isRevocable: true,
-  //   rewardValueToken: "",
-  //   rewardValueAmount: 0,
-  //   gasCostValueToken: "",
-  //   gasCostValueGasPrice: 0,
-  //   guaranteeValueToken: "",
-  //   guaranteeValueGasPrice: 0,
-  //   executionWindow: 1000,
-  //   rewardTransfer: 0,
-  //   gasCostTransfer: 0,
-  // }
-
-  //rewardValueToken: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-
-  //TODO: this initial state is for tests only, remove in production
-  //TODO: execution window and dates?
+  //TODO: this initial state is for tests only, replace in production
+  //Values for simple order creation: Redeem window is 2h, txWindow is 10m, expire = current time + 15 mins, start = 0, end = current time + 24h,
   const initialState: CreateOrderState = {
     gasAmount: 10,
-    executionPeriodStartDate: dayjs().add(1, "day"),
-    executionPeriodStartTime: dayjs("00:00", "HH:mm"),
-    executionPeriodEndDate: dayjs().add(2, "day"),
-    executionPeriodEndTime: dayjs("00:00", "HH:mm"),
-    rewardValueToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    rewardValueAmount: 10,
-    gasCostValueToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    gasCostValueGasPrice: 10,
-    guaranteeValueToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    guaranteeValueGasPrice: 10,
-    executionWindow: 1000,
-    rewardTransfer: 10,
-    gasCostTransfer: 100,
+    expireDate: dayjs().add(1, "day"),
+    expireTime: dayjs("00:00", "HH:mm"),
+    startDate: dayjs().add(1, "day"),
+    startTime: dayjs("00:00", "HH:mm"),
+    endDate: dayjs().add(2, "day"),
+    endTime: dayjs("00:00", "HH:mm"),
+    txWindow: 600,
+    redeemWindow: 7200,
+    gasPriceToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    gasPricePerUnit: 10,
+    guaranteeToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    guaranteePerUnit: 10,
   }
 
   const { address, isConnecting, isDisconnected } = useAccount()
@@ -103,90 +74,50 @@ export default function CreateOrderCard({
   const createOrder = async () => {
     console.log("CreateOrderTestArr: START")
     const testArr = [
+      address,
       inputValues.gasAmount,
-      getUnixTimestampInSeconds(
-        combineDateAndTime(inputValues.executionPeriodStartDate, inputValues.executionPeriodStartTime),
-      ),
-      getUnixTimestampInSeconds(
-        combineDateAndTime(inputValues.executionPeriodEndDate, inputValues.executionPeriodEndTime),
-      ),
-      inputValues.executionWindow,
-      { token: inputValues.rewardValueToken, amount: inputValues.rewardValueAmount } as PaymentStruct,
-      { token: inputValues.gasCostValueToken, gasPrice: inputValues.gasCostValueGasPrice } as GasPaymentStruct,
-      { token: inputValues.guaranteeValueToken, gasPrice: inputValues.guaranteeValueGasPrice } as GasPaymentStruct,
-      inputValues.rewardTransfer,
-      inputValues.gasCostTransfer,
+      getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
+      getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
+      getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+      inputValues.txWindow,
+      inputValues.redeemWindow,
+      { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit } as GasPaymentStruct,
+      { token: inputValues.guaranteeToken, perUnit: inputValues.guaranteePerUnit } as GasPaymentStruct,
     ]
     console.log("CreateOrderTestArr: ", testArr)
 
     setShowDialogWindow(true)
     setIsLoading(true)
 
-    //Approve both reward and GasCost * GasAmount
-    if (inputValues.rewardValueToken === inputValues.gasCostValueToken) {
-      try {
-        const data = await writeContract({
-          address: inputValues.rewardValueToken as `0x${string}`,
-          abi: MockTokenABI,
-          functionName: "approve",
-          args: [
-            prepaidGasCoreContractAddress(),
-            inputValues.gasCostValueGasPrice * inputValues.gasAmount + inputValues.rewardValueAmount,
-          ],
-        })
-        console.log("CreateOrderData Approve: ", data)
-        const txData = await waitForTransaction({ hash: data.hash })
-        console.log("CreateOrderTXData: ", txData)
-      } catch (e) {
-        console.log("CreateOrderError Approve: ", e)
-      }
-    } else {
-      //Approve reward
-      try {
-        const data = await writeContract({
-          address: inputValues.rewardValueToken as `0x${string}`,
-          abi: MockTokenABI,
-          functionName: "approve",
-          args: [prepaidGasCoreContractAddress(), inputValues.rewardValueAmount],
-        })
-        console.log("CreateOrderData: ", data)
-      } catch (e) {
-        console.log("CreateOrderError: ", e)
-      }
-      //Approve gasCost * gasAmount
-      try {
-        const data = await writeContract({
-          address: inputValues.gasCostValueToken as `0x${string}`,
-          abi: MockTokenABI,
-          functionName: "approve",
-          args: [prepaidGasCoreContractAddress(), inputValues.gasCostValueGasPrice * inputValues.gasAmount],
-        })
-        console.log("CreateOrderData: ", data)
-      } catch (e) {
-        console.log("CreateOrderError: ", e)
-      }
+    //Approve gasCost * gasAmount
+    try {
+      const data = await writeContract({
+        address: inputValues.gasPriceToken as `0x${string}`,
+        abi: MockTokenABI,
+        functionName: "approve",
+        args: [prepaidGasCoreContractAddress(), inputValues.gasPricePerUnit * inputValues.gasAmount],
+      })
+      console.log("CreateOrderData: ", data)
+    } catch (e) {
+      console.log("CreateOrderError: ", e)
     }
 
     // Create Order
     try {
       const data = await writeContract({
         address: prepaidGasCoreContractAddress(),
-        abi: GasOrderABI,
-        functionName: "createOrder",
+        abi: PrepaidGasABI,
+        functionName: "orderCreate",
         args: [
+          address,
           inputValues.gasAmount,
-          getUnixTimestampInSeconds(
-            combineDateAndTime(inputValues.executionPeriodStartDate, inputValues.executionPeriodStartTime),
-          ),
-          getUnixTimestampInSeconds(
-            combineDateAndTime(inputValues.executionPeriodEndDate, inputValues.executionPeriodEndTime),
-          ),
-          inputValues.executionWindow,
-          [inputValues.rewardValueToken, inputValues.rewardValueAmount], //} as PaymentStruct, @todo remove
-          [inputValues.gasCostValueToken, inputValues.gasCostValueGasPrice], // } as GasPaymentStruct,
-          [inputValues.guaranteeValueToken, inputValues.guaranteeValueGasPrice], //} as GasPaymentStruct,
-          inputValues.rewardTransfer,
-          inputValues.gasCostTransfer,
+          getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
+          getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
+          getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+          inputValues.txWindow,
+          inputValues.redeemWindow,
+          { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit } as GasPaymentStruct,
+          { token: inputValues.guaranteeToken, perUnit: inputValues.guaranteePerUnit } as GasPaymentStruct,
         ],
       })
       console.log("CreateOrderData: ", data)
@@ -194,9 +125,8 @@ export default function CreateOrderCard({
       console.log("CreateOrderTXData: ", txData)
       setTransactionDetails(txData)
     } catch (e) {
-      console.log(e)
-      setTransactionDetails({ error: e })
       console.log("CreateOrderError: ", e)
+      setTransactionDetails({ error: e })
     }
     setIsLoading(false)
     console.log("CreateOrderTestArr: END")
@@ -241,24 +171,22 @@ export default function CreateOrderCard({
         //save current gas amount
         gasAmount: inputValues.gasAmount,
         //apply new time
-        executionPeriodStartDate: dayjs().add(1, "day"),
-        executionPeriodStartTime: dayjs("00:00", "HH:mm"),
-        executionPeriodEndDate: dayjs().add(2, "day"),
-        executionPeriodEndTime: dayjs("00:00", "HH:mm"),
-        //set all tokens to be equal to gas value token
-        gasCostValueToken: inputValues.gasCostValueToken,
-        guaranteeValueToken: inputValues.gasCostValueToken,
-        rewardValueToken: inputValues.gasCostValueToken,
-        //save current gasCostValueGasPrice
-        gasCostValueGasPrice: inputValues.gasCostValueGasPrice,
-        //recalculate reward and guarantee
-        guaranteeValueGasPrice: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
-        rewardValueAmount: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
+        expireDate: dayjs().add(1, "day"),
+        expireTime: dayjs("00:00", "HH:mm"),
+        startDate: dayjs().add(1, "day"),
+        startTime: dayjs("00:00", "HH:mm"),
+        endDate: dayjs().add(2, "day"),
+        endTime: dayjs("00:00", "HH:mm"),
         //set execution window to initial value
-        executionWindow: initialState.executionWindow,
-        //TODO: recalculate reward transfer and gasCost transfer
-        rewardTransfer: (inputValues.gasAmount / 10) * inputValues.gasCostValueGasPrice,
-        gasCostTransfer: inputValues.gasAmount * inputValues.gasCostValueGasPrice,
+        txWindow: 600,
+        redeemWindow: 7200,
+        //set all tokens to be equal to gas value token
+        gasPriceToken: inputValues.gasPriceToken,
+        guaranteeToken: inputValues.gasPriceToken,
+        //save current gasCostValueGasPrice
+        gasPricePerUnit: inputValues.gasPricePerUnit,
+        //recalculate reward and guarantee
+        guaranteePerUnit: inputValues.gasAmount * inputValues.gasPricePerUnit,
       })
     }
   }

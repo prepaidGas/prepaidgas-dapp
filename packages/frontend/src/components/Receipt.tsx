@@ -6,15 +6,11 @@ export default function Receipt({
   gasAmount,
   gasCostTokenName = "NULL",
   gasCostValue,
-  rewardTokenName = "NULL",
-  rewardValue,
   className = "",
 }: {
   gasAmount: number
   gasCostTokenName?: string
   gasCostValue: number
-  rewardTokenName?: string
-  rewardValue: number
   className?: string
 }) {
   return (
@@ -31,11 +27,7 @@ export default function Receipt({
             </span>
           </div>
         }
-        dataSource={
-          gasCostTokenName === rewardTokenName
-            ? [`${rewardValue + gasCostValue * gasAmount} ${gasCostTokenName}`]
-            : [`${gasCostValue * gasAmount} ${gasCostTokenName}`, `${gasCostValue * gasAmount} ${rewardTokenName}`]
-        }
+        dataSource={[`${gasCostValue * gasAmount} ${gasCostTokenName}`]}
         bordered={true}
         renderItem={(item) => <List.Item.Meta className="dark:[&>div>div]:text-white/60" description={item} />}
       />

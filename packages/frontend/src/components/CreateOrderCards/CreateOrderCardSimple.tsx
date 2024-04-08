@@ -45,10 +45,7 @@ export default function CreateOrderCardSimple({
               setInputValues({
                 ...inputValues,
                 gasAmount,
-                guaranteeValueGasPrice: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
-                rewardValueAmount: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
-                gasCostTransfer: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
-                rewardTransfer: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
+                guaranteePerUnit: getGuaranteeValue(gasAmount, inputValues.gasPricePerUnit),
               })
             }}
             min={0}
@@ -66,13 +63,12 @@ export default function CreateOrderCardSimple({
               Token
             </label>
             <TokenSearchSelect
-              searchSelectValue={inputValues.gasCostValueToken}
+              searchSelectValue={inputValues.gasPriceToken}
               changeHandler={(value) =>
                 setInputValues({
                   ...inputValues,
-                  gasCostValueToken: value,
-                  guaranteeValueToken: value,
-                  rewardValueToken: value,
+                  gasPriceToken: value[0],
+                  guaranteeToken: value[0],
                 })
               }
             />
@@ -82,16 +78,13 @@ export default function CreateOrderCardSimple({
               Gas Cost
             </label>
             <Input
-              value={inputValues.gasCostValueGasPrice.toString()}
+              value={inputValues.gasPricePerUnit.toString()}
               onChange={(e) => {
-                const gasCostValueGasPrice = Number(e.target.value)
+                const gasPricePerUnit = Number(e.target.value)
                 setInputValues({
                   ...inputValues,
-                  gasCostValueGasPrice,
-                  guaranteeValueGasPrice: getGuaranteeValue(inputValues.gasAmount, gasCostValueGasPrice),
-                  rewardValueAmount: getRewardValue(inputValues.gasAmount, gasCostValueGasPrice),
-                  gasCostTransfer: getGuaranteeValue(inputValues.gasAmount, gasCostValueGasPrice),
-                  rewardTransfer: getRewardValue(inputValues.gasAmount, gasCostValueGasPrice),
+                  gasPricePerUnit,
+                  guaranteePerUnit: getGuaranteeValue(inputValues.gasAmount, gasPricePerUnit),
                 })
               }}
               // error={!!validationErrors?.gasCostValueGasPrice}
@@ -109,10 +102,8 @@ export default function CreateOrderCardSimple({
           className=""
           //TODO pass correct token names
           gasAmount={inputValues.gasAmount}
-          gasCostValue={inputValues.gasCostValueGasPrice}
-          rewardValue={inputValues.rewardValueAmount}
-          gasCostTokenName={TOKEN_NAME[inputValues.gasCostValueToken] ?? inputValues.gasCostValueToken}
-          rewardTokenName={TOKEN_NAME[inputValues.rewardValueToken] ?? inputValues.rewardValueToken}
+          gasCostValue={inputValues.gasPricePerUnit}
+          gasCostTokenName={TOKEN_NAME[inputValues.gasPriceToken] ?? inputValues.gasPriceToken}
         />
         <Buttons onClick={handleSubmit} className="primary_btn">
           {"Create Gas Order"}
