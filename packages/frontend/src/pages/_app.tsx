@@ -6,7 +6,6 @@ import type { AppProps } from "next/app"
 import { Provider, useDispatch } from "react-redux"
 import { UserProvider } from "@auth0/nextjs-auth0/client"
 import AdminLayout from "./adminLayout"
-import AuthLayout from "./authLayout"
 import { wrapper, store } from "../redux/store"
 import "../i18n/config"
 

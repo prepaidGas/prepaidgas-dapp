@@ -50,10 +50,7 @@ export default function CreateOrderCardAdvanced({
                 setInputValues({
                   ...inputValues,
                   gasAmount,
-                  guaranteeValueGasPrice: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
-                  rewardValueAmount: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
-                  gasCostTransfer: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
-                  rewardTransfer: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
+                  guaranteeValueGasPrice: getGuaranteeValue(gasAmount, inputValues.gasPricePerUnit),
                 })
               }
             }}
@@ -144,54 +141,17 @@ export default function CreateOrderCardAdvanced({
         </div>
       </div>
 
-      {/* Reward Settings */}
-      <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
-        <div className="flex flex-col flex-1">
-          <label className="base-text mb-1">Reward Token</label>
-          <TokenSearchSelect
-            className=""
-            searchSelectValue={inputValues.rewardValueToken}
-            changeHandler={(value) =>
-              setInputValues({
-                ...inputValues,
-                rewardValueToken: value,
-              })
-            }
-          />
-        </div>
-
-        <div className="flex flex-col flex-1">
-          <label htmlFor="input-number-gas" className="base-text mb-1">
-            Reward Amount
-          </label>
-          <Input
-            value={inputValues.rewardValueAmount.toString()}
-            onChange={(e) => {
-              const rewardValueAmount = Number(e.target.value)
-              setInputValues({ ...inputValues, rewardValueAmount })
-            }}
-            min={0}
-            // error={!!validationErrors?.rewardValueAmount}
-            // errorMessage={validationErrors?.rewardValueAmount}
-            spellCheck={false}
-            placeholder="123"
-            size="middle"
-            className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-          />
-        </div>
-      </div>
-
       {/* Gas Cost Settings */}
       <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
         <div className="flex flex-col flex-1">
           <label className="base-text mb-1">Gas Cost Token</label>
           <TokenSearchSelect
             className=""
-            searchSelectValue={inputValues.gasCostValueToken}
+            searchSelectValue={inputValues.gasPriceToken}
             changeHandler={(value) =>
               setInputValues({
                 ...inputValues,
-                gasCostValueToken: value,
+                gasPriceToken: value[0],
               })
             }
           />
@@ -202,12 +162,12 @@ export default function CreateOrderCardAdvanced({
             Gas Price
           </label>
           <Input
-            value={inputValues.gasCostValueGasPrice.toString()}
+            value={inputValues.gasPricePerUnit.toString()}
             onChange={(e) => {
-              const gasCostValueGasPrice = Number(e.target.value)
+              const gasPricePerUnit = Number(e.target.value)
               setInputValues({
                 ...inputValues,
-                gasCostValueGasPrice,
+                gasPricePerUnit,
               })
             }}
             min={0}
@@ -227,11 +187,11 @@ export default function CreateOrderCardAdvanced({
           <label className="base-text mb-1">Guarantee Token</label>
           <TokenSearchSelect
             className=""
-            searchSelectValue={inputValues.guaranteeValueToken}
+            searchSelectValue={inputValues.guaranteeToken}
             changeHandler={(value) =>
               setInputValues({
                 ...inputValues,
-                guaranteeValueToken: value,
+                guaranteeToken: value,
               })
             }
           />
@@ -242,8 +202,8 @@ export default function CreateOrderCardAdvanced({
             Guarantee GasPrice
           </label>
           <Input
-            value={inputValues.guaranteeValueGasPrice.toString()}
-            onChange={(e) => setInputValues({ ...inputValues, guaranteeValueGasPrice: Number(e.target.value) })}
+            value={inputValues.guaranteePerUnit.toString()}
+            onChange={(e) => setInputValues({ ...inputValues, guaranteePerUnit: Number(e.target.value) })}
             min={0}
             // error={!!validationErrors?.guaranteeValueGasPrice}
             // errorMessage={validationErrors?.guaranteeValueGasPrice}
@@ -259,10 +219,27 @@ export default function CreateOrderCardAdvanced({
       <div className="flex flex-col old-lg:flex-row gap-6 mt-4">
         <div className="flex flex-col flex-1">
           <label htmlFor="input-number-gas" className="base-text mb-1">
-            Execution window
+            Transaction window
           </label>
           <Input
-            value={inputValues.executionWindow.toString()}
+            value={inputValues.txWindow.toString()}
+            onChange={(e) => setInputValues({ ...inputValues, executionWindow: Number(e.target.value) })}
+            min={0}
+            // error={!!validationErrors?.executionWindow}
+            // errorMessage={validationErrors?.executionWindow}
+            spellCheck={false}
+            placeholder="123"
+            size="middle"
+            className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+          />
+        </div>
+
+        <div className="flex flex-col flex-1">
+          <label htmlFor="input-number-gas" className="base-text mb-1">
+            Redeem window
+          </label>
+          <Input
+            value={inputValues.redeemWindow.toString()}
             onChange={(e) => setInputValues({ ...inputValues, executionWindow: Number(e.target.value) })}
             min={0}
             // error={!!validationErrors?.executionWindow}
