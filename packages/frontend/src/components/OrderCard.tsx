@@ -1,6 +1,6 @@
 import format from "date-fns/format"
 
-import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
+import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
 
 import { COLOR_BY_STATUS } from "@/constants"
 
@@ -35,11 +35,9 @@ interface OrderCard extends FilteredOrderStructOutput {
 export default function OrderCard({
   id,
   order,
-  gasBalance,
   status,
-  gasCost,
-  reward,
-  guarantee,
+  gasLeft,
+  executor,
   onFavorited = () => {},
   className = "",
 }: OrderCard) {
@@ -94,78 +92,6 @@ export default function OrderCard({
 
   return (
     <>
-      {/* <Card className={className + " break-words"} decoration="top" decorationColor={COLOR_BY_STATUS[Number(status)]}>
-        <Flex>
-          <StatusBadge status={Number(status)} />
-          {isFavorite ? (
-            <Button
-              onClick={() => {
-                removeFromFavorites()
-                onFavorited(false)
-              }}
-              color="amber"
-              icon={StarIcon}
-            ></Button>
-          ) : (
-            <Button
-              onClick={() => {
-                addToFavorites()
-                onFavorited(true)
-              }}
-              variant="secondary"
-              color="amber"
-              icon={StarIcon}
-            ></Button>
-          )}
-        </Flex> */}
-
-      {/* @dev Order Id */}
-      {/* <Metric>#{id.toString()}</Metric>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-row gap-2 items-center">
-            <Text>Manager:</Text>
-            <TruncatedTextWithTooltip text={order.manager} isCopyable />
-          </div> */}
-      {/* @dev Order executionPeriodStart and executionPeriodDeadline */}
-      {/*"yyyy.mm.dd hh:ss:mm"*/}
-      {/* <Text>
-            Execution timeframe: {format(new Date(Number(order.executionPeriodStart) * 1000), "MMM d y, HH:mm:ss")} -{" "}
-            {format(new Date(Number(order.executionPeriodDeadline) * 1000), "MMM d y, HH:mm:ss")}
-          </Text> */}
-      {/* @dev Order executionWindow */}
-      {/* <Text>Execution window: {order.executionWindow.toString()}</Text> */}
-      {/* @dev Order executionWindow */}
-      {/* @dev Order data, the details might be found in `TokenAmountWithDetails` structure */}
-      {/* todo: how to get token 'symbol'? ${reward.amount} ${reward.symbol} */}
-      {/* <div className="flex flex-row gap-2 items-center">
-            <Text>{`Reward:`}</Text>
-            <Text color="blue">{`${reward.amount}`}</Text>
-            <TruncatedTextWithTooltip title={TOKEN_NAME[reward.token] ?? ""} text={reward.token} isCopyable />
-          </div>
-          <div className="flex flex-row gap-2 items-center">
-            <Text>{`Gas Cost:`}</Text>
-            <Text color="blue">{`${gasCost.gasPrice}`}</Text>
-            <TruncatedTextWithTooltip title={TOKEN_NAME[gasCost.token] ?? ""} text={gasCost.token} isCopyable />
-          </div>
-          <div className="flex flex-row gap-2 items-center">
-            <Text>{`Guarantee:`}</Text>
-            <Text color="blue">{`${guarantee.gasPrice}`}</Text>
-            <TruncatedTextWithTooltip title={TOKEN_NAME[guarantee.token] ?? ""} text={guarantee.token} isCopyable />
-          </div>
-        </div> */}
-      {/* @dev Gas left (maxGas) */}
-      {/* <Flex className="mt-4">
-          <Text>Used: 0 / {order.maxGas.toString()}</Text>
-        </Flex>
-        <ProgressBar value={32} className="mt-2" />
-        <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
-          <Link href={`/order/${id}`}>
-            <Button variant="secondary">Manage Order</Button>
-          </Link>
-        </div>
-      </Card> */}
-
       <Cards headless className="max-w-[1024px] mx-auto relative mt-4">
         <div className="flex flex-col gap-3">
           <Buttons className="absolute [&>*]:fill-primary right-3 top-3 h-[40px] ml-4 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] ">
@@ -182,30 +108,36 @@ export default function OrderCard({
           </div>
 
           <span className="text-[#404040] dark:text-[#A4A5AA]">
-            Execution timeframe: {format(new Date(Number(order.executionPeriodStart) * 1000), "MMM d y, HH:mm:ss")} -{" "}
-            {format(new Date(Number(order.executionPeriodDeadline) * 1000), "MMM d y, HH:mm:ss")}
+            Execution timeframe: {format(new Date(Number(order.start) * 1000), "MMM d y, HH:mm:ss")} -{" "}
+            {format(new Date(Number(order.end) * 1000), "MMM d y, HH:mm:ss")}
           </span>
 
           <span className="text-[#404040] dark:text-[#A4A5AA]">
-            Execution window: {order.executionWindow.toString()}
+            Expire date: {format(new Date(Number(order.expire) * 1000), "MMM d y, HH:mm:ss")}
           </span>
 
-          <div className="flex flex-row items-center gap-2">
-            <span className="text-[#404040] dark:text-[#A4A5AA]">Reward:</span>
-            <span className="text-primary">{` ${reward.amount}`}</span>
-            <TruncatedTextWithTooltip title={TOKEN_NAME[reward.token] ?? ""} text={reward.token} isCopyable />
-          </div>
+          <span className="text-[#404040] dark:text-[#A4A5AA]">Transaction window: {order.txWindow.toString()}</span>
+
+          <span className="text-[#404040] dark:text-[#A4A5AA]">Redeem window: {order.redeemWindow.toString()}</span>
 
           <div className="flex flex-row items-center gap-2">
-            <span className="text-[#404040] dark:text-[#A4A5AA]">Gas Cost:</span>
-            <span className="text-primary">{` ${gasCost.gasPrice}`}</span>
-            <TruncatedTextWithTooltip title={TOKEN_NAME[gasCost.token] ?? ""} text={gasCost.token} isCopyable />
+            <span className="text-[#404040] dark:text-[#A4A5AA]">Gas Price:</span>
+            <span className="text-primary">{` ${order.gasPrice.perUnit}`}</span>
+            <TruncatedTextWithTooltip
+              title={TOKEN_NAME[order.gasPrice.token] ?? ""}
+              text={order.gasPrice.token}
+              isCopyable
+            />
           </div>
 
           <div className="flex flex-row items-center gap-2">
             <span className="text-[#404040] dark:text-[#A4A5AA]">Guarantee:</span>
-            <span className="text-primary">{`${guarantee.gasPrice}`}</span>
-            <TruncatedTextWithTooltip title={TOKEN_NAME[guarantee.token] ?? ""} text={guarantee.token} isCopyable />
+            <span className="text-primary">{`${order.gasGuarantee.perUnit}`}</span>
+            <TruncatedTextWithTooltip
+              title={TOKEN_NAME[order.gasGuarantee.token] ?? ""}
+              text={order.gasGuarantee.token}
+              isCopyable
+            />
           </div>
         </div>
       </Cards>

@@ -8,11 +8,11 @@ import { Buttons } from "@/components/buttons"
 // import OrderCard, { OrderCardProps } from "@/components/cards/orderCard"
 import { useEffect, useState } from "react"
 import SearchFiltersCard, { FilterOptions } from "@/components/SearchFiltersCard"
-import { FilteredOrderStructOutput } from "typechain-types/GasOrder"
+import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
 import { readContract } from "@wagmi/core"
 import Pagination from "@/components/Pagination"
 import { useAccount } from "wagmi"
-import { GasOrderABI, prepaidGasCoreContractAddress } from "@/helpers"
+import { prepaidGasCoreContractAddress, PrepaidGasABI } from "@/helpers"
 import { TailSpin } from "react-loader-spinner"
 import { SPINNER_COLOR } from "@/constants"
 import OrderCard from "@/components/OrderCard"
@@ -55,7 +55,8 @@ const OrderSearch = () => {
     const { manager, status, numberOfEntries } = filterOptions
     const searchArgs = [
       manager === "" ? defaultManager : manager,
-      address,
+      //todo: check
+      //address,
       status,
       numberOfEntries,
       (pageNumber - 1) * numberOfEntries,
@@ -64,12 +65,11 @@ const OrderSearch = () => {
     try {
       const data = await readContract({
         address: prepaidGasCoreContractAddress(),
-        abi: GasOrderABI,
+        abi: PrepaidGasABI,
         functionName: "getFilteredOrders",
-        //@todo replace second argument with users address instead of defaultManager (already done but i'm leaving todo for now)
         args: searchArgs,
       })
-      // console.log("DATA", data)
+      console.log("DATA", data)
       setOrdersData(data as FilteredOrderStructOutput[])
     } catch (e) {
       console.log("ERROR: ", e)
@@ -82,7 +82,7 @@ const OrderSearch = () => {
     try {
       const data = await readContract({
         address: prepaidGasCoreContractAddress(),
-        abi: GasOrderABI,
+        abi: PrepaidGasABI,
         functionName: "getMatchingOrdersCount",
         args: [filterOptions.manager || defaultManager, filterOptions.status],
       })
