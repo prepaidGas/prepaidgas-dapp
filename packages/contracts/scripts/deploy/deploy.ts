@@ -2,7 +2,7 @@ import { ethers } from "hardhat"
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
-import { PrepaidGas, Treasury } from "../../typechain-types"
+import { MockToken, PrepaidGas, Treasury } from "../../typechain-types"
 
 import { getDeployAddress } from "../helpers/deploy"
 import { randNum, randOpt } from "../helpers/math"
@@ -30,20 +30,29 @@ async function deploy(admin: HardhatEthersSigner) {
   return { treasury, pgas }
 }
 
-async function testSetup(
-  client: HardhatEthersSigner,
-  executor: HardhatEthersSigner,
-  treasury: Treasury,
-  pgas: PrepaidGas,
-) {
+async function mockTokens(testers: HardhatEthersSigner[]) {
   const MockToken = await ethers.getContractFactory("MockToken")
 
   const guaranteeT = await MockToken.deploy("Gas Guarantee Token", "GGT")
   const priceT = await MockToken.deploy("Gas Price Token", "GPT")
 
-  await priceT.mint(client.address, 1000n * 10n ** 18n)
+  for (const tester of testers) {
+    await priceT.mint(tester.address, 1000n * 10n ** 18n)
+    await guaranteeT.mint(tester.address, 1000n * 10n ** 18n)
+  }
+
+  return { priceT, guaranteeT }
+}
+
+async function mockOrders(
+  treasury: Treasury,
+  pgas: PrepaidGas,
+  priceT: MockToken,
+  guaranteeT: MockToken,
+  client: HardhatEthersSigner,
+  executor: HardhatEthersSigner,
+) {
   await priceT.connect(client).approve(treasury.target, 1000n * 10n ** 18n)
-  await guaranteeT.mint(executor.address, 1000n * 10n ** 18n)
   await guaranteeT.connect(executor).approve(treasury.target, 1000n * 10n ** 18n)
 
   for (let i = 0; i < 72; i++) {
@@ -82,20 +91,15 @@ async function testSetup(
       }
     }
   }
-
-  return { priceT, guaranteeT }
 }
 
 async function main() {
-  const [admin, client, executor, ...testers] = await ethers.getSigners()
+  const [admin, ...testers] = await ethers.getSigners()
 
   const { treasury, pgas } = await deploy(admin)
-  const { priceT, guaranteeT } = await testSetup(client, executor, treasury, pgas)
 
-  for (const tester of testers) {
-    await priceT.mint(tester.address, 1000n * 10n ** 18n)
-    await guaranteeT.mint(tester.address, 1000n * 10n ** 18n)
-  }
+  const { priceT, guaranteeT } = await mockTokens(testers)
+  await mockOrders(treasury, pgas, priceT, guaranteeT, testers[0], testers[1])
 }
 
 main().catch((error) => {
