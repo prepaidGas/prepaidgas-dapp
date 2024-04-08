@@ -82,13 +82,20 @@ async function testSetup(
       }
     }
   }
+
+  return { priceT, guaranteeT }
 }
 
 async function main() {
-  const [admin, client, executor] = await ethers.getSigners()
+  const [admin, client, executor, ...testers] = await ethers.getSigners()
 
   const { treasury, pgas } = await deploy(admin)
-  await testSetup(client, executor, treasury, pgas)
+  const { priceT, guaranteeT } = await testSetup(client, executor, treasury, pgas)
+
+  for (const tester of testers) {
+    await priceT.mint(tester.address, 1000n * 10n ** 18n)
+    await guaranteeT.mint(tester.address, 1000n * 10n ** 18n)
+  }
 }
 
 main().catch((error) => {
