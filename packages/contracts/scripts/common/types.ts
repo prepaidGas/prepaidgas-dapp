@@ -4,7 +4,7 @@ export const MessageTypedFields: TypedDataField[] = [
   { name: "from", type: "address" },
   { name: "nonce", type: "uint256" },
   { name: "order", type: "uint256" },
-  { name: "deadline", type: "uint256" },
+  { name: "start", type: "uint256" },
   { name: "to", type: "address" },
   { name: "gas", type: "uint256" },
   { name: "data", type: "bytes" },
@@ -14,7 +14,7 @@ export type Message = {
   from: string
   nonce: BigNumberish
   order: BigNumberish
-  deadline: BigNumberish
+  start: BigNumberish
   to: string
   gas: BigNumberish
   data: string

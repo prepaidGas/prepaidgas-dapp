@@ -41,10 +41,10 @@ graph TB;
 
 None -- tx formation and sign --> Formed
 Formed -- validators accept tx --> Validated
-Formed -- invalid tx execution time --> Rejected
-Validated -- deadline - 2*window <= time <= deadline - window --> Execute
-Validated -- deadline - window < time <= deadline --> Liquidate
-Validated -- deadline < time <= deadline + redeem --> Redeem
+Formed -- invalid tx --> Rejected
+Validated -- start <= time <= start + window --> Execute
+Validated -- start + window < time <= start + 2*window --> Liquidate
+Validated -- start + 2*window < time <= start + 2*window + redeem --> Redeem
 Execute -- guarantee taken back by executor
 prepayment claimed by executor ----> Fulfilled
 Liquidate -- guarantee claimed by liquidator

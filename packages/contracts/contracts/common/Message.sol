@@ -14,7 +14,7 @@ struct Message {
   address from;
   uint256 nonce;
   uint256 order;
-  uint256 deadline;
+  uint256 start;
   address to;
   uint256 gas;
   bytes data;
@@ -25,7 +25,7 @@ bytes32 constant MESSAGE_TYPE_HASH = keccak256(
   "address from,"
   "uint256 nonce,"
   "uint256 order,"
-  "uint256 deadline,"
+  "uint256 start,"
   "address to,"
   "uint256 gas,"
   "bytes data"
@@ -46,7 +46,7 @@ abstract contract MessageHash is EIP712 {
             message.from,
             message.nonce,
             message.order,
-            message.deadline,
+            message.start,
             message.to,
             message.gas,
             keccak256(message.data)

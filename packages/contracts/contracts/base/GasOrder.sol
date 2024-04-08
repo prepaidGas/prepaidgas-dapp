@@ -110,24 +110,24 @@ contract GasOrder {
     if (order.manager != message.from) revert Error.Unauthorized(message.from, order.manager);
     if (message.gas > left) revert Error.BalanceExhausted(message.gas, left);
 
-    if (message.deadline > order.end) revert Error.ExceedMax(message.deadline, order.end);
-    if (message.deadline - 2 * order.txWindow < order.start)
-      revert Error.BelowMin(message.deadline - 2 * order.txWindow, order.start);
+    if (message.start + 2 * order.txWindow > order.end)
+      revert Error.ExceedMax(message.start + 2 * order.txWindow, order.end);
+    if (message.start < order.start) revert Error.BelowMin(message.start, order.start);
 
     if (resolution == Resolution.Execute) {
-      uint256 start = message.deadline - 2 * order.txWindow;
-      uint256 end = message.deadline - order.txWindow;
+      uint256 start = message.start;
+      uint256 end = message.start + order.txWindow;
       if (start > block.timestamp) revert Error.WindowNotOpen(block.timestamp, start);
       if (end < block.timestamp) revert Error.WindowClosed(block.timestamp, end);
     } else if (resolution == Resolution.Liquidate) {
-      uint256 start = message.deadline - order.txWindow;
-      uint256 end = message.deadline;
-      if (start >= block.timestamp) revert Error.WindowNotOpen(block.timestamp, start + 1);
+      uint256 start = message.start + order.txWindow + 1;
+      uint256 end = message.start + 2 * order.txWindow;
+      if (start > block.timestamp) revert Error.WindowNotOpen(block.timestamp, start);
       if (end < block.timestamp) revert Error.WindowClosed(block.timestamp, end);
     } else if (resolution == Resolution.Redeem) {
-      uint256 start = message.deadline;
-      uint256 end = message.deadline + order.redeemWindow;
-      if (start >= block.timestamp) revert Error.WindowNotOpen(block.timestamp, start + 1);
+      uint256 start = message.start + 2 * order.txWindow + 1;
+      uint256 end = message.start + 2 * order.txWindow + order.redeemWindow;
+      if (start > block.timestamp) revert Error.WindowNotOpen(block.timestamp, start);
       if (end < block.timestamp) revert Error.WindowClosed(block.timestamp, end);
     }
 

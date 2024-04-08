@@ -71,7 +71,7 @@ async function testSetup(
           from: client.address,
           nonce: i,
           order: i,
-          deadline: latest + Number(order.txWindow) * 2,
+          start: latest,
           to: "0x0000000000000000000000000000000000000000",
           gas: randNum(0, Number(order.gas)),
           data: "0x",
