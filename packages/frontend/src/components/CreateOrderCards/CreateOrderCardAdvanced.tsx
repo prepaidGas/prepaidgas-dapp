@@ -22,10 +22,7 @@ export default function CreateOrderCardAdvanced({
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [wasGasPriceChanged, setWasGasPriceChanged] = useState(false)
-  const [wasRewardValueChanged, setWasRewardValueChanged] = useState(false)
   const [wasGuaranteeValueChanged, setWasGuaranteeValueChanged] = useState(false)
-  const [wasRewardTransferChanged, setWasRewardTransferChanged] = useState(false)
-  const [wasGasCostTransferChanged, setWasGasCostTransferChanged] = useState(false)
 
   return (
     <div className="mt-6 flex flex-col w-full">
@@ -36,24 +33,20 @@ export default function CreateOrderCardAdvanced({
           </label>
           <Input
             value={inputValues.gasAmount.toString()}
-            //onChange={(e) => setInputValues({ ...inputValues, gasAmount: Number(e.target.value) })}
             onChange={(e) => {
               setInputValues({ ...inputValues, gasAmount: Number(e.target.value) })
               const gasAmount = Number(e.target.value)
-              if (
-                wasGasPriceChanged === false &&
-                wasRewardValueChanged === false &&
-                wasGuaranteeValueChanged === false &&
-                wasGasCostTransferChanged === false &&
-                wasRewardTransferChanged === false
-              ) {
+
+              if (wasGasPriceChanged === false && wasGuaranteeValueChanged === false) {
                 setInputValues({
                   ...inputValues,
                   gasAmount,
-                  guaranteeValueGasPrice: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
-                  rewardValueAmount: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
-                  gasCostTransfer: getGuaranteeValue(gasAmount, inputValues.gasCostValueGasPrice),
-                  rewardTransfer: getRewardValue(gasAmount, inputValues.gasCostValueGasPrice),
+                  guaranteeValueGasPrice: getGuaranteeValue(gasAmount, inputValues.gasPricePerUnit),
+                })
+              } else {
+                setInputValues({
+                  ...inputValues,
+                  gasAmount,
                 })
               }
             }}
@@ -72,7 +65,7 @@ export default function CreateOrderCardAdvanced({
           <div className="flex flex-col gap-4">
             <DatePicker
               defaultValue={dayjs().add(0, "d")}
-              // value={dayjs(inputValues.executionPeriodStartDate)}
+              value={inputValues.startDate}
               presets={[
                 {
                   label: "Tommorrow",
@@ -89,7 +82,7 @@ export default function CreateOrderCardAdvanced({
               ]}
               onChange={(date) => {
                 if (date) {
-                  // setInputValues({ ...inputValues, executionPeriodStartDate: date })
+                  setInputValues({ ...inputValues, startDate: date })
                 }
               }}
             />
@@ -97,8 +90,8 @@ export default function CreateOrderCardAdvanced({
               className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
               defaultValue={dayjs("00:00", "HH:mm")}
               format={"HH:mm"}
-              // value={inputValues.executionPeriodStartTime}
-              // onChange={(value) => setInputValues({ ...inputValues, executionPeriodStartTime: value })}
+              value={inputValues.startTime}
+              onChange={(value) => setInputValues({ ...inputValues, startTime: value })}
               // error={!!validationErrors?.executionPeriodStartTime}
               // errorMessage={validationErrors?.executionPeriodStartTime}
             />
@@ -110,7 +103,7 @@ export default function CreateOrderCardAdvanced({
           <div className="flex flex-col gap-4">
             <DatePicker
               defaultValue={dayjs().add(0, "d")}
-              // value={dayjs(inputValues.executionPeriodEndDate)}
+              value={inputValues.endDate}
               presets={[
                 {
                   label: "Tommorrow",
@@ -127,7 +120,45 @@ export default function CreateOrderCardAdvanced({
               ]}
               onChange={(date) => {
                 if (date) {
-                  // setInputValues({ ...inputValues, executionPeriodEndDate: date })
+                  setInputValues({ ...inputValues, endDate: date })
+                }
+              }}
+            />
+            <TimePicker
+              className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
+              defaultValue={dayjs("00:00", "HH:mm")}
+              format={"HH:mm"}
+              value={inputValues.endTime}
+              onChange={(value) => setInputValues({ ...inputValues, endTime: value })}
+              // error={!!validationErrors?.executionPeriodEndTime}
+              // errorMessage={validationErrors?.executionPeriodEndTime}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col">
+          <label className="base-text mb-1">Execution period Expire</label>
+          <div className="flex flex-col gap-4">
+            <DatePicker
+              defaultValue={dayjs().add(0, "d")}
+              value={inputValues.expireDate}
+              presets={[
+                {
+                  label: "Tommorrow",
+                  value: dayjs().add(1, "d"),
+                },
+                {
+                  label: "Next Week",
+                  value: dayjs().add(7, "d"),
+                },
+                {
+                  label: "Next Month",
+                  value: dayjs().add(1, "month"),
+                },
+              ]}
+              onChange={(date) => {
+                if (date) {
+                  setInputValues({ ...inputValues, expireDate: date })
                 }
               }}
             />
@@ -136,48 +167,11 @@ export default function CreateOrderCardAdvanced({
               defaultValue={dayjs("00:00", "HH:mm")}
               format={"HH:mm"}
               // value={inputValues.executionPeriodEndTime}
-              // onChange={(value) => setInputValues({ ...inputValues, executionPeriodEndTime: value })}
+              onChange={(value) => setInputValues({ ...inputValues, expireTime: value })}
               // error={!!validationErrors?.executionPeriodEndTime}
               // errorMessage={validationErrors?.executionPeriodEndTime}
             />
           </div>
-        </div>
-      </div>
-
-      {/* Reward Settings */}
-      <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
-        <div className="flex flex-col flex-1">
-          <label className="base-text mb-1">Reward Token</label>
-          <TokenSearchSelect
-            className=""
-            searchSelectValue={inputValues.rewardValueToken}
-            changeHandler={(value) =>
-              setInputValues({
-                ...inputValues,
-                rewardValueToken: value,
-              })
-            }
-          />
-        </div>
-
-        <div className="flex flex-col flex-1">
-          <label htmlFor="input-number-gas" className="base-text mb-1">
-            Reward Amount
-          </label>
-          <Input
-            value={inputValues.rewardValueAmount.toString()}
-            onChange={(e) => {
-              const rewardValueAmount = Number(e.target.value)
-              setInputValues({ ...inputValues, rewardValueAmount })
-            }}
-            min={0}
-            // error={!!validationErrors?.rewardValueAmount}
-            // errorMessage={validationErrors?.rewardValueAmount}
-            spellCheck={false}
-            placeholder="123"
-            size="middle"
-            className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-          />
         </div>
       </div>
 
@@ -187,11 +181,11 @@ export default function CreateOrderCardAdvanced({
           <label className="base-text mb-1">Gas Cost Token</label>
           <TokenSearchSelect
             className=""
-            searchSelectValue={inputValues.gasCostValueToken}
+            searchSelectValue={inputValues.gasPriceToken}
             changeHandler={(value) =>
               setInputValues({
                 ...inputValues,
-                gasCostValueToken: value,
+                gasPriceToken: value[0],
               })
             }
           />
@@ -202,12 +196,12 @@ export default function CreateOrderCardAdvanced({
             Gas Price
           </label>
           <Input
-            value={inputValues.gasCostValueGasPrice.toString()}
+            value={inputValues.gasPricePerUnit.toString()}
             onChange={(e) => {
-              const gasCostValueGasPrice = Number(e.target.value)
+              const gasPricePerUnit = Number(e.target.value)
               setInputValues({
                 ...inputValues,
-                gasCostValueGasPrice,
+                gasPricePerUnit,
               })
             }}
             min={0}
@@ -227,11 +221,11 @@ export default function CreateOrderCardAdvanced({
           <label className="base-text mb-1">Guarantee Token</label>
           <TokenSearchSelect
             className=""
-            searchSelectValue={inputValues.guaranteeValueToken}
+            searchSelectValue={inputValues.guaranteeToken}
             changeHandler={(value) =>
               setInputValues({
                 ...inputValues,
-                guaranteeValueToken: value,
+                guaranteeToken: value[0],
               })
             }
           />
@@ -242,8 +236,8 @@ export default function CreateOrderCardAdvanced({
             Guarantee GasPrice
           </label>
           <Input
-            value={inputValues.guaranteeValueGasPrice.toString()}
-            onChange={(e) => setInputValues({ ...inputValues, guaranteeValueGasPrice: Number(e.target.value) })}
+            value={inputValues.guaranteePerUnit.toString()}
+            onChange={(e) => setInputValues({ ...inputValues, guaranteePerUnit: Number(e.target.value) })}
             min={0}
             // error={!!validationErrors?.guaranteeValueGasPrice}
             // errorMessage={validationErrors?.guaranteeValueGasPrice}
@@ -259,10 +253,10 @@ export default function CreateOrderCardAdvanced({
       <div className="flex flex-col old-lg:flex-row gap-6 mt-4">
         <div className="flex flex-col flex-1">
           <label htmlFor="input-number-gas" className="base-text mb-1">
-            Execution window
+            Transaction window
           </label>
           <Input
-            value={inputValues.executionWindow.toString()}
+            value={inputValues.txWindow.toString()}
             onChange={(e) => setInputValues({ ...inputValues, executionWindow: Number(e.target.value) })}
             min={0}
             // error={!!validationErrors?.executionWindow}
@@ -276,37 +270,14 @@ export default function CreateOrderCardAdvanced({
 
         <div className="flex flex-col flex-1">
           <label htmlFor="input-number-gas" className="base-text mb-1">
-            Reward transfer
+            Redeem window
           </label>
           <Input
-            value={inputValues.rewardTransfer.toString()}
-            onChange={(e) => {
-              setInputValues({ ...inputValues, rewardTransfer: Number(e.target.value) })
-              setWasRewardTransferChanged(true)
-            }}
+            value={inputValues.redeemWindow.toString()}
+            onChange={(e) => setInputValues({ ...inputValues, executionWindow: Number(e.target.value) })}
             min={0}
-            // error={!!validationErrors?.rewardTransfer}
-            // errorMessage={validationErrors?.rewardTransfer}
-            spellCheck={false}
-            placeholder="123"
-            size="middle"
-            className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-          />
-        </div>
-
-        <div className="flex flex-col flex-1">
-          <label htmlFor="input-number-gas" className="base-text mb-1">
-            Gas cost transfer
-          </label>
-          <Input
-            value={inputValues.gasCostTransfer.toString()}
-            onChange={(e) => {
-              setInputValues({ ...inputValues, gasCostTransfer: Number(e.target.value) })
-              setWasGasCostTransferChanged(true)
-            }}
-            min={0}
-            // error={!!validationErrors?.gasCostTransfer}
-            // errorMessage={validationErrors?.gasCostTransfer}
+            // error={!!validationErrors?.executionWindow}
+            // errorMessage={validationErrors?.executionWindow}
             spellCheck={false}
             placeholder="123"
             size="middle"
@@ -314,14 +285,13 @@ export default function CreateOrderCardAdvanced({
           />
         </div>
       </div>
+
       <div className="flex flex-col old-sm:flex-row old-sm:items-end old-sm:justify-between gap-4 mt-4 old-sm:mt-8">
         <Receipt
           //TODO pass correct token names
           gasAmount={inputValues.gasAmount}
-          gasCostValue={inputValues.gasCostValueGasPrice}
-          rewardValue={inputValues.rewardValueAmount}
-          gasCostTokenName={TOKEN_NAME[inputValues.gasCostValueToken] ?? inputValues.gasCostValueToken}
-          rewardTokenName={TOKEN_NAME[inputValues.rewardValueToken] ?? inputValues.rewardValueToken}
+          gasCostValue={inputValues.gasPricePerUnit}
+          gasCostTokenName={TOKEN_NAME[inputValues.gasPriceToken] ?? inputValues.gasPriceToken}
         />
         <Buttons onClick={handleSubmit} className="primary_btn">
           {"Create Gas Order"}

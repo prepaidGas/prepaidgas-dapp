@@ -2,10 +2,17 @@
 
 import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTime.utils"
 import format from "date-fns/format"
+import { ethers } from "ethers"
 
 import { writeContract, waitForTransaction } from "@wagmi/core"
-import { MockTokenABI, PrepaidGasABI, prepaidGasCoreContractAddress } from "@/helpers"
-import { GasPaymentStruct } from "typechain-types/PrepaidGas"
+import {
+  MockTokenABI,
+  PrepaidGasABI,
+  TreasuryABI,
+  prepaidGasCoreContractAddress,
+  prepaidGasTreasuryContractAddress,
+} from "@/helpers"
+import { GasPaymentStruct, OrderStruct } from "typechain-types/PrepaidGas"
 import { useAccount } from "wagmi"
 import { UilWallet } from "@iconscout/react-unicons"
 
@@ -46,7 +53,7 @@ export default function CreateOrderCard({
   //TODO: this initial state is for tests only, replace in production
   //Values for simple order creation: Redeem window is 2h, txWindow is 10m, expire = current time + 15 mins, start = 0, end = current time + 24h,
   const initialState: CreateOrderState = {
-    gasAmount: 10,
+    gasAmount: 100000,
     expireDate: dayjs().add(1, "day"),
     expireTime: dayjs("00:00", "HH:mm"),
     startDate: dayjs().add(1, "day"),
@@ -95,29 +102,46 @@ export default function CreateOrderCard({
         address: inputValues.gasPriceToken as `0x${string}`,
         abi: MockTokenABI,
         functionName: "approve",
-        args: [prepaidGasCoreContractAddress(), inputValues.gasPricePerUnit * inputValues.gasAmount],
+        args: [prepaidGasTreasuryContractAddress(), inputValues.gasPricePerUnit * inputValues.gasAmount],
       })
       console.log("CreateOrderData: ", data)
     } catch (e) {
       console.log("CreateOrderError: ", e)
     }
 
+    const order: OrderStruct = {
+      manager: address as string,
+      gas: inputValues.gasAmount,
+      expire: getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
+      start: getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
+      end: getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+      txWindow: inputValues.txWindow,
+      redeemWindow: inputValues.redeemWindow,
+      gasPrice: { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit } as GasPaymentStruct,
+      gasGuarantee: { token: inputValues.guaranteeToken, perUnit: inputValues.guaranteePerUnit } as GasPaymentStruct,
+    }
+
     // Create Order
     try {
       const data = await writeContract({
-        address: prepaidGasCoreContractAddress(),
-        abi: PrepaidGasABI,
+        address: prepaidGasTreasuryContractAddress(),
+        abi: TreasuryABI,
         functionName: "orderCreate",
         args: [
-          address,
-          inputValues.gasAmount,
-          getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
-          getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
-          getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
-          inputValues.txWindow,
-          inputValues.redeemWindow,
-          { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit } as GasPaymentStruct,
-          { token: inputValues.guaranteeToken, perUnit: inputValues.guaranteePerUnit } as GasPaymentStruct,
+          {
+            manager: address,
+            gas: inputValues.gasAmount,
+            expire: getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
+            start: getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
+            end: getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+            txWindow: inputValues.txWindow,
+            redeemWindow: inputValues.redeemWindow,
+            gasPrice: { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit },
+            gasGuarantee: {
+              token: inputValues.guaranteeToken,
+              perUnit: inputValues.guaranteePerUnit,
+            },
+          },
         ],
       })
       console.log("CreateOrderData: ", data)
