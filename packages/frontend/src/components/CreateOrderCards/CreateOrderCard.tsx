@@ -24,6 +24,7 @@ import DialogWindow from "../DialogWindow"
 import UserAgreement from "../UserAgreement"
 import { Tabs, TabsProps } from "antd"
 import dayjs, { type Dayjs } from "dayjs"
+import { TOKEN_ADDRESS } from "@/constants/tokens"
 
 const schema = z.object({
   gasAmount: z.number().int().gt(0),
@@ -62,9 +63,9 @@ export default function CreateOrderCard({
     endTime: dayjs("00:00", "HH:mm"),
     txWindow: 600,
     redeemWindow: 7200,
-    gasPriceToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    gasPriceToken: TOKEN_ADDRESS.MockUSD,
     gasPricePerUnit: 10,
-    guaranteeToken: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    guaranteeToken: TOKEN_ADDRESS.MockUSD,
     guaranteePerUnit: 10,
   }
 
