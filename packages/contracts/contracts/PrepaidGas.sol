@@ -15,11 +15,12 @@ import { Message, Resolution } from "./common/Message.sol";
 import { Order } from "./common/Order.sol";
 
 import { GasOrderGetters } from "./extensions/GasOrderGetters.sol";
+import { MessageValidations } from "./extensions/MessageValidations.sol";
 
 import "./common/Constants.sol" as Const;
 import "./common/Errors.sol" as Error;
 
-contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor, GasOrderGetters {
+contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor, GasOrderGetters, MessageValidations {
   address public immutable treasury;
 
   modifier onlyTreasury() {
@@ -86,7 +87,7 @@ contract PrepaidGas is Executor, GasOrder, Distributor, FeeProcessor, GasOrderGe
     address fulfiller,
     uint256 gasSpent,
     Resolution resolution
-  ) internal override(Executor, GasOrder) {
+  ) internal override(Executor, GasOrder, MessageValidations) {
     uint256 id = message.order;
     Order storage order = _order[id];
     uint256 left = gasLeft[id];
