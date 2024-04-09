@@ -79,7 +79,7 @@ export default function CreateOrderCard({
   const [isValidating, setIsValidating] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const createOrder = async () => {
+  const createOrder = async (isOrderSimple: boolean = false) => {
     console.log("CreateOrderTestArr: START")
     const testArr = [
       address,
@@ -110,16 +110,26 @@ export default function CreateOrderCard({
       console.log("CreateOrderError: ", e)
     }
 
+    //todo: use in writeContract args
     const order: OrderStruct = {
       manager: address as string,
       gas: inputValues.gasAmount,
-      expire: getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
-      start: getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
-      end: getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+      expire: isOrderSimple
+        ? getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute")))
+        : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+      start: isOrderSimple
+        ? 0
+        : getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
+      end: isOrderSimple
+        ? getUnixTimestampInSeconds(combineDateAndTime(dayjs().add(1, "day"), dayjs()))
+        : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
       txWindow: inputValues.txWindow,
       redeemWindow: inputValues.redeemWindow,
       gasPrice: { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit } as GasPaymentStruct,
-      gasGuarantee: { token: inputValues.guaranteeToken, perUnit: inputValues.guaranteePerUnit } as GasPaymentStruct,
+      gasGuarantee: {
+        token: inputValues.guaranteeToken,
+        perUnit: inputValues.guaranteePerUnit,
+      } as GasPaymentStruct,
     }
 
     // Create Order
@@ -132,9 +142,15 @@ export default function CreateOrderCard({
           {
             manager: address,
             gas: inputValues.gasAmount,
-            expire: getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
-            start: getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
-            end: getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+            expire: isOrderSimple
+              ? getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute")))
+              : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+            start: isOrderSimple
+              ? 0
+              : getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
+            end: isOrderSimple
+              ? getUnixTimestampInSeconds(combineDateAndTime(dayjs().add(1, "day"), dayjs()))
+              : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
             txWindow: inputValues.txWindow,
             redeemWindow: inputValues.redeemWindow,
             gasPrice: { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit },
