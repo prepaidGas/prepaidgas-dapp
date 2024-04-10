@@ -11,9 +11,9 @@ enum Validation {
   None,
   StartInFuture,
   NonceExhaustion,
-  OrderBalanceCompliance,
-  OrderOwnerCompliance,
-  OrderTimelineCompliance
+  BalanceCompliance,
+  OwnerCompliance,
+  TimelineCompliance
 }
 
 abstract contract MessageValidations is Executor, GasOrder {
@@ -26,11 +26,11 @@ abstract contract MessageValidations is Executor, GasOrder {
 
     if (nonce[message.from][message.nonce]) return Validation.NonceExhaustion;
 
-    if (message.gas > left) return Validation.OrderBalanceCompliance;
-    if (order.manager != message.from) return Validation.OrderOwnerCompliance;
+    if (message.gas > left) return Validation.BalanceCompliance;
+    if (order.manager != message.from) return Validation.OwnerCompliance;
 
-    if (message.start + 2 * order.txWindow > order.end) return Validation.OrderTimelineCompliance;
-    if (message.start < order.start) return Validation.OrderTimelineCompliance;
+    if (message.start + 2 * order.txWindow > order.end) return Validation.TimelineCompliance;
+    if (message.start < order.start) return Validation.TimelineCompliance;
 
     return Validation.None;
   }
