@@ -96,7 +96,7 @@ contract GasOrderGetters is GasOrder {
   /// @notice over high amount of orders may lead to the function call failure
   /// @notice zero manager address means any manager
   /// @notice none order status means any status
-  function getMatchingOrdersCount(address manager, OrderStatus state) external view returns (uint256) {
+  function getManagerOrdersCount(address manager, OrderStatus state) external view returns (uint256) {
     uint256 matching = 0;
 
     bool anyManager = manager == address(0);
@@ -115,7 +115,7 @@ contract GasOrderGetters is GasOrder {
   /// @notice over high limit value may cause function call failure
   /// @notice zero manager address means any manager
   /// @notice none order status means any status
-  function getFilteredOrders(
+  function getManagerOrders(
     address manager,
     OrderStatus state,
     uint256 limit,
@@ -137,6 +137,48 @@ contract GasOrderGetters is GasOrder {
         }
 
         filtered[length] = FilteredOrder(id, _order[id], status(id), gasLeft[id], executor[id]);
+        length++;
+      }
+    }
+
+    if (length < limit) {
+      /// @solidity memory-safe-assembly
+      assembly {
+        mstore(filtered, length)
+      }
+    }
+
+    return filtered;
+  }
+
+  /// @notice over high limit value may cause function call failure
+  /// @notice zero promisor address means any executor
+  /// @notice true only live parameter means pending or active order status
+  function getExecutorOrders(
+    address promisor,
+    bool onlyLive,
+    uint256 limit,
+    uint256 offset
+  ) external view returns (FilteredOrder[] memory) {
+    FilteredOrder[] memory filtered = new FilteredOrder[](limit);
+
+    bool anyPromisor = promisor == address(0);
+
+    uint256 length = 0;
+    uint256 all = orders;
+
+    for (uint256 id = 0; id < all && length < limit; id++) {
+      OrderStatus state = status(id);
+      if (
+        (anyPromisor || executor[id] == promisor) &&
+        (!onlyLive || state == OrderStatus.Pending || state == OrderStatus.Active)
+      ) {
+        if (offset > 0) {
+          offset--;
+          continue;
+        }
+
+        filtered[length] = FilteredOrder(id, _order[id], state, gasLeft[id], executor[id]);
         length++;
       }
     }
