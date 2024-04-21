@@ -17,7 +17,6 @@ import { useAccount } from "wagmi"
 import StatusBadge from "./StatusBadge"
 import { STATUS } from "@/constants"
 
-
 export default function UserStatsCard() {
   const [totalGas, setTotalGas] = useState<null | number>(null)
   const [ordersCount, setOrdersCount] = useState({
@@ -52,7 +51,7 @@ export default function UserStatsCard() {
       const data = await readContract({
         address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
-        functionName: "getMatchingOrdersCount",
+        functionName: "getManagerOrdersCount",
         args: ["0x0000000000000000000000000000000000000000", status],
       })
       console.log("totalMatchingOrdersCount", data)

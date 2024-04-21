@@ -116,7 +116,7 @@ export default function CreateOrderCard({
       gas: inputValues.gasAmount,
       expire: isOrderSimple
         ? getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute")))
-        : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+        : getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
       start: isOrderSimple
         ? 0
         : getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
@@ -144,7 +144,7 @@ export default function CreateOrderCard({
             gas: inputValues.gasAmount,
             expire: isOrderSimple
               ? getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute")))
-              : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+              : getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
             start: isOrderSimple
               ? 0
               : getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),

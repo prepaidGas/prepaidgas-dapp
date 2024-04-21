@@ -66,7 +66,7 @@ const OrderSearch = () => {
       const data = await readContract({
         address: prepaidGasCoreContractAddress(),
         abi: PrepaidGasABI,
-        functionName: "getFilteredOrders",
+        functionName: "getManagerOrders",
         args: searchArgs,
       })
       console.log("DATA", data)
@@ -83,7 +83,7 @@ const OrderSearch = () => {
       const data = await readContract({
         address: prepaidGasCoreContractAddress(),
         abi: PrepaidGasABI,
-        functionName: "getMatchingOrdersCount",
+        functionName: "getManagerOrdersCount",
         args: [filterOptions.manager || defaultManager, filterOptions.status],
       })
       console.log("getTotalEntriesNumber", { filterOptions })

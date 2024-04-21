@@ -65,7 +65,7 @@ const OrderSearch = () => {
       const data = await readContract({
         address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
-        functionName: "getFilteredOrders",
+        functionName: "getManagerOrders",
         //@todo replace second argument with users address instead of defaultManager (already done but i'm leaving todo for now)
         args: searchArgs,
       })
@@ -83,7 +83,7 @@ const OrderSearch = () => {
       const data = await readContract({
         address: prepaidGasCoreContractAddress(),
         abi: GasOrderABI,
-        functionName: "getMatchingOrdersCount",
+        functionName: "getManagerOrdersCount",
         args: [filterOptions.manager || defaultManager, filterOptions.status],
       })
       console.log("getTotalEntriesNumber", { filterOptions })
