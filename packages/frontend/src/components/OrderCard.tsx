@@ -25,11 +25,40 @@ import { string } from "zod"
 import { Cards } from "@/components/cards/frame/cards-frame"
 import { UilQuestionCircle, UilClipboardNotes, UilFavorite } from "@iconscout/react-unicons"
 import { Buttons } from "./buttons"
+import { DescriptionsProps } from "antd"
 
 interface OrderCard extends FilteredOrderStructOutput {
   onFavorited(favorited: boolean): void
   className?: string
 }
+
+const items: DescriptionsProps["items"] = [
+  {
+    key: "1",
+    label: "UserName",
+    children: <p>Zhou Maomao</p>,
+  },
+  {
+    key: "2",
+    label: "Telephone",
+    children: <p>1810000000</p>,
+  },
+  {
+    key: "3",
+    label: "Live",
+    children: <p>Hangzhou, Zhejiang</p>,
+  },
+  {
+    key: "4",
+    label: "Remark",
+    children: <p>empty</p>,
+  },
+  {
+    key: "5",
+    label: "Address",
+    children: <p>No. 18, Wantang Road, Xihu District, Hangzhou, Zhejiang, China</p>,
+  },
+]
 
 // @todo display order data
 export default function OrderCard({
@@ -101,6 +130,10 @@ export default function OrderCard({
             Manage Order
           </Buttons>
           <span className="text-[#404040] dark:text-[#A4A5AA] font-bold text-2xl">{`#${id.toString()}`}</span>
+
+          <div className="flex flex-row items-center gap-2">
+            <span className="text-[#404040] dark:text-[#A4A5AA]">Status: Accepted</span>
+          </div>
 
           <div className="flex flex-row items-center gap-2">
             <span className="text-[#404040] dark:text-[#A4A5AA]">Manager: </span>

@@ -47,7 +47,7 @@ const CreateTx = () => {
         className="flex items-center justify-between px-8 xl:px-[15px] pt-[18px] pb-6 sm:pb-[30px] bg-transparent sm:flex-col"
       />
 
-      {showDialogWindow ? (
+      {/* {showDialogWindow ? (
         Boolean(transactionDetails) ? (
           <DialogWindow
             onClose={() => {
@@ -93,6 +93,18 @@ const CreateTx = () => {
             }
           ></DialogWindow>
         )
+      ) : null} */}
+
+      {showDialogWindow ? (
+        <DialogWindow
+          onClose={() => {
+            setShowDialogWindow(false)
+            setTransactionDetails(null)
+          }}
+          isClosable={true}
+          title="Transaction Result"
+          description={"Transaction was successful"}
+        ></DialogWindow>
       ) : null}
       <div className="min-h-[715px] lg:min-h-[580px] flex-1 h-auto px-8 xl:px-[15px] pb-[30px] bg-transparent">
         <div className="h-full w-full">
