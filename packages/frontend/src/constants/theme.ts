@@ -27,6 +27,16 @@ export const STATUS: StatusNameType = {
   Closed: 6,
 }
 
+export const STATUS_NAMES = {
+  [STATUS.Any]: "Any",
+  [STATUS.Pending]: "Pending",
+  [STATUS.Accepted]: "Accepted",
+  [STATUS.Active]: "Active",
+  [STATUS.Inactive]: "Inactive",
+  [STATUS.Untaken]: "Untaken",
+  [STATUS.Closed]: "Closed",
+}
+
 type ValuesOf<T> = T[keyof T]
 type StatusType = ValuesOf<StatusNameType>
 

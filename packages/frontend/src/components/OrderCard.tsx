@@ -2,7 +2,7 @@ import format from "date-fns/format"
 
 import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
 
-import { COLOR_BY_STATUS } from "@/constants"
+import { COLOR_BY_STATUS, STATUS_NAMES } from "@/constants"
 
 import { Badge, Card, Text, Metric, Flex, ProgressBar, Icon, Button } from "@tremor/react"
 
@@ -132,7 +132,7 @@ export default function OrderCard({
           <span className="text-[#404040] dark:text-[#A4A5AA] font-bold text-2xl">{`#${id.toString()}`}</span>
 
           <div className="flex flex-row items-center gap-2">
-            <span className="text-[#404040] dark:text-[#A4A5AA]">Status: Accepted</span>
+            <span className="text-[#404040] dark:text-[#A4A5AA]">Status: {STATUS_NAMES[Number(status)]}</span>
           </div>
 
           <div className="flex flex-row items-center gap-2">
