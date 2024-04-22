@@ -5,7 +5,7 @@ const { Option } = Select
 
 import { Cards } from "@/components/cards/frame/cards-frame"
 import { Buttons } from "@/components/buttons"
-import CreateOrderForm from "@/components/CreateOrderCards/antdVer/CreateOrderForm"
+import CreateOrderForm from "@/components/forms/order/create/CreateOrderForm"
 import { useState } from "react"
 import DialogWindow from "@/components/DialogWindow"
 import { TailSpin } from "react-loader-spinner"

@@ -27,9 +27,9 @@ export default function CreateOrderFormSimple() {
           <label htmlFor="input-number-gas" className="base-text mb-1">
             Gas Amount
           </label>
-          <Form.Item name="gasAmount" label="Gas Amount" rules={[{ required: true }]}>
+          <Form.Item name="gasAmount" label="Gas Amount" rules={[{ required: true }, { min: 100000 }]}>
             <Input
-              min={0}
+              min={100000}
               spellCheck={false}
               placeholder="123"
               size="middle"
