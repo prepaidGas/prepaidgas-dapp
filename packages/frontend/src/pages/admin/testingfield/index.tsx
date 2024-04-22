@@ -9,6 +9,7 @@ import CreateOrderForm from "@/components/forms/order/create/CreateOrderForm"
 import { useState } from "react"
 import DialogWindow from "@/components/DialogWindow"
 import { TailSpin } from "react-loader-spinner"
+import SearchOrdersForm from "@/components/forms/searchOrders/SearchOrdersForm"
 
 const TestingField = () => {
   const [showDialogWindow, setShowDialogWindow] = useState(false)
@@ -85,10 +86,11 @@ const TestingField = () => {
         <div className="h-full w-full">
           <Cards title={"React Hook Form Variant"} className="max-w-[1024px] mx-auto">
             <div className="p-[25px]">
-              <CreateOrderForm
+              {/* <CreateOrderForm
                 setShowDialogWindow={setShowDialogWindow}
                 setTransactionDetails={setTransactionDetails}
-              />
+              /> */}
+              <SearchOrdersForm />
             </div>
           </Cards>
         </div>
