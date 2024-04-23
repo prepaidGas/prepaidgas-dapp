@@ -119,9 +119,17 @@ export default function OrderCard({
     }
   }
 
+  const getCardColor = () => `border-[${COLOR_BY_STATUS[Number(status)]}]`
+
   return (
     <>
-      <Cards headless className="max-w-[1024px] mx-auto relative mt-4">
+      <Cards
+        headless
+        className={
+          `max-w-[1024px] mx-auto relative mt-4 border-t-4 border-l-0 old-lg:border-t-0 old-lg:border-l-4 ` +
+          getCardColor()
+        }
+      >
         <div className="flex flex-col gap-3">
           <Buttons className="absolute [&>*]:fill-primary right-3 top-3 h-[40px] ml-4 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] ">
             <UilFavorite />
@@ -137,7 +145,7 @@ export default function OrderCard({
 
           <div className="flex flex-row items-center gap-2">
             <span className="text-[#404040] dark:text-[#A4A5AA]">Manager: </span>
-            <TruncatedTextWithTooltip text={order.manager} />
+            <TruncatedTextWithTooltip text={order.manager} isCopyable />
           </div>
 
           <span className="text-[#404040] dark:text-[#A4A5AA]">

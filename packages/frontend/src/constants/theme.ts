@@ -5,7 +5,6 @@ import {
   ExclamationTriangleIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline"
-import { Color } from "@tremor/react"
 
 type StatusNameType = {
   Any: 0
@@ -41,14 +40,14 @@ type ValuesOf<T> = T[keyof T]
 type StatusType = ValuesOf<StatusNameType>
 
 //Those are Tremor.JS colors defined in Color type
-export const COLOR_BY_STATUS: { [key: number]: Color } = {
-  [STATUS.Any]: "blue",
-  [STATUS.Pending]: "yellow",
-  [STATUS.Accepted]: "cyan",
-  [STATUS.Active]: "green",
-  [STATUS.Inactive]: "red",
-  [STATUS.Untaken]: "amber",
-  [STATUS.Closed]: "slate",
+export const COLOR_BY_STATUS: { [key: number]: string } = {
+  [STATUS.Any]: "#80cbc4",
+  [STATUS.Pending]: "#ffd600",
+  [STATUS.Accepted]: "#4caf50",
+  [STATUS.Active]: "#2196f3",
+  [STATUS.Inactive]: "#80cbc4",
+  [STATUS.Untaken]: " #ff9800",
+  [STATUS.Closed]: "#f44336",
 }
 
 export const ICON_BY_STATUS = {
