@@ -87,15 +87,27 @@ export default function SearchOrdersForm({
         </div>
         <div className="flex flex-col grow w-full">
           {/* <label className="base-text">&nbsp;</label> */}
-          <div className="flex flex-col gap-4 old-lg:flex-row">
-            <Form.Item colon={false} label=" ">
+          <div className="flex flex-col gap-4 old-lg:flex-row [&_label]:hidden old-lg:[&_label]:flex">
+            <Form.Item colon={false} label=" " className="hidden old-lg:inline-flex">
               <Buttons type="primary" htmlType="submit" className="primary_btn">
                 {"Apply"}
               </Buttons>
             </Form.Item>
 
-            <Form.Item colon={false} label=" " className="[&_label]:">
+            <Form.Item colon={false} label=" " className="hidden old-lg:inline-flex">
               <Buttons onClick={() => form.resetFields()} className="secondary_btn">
+                {"Clear"}
+              </Buttons>
+            </Form.Item>
+
+            <Form.Item colon={false} label=" " className="old-lg:hidden">
+              <Buttons type="primary" htmlType="submit" className="primary_btn" block>
+                {"Apply"}
+              </Buttons>
+            </Form.Item>
+
+            <Form.Item colon={false} label=" " className="old-lg:hidden">
+              <Buttons onClick={() => form.resetFields()} className="secondary_btn" block>
                 {"Clear"}
               </Buttons>
             </Form.Item>
