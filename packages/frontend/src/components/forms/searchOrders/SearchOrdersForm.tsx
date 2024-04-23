@@ -9,35 +9,25 @@ import { Form, FormProps, Input, List, Select, Tabs, TabsProps } from "antd"
 const { Option } = Select
 
 import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX, ICON_BY_STATUS } from "@/constants"
+import { FilterOptions } from "@/components/SearchFiltersCard"
 
 export default function SearchOrdersForm({
   initialValues,
-  onSubmit,
+  handleSubmit,
 }: {
-  initialValue: FilterOptions
-  onSubmit: (x: FilterOptions) => void
+  initialValues: FilterOptions
+  handleSubmit: (x: FilterOptions) => void
 }) {
-  const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
-
-  const onFinish: FormProps["onFinish"] = (values) => {
+  const onFinish: FormProps<FilterOptions>["onFinish"] = (values) => {
     console.log("Success:", values)
+    handleSubmit({ ...values })
   }
 
-  const onFinishFailed: FormProps["onFinishFailed"] = (errorInfo) => {
+  const onFinishFailed: FormProps<FilterOptions>["onFinishFailed"] = (errorInfo) => {
     console.log("Failed:", errorInfo)
   }
 
   const [form] = Form.useForm()
-
-  const handleSubmit = (doDefaultSearch: boolean = false) => {
-    // const isValidForm = validateSearchForm()
-    // if (!isValidForm) return
-    // if (doDefaultSearch) {
-    //   onSubmit({ ...initialValue })
-    // } else {
-    //   onSubmit({ ...inputValues })
-    // }
-  }
 
   return (
     <Form
@@ -46,13 +36,16 @@ export default function SearchOrdersForm({
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
       autoComplete="off"
+      layout="vertical"
       className="mt-4 grow"
+      form={form}
     >
       <div className="flex flex-col old-lg:flex-row old-lg:items-start old-lg:gap-6">
         <div className="flex flex-col grow w-full">
           <Form.Item
             name="manager"
             label="Manager"
+            colon={false}
             rules={[
               {
                 validator: (_, value) =>
@@ -69,40 +62,43 @@ export default function SearchOrdersForm({
           </Form.Item>
         </div>
         <div className="flex flex-col grow w-full">
-          <Form.Item name="status" label="Status">
+          <Form.Item name="status" label="Status" colon={false}>
             <Select className="[&>div]:border-normal dark:[&>div]:border-white/10 [&>div]:rounded-6 [&>.ant-select-arrow]:text-theme-gray dark:[&>.ant-select-arrow]:text-white/60 [&>div>div>div>span]:bg-transparent [&>div>div>div>span]:h-[26px] [&>div>div>div>span]:items-center h-[48px] py-0">
-              <Option value="0">Any</Option>
-              <Option value="1">Pending</Option>
-              <Option value="2">Accepted</Option>
-              <Option value="3">Active</Option>
-              <Option value="4">Inactive</Option>
-              <Option value="5">Untaken</Option>
-              <Option value="5">Closed</Option>
+              <Option value={0}>Any</Option>
+              <Option value={1}>Pending</Option>
+              <Option value={2}>Accepted</Option>
+              <Option value={3}>Active</Option>
+              <Option value={4}>Inactive</Option>
+              <Option value={5}>Untaken</Option>
+              <Option value={6}>Closed</Option>
             </Select>
           </Form.Item>
         </div>
         <div className="flex flex-col grow w-full">
           <Form.Item name="numberOfEntries" label="Items Per Page">
             <Select className="[&>div]:border-normal dark:[&>div]:border-white/10 [&>div]:rounded-6 [&>.ant-select-arrow]:text-theme-gray dark:[&>.ant-select-arrow]:text-white/60 [&>div>div>div>span]:bg-transparent [&>div>div>div>span]:h-[26px] [&>div>div>div>span]:items-center h-[48px] py-0">
-              <Option value="10">10</Option>
-              <Option value="20">20</Option>
-              <Option value="30">30</Option>
-              <Option value="50">50</Option>
-              <Option value="100">100</Option>
+              <Option value={10}>10</Option>
+              <Option value={20}>20</Option>
+              <Option value={30}>30</Option>
+              <Option value={50}>50</Option>
+              <Option value={100}>100</Option>
             </Select>
           </Form.Item>
         </div>
         <div className="flex flex-col grow w-full">
-          <label className="base-text">&nbsp;</label>
+          {/* <label className="base-text">&nbsp;</label> */}
           <div className="flex flex-col gap-4 old-lg:flex-row">
-            <Form.Item colon={false}>
+            <Form.Item colon={false} label=" ">
               <Buttons type="primary" htmlType="submit" className="primary_btn">
                 {"Apply"}
               </Buttons>
             </Form.Item>
-            <Buttons onClick={() => handleSubmit(true)} className="secondary_btn">
-              {"Clear"}
-            </Buttons>
+
+            <Form.Item colon={false} label=" " className="[&_label]:">
+              <Buttons onClick={() => form.resetFields()} className="secondary_btn">
+                {"Clear"}
+              </Buttons>
+            </Form.Item>
           </div>
         </div>
       </div>
