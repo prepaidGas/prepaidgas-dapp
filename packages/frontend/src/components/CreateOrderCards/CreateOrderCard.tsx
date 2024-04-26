@@ -99,7 +99,6 @@ export default function CreateOrderCard({
       console.log("CreateOrderError: ", e)
     }
 
-    //todo: use in writeContract args
     const order: OrderStruct = {
       manager: address as string,
       gas: inputValues.gasAmount,

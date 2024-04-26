@@ -1,8 +1,6 @@
 "use client"
 
 import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTime.utils"
-import format from "date-fns/format"
-import { ethers } from "ethers"
 
 import { writeContract, waitForTransaction } from "@wagmi/core"
 import {
@@ -17,9 +15,6 @@ import { useAccount } from "wagmi"
 import { UilWallet } from "@iconscout/react-unicons"
 
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { z } from "zod"
-import CreateOrderCardSimple from "./CreateOrderFormSimple"
-import CreateOrderCardAdvanced from "./CreateOrderFormAdvanced"
 import DialogWindow from "@/components/DialogWindow"
 import UserAgreement from "@/components/UserAgreement"
 import { Tabs, TabsProps, Form, FormProps } from "antd"
@@ -28,6 +23,22 @@ import { TOKEN_ADDRESS } from "@/constants/tokens"
 import CreateOrderFormSimple from "./CreateOrderFormSimple"
 import CreateOrderFormAdvanced from "./CreateOrderFormAdvanced"
 
+export type OrderProps = {
+  gasAmount: number
+  expireDate: Dayjs
+  expireTime: Dayjs
+  startDate: Dayjs
+  startTime: Dayjs
+  endDate: Dayjs
+  endTime: Dayjs
+  txWindow: number
+  redeemWindow: number
+  gasPriceToken: string
+  gasPricePerUnit: number
+  guaranteeToken: string
+  guaranteePerUnit: number
+}
+
 export default function CreateOrderForm({
   setShowDialogWindow,
   setTransactionDetails,
@@ -35,8 +46,6 @@ export default function CreateOrderForm({
   setShowDialogWindow: Dispatch<SetStateAction<boolean>>
   setTransactionDetails: Dispatch<SetStateAction<{}>>
 }) {
-  //TODO: this initial state is for tests only, replace in production
-  //Values for simple order creation: Redeem window is 2h, txWindow is 10m, expire = current time + 15 mins, start = 0, end = current time + 24h,
   const initialState = {
     gasAmount: 100000,
     expireDate: dayjs(),
@@ -58,25 +67,10 @@ export default function CreateOrderForm({
   const [isOrderOnHold, setIsOrderOnHold] = useState(false)
 
   const [inputValues, setInputValues] = useState({ ...initialState })
-  const [validationErrors, setValidationErrors] = useState<null | { [key: string]: string }>(null)
-  const [validationTimer, setValidationTimer] = useState<NodeJS.Timeout | undefined>()
-  const [isValidating, setIsValidating] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   const createOrder = async (isOrderSimple: boolean = false) => {
     console.log("CreateOrderTestArr: START")
-    const testArr = [
-      address,
-      inputValues.gasAmount,
-      getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
-      getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
-      getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
-      inputValues.txWindow,
-      inputValues.redeemWindow,
-      { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit } as GasPaymentStruct,
-      { token: inputValues.guaranteeToken, perUnit: inputValues.guaranteePerUnit } as GasPaymentStruct,
-    ]
-    console.log("CreateOrderTestArr: ", testArr)
 
     setShowDialogWindow(true)
     setIsLoading(true)
@@ -94,13 +88,12 @@ export default function CreateOrderForm({
       console.log("CreateOrderError: ", e)
     }
 
-    //todo: use in writeContract args
     const order: OrderStruct = {
       manager: address as string,
       gas: inputValues.gasAmount,
       expire: isOrderSimple
         ? getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute")))
-        : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+        : getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
       start: isOrderSimple
         ? 0
         : getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
@@ -116,34 +109,15 @@ export default function CreateOrderForm({
       } as GasPaymentStruct,
     }
 
+    console.log(order)
+
     // Create Order
     try {
       const data = await writeContract({
         address: prepaidGasTreasuryContractAddress(),
         abi: TreasuryABI,
         functionName: "orderCreate",
-        args: [
-          {
-            manager: address,
-            gas: inputValues.gasAmount,
-            expire: isOrderSimple
-              ? getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute")))
-              : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
-            start: isOrderSimple
-              ? 0
-              : getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
-            end: isOrderSimple
-              ? getUnixTimestampInSeconds(combineDateAndTime(dayjs().add(1, "day"), dayjs()))
-              : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
-            txWindow: inputValues.txWindow,
-            redeemWindow: inputValues.redeemWindow,
-            gasPrice: { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit },
-            gasGuarantee: {
-              token: inputValues.guaranteeToken,
-              perUnit: inputValues.guaranteePerUnit,
-            },
-          },
-        ],
+        args: [order],
       })
       console.log("CreateOrderData: ", data)
       const txData = await waitForTransaction({ hash: data.hash })
@@ -159,11 +133,21 @@ export default function CreateOrderForm({
 
   const onFinish: FormProps["onFinish"] = (values) => {
     console.log("Success:", values)
+    if (address !== undefined) {
+      createOrder()
+    } else {
+      setIsOrderOnHold(true)
+      setShowWalletConnectionWindow(true)
+    }
   }
 
   const onFinishFailed: FormProps["onFinishFailed"] = (errorInfo) => {
     console.log("Failed:", errorInfo)
   }
+
+  //todo: delete if not using 2 different forms
+  const [formSimple] = Form.useForm()
+  const [formAdvanced] = Form.useForm()
 
   const [form] = Form.useForm()
 
@@ -174,9 +158,7 @@ export default function CreateOrderForm({
       // form.setFields([{name: }])
 
       setInputValues({
-        //save current gas amount
         gasAmount: inputValues.gasAmount,
-        //apply new time
         expireDate: dayjs().add(1, "day"),
         expireTime: dayjs("00:00", "HH:mm"),
         startDate: dayjs().add(1, "day"),
@@ -194,22 +176,10 @@ export default function CreateOrderForm({
   }
 
   useEffect(() => {
-    console.log("INPUT_VALUES: ", inputValues)
-
-    if (isValidating) {
-      if (validationTimer !== undefined) {
-        clearTimeout(validationTimer)
-      }
-      const timer = setTimeout(validateSearchForm, 500)
-      setValidationTimer(timer)
-    }
-  }, [inputValues])
-
-  useEffect(() => {
     if (address !== undefined && isOrderOnHold) {
       setShowWalletConnectionWindow(false)
       setIsOrderOnHold(false)
-      handleSubmit()
+      // handleSubmit()
     }
   }, [address])
 
@@ -252,6 +222,7 @@ export default function CreateOrderForm({
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
+          form={form}
         >
           <Tabs defaultActiveKey="1" items={items} onChange={setAdvancedInputsToDefault} />
         </Form>
