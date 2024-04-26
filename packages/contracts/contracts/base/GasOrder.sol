@@ -17,7 +17,7 @@ contract GasOrder {
   mapping(uint256 id => address promisor) public executor;
   mapping(uint256 id => uint256 balance) public gasLeft;
 
-  event OrderCreate(uint256 indexed id, uint256 end);
+  event OrderCreate(uint256 indexed id, Order order);
   event OrderWithdraw(uint256 indexed id);
   event OrderAccept(uint256 indexed id, address indexed executor);
   event OrderClose(uint256 indexed id, uint256 gas);
@@ -75,7 +75,7 @@ contract GasOrder {
 
     if (order.start == 0) _order[id].start = block.timestamp;
 
-    emit OrderCreate(id, order.end);
+    emit OrderCreate(id, order);
   }
 
   function orderWithdraw(uint256 id) public virtual specificStatus(id, OrderStatus.Untaken) {
