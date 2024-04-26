@@ -25,6 +25,7 @@ import UserAgreement from "../UserAgreement"
 import { Tabs, TabsProps } from "antd"
 import dayjs, { type Dayjs } from "dayjs"
 import { TOKEN_ADDRESS } from "@/constants/tokens"
+import { time, timeStamp } from "console"
 
 const schema = z.object({
   gasAmount: z.number().int().gt(0),
@@ -39,7 +40,7 @@ const schema = z.object({
   gasPriceToken: z.string(),
   gasPricePerUnit: z.number().int().gt(0),
   guaranteeToken: z.string(),
-  guaranteePerUnit: z.number().int().gt(0),
+  guaranteePerUnit: z.number().int(),
 })
 
 export type CreateOrderState = z.infer<typeof schema>
@@ -56,7 +57,7 @@ export default function CreateOrderCard({
   const initialState: CreateOrderState = {
     gasAmount: 100000,
     expireDate: dayjs(),
-    expireTime: dayjs("00:00", "HH:mm").add(15, "minute"),
+    expireTime: dayjs().add(15, "m"),
     startDate: dayjs(),
     startTime: dayjs(),
     endDate: dayjs().add(1, "day"),
@@ -81,18 +82,6 @@ export default function CreateOrderCard({
 
   const createOrder = async (isOrderSimple: boolean = false) => {
     console.log("CreateOrderTestArr: START")
-    const testArr = [
-      address,
-      inputValues.gasAmount,
-      getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
-      getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
-      getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
-      inputValues.txWindow,
-      inputValues.redeemWindow,
-      { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit } as GasPaymentStruct,
-      { token: inputValues.guaranteeToken, perUnit: inputValues.guaranteePerUnit } as GasPaymentStruct,
-    ]
-    console.log("CreateOrderTestArr: ", testArr)
 
     setShowDialogWindow(true)
     setIsLoading(true)
@@ -132,34 +121,15 @@ export default function CreateOrderCard({
       } as GasPaymentStruct,
     }
 
+    console.log(order)
+
     // Create Order
     try {
       const data = await writeContract({
         address: prepaidGasTreasuryContractAddress(),
         abi: TreasuryABI,
         functionName: "orderCreate",
-        args: [
-          {
-            manager: address,
-            gas: inputValues.gasAmount,
-            expire: isOrderSimple
-              ? getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute")))
-              : getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
-            start: isOrderSimple
-              ? 0
-              : getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
-            end: isOrderSimple
-              ? getUnixTimestampInSeconds(combineDateAndTime(dayjs().add(1, "day"), dayjs()))
-              : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
-            txWindow: inputValues.txWindow,
-            redeemWindow: inputValues.redeemWindow,
-            gasPrice: { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit },
-            gasGuarantee: {
-              token: inputValues.guaranteeToken,
-              perUnit: inputValues.guaranteePerUnit,
-            },
-          },
-        ],
+        args: [order],
       })
       console.log("CreateOrderData: ", data)
       const txData = await waitForTransaction({ hash: data.hash })
@@ -242,6 +212,18 @@ export default function CreateOrderCard({
       const timer = setTimeout(validateSearchForm, 500)
       setValidationTimer(timer)
     }
+  }, [inputValues])
+
+  useEffect(() => {
+    const timeLog = {
+      start: { timeStamp: getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)) },
+      expire: {
+        timeStamp: getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
+        combined: combineDateAndTime(inputValues.expireDate, inputValues.expireTime),
+        time: inputValues.expireTime,
+      },
+    }
+    console.log("Time Log:", timeLog)
   }, [inputValues])
 
   useEffect(() => {

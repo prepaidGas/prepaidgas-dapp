@@ -164,9 +164,8 @@ export default function CreateOrderCardAdvanced({
             />
             <TimePicker
               className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
-              defaultValue={dayjs("00:00", "HH:mm")}
               format={"HH:mm"}
-              // value={inputValues.executionPeriodEndTime}
+              value={inputValues.expireTime}
               onChange={(value) => setInputValues({ ...inputValues, expireTime: value })}
               // error={!!validationErrors?.executionPeriodEndTime}
               // errorMessage={validationErrors?.executionPeriodEndTime}
@@ -239,8 +238,6 @@ export default function CreateOrderCardAdvanced({
             value={inputValues.guaranteePerUnit.toString()}
             onChange={(e) => setInputValues({ ...inputValues, guaranteePerUnit: Number(e.target.value) })}
             min={0}
-            // error={!!validationErrors?.guaranteeValueGasPrice}
-            // errorMessage={validationErrors?.guaranteeValueGasPrice}
             spellCheck={false}
             placeholder="123"
             size="middle"
