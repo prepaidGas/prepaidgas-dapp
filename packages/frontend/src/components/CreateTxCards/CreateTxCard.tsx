@@ -153,19 +153,7 @@ export default function CreateTxCard({
   }
 
   const handleSubmit = () => {
-    setIsValidating(true)
-
-    if (validateSearchForm()) {
-      if (address !== undefined) {
-        signMessage()
-        //executeFunction()
-      } else {
-        setIsOrderOnHold(true)
-        setShowWalletConnectionWindow(true)
-      }
-    } else {
-      console.log("Form has errors. Please fix them before submitting.")
-    }
+    setShowDialogWindow(true)
   }
 
   const executeFunction = async () => {

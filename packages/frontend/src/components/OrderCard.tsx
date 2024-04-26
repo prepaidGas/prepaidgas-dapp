@@ -2,7 +2,7 @@ import format from "date-fns/format"
 
 import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
 
-import { COLOR_BY_STATUS } from "@/constants"
+import { COLOR_BY_STATUS, STATUS_NAMES } from "@/constants"
 
 import { Badge, Card, Text, Metric, Flex, ProgressBar, Icon, Button } from "@tremor/react"
 
@@ -25,11 +25,40 @@ import { string } from "zod"
 import { Cards } from "@/components/cards/frame/cards-frame"
 import { UilQuestionCircle, UilClipboardNotes, UilFavorite } from "@iconscout/react-unicons"
 import { Buttons } from "./buttons"
+import { DescriptionsProps } from "antd"
 
 interface OrderCard extends FilteredOrderStructOutput {
   onFavorited(favorited: boolean): void
   className?: string
 }
+
+const items: DescriptionsProps["items"] = [
+  {
+    key: "1",
+    label: "UserName",
+    children: <p>Zhou Maomao</p>,
+  },
+  {
+    key: "2",
+    label: "Telephone",
+    children: <p>1810000000</p>,
+  },
+  {
+    key: "3",
+    label: "Live",
+    children: <p>Hangzhou, Zhejiang</p>,
+  },
+  {
+    key: "4",
+    label: "Remark",
+    children: <p>empty</p>,
+  },
+  {
+    key: "5",
+    label: "Address",
+    children: <p>No. 18, Wantang Road, Xihu District, Hangzhou, Zhejiang, China</p>,
+  },
+]
 
 // @todo display order data
 export default function OrderCard({
@@ -90,9 +119,17 @@ export default function OrderCard({
     }
   }
 
+  const getCardColor = () => `border-[${COLOR_BY_STATUS[Number(status)]}]`
+
   return (
     <>
-      <Cards headless className="max-w-[1024px] mx-auto relative mt-4">
+      <Cards
+        headless
+        className={
+          `max-w-[1024px] mx-auto relative mt-4 border-t-4 border-l-0 old-lg:border-t-0 old-lg:border-l-4 ` +
+          getCardColor()
+        }
+      >
         <div className="flex flex-col gap-3">
           <Buttons className="absolute [&>*]:fill-primary right-3 top-3 h-[40px] ml-4 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] ">
             <UilFavorite />
@@ -103,8 +140,12 @@ export default function OrderCard({
           <span className="text-[#404040] dark:text-[#A4A5AA] font-bold text-2xl">{`#${id.toString()}`}</span>
 
           <div className="flex flex-row items-center gap-2">
+            <span className="text-[#404040] dark:text-[#A4A5AA]">Status: {STATUS_NAMES[Number(status)]}</span>
+          </div>
+
+          <div className="flex flex-row items-center gap-2">
             <span className="text-[#404040] dark:text-[#A4A5AA]">Manager: </span>
-            <TruncatedTextWithTooltip text={order.manager} />
+            <TruncatedTextWithTooltip text={order.manager} isCopyable />
           </div>
 
           <span className="text-[#404040] dark:text-[#A4A5AA]">

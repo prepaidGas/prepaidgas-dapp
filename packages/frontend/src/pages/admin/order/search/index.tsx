@@ -16,6 +16,7 @@ import { prepaidGasCoreContractAddress, PrepaidGasABI } from "@/helpers"
 import { TailSpin } from "react-loader-spinner"
 import { SPINNER_COLOR } from "@/constants"
 import OrderCard from "@/components/OrderCard"
+import SearchOrdersForm from "@/components/forms/searchOrders/SearchOrdersForm"
 
 const OrderSearch = () => {
   const PageRoutes = [
@@ -130,7 +131,7 @@ const OrderSearch = () => {
   //   setPopupTimer(timer)
   // }
 
-  const handleFilterSubmit = (filterOptions: FilterOptions) => {
+  const onFilterSubmit = (filterOptions: FilterOptions) => {
     console.log("handleFilterSubmit START")
     setFilterState(filterOptions)
     setCurrentPage(1)
@@ -159,10 +160,18 @@ const OrderSearch = () => {
       />
       <div className="min-h-[715px] lg:min-h-[580px] flex-1 h-auto px-8 xl:px-[15px] pb-[30px] bg-transparent">
         <div className="h-full w-full">
-          <Cards headless className="max-w-[1024px] mx-auto">
+          {/* <Cards headless className="max-w-[1024px] mx-auto">
             <div className="px-[25px] py-0">
               <div className="flex flex-row items-center gap-4 w-full grow">
-                <SearchFiltersCard initialValue={initialState} onSubmit={handleFilterSubmit} />
+                <SearchFiltersCard initialValue={initialState} onSubmit={onFilterSubmit} />
+              </div>
+            </div>
+          </Cards> */}
+
+          <Cards headless className="max-w-[1024px] mx-auto mt-4">
+            <div className="px-[25px] py-0">
+              <div className="flex flex-row items-center gap-4 w-full grow">
+                <SearchOrdersForm initialValues={initialState} handleSubmit={onFilterSubmit} />
               </div>
             </div>
           </Cards>

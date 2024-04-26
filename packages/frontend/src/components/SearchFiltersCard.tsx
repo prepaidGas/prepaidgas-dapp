@@ -15,7 +15,11 @@ const schema = z.object({
   status: z.number().lte(5).gte(0),
   numberOfEntries: z.number(),
 })
-export type FilterOptions = z.infer<typeof schema>
+export type FilterOptions = {
+  manager: string
+  status: number
+  numberOfEntries: number
+}
 
 export default function SearchFiltersCard({
   initialValue,

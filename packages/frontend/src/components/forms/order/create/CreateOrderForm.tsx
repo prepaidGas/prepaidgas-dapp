@@ -157,16 +157,21 @@ export default function CreateOrderForm({
     console.log("CreateOrderTestArr: END")
   }
 
-  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
+  const onFinish: FormProps["onFinish"] = (values) => {
     console.log("Success:", values)
   }
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
+  const onFinishFailed: FormProps["onFinishFailed"] = (errorInfo) => {
     console.log("Failed:", errorInfo)
   }
+
+  const [form] = Form.useForm()
+
   const setAdvancedInputsToDefault = (tabKey: string) => {
     if (tabKey === "1") {
       console.log("SETTING INPUTS TO DEFAULT")
+
+      // form.setFields([{name: }])
 
       setInputValues({
         //save current gas amount
@@ -178,15 +183,11 @@ export default function CreateOrderForm({
         startTime: dayjs("00:00", "HH:mm"),
         endDate: dayjs().add(2, "day"),
         endTime: dayjs("00:00", "HH:mm"),
-        //set execution window to initial value
         txWindow: 600,
         redeemWindow: 7200,
-        //set all tokens to be equal to gas value token
         gasPriceToken: inputValues.gasPriceToken,
         guaranteeToken: inputValues.gasPriceToken,
-        //save current gasCostValueGasPrice
         gasPricePerUnit: inputValues.gasPricePerUnit,
-        //recalculate reward and guarantee
         guaranteePerUnit: inputValues.gasAmount * inputValues.gasPricePerUnit,
       })
     }
