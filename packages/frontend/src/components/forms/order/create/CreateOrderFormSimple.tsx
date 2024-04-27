@@ -8,28 +8,46 @@ import { SPINNER_COLOR } from "@/constants"
 import Receipt from "@/components/Receipt"
 import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
 import TokenSearchSelect from "@/components/TokenSearchSelect"
-import { TOKEN_NAME } from "@/constants/tokens"
+import { TOKEN_ADDRESS, TOKEN_NAME } from "@/constants/tokens"
 
-import { Form, Input, List, Select, Tabs, TabsProps } from "antd"
+import { Form, FormInstance, FormProps, Input, List, Select, Tabs, TabsProps } from "antd"
 const { Option } = Select
 
 import { Buttons } from "@/components/buttons"
 import CreateOrderCard from "@/components/CreateOrderCards/CreateOrderCard"
 
-export default function CreateOrderFormSimple() {
+export type SimpleOrderProps = {
+  gasAmount: number
+  txWindow: number
+  redeemWindow: number
+  gasPriceToken: string
+  gasPricePerUnit: number
+}
+
+const initialState = {
+  gasAmount: 100000,
+  txWindow: 600,
+  redeemWindow: 7200,
+  gasPriceToken: TOKEN_ADDRESS.MockUSD,
+  gasPricePerUnit: 10,
+}
+
+export default function CreateOrderFormSimple({
+  form,
+  handleSubmit,
+}: {
+  form: FormInstance<SimpleOrderProps>
+  handleSubmit: (values: SimpleOrderProps) => void
+}) {
   const [isLoading, setIsLoading] = useState(false)
 
-  const onFinish: FormProps["onFinish"] = (values) => {
+  const onFinish: FormProps<SimpleOrderProps>["onFinish"] = (values) => {
     console.log("Success:", values)
-    if (address !== undefined) {
-      createOrder()
-    } else {
-      setIsOrderOnHold(true)
-      setShowWalletConnectionWindow(true)
-    }
+    handleSubmit(values)
+    // createOrder()
   }
 
-  const onFinishFailed: FormProps["onFinishFailed"] = (errorInfo) => {
+  const onFinishFailed: FormProps<SimpleOrderProps>["onFinishFailed"] = (errorInfo) => {
     console.log("Failed:", errorInfo)
   }
 
@@ -49,7 +67,7 @@ export default function CreateOrderFormSimple() {
             <label htmlFor="input-number-gas" className="base-text mb-1">
               Gas Amount
             </label>
-            <Form.Item name="gasAmount" label="Gas Amount" rules={[{ required: true }, { min: 100000 }]}>
+            <Form.Item name="gasAmount" label="Gas Amount" rules={[{ required: true }]}>
               <Input
                 min={100000}
                 spellCheck={false}
@@ -64,7 +82,7 @@ export default function CreateOrderFormSimple() {
               <label htmlFor="token-select" className="base-text mb-1">
                 Token
               </label>
-              <Form.Item name={""}>
+              <Form.Item name={"gasPriceToken"}>
                 <TokenSearchSelect />
               </Form.Item>
             </div>
@@ -72,19 +90,8 @@ export default function CreateOrderFormSimple() {
               <label htmlFor="input-number-gasCost" className="base-text mb-1">
                 Gas Cost
               </label>
-              <Form.Item>
+              <Form.Item name={"gasPricePerUnit"}>
                 <Input
-                  value={inputValues.gasPricePerUnit.toString()}
-                  onChange={(e) => {
-                    const gasPricePerUnit = Number(e.target.value)
-                    setInputValues({
-                      ...inputValues,
-                      gasPricePerUnit,
-                      guaranteePerUnit: getGuaranteeValue(inputValues.gasAmount, gasPricePerUnit),
-                    })
-                  }}
-                  // error={!!validationErrors?.gasCostValueGasPrice}
-                  // errorMessage={validationErrors?.gasCostValueGasPrice}
                   spellCheck={false}
                   placeholder="123"
                   size="middle"
@@ -98,9 +105,9 @@ export default function CreateOrderFormSimple() {
           <Receipt
             className=""
             //TODO pass correct token names
-            gasAmount={inputValues.gasAmount}
-            gasCostValue={inputValues.gasPricePerUnit}
-            gasCostTokenName={TOKEN_NAME[inputValues.gasPriceToken] ?? inputValues.gasPriceToken}
+            gasAmount={form.getFieldValue("gasAmount")}
+            gasCostValue={form.getFieldValue("gasPricePerUnit")}
+            gasCostTokenName={TOKEN_NAME[form.getFieldValue("gasPriceToken")] ?? form.getFieldValue("gasPriceToken")}
           />
 
           <Form.Item>

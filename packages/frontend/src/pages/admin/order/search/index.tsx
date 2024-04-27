@@ -7,7 +7,6 @@ import { Cards } from "@/components/cards/frame/cards-frame"
 import { Buttons } from "@/components/buttons"
 // import OrderCard, { OrderCardProps } from "@/components/cards/orderCard"
 import { useEffect, useState } from "react"
-import SearchFiltersCard, { FilterOptions } from "@/components/SearchFiltersCard"
 import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
 import { readContract } from "@wagmi/core"
 import Pagination from "@/components/Pagination"
@@ -16,7 +15,7 @@ import { prepaidGasCoreContractAddress, PrepaidGasABI } from "@/helpers"
 import { TailSpin } from "react-loader-spinner"
 import { SPINNER_COLOR } from "@/constants"
 import OrderCard from "@/components/OrderCard"
-import SearchOrdersForm from "@/components/forms/searchOrders/SearchOrdersForm"
+import SearchOrdersForm, { FilterOptions } from "@/components/forms/searchOrders/SearchOrdersForm"
 
 const OrderSearch = () => {
   const PageRoutes = [
@@ -29,8 +28,6 @@ const OrderSearch = () => {
       breadcrumbName: "Order Search",
     },
   ]
-
-  const { address, isConnecting, isDisconnected } = useAccount()
 
   const initialState: FilterOptions = {
     manager: "",
