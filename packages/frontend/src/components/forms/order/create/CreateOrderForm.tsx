@@ -149,8 +149,6 @@ export default function CreateOrderForm({
   const [formSimple] = Form.useForm()
   const [formAdvanced] = Form.useForm()
 
-  const [form] = Form.useForm()
-
   const setAdvancedInputsToDefault = (tabKey: string) => {
     if (tabKey === "1") {
       console.log("SETTING INPUTS TO DEFAULT")

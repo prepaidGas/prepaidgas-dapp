@@ -16,6 +16,16 @@ const { Option } = Select
 import { Buttons } from "@/components/buttons"
 import CreateOrderCard from "@/components/CreateOrderCards/CreateOrderCard"
 
+const initialState = {
+  gasAmount: 100000,
+  txWindow: 600,
+  redeemWindow: 7200,
+  gasPriceToken: TOKEN_ADDRESS.MockUSD,
+  gasPricePerUnit: 10,
+  guaranteeToken: TOKEN_ADDRESS.MockUSD,
+  guaranteePerUnit: 10,
+}
+
 export default function CreateOrderFormSimple() {
   const [isLoading, setIsLoading] = useState(false)
 
