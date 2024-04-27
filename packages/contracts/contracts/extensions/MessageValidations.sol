@@ -40,5 +40,7 @@ abstract contract MessageValidations is Executor, GasOrder {
     address fulfiller,
     uint256 gasSpent,
     Resolution resolution
-  ) internal virtual override(Executor, GasOrder) {}
+  ) internal virtual override(Executor, GasOrder) {
+    super._reportExecution(message, fulfiller, gasSpent, resolution);
+  }
 }
