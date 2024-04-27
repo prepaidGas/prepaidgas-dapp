@@ -9,6 +9,7 @@ import CreateOrderCard from "@/components/CreateOrderCards/CreateOrderCard"
 import { useState } from "react"
 import DialogWindow from "@/components/DialogWindow"
 import { TailSpin } from "react-loader-spinner"
+import CreateOrderForm from "@/components/forms/order/create/CreateOrderForm"
 
 const CreateOrder = () => {
   const [showDialogWindow, setShowDialogWindow] = useState(false)
@@ -86,6 +87,15 @@ const CreateOrder = () => {
           <Cards headless className="max-w-[1024px] mx-auto">
             <div className="p-[25px]">
               <CreateOrderCard
+                setShowDialogWindow={setShowDialogWindow}
+                setTransactionDetails={setTransactionDetails}
+              />
+            </div>
+          </Cards>
+
+          <Cards headless className="max-w-[1024px] mx-auto mt-4">
+            <div className="p-[25px]">
+              <CreateOrderForm
                 setShowDialogWindow={setShowDialogWindow}
                 setTransactionDetails={setTransactionDetails}
               />

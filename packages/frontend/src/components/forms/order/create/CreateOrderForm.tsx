@@ -20,7 +20,7 @@ import UserAgreement from "@/components/UserAgreement"
 import { Tabs, TabsProps, Form, FormProps } from "antd"
 import dayjs, { type Dayjs } from "dayjs"
 import { TOKEN_ADDRESS } from "@/constants/tokens"
-import CreateOrderFormSimple from "./CreateOrderFormSimple"
+import CreateOrderFormSimple, { SimpleOrderProps } from "./CreateOrderFormSimple"
 import CreateOrderFormAdvanced from "./CreateOrderFormAdvanced"
 
 export type OrderProps = {
@@ -88,27 +88,6 @@ export default function CreateOrderForm({
       console.log("CreateOrderError: ", e)
     }
 
-    const order: OrderStruct = {
-      manager: address as string,
-      gas: inputValues.gasAmount,
-      expire: isOrderSimple
-        ? getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute")))
-        : getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
-      start: isOrderSimple
-        ? 0
-        : getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
-      end: isOrderSimple
-        ? getUnixTimestampInSeconds(combineDateAndTime(dayjs().add(1, "day"), dayjs()))
-        : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
-      txWindow: inputValues.txWindow,
-      redeemWindow: inputValues.redeemWindow,
-      gasPrice: { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit } as GasPaymentStruct,
-      gasGuarantee: {
-        token: inputValues.guaranteeToken,
-        perUnit: inputValues.guaranteePerUnit,
-      } as GasPaymentStruct,
-    }
-
     console.log(order)
 
     // Create Order
@@ -146,10 +125,10 @@ export default function CreateOrderForm({
   }
 
   //todo: delete if not using 2 different forms
-  const [formSimple] = Form.useForm()
+  const [formSimple] = Form.useForm<SimpleOrderProps>()
   const [formAdvanced] = Form.useForm()
 
-  const setAdvancedInputsToDefault = (tabKey: string) => {
+  const handleTabChange = (tabKey: string) => {
     if (tabKey === "1") {
       console.log("SETTING INPUTS TO DEFAULT")
 
@@ -173,6 +152,38 @@ export default function CreateOrderForm({
     }
   }
 
+  // console.log("Success:", values)
+  // if (address !== undefined) {
+  //   createOrder()
+  // } else {
+  //   setIsOrderOnHold(true)
+  //   setShowWalletConnectionWindow(true)
+  // }
+
+  const handleSimpleSubmit = (values: SimpleOrderProps) => {
+    const order: OrderStruct = {
+      manager: address as string,
+      gas: values.gasAmount,
+      expire: getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute"))),
+      start: 0,
+      end: getUnixTimestampInSeconds(combineDateAndTime(dayjs().add(1, "day"), dayjs())),
+      txWindow: 600,
+      redeemWindow: 7200,
+      gasPrice: { token: values.gasPriceToken, perUnit: values.gasPricePerUnit } as GasPaymentStruct,
+      gasGuarantee: { token: values.gasPriceToken, perUnit: values.gasPricePerUnit } as GasPaymentStruct,
+    }
+
+    console.log("handleSimpleSubmit: ", { order })
+  }
+
+  const isWalletConnected = () => {
+    if (address !== undefined) {
+      return true
+    }
+
+    return false
+  }
+
   useEffect(() => {
     if (address !== undefined && isOrderOnHold) {
       setShowWalletConnectionWindow(false)
@@ -181,19 +192,40 @@ export default function CreateOrderForm({
     }
   }, [address])
 
+  // const order: OrderStruct = {
+  //   manager: address as string,
+  //   gas: inputValues.gasAmount,
+  //   expire: isOrderSimple
+  //     ? getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute")))
+  //     : getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
+  //   start: isOrderSimple
+  //     ? 0
+  //     : getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
+  //   end: isOrderSimple
+  //     ? getUnixTimestampInSeconds(combineDateAndTime(dayjs().add(1, "day"), dayjs()))
+  //     : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
+  //   txWindow: inputValues.txWindow,
+  //   redeemWindow: inputValues.redeemWindow,
+  //   gasPrice: { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit } as GasPaymentStruct,
+  //   gasGuarantee: {
+  //     token: inputValues.guaranteeToken,
+  //     perUnit: inputValues.guaranteePerUnit,
+  //   } as GasPaymentStruct,
+  // }
+
   //todo: make sure this is the best way to store data for tabs. const inside of function may lead to re-renders
   const items: TabsProps["items"] = [
     {
       key: "1",
       label: "Simple",
-      children: <CreateOrderFormSimple />,
+      children: <CreateOrderFormSimple form={formSimple} handleSubmit={handleSimpleSubmit} />,
     },
 
-    {
-      key: "2",
-      label: "Advanced",
-      children: <CreateOrderFormAdvanced />,
-    },
+    // {
+    //   key: "2",
+    //   label: "Advanced",
+    //   children: <CreateOrderFormAdvanced form={formAdvanced} handleSubmit={handleAdvancedSubmit} />,
+    // },
   ]
 
   return (
@@ -214,16 +246,7 @@ export default function CreateOrderForm({
         />
       )}
       <div className="flex flex-col w-full">
-        <Form
-          variant="outlined"
-          initialValues={{ ...initialState }}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-          autoComplete="off"
-          form={form}
-        >
-          <Tabs defaultActiveKey="1" items={items} onChange={setAdvancedInputsToDefault} />
-        </Form>
+        <Tabs defaultActiveKey="1" items={items} onChange={handleTabChange} />
       </div>
     </>
   )
