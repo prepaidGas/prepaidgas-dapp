@@ -9,7 +9,12 @@ import { Form, FormProps, Input, List, Select, Tabs, TabsProps } from "antd"
 const { Option } = Select
 
 import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX, ICON_BY_STATUS } from "@/constants"
-import { FilterOptions } from "@/components/SearchFiltersCard"
+
+export type FilterOptions = {
+  manager: string
+  status: number
+  numberOfEntries: number
+}
 
 export default function SearchOrdersForm({
   initialValues,
