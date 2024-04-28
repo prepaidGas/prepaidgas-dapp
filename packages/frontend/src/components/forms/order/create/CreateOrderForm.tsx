@@ -104,6 +104,9 @@ export default function CreateOrderForm({
       console.log("APPROVE ERROR")
     }
 
+    console.log("prepaidGasTreasuryContractAddress(): ", prepaidGasTreasuryContractAddress())
+    console.log("USER ADDRESS: ", address)
+
     // Create Order
     try {
       const data = await writeContract({
@@ -210,7 +213,7 @@ export default function CreateOrderForm({
         console.log("ORDER IS UNDEFINED")
         return
       }
-      createOrder(pendingOrder.order)
+      createOrder({ ...pendingOrder.order, manager: address })
       setPendingOrder({ isOrderPending: false, order: undefined })
     }
   }, [address])

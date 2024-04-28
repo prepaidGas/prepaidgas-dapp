@@ -46,7 +46,6 @@ export default function CreateOrderFormSimple({
   const onFinish: FormProps<SimpleOrderProps>["onFinish"] = (values) => {
     console.log("Success:", values)
     handleSubmit(values)
-    // createOrder()
   }
 
   const onFinishFailed: FormProps<SimpleOrderProps>["onFinishFailed"] = (errorInfo) => {
