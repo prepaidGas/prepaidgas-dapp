@@ -171,7 +171,7 @@ contract GasOrderGetters is GasOrder {
       OrderStatus state = status(id);
       if (
         (anyPromisor || executor[id] == promisor) &&
-        (!onlyLive || state == OrderStatus.Pending || state == OrderStatus.Active)
+        (!onlyLive || state == OrderStatus.Accepted || state == OrderStatus.Active)
       ) {
         if (offset > 0) {
           offset--;
