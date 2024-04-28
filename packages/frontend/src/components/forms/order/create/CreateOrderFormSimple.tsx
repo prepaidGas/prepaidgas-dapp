@@ -7,14 +7,14 @@ import { Dispatch, SetStateAction, useState } from "react"
 import { SPINNER_COLOR } from "@/constants"
 import Receipt from "@/components/Receipt"
 import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
-import TokenSearchSelect from "@/components/TokenSearchSelect"
 import { TOKEN_ADDRESS, TOKEN_NAME } from "@/constants/tokens"
 
-import { Form, FormInstance, FormProps, Input, List, Select, Tabs, TabsProps } from "antd"
+import { Form, FormInstance, FormProps, Input, InputNumber, List, Select, Tabs, TabsProps } from "antd"
 const { Option } = Select
 
 import { Buttons } from "@/components/buttons"
 import CreateOrderCard from "@/components/CreateOrderCards/CreateOrderCard"
+import TokenSearchSelectAntd from "@/components/TokenSearchSelectAntd"
 
 export type SimpleOrderProps = {
   gasAmount: number
@@ -35,9 +35,11 @@ const initialState = {
 export default function CreateOrderFormSimple({
   form,
   handleSubmit,
+  disabled,
 }: {
   form: FormInstance<SimpleOrderProps>
   handleSubmit: (values: SimpleOrderProps) => void
+  disabled: boolean
 }) {
   const [isLoading, setIsLoading] = useState(false)
 
@@ -59,66 +61,57 @@ export default function CreateOrderFormSimple({
       onFinishFailed={onFinishFailed}
       autoComplete="off"
       form={form}
+      disabled={disabled}
+      layout="vertical"
     >
-      <div className="mt-6 flex flex-col w-full">
-        {/* Gas Amount, Token and Gas Price inputs */}
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col">
-            <label htmlFor="input-number-gas" className="base-text mb-1">
-              Gas Amount
-            </label>
-            <Form.Item name="gasAmount" label="Gas Amount" rules={[{ required: true }]}>
-              <Input
-                min={100000}
-                spellCheck={false}
-                placeholder="123"
-                size="middle"
-                className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-              />
-            </Form.Item>
-          </div>
-          <div className="flex flex-col old-md:flex-row gap-4">
-            <div className="flex flex-col grow justify-start ">
-              <label htmlFor="token-select" className="base-text mb-1">
-                Token
-              </label>
-              <Form.Item name={"gasPriceToken"}>
-                <TokenSearchSelect />
-              </Form.Item>
-            </div>
-            <div className="flex flex-col grow justify-start">
-              <label htmlFor="input-number-gasCost" className="base-text mb-1">
-                Gas Cost
-              </label>
-              <Form.Item name={"gasPricePerUnit"}>
-                <Input
-                  spellCheck={false}
-                  placeholder="123"
-                  size="middle"
-                  className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-                />
-              </Form.Item>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col old-sm:flex-row old-sm:items-end old-sm:justify-between gap-4 mt-4 old-sm:mt-8">
-          <Receipt
+      <Form.Item name="gasAmount" label="Gas Amount" colon={false} rules={[{ required: true }]}>
+        <InputNumber
+          min={100000}
+          spellCheck={false}
+          placeholder="123"
+          size="middle"
+          className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+          style={{ width: "100%" }}
+        />
+      </Form.Item>
+      <Form.Item name={"gasPriceToken"} label={"Token"} colon={false}>
+        <TokenSearchSelectAntd />
+      </Form.Item>
+      <Form.Item
+        name={"gasPricePerUnit"}
+        label={"Gas Price Per Unit"}
+        colon={false}
+        rules={[
+          {
+            required: true,
+          },
+        ]}
+      >
+        <InputNumber
+          spellCheck={false}
+          placeholder="123"
+          size="middle"
+          className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60 grow"
+          style={{ width: "100%" }}
+        />
+      </Form.Item>
+      <div className="flex flex-col old-sm:flex-row old-sm:items-end old-sm:justify-between gap-4 mt-4 old-sm:mt-8">
+        {/* <Receipt
             className=""
             //TODO pass correct token names
             gasAmount={form.getFieldValue("gasAmount")}
             gasCostValue={form.getFieldValue("gasPricePerUnit")}
             gasCostTokenName={TOKEN_NAME[form.getFieldValue("gasPriceToken")] ?? form.getFieldValue("gasPriceToken")}
-          />
+          /> */}
 
-          <Form.Item>
-            <Buttons type="primary" htmlType="submit" className="primary_btn">
-              {"Create Gas Order"}
-            </Buttons>
-            {/* <Buttons onClick={handleSubmit} className="primary_btn">
+        <Form.Item>
+          <Buttons type="primary" htmlType="submit" className="primary_btn">
+            {"Create Gas Order"}
+          </Buttons>
+          {/* <Buttons onClick={handleSubmit} className="primary_btn">
           {"Create Gas Order"}
         </Buttons> */}
-          </Form.Item>
-        </div>
+        </Form.Item>
       </div>
     </Form>
   )

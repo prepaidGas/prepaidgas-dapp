@@ -39,6 +39,11 @@ export type OrderProps = {
   guaranteePerUnit: number
 }
 
+type PendingOrderProps = {
+  isOrderPending: boolean
+  order: OrderStruct | undefined
+}
+
 export default function CreateOrderForm({
   setShowDialogWindow,
   setTransactionDetails,
@@ -64,13 +69,19 @@ export default function CreateOrderForm({
 
   const { address, isConnecting, isDisconnected } = useAccount()
   const [showWalletConnectionWindow, setShowWalletConnectionWindow] = useState(false)
-  const [isOrderOnHold, setIsOrderOnHold] = useState(false)
+  const [pendingOrder, setPendingOrder] = useState<PendingOrderProps>({ isOrderPending: false, order: undefined })
 
   const [inputValues, setInputValues] = useState({ ...initialState })
   const [isLoading, setIsLoading] = useState(true)
 
-  const createOrder = async (isOrderSimple: boolean = false) => {
+  const createOrder = async (order: OrderStruct) => {
     console.log("CreateOrderTestArr: START")
+
+    if (!isWalletConnected()) {
+      setPendingOrder({ isOrderPending: true, order })
+      setShowWalletConnectionWindow(true)
+      return
+    }
 
     setShowDialogWindow(true)
     setIsLoading(true)
@@ -108,20 +119,6 @@ export default function CreateOrderForm({
     }
     setIsLoading(false)
     console.log("CreateOrderTestArr: END")
-  }
-
-  const onFinish: FormProps["onFinish"] = (values) => {
-    console.log("Success:", values)
-    if (address !== undefined) {
-      createOrder()
-    } else {
-      setIsOrderOnHold(true)
-      setShowWalletConnectionWindow(true)
-    }
-  }
-
-  const onFinishFailed: FormProps["onFinishFailed"] = (errorInfo) => {
-    console.log("Failed:", errorInfo)
   }
 
   //todo: delete if not using 2 different forms
@@ -172,8 +169,27 @@ export default function CreateOrderForm({
       gasPrice: { token: values.gasPriceToken, perUnit: values.gasPricePerUnit } as GasPaymentStruct,
       gasGuarantee: { token: values.gasPriceToken, perUnit: values.gasPricePerUnit } as GasPaymentStruct,
     }
+    console.log("handleSimpleSubmit: ", { order })
+
+    createOrder(order)
+  }
+
+  const handleAdvancedSubmit = (values) => {
+    const order: OrderStruct = {
+      manager: address as string,
+      gas: values.gasAmount,
+      expire: getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute"))),
+      start: 0,
+      end: getUnixTimestampInSeconds(combineDateAndTime(dayjs().add(1, "day"), dayjs())),
+      txWindow: 600,
+      redeemWindow: 7200,
+      gasPrice: { token: values.gasPriceToken, perUnit: values.gasPricePerUnit } as GasPaymentStruct,
+      gasGuarantee: { token: values.gasPriceToken, perUnit: values.gasPricePerUnit } as GasPaymentStruct,
+    }
 
     console.log("handleSimpleSubmit: ", { order })
+
+    createOrder(order)
   }
 
   const isWalletConnected = () => {
@@ -185,10 +201,14 @@ export default function CreateOrderForm({
   }
 
   useEffect(() => {
-    if (address !== undefined && isOrderOnHold) {
+    if (address !== undefined && pendingOrder.isOrderPending === true) {
       setShowWalletConnectionWindow(false)
-      setIsOrderOnHold(false)
-      // handleSubmit()
+      if (pendingOrder.order === undefined) {
+        console.log("ORDER IS UNDEFINED")
+        return
+      }
+      createOrder(pendingOrder.order)
+      setPendingOrder({ isOrderPending: false, order: undefined })
     }
   }, [address])
 
@@ -218,7 +238,14 @@ export default function CreateOrderForm({
     {
       key: "1",
       label: "Simple",
-      children: <CreateOrderFormSimple form={formSimple} handleSubmit={handleSimpleSubmit} />,
+      children: (
+        <CreateOrderFormSimple
+          form={formSimple}
+          handleSubmit={handleSimpleSubmit}
+          disabled={pendingOrder.isOrderPending}
+        />
+      ),
+      disabled: pendingOrder.isOrderPending,
     },
 
     // {
@@ -242,7 +269,10 @@ export default function CreateOrderForm({
           }
           description="Please accept our terms of service and connect your wallet to continue with order creation"
           actionButtons={[<UserAgreement />]}
-          onClose={() => setShowWalletConnectionWindow(false)}
+          onClose={() => {
+            setShowWalletConnectionWindow(false)
+            setPendingOrder({ isOrderPending: false, order: undefined })
+          }}
         />
       )}
       <div className="flex flex-col w-full">

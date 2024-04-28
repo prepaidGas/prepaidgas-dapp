@@ -8,7 +8,7 @@ export default function UserAgreement() {
     <div>
       <div className="flex flex-col">
         <div className="flex mt-4 items-center justify-center">
-          <CustomConnectBttn isActive={true} />
+          <CustomConnectBttn isActive={true} collapsed={false} />
         </div>
       </div>
     </div>
