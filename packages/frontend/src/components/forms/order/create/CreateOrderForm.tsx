@@ -75,8 +75,8 @@ export default function CreateOrderForm({
   const [isLoading, setIsLoading] = useState(true)
 
   const createOrder = async (order: OrderStruct) => {
-    console.log("CreateOrderTestArr: START")
-    console.log("OrderStruct: ", { order })
+    console.log("CreateOrder: START")
+    console.log("Order data to submit: ", { order })
 
     if (!isWalletConnected()) {
       setPendingOrder({ isOrderPending: true, order })
@@ -112,16 +112,16 @@ export default function CreateOrderForm({
         functionName: "orderCreate",
         args: [order],
       })
-      console.log("CreateOrderData: ", data)
+      console.log("orderCreate: ", data)
       const txData = await waitForTransaction({ hash: data.hash })
-      console.log("CreateOrderTXData: ", txData)
+      console.log("orderCreate transaction details: ", txData)
       setTransactionDetails(txData)
     } catch (e) {
-      console.log("CreateOrderError: ", e)
+      console.log("orderCreate Error: ", e)
       setTransactionDetails({ error: e })
     }
     setIsLoading(false)
-    console.log("CreateOrderTestArr: END")
+    console.log("CreateOrder: END")
   }
 
   //todo: delete if not using 2 different forms
