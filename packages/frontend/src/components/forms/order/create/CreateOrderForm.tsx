@@ -76,12 +76,15 @@ export default function CreateOrderForm({
 
   const createOrder = async (order: OrderStruct) => {
     console.log("CreateOrderTestArr: START")
+    console.log("OrderStruct: ", { order })
 
     if (!isWalletConnected()) {
       setPendingOrder({ isOrderPending: true, order })
       setShowWalletConnectionWindow(true)
       return
     }
+
+    console.log("Wallet is connected: ", { address })
 
     setShowDialogWindow(true)
     setIsLoading(true)
@@ -94,12 +97,12 @@ export default function CreateOrderForm({
         functionName: "approve",
         args: [prepaidGasTreasuryContractAddress(), inputValues.gasPricePerUnit * inputValues.gasAmount],
       })
-      console.log("CreateOrderData: ", data)
+      console.log("Approve Data: ", data)
+      console.log("APPROVED")
     } catch (e) {
-      console.log("CreateOrderError: ", e)
+      console.log("Approve Error: ", e)
+      console.log("APPROVE ERROR")
     }
-
-    console.log(order)
 
     // Create Order
     try {
