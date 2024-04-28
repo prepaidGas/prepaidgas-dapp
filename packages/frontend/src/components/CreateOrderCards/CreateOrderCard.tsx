@@ -80,8 +80,9 @@ export default function CreateOrderCard({
   const [isValidating, setIsValidating] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const createOrder = async (isOrderSimple: boolean = false) => {
+  const createOrder = async (isOrderSimple: boolean) => {
     console.log("CreateOrderTestArr: START")
+    console.log("isOrderSimple: ", isOrderSimple)
 
     setShowDialogWindow(true)
     setIsLoading(true)
@@ -158,12 +159,12 @@ export default function CreateOrderCard({
     return true
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = (isOrderSimple: boolean = false) => {
     setIsValidating(true)
 
     if (validateSearchForm()) {
       if (address !== undefined) {
-        createOrder()
+        createOrder(isOrderSimple)
       } else {
         setIsOrderOnHold(true)
         setShowWalletConnectionWindow(true)

@@ -26,7 +26,7 @@ export default function CreateOrderCardSimple({
   setInputValues: Dispatch<SetStateAction<{}>>
   inputValues: CreateOrderState
   validationErrors: null | { [key: string]: string }
-  handleSubmit: () => void
+  handleSubmit: (isOrderSimple: boolean) => void
 }) {
   const [isLoading, setIsLoading] = useState(false)
 
@@ -105,7 +105,7 @@ export default function CreateOrderCardSimple({
           gasCostValue={inputValues.gasPricePerUnit}
           gasCostTokenName={TOKEN_NAME[inputValues.gasPriceToken] ?? inputValues.gasPriceToken}
         />
-        <Buttons onClick={handleSubmit} className="primary_btn">
+        <Buttons onClick={() => handleSubmit(true)} className="primary_btn">
           {"Create Gas Order"}
         </Buttons>
       </div>
