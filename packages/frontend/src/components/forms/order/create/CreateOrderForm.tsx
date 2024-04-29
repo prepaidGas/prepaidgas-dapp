@@ -53,12 +53,12 @@ export default function CreateOrderForm({
 }) {
   const initialState = {
     gasAmount: 100000,
-    expireDate: dayjs(),
-    expireTime: dayjs("00:00", "HH:mm").add(15, "minute"),
     startDate: dayjs(),
     startTime: dayjs(),
     endDate: dayjs().add(1, "day"),
     endTime: dayjs(),
+    expireDate: dayjs(),
+    expireTime: dayjs("00:00", "HH:mm").add(15, "minute"),
     txWindow: 600,
     redeemWindow: 7200,
     gasPriceToken: TOKEN_ADDRESS.MockUSD,
@@ -71,7 +71,6 @@ export default function CreateOrderForm({
   const [showWalletConnectionWindow, setShowWalletConnectionWindow] = useState(false)
   const [pendingOrder, setPendingOrder] = useState<PendingOrderProps>({ isOrderPending: false, order: undefined })
 
-  const [inputValues, setInputValues] = useState({ ...initialState })
   const [isLoading, setIsLoading] = useState(true)
 
   const createOrder = async (order: OrderStruct) => {
@@ -131,29 +130,29 @@ export default function CreateOrderForm({
   const [formSimple] = Form.useForm<SimpleOrderProps>()
   const [formAdvanced] = Form.useForm()
 
-  const handleTabChange = (tabKey: string) => {
-    if (tabKey === "1") {
-      console.log("SETTING INPUTS TO DEFAULT")
+  // const handleTabChange = (tabKey: string) => {
+  //   if (tabKey === "1") {
+  //     console.log("SETTING INPUTS TO DEFAULT")
 
-      // form.setFields([{name: }])
+  //     // form.setFields([{name: }])
 
-      setInputValues({
-        gasAmount: inputValues.gasAmount,
-        expireDate: dayjs().add(1, "day"),
-        expireTime: dayjs("00:00", "HH:mm"),
-        startDate: dayjs().add(1, "day"),
-        startTime: dayjs("00:00", "HH:mm"),
-        endDate: dayjs().add(2, "day"),
-        endTime: dayjs("00:00", "HH:mm"),
-        txWindow: 600,
-        redeemWindow: 7200,
-        gasPriceToken: inputValues.gasPriceToken,
-        guaranteeToken: inputValues.gasPriceToken,
-        gasPricePerUnit: inputValues.gasPricePerUnit,
-        guaranteePerUnit: inputValues.gasAmount * inputValues.gasPricePerUnit,
-      })
-    }
-  }
+  //     setInputValues({
+  //       gasAmount: inputValues.gasAmount,
+  //       expireDate: dayjs().add(1, "day"),
+  //       expireTime: dayjs("00:00", "HH:mm"),
+  //       startDate: dayjs().add(1, "day"),
+  //       startTime: dayjs("00:00", "HH:mm"),
+  //       endDate: dayjs().add(2, "day"),
+  //       endTime: dayjs("00:00", "HH:mm"),
+  //       txWindow: 600,
+  //       redeemWindow: 7200,
+  //       gasPriceToken: inputValues.gasPriceToken,
+  //       guaranteeToken: inputValues.gasPriceToken,
+  //       gasPricePerUnit: inputValues.gasPricePerUnit,
+  //       guaranteePerUnit: inputValues.gasAmount * inputValues.gasPricePerUnit,
+  //     })
+  //   }
+  // }
 
   // console.log("Success:", values)
   // if (address !== undefined) {

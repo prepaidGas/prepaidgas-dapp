@@ -2,25 +2,41 @@
 import Receipt from "@/components/Receipt"
 import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
 import { TOKEN_ADDRESS, TOKEN_NAME } from "@/constants/tokens"
-import { Input, DatePicker, TimePicker, Form, FormInstance, FormProps } from "antd"
+import { Input, DatePicker, TimePicker, Form, FormInstance, FormProps, InputNumber } from "antd"
 import { Buttons } from "@/components/buttons"
 import dayjs, { Dayjs } from "dayjs"
 import TokenSearchSelectAntd from "@/components/TokenSearchSelectAntd"
 
-export type SimpleOrderProps = {
+export type AdvancedOrderProps = {
   gasAmount: number
+  expireDate: Dayjs
+  expireTime: Dayjs
+  startDate: Dayjs
+  startTime: Dayjs
+  endDate: Dayjs
+  endTime: Dayjs
   txWindow: number
   redeemWindow: number
   gasPriceToken: string
   gasPricePerUnit: number
+  guaranteeToken: string
+  guaranteePerUnit: number
 }
 
-const initialState = {
+const initialState: AdvancedOrderProps = {
   gasAmount: 100000,
+  expireDate: dayjs(),
+  expireTime: dayjs("00:00", "HH:mm").add(15, "minute"),
+  startDate: dayjs(),
+  startTime: dayjs(),
+  endDate: dayjs().add(1, "day"),
+  endTime: dayjs(),
   txWindow: 600,
   redeemWindow: 7200,
   gasPriceToken: TOKEN_ADDRESS.MockUSD,
   gasPricePerUnit: 10,
+  guaranteeToken: TOKEN_ADDRESS.MockUSD,
+  guaranteePerUnit: 0,
 }
 
 export default function CreateOrderFormAdvanced({
@@ -28,16 +44,16 @@ export default function CreateOrderFormAdvanced({
   handleSubmit,
   disabled,
 }: {
-  form: FormInstance<SimpleOrderProps>
-  handleSubmit: (values: SimpleOrderProps) => void
+  form: FormInstance<AdvancedOrderProps>
+  handleSubmit: (values: AdvancedOrderProps) => void
   disabled: boolean
 }) {
-  const onFinish: FormProps<SimpleOrderProps>["onFinish"] = (values) => {
+  const onFinish: FormProps<AdvancedOrderProps>["onFinish"] = (values) => {
     console.log("Success:", values)
     handleSubmit(values)
   }
 
-  const onFinishFailed: FormProps<SimpleOrderProps>["onFinishFailed"] = (errorInfo) => {
+  const onFinishFailed: FormProps<AdvancedOrderProps>["onFinishFailed"] = (errorInfo) => {
     console.log("Failed:", errorInfo)
   }
 
@@ -58,96 +74,114 @@ export default function CreateOrderFormAdvanced({
             <label htmlFor="input-number-gas" className="base-text mb-1">
               Gas Amount
             </label>
-            <Input
-              min={0}
-              spellCheck={false}
-              placeholder="123"
-              size="middle"
-              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-            />
+            <Form.Item name="gasAmount" label="Gas Amount" colon={false} rules={[{ required: true }]}>
+              <InputNumber
+                min={100000}
+                spellCheck={false}
+                placeholder="123"
+                size="middle"
+                className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
           </div>
 
           <div className="flex flex-col">
             <label className="base-text mb-1">Execution period Start</label>
             <div className="flex flex-col gap-4">
-              <DatePicker
-                defaultValue={dayjs().add(0, "d")}
-                presets={[
-                  {
-                    label: "Tommorrow",
-                    value: dayjs().add(1, "d"),
-                  },
-                  {
-                    label: "Next Week",
-                    value: dayjs().add(7, "d"),
-                  },
-                  {
-                    label: "Next Month",
-                    value: dayjs().add(1, "month"),
-                  },
-                ]}
-              />
-              <TimePicker
-                className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
-                defaultValue={dayjs("00:00", "HH:mm")}
-                format={"HH:mm"}
-              />
+              <Form.Item name="startDate" label="Execution period Start Date" colon={false}>
+                <DatePicker
+                  defaultValue={dayjs().add(0, "d")}
+                  presets={[
+                    {
+                      label: "Tommorrow",
+                      value: dayjs().add(1, "d"),
+                    },
+                    {
+                      label: "Next Week",
+                      value: dayjs().add(7, "d"),
+                    },
+                    {
+                      label: "Next Month",
+                      value: dayjs().add(1, "month"),
+                    },
+                  ]}
+                />
+              </Form.Item>
+
+              <Form.Item name="startTime" label="Execution period Start Time" colon={false}>
+                <TimePicker
+                  className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
+                  defaultValue={dayjs("00:00", "HH:mm")}
+                  format={"HH:mm"}
+                />
+              </Form.Item>
             </div>
           </div>
 
           <div className="flex flex-col">
             <label className="base-text mb-1">Execution period End</label>
             <div className="flex flex-col gap-4">
-              <DatePicker
-                defaultValue={dayjs().add(0, "d")}
-                presets={[
-                  {
-                    label: "Tommorrow",
-                    value: dayjs().add(1, "d"),
-                  },
-                  {
-                    label: "Next Week",
-                    value: dayjs().add(7, "d"),
-                  },
-                  {
-                    label: "Next Month",
-                    value: dayjs().add(1, "month"),
-                  },
-                ]}
-              />
-              <TimePicker
-                className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
-                defaultValue={dayjs("00:00", "HH:mm")}
-                format={"HH:mm"}
-              />
+              <Form.Item name="endDate" label="Execution period End Date" colon={false}>
+                <DatePicker
+                  defaultValue={dayjs().add(0, "d")}
+                  presets={[
+                    {
+                      label: "Tommorrow",
+                      value: dayjs().add(1, "d"),
+                    },
+                    {
+                      label: "Next Week",
+                      value: dayjs().add(7, "d"),
+                    },
+                    {
+                      label: "Next Month",
+                      value: dayjs().add(1, "month"),
+                    },
+                  ]}
+                />
+              </Form.Item>
+
+              <Form.Item name="endTime" label="Execution period End Time" colon={false}>
+                <TimePicker
+                  className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
+                  defaultValue={dayjs("00:00", "HH:mm")}
+                  format={"HH:mm"}
+                />
+              </Form.Item>
             </div>
           </div>
 
           <div className="flex flex-col">
             <label className="base-text mb-1">Execution period Expire</label>
             <div className="flex flex-col gap-4">
-              <DatePicker
-                defaultValue={dayjs().add(0, "d")}
-                presets={[
-                  {
-                    label: "Tommorrow",
-                    value: dayjs().add(1, "d"),
-                  },
-                  {
-                    label: "Next Week",
-                    value: dayjs().add(7, "d"),
-                  },
-                  {
-                    label: "Next Month",
-                    value: dayjs().add(1, "month"),
-                  },
-                ]}
-              />
-              <TimePicker
-                className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
-                defaultValue={dayjs("00:00", "HH:mm")}
-                format={"HH:mm"}
-              />
+              <Form.Item name="expireDate" label="Execution period Expire Date" colon={false}>
+                <DatePicker
+                  defaultValue={dayjs().add(0, "d")}
+                  presets={[
+                    {
+                      label: "Tommorrow",
+                      value: dayjs().add(1, "d"),
+                    },
+                    {
+                      label: "Next Week",
+                      value: dayjs().add(7, "d"),
+                    },
+                    {
+                      label: "Next Month",
+                      value: dayjs().add(1, "month"),
+                    },
+                  ]}
+                />
+              </Form.Item>
+
+              <Form.Item name="expireTime" label="Execution period Expire Time" colon={false}>
+                <TimePicker
+                  className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
+                  defaultValue={dayjs("00:00", "HH:mm")}
+                  format={"HH:mm"}
+                />
+              </Form.Item>
             </div>
           </div>
         </div>
@@ -156,20 +190,33 @@ export default function CreateOrderFormAdvanced({
         <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
           <div className="flex flex-col flex-1">
             <label className="base-text mb-1">Gas Cost Token</label>
-            <TokenSearchSelectAntd />
+            <Form.Item name={"gasPriceToken"} label={"Gas Price Token"} colon={false}>
+              <TokenSearchSelectAntd />
+            </Form.Item>
           </div>
 
           <div className="flex flex-col flex-1">
             <label htmlFor="input-number-gas" className="base-text mb-1">
               Gas Price
             </label>
-            <Input
-              min={0}
-              spellCheck={false}
-              placeholder="123"
-              size="middle"
-              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-            />
+            <Form.Item
+              name={"gasPricePerUnit"}
+              label={"Gas Price Per Unit"}
+              colon={false}
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
+            >
+              <InputNumber
+                spellCheck={false}
+                placeholder="123"
+                size="middle"
+                className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60 grow"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
           </div>
         </div>
 
@@ -177,20 +224,33 @@ export default function CreateOrderFormAdvanced({
         <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
           <div className="flex flex-col flex-1">
             <label className="base-text mb-1">Guarantee Token</label>
-            <TokenSearchSelectAntd />
+            <Form.Item name={"guaranteeToken"} label={"Guarantee Token"} colon={false}>
+              <TokenSearchSelectAntd />
+            </Form.Item>
           </div>
 
           <div className="flex flex-col flex-1">
             <label htmlFor="input-number-gas" className="base-text mb-1">
               Guarantee GasPrice
             </label>
-            <Input
-              min={0}
-              spellCheck={false}
-              placeholder="123"
-              size="middle"
-              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-            />
+            <Form.Item
+              name={"guaranteePerUnit"}
+              label={"Guarantee Per Unit"}
+              colon={false}
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
+            >
+              <InputNumber
+                spellCheck={false}
+                placeholder="123"
+                size="middle"
+                className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60 grow"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
           </div>
         </div>
 
@@ -200,26 +260,48 @@ export default function CreateOrderFormAdvanced({
             <label htmlFor="input-number-gas" className="base-text mb-1">
               Transaction window
             </label>
-            <Input
-              min={0}
-              spellCheck={false}
-              placeholder="123"
-              size="middle"
-              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-            />
+            <Form.Item
+              name={"txWindow"}
+              label={"Transaction window"}
+              colon={false}
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
+            >
+              <InputNumber
+                spellCheck={false}
+                placeholder="123"
+                size="middle"
+                className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60 grow"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
           </div>
 
           <div className="flex flex-col flex-1">
             <label htmlFor="input-number-gas" className="base-text mb-1">
               Redeem window
             </label>
-            <Input
-              min={0}
-              spellCheck={false}
-              placeholder="123"
-              size="middle"
-              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-            />
+            <Form.Item
+              name={"redeemWindow"}
+              label={"Redeem window"}
+              colon={false}
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
+            >
+              <InputNumber
+                spellCheck={false}
+                placeholder="123"
+                size="middle"
+                className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60 grow"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
           </div>
         </div>
 
@@ -230,9 +312,11 @@ export default function CreateOrderFormAdvanced({
             gasCostValue={inputValues.gasPricePerUnit}
             gasCostTokenName={TOKEN_NAME[inputValues.gasPriceToken] ?? inputValues.gasPriceToken}
           /> */}
-          <Buttons onClick={handleSubmit} className="primary_btn">
-            {"Create Gas Order"}
-          </Buttons>
+          <Form.Item>
+            <Buttons type="primary" htmlType="submit" className="primary_btn">
+              {"Create Gas Order"}
+            </Buttons>
+          </Form.Item>
         </div>
       </div>
     </Form>
