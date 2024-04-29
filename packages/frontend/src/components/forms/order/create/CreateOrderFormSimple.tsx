@@ -1,19 +1,11 @@
 "use client"
 
-import { FireIcon } from "@heroicons/react/24/outline"
-import { Text, NumberInput, Button } from "@tremor/react"
-import { TailSpin } from "react-loader-spinner"
-import { Dispatch, SetStateAction, useState } from "react"
-import { SPINNER_COLOR } from "@/constants"
 import Receipt from "@/components/Receipt"
-import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
 import { TOKEN_ADDRESS, TOKEN_NAME } from "@/constants/tokens"
 
 import { Form, FormInstance, FormProps, Input, InputNumber, List, Select, Tabs, TabsProps } from "antd"
-const { Option } = Select
 
 import { Buttons } from "@/components/buttons"
-import CreateOrderCard from "@/components/CreateOrderCards/CreateOrderCard"
 import TokenSearchSelectAntd from "@/components/TokenSearchSelectAntd"
 
 export type SimpleOrderProps = {
@@ -24,7 +16,7 @@ export type SimpleOrderProps = {
   gasPricePerUnit: number
 }
 
-const initialState = {
+const initialState: SimpleOrderProps = {
   gasAmount: 100000,
   txWindow: 600,
   redeemWindow: 7200,
@@ -41,8 +33,6 @@ export default function CreateOrderFormSimple({
   handleSubmit: (values: SimpleOrderProps) => void
   disabled: boolean
 }) {
-  const [isLoading, setIsLoading] = useState(false)
-
   const onFinish: FormProps<SimpleOrderProps>["onFinish"] = (values) => {
     console.log("Success:", values)
     handleSubmit(values)
