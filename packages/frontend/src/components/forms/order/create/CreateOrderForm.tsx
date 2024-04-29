@@ -92,10 +92,10 @@ export default function CreateOrderForm({
     //Approve gasCost * gasAmount
     try {
       const data = await writeContract({
-        address: inputValues.gasPriceToken as `0x${string}`,
+        address: order.gasPrice.token as `0x${string}`,
         abi: MockTokenABI,
         functionName: "approve",
-        args: [prepaidGasTreasuryContractAddress(), inputValues.gasPricePerUnit * inputValues.gasAmount],
+        args: [prepaidGasTreasuryContractAddress(), Number(order.gasPrice.perUnit) * Number(order.gas)],
       })
       console.log("Approve Data: ", data)
       console.log("APPROVED")
