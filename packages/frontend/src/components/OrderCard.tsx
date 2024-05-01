@@ -2,7 +2,7 @@ import format from "date-fns/format"
 
 import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
 
-import { COLOR_BY_STATUS, STATUS_NAMES } from "@/constants"
+import { COLOR_BY_STATUS, STATUS, STATUS_NAMES } from "@/constants"
 
 import { Badge, Card, Text, Metric, Flex, ProgressBar, Icon, Button } from "@tremor/react"
 
@@ -119,17 +119,31 @@ export default function OrderCard({
     }
   }
 
-  const getCardColor = () => `border-[${COLOR_BY_STATUS[Number(status)]}]`
+  const getCardColor = () => {
+    switch (Number(status)) {
+      case STATUS.Any:
+        return "border-[#000000]"
+      case STATUS.Pending:
+        return "border-[#ffd600]"
+      case STATUS.Accepted:
+        return "border-[#4caf50]"
+      case STATUS.Active:
+        return "border-[#2196f3]"
+      case STATUS.Inactive:
+        return "border-[#80cbc4]"
+      case STATUS.Untaken:
+        return "border-[#ff9800]"
+      case STATUS.Closed:
+        return "border-[#f44336]"
+
+      default:
+        return "border-[#000000]"
+    }
+  }
 
   return (
     <>
-      <Cards
-        headless
-        className={
-          `max-w-[1024px] mx-auto relative mt-4 border-t-4 border-l-0 old-lg:border-t-0 old-lg:border-l-4 ` +
-          getCardColor()
-        }
-      >
+      <Cards headless className={`max-w-[1024px] mx-auto relative mt-4 border-t-4  ${getCardColor()}`}>
         <div className="flex flex-col gap-3">
           <Buttons className="absolute [&>*]:fill-primary right-3 top-3 h-[40px] ml-4 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] ">
             <UilFavorite />
