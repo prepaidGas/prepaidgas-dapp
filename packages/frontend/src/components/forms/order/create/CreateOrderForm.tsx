@@ -1,7 +1,6 @@
 "use client"
-
+import { readContract } from "@wagmi/core"
 import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTime.utils"
-
 import { writeContract, waitForTransaction } from "@wagmi/core"
 import {
   MockTokenABI,
@@ -21,23 +20,7 @@ import { Tabs, TabsProps, Form, FormProps } from "antd"
 import dayjs, { type Dayjs } from "dayjs"
 import { TOKEN_ADDRESS } from "@/constants/tokens"
 import CreateOrderFormSimple, { SimpleOrderProps } from "./CreateOrderFormSimple"
-import CreateOrderFormAdvanced from "./CreateOrderFormAdvanced"
-
-export type OrderProps = {
-  gasAmount: number
-  expireDate: Dayjs
-  expireTime: Dayjs
-  startDate: Dayjs
-  startTime: Dayjs
-  endDate: Dayjs
-  endTime: Dayjs
-  txWindow: number
-  redeemWindow: number
-  gasPriceToken: string
-  gasPricePerUnit: number
-  guaranteeToken: string
-  guaranteePerUnit: number
-}
+import CreateOrderFormAdvanced, { AdvancedOrderProps } from "./CreateOrderFormAdvanced"
 
 type PendingOrderProps = {
   isOrderPending: boolean
@@ -51,22 +34,6 @@ export default function CreateOrderForm({
   setShowDialogWindow: Dispatch<SetStateAction<boolean>>
   setTransactionDetails: Dispatch<SetStateAction<{}>>
 }) {
-  const initialState = {
-    gasAmount: 100000,
-    startDate: dayjs(),
-    startTime: dayjs(),
-    endDate: dayjs().add(1, "day"),
-    endTime: dayjs(),
-    expireDate: dayjs(),
-    expireTime: dayjs("00:00", "HH:mm").add(15, "minute"),
-    txWindow: 600,
-    redeemWindow: 7200,
-    gasPriceToken: TOKEN_ADDRESS.MockUSD,
-    gasPricePerUnit: 10,
-    guaranteeToken: TOKEN_ADDRESS.MockUSD,
-    guaranteePerUnit: 10,
-  }
-
   const { address, isConnecting, isDisconnected } = useAccount()
   const [showWalletConnectionWindow, setShowWalletConnectionWindow] = useState(false)
   const [pendingOrder, setPendingOrder] = useState<PendingOrderProps>({ isOrderPending: false, order: undefined })
@@ -88,19 +55,38 @@ export default function CreateOrderForm({
     setShowDialogWindow(true)
     setIsLoading(true)
 
-    //Approve gasCost * gasAmount
+    //todo call allowance and if allowance is bigger than the amount we need to approve - approve isn't needed
+    let allowance = 0
     try {
-      const data = await writeContract({
+      const data = await readContract({
         address: order.gasPrice.token as `0x${string}`,
         abi: MockTokenABI,
-        functionName: "approve",
-        args: [prepaidGasTreasuryContractAddress(), Number(order.gasPrice.perUnit) * Number(order.gas)],
+        functionName: "allowance",
+        args: [address, prepaidGasTreasuryContractAddress()],
       })
-      console.log("Approve Data: ", data)
-      console.log("APPROVED")
+      console.log("Allowance Data: ", { data })
+      allowance = Number(data)
     } catch (e) {
-      console.log("Approve Error: ", e)
-      console.log("APPROVE ERROR")
+      console.log("Allowance ERROR: ", e)
+    }
+
+    const overallPrice = Number(order.gasPrice.perUnit) * Number(order.gas)
+
+    if (allowance < overallPrice) {
+      //Approve gasCost * gasAmount
+      try {
+        const data = await writeContract({
+          address: order.gasPrice.token as `0x${string}`,
+          abi: MockTokenABI,
+          functionName: "approve",
+          args: [prepaidGasTreasuryContractAddress(), overallPrice],
+        })
+        console.log("Approve Data: ", data)
+        console.log("APPROVED")
+      } catch (e) {
+        console.log("Approve Error: ", e)
+        console.log("APPROVE ERROR")
+      }
     }
 
     console.log("prepaidGasTreasuryContractAddress(): ", prepaidGasTreasuryContractAddress())
@@ -130,37 +116,29 @@ export default function CreateOrderForm({
   const [formSimple] = Form.useForm<SimpleOrderProps>()
   const [formAdvanced] = Form.useForm()
 
-  // const handleTabChange = (tabKey: string) => {
-  //   if (tabKey === "1") {
-  //     console.log("SETTING INPUTS TO DEFAULT")
-
-  //     // form.setFields([{name: }])
-
-  //     setInputValues({
-  //       gasAmount: inputValues.gasAmount,
-  //       expireDate: dayjs().add(1, "day"),
-  //       expireTime: dayjs("00:00", "HH:mm"),
-  //       startDate: dayjs().add(1, "day"),
-  //       startTime: dayjs("00:00", "HH:mm"),
-  //       endDate: dayjs().add(2, "day"),
-  //       endTime: dayjs("00:00", "HH:mm"),
-  //       txWindow: 600,
-  //       redeemWindow: 7200,
-  //       gasPriceToken: inputValues.gasPriceToken,
-  //       guaranteeToken: inputValues.gasPriceToken,
-  //       gasPricePerUnit: inputValues.gasPricePerUnit,
-  //       guaranteePerUnit: inputValues.gasAmount * inputValues.gasPricePerUnit,
-  //     })
-  //   }
-  // }
-
-  // console.log("Success:", values)
-  // if (address !== undefined) {
-  //   createOrder()
-  // } else {
-  //   setIsOrderOnHold(true)
-  //   setShowWalletConnectionWindow(true)
-  // }
+  const handleTabChange = (tabKey: string) => {
+    console.log("TabKey: ", tabKey)
+    if (tabKey === "1") {
+      formSimple.resetFields()
+      formAdvanced.resetFields()
+    } else {
+      formAdvanced.setFieldsValue({
+        gasAmount: formSimple.getFieldValue("gasAmount"),
+        expireDate: dayjs(),
+        expireTime: dayjs().add(15, "m"),
+        startDate: dayjs(),
+        startTime: dayjs(),
+        endDate: dayjs().add(1, "d"),
+        endTime: dayjs(),
+        txWindow: 600,
+        redeemWindow: 7200,
+        gasPriceToken: formSimple.getFieldValue("gasPriceToken"),
+        gasPricePerUnit: formSimple.getFieldValue("gasPricePerUnit"),
+        guaranteeToken: formSimple.getFieldValue("gasPriceToken"),
+        guaranteePerUnit: 0,
+      })
+    }
+  }
 
   const handleSimpleSubmit = (values: SimpleOrderProps) => {
     const order: OrderStruct = {
@@ -179,17 +157,17 @@ export default function CreateOrderForm({
     createOrder(order)
   }
 
-  const handleAdvancedSubmit = (values) => {
+  const handleAdvancedSubmit = (values: AdvancedOrderProps) => {
     const order: OrderStruct = {
       manager: address as string,
       gas: values.gasAmount,
-      expire: getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute"))),
-      start: 0,
-      end: getUnixTimestampInSeconds(combineDateAndTime(dayjs().add(1, "day"), dayjs())),
-      txWindow: 600,
-      redeemWindow: 7200,
+      expire: getUnixTimestampInSeconds(combineDateAndTime(values.expireDate, values.expireTime)),
+      start: getUnixTimestampInSeconds(combineDateAndTime(values.startDate, values.startTime)),
+      end: getUnixTimestampInSeconds(combineDateAndTime(values.endDate, values.endTime)),
+      txWindow: values.txWindow,
+      redeemWindow: values.redeemWindow,
       gasPrice: { token: values.gasPriceToken, perUnit: values.gasPricePerUnit } as GasPaymentStruct,
-      gasGuarantee: { token: values.gasPriceToken, perUnit: values.gasPricePerUnit } as GasPaymentStruct,
+      gasGuarantee: { token: values.guaranteeToken, perUnit: values.guaranteePerUnit } as GasPaymentStruct,
     }
 
     console.log("handleSimpleSubmit: ", { order })
@@ -253,11 +231,17 @@ export default function CreateOrderForm({
       disabled: pendingOrder.isOrderPending,
     },
 
-    // {
-    //   key: "2",
-    //   label: "Advanced",
-    //   children: <CreateOrderFormAdvanced form={formAdvanced} handleSubmit={handleAdvancedSubmit} />,
-    // },
+    {
+      key: "2",
+      label: "Advanced",
+      children: (
+        <CreateOrderFormAdvanced
+          form={formAdvanced}
+          handleSubmit={handleAdvancedSubmit}
+          disabled={pendingOrder.isOrderPending}
+        />
+      ),
+    },
   ]
 
   return (

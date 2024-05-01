@@ -26,10 +26,10 @@ export type AdvancedOrderProps = {
 const initialState: AdvancedOrderProps = {
   gasAmount: 100000,
   expireDate: dayjs(),
-  expireTime: dayjs("00:00", "HH:mm").add(15, "minute"),
+  expireTime: dayjs().add(15, "m"),
   startDate: dayjs(),
   startTime: dayjs(),
-  endDate: dayjs().add(1, "day"),
+  endDate: dayjs().add(1, "d"),
   endTime: dayjs(),
   txWindow: 600,
   redeemWindow: 7200,
@@ -71,9 +71,6 @@ export default function CreateOrderFormAdvanced({
       <div className="mt-6 flex flex-col w-full">
         <div className="flex flex-col old-lg:flex-row gap-6">
           <div className="flex flex-col flex-1">
-            <label htmlFor="input-number-gas" className="base-text mb-1">
-              Gas Amount
-            </label>
             <Form.Item name="gasAmount" label="Gas Amount" colon={false} rules={[{ required: true }]}>
               <InputNumber
                 min={100000}
@@ -87,7 +84,6 @@ export default function CreateOrderFormAdvanced({
           </div>
 
           <div className="flex flex-col">
-            <label className="base-text mb-1">Execution period Start</label>
             <div className="flex flex-col gap-4">
               <Form.Item name="startDate" label="Execution period Start Date" colon={false}>
                 <DatePicker
@@ -120,7 +116,6 @@ export default function CreateOrderFormAdvanced({
           </div>
 
           <div className="flex flex-col">
-            <label className="base-text mb-1">Execution period End</label>
             <div className="flex flex-col gap-4">
               <Form.Item name="endDate" label="Execution period End Date" colon={false}>
                 <DatePicker
@@ -153,7 +148,6 @@ export default function CreateOrderFormAdvanced({
           </div>
 
           <div className="flex flex-col">
-            <label className="base-text mb-1">Execution period Expire</label>
             <div className="flex flex-col gap-4">
               <Form.Item name="expireDate" label="Execution period Expire Date" colon={false}>
                 <DatePicker
@@ -189,16 +183,12 @@ export default function CreateOrderFormAdvanced({
         {/* Gas Cost Settings */}
         <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
           <div className="flex flex-col flex-1">
-            <label className="base-text mb-1">Gas Cost Token</label>
             <Form.Item name={"gasPriceToken"} label={"Gas Price Token"} colon={false}>
               <TokenSearchSelectAntd />
             </Form.Item>
           </div>
 
           <div className="flex flex-col flex-1">
-            <label htmlFor="input-number-gas" className="base-text mb-1">
-              Gas Price
-            </label>
             <Form.Item
               name={"gasPricePerUnit"}
               label={"Gas Price Per Unit"}
@@ -223,16 +213,12 @@ export default function CreateOrderFormAdvanced({
         {/* Guarantee Settings */}
         <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
           <div className="flex flex-col flex-1">
-            <label className="base-text mb-1">Guarantee Token</label>
             <Form.Item name={"guaranteeToken"} label={"Guarantee Token"} colon={false}>
               <TokenSearchSelectAntd />
             </Form.Item>
           </div>
 
           <div className="flex flex-col flex-1">
-            <label htmlFor="input-number-gas" className="base-text mb-1">
-              Guarantee GasPrice
-            </label>
             <Form.Item
               name={"guaranteePerUnit"}
               label={"Guarantee Per Unit"}
@@ -257,9 +243,6 @@ export default function CreateOrderFormAdvanced({
         {/* Advanced Settings */}
         <div className="flex flex-col old-lg:flex-row gap-6 mt-4">
           <div className="flex flex-col flex-1">
-            <label htmlFor="input-number-gas" className="base-text mb-1">
-              Transaction window
-            </label>
             <Form.Item
               name={"txWindow"}
               label={"Transaction window"}
@@ -281,9 +264,6 @@ export default function CreateOrderFormAdvanced({
           </div>
 
           <div className="flex flex-col flex-1">
-            <label htmlFor="input-number-gas" className="base-text mb-1">
-              Redeem window
-            </label>
             <Form.Item
               name={"redeemWindow"}
               label={"Redeem window"}
@@ -313,7 +293,10 @@ export default function CreateOrderFormAdvanced({
             gasCostTokenName={TOKEN_NAME[inputValues.gasPriceToken] ?? inputValues.gasPriceToken}
           /> */}
           <Form.Item>
-            <Buttons type="primary" htmlType="submit" className="primary_btn">
+            <Buttons type="primary" htmlType="submit" className="primary_btn hidden old-lg:inline-flex">
+              {"Create Gas Order"}
+            </Buttons>
+            <Buttons type="primary" htmlType="submit" className="primary_btn old-lg:hidden" block>
               {"Create Gas Order"}
             </Buttons>
           </Form.Item>

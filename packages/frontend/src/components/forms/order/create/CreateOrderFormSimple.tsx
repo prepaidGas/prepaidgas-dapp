@@ -53,39 +53,51 @@ export default function CreateOrderFormSimple({
       disabled={disabled}
       layout="vertical"
     >
-      <Form.Item name="gasAmount" label="Gas Amount" colon={false} rules={[{ required: true }]}>
-        <InputNumber
-          min={100000}
-          spellCheck={false}
-          placeholder="123"
-          size="middle"
-          className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-          style={{ width: "100%" }}
-        />
-      </Form.Item>
-      <Form.Item name={"gasPriceToken"} label={"Token"} colon={false}>
-        <TokenSearchSelectAntd />
-      </Form.Item>
-      <Form.Item
-        name={"gasPricePerUnit"}
-        label={"Gas Price Per Unit"}
-        colon={false}
-        rules={[
-          {
-            required: true,
-          },
-        ]}
-      >
-        <InputNumber
-          spellCheck={false}
-          placeholder="123"
-          size="middle"
-          className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60 grow"
-          style={{ width: "100%" }}
-        />
-      </Form.Item>
-      <div className="flex flex-col old-sm:flex-row old-sm:items-end old-sm:justify-between gap-4 mt-4 old-sm:mt-8">
-        {/* <Receipt
+      <div className="mt-6 flex flex-col w-full">
+        {/* Gas Amount, Token and Gas Price inputs */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col">
+            <Form.Item name="gasAmount" label="Gas Amount" colon={false} rules={[{ required: true }]}>
+              <InputNumber
+                min={100000}
+                spellCheck={false}
+                placeholder="123"
+                size="middle"
+                className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </div>
+          <div className="flex flex-col old-md:flex-row gap-4">
+            <div className="flex flex-col grow justify-start ">
+              <Form.Item name={"gasPriceToken"} label={"Token"} colon={false}>
+                <TokenSearchSelectAntd />
+              </Form.Item>
+            </div>
+            <div className="flex flex-col grow justify-start">
+              <Form.Item
+                name={"gasPricePerUnit"}
+                label={"Gas Price Per Unit"}
+                colon={false}
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+              >
+                <InputNumber
+                  spellCheck={false}
+                  placeholder="123"
+                  size="middle"
+                  className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60 grow"
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col old-sm:flex-row old-sm:items-end old-sm:justify-between gap-4 mt-4 old-sm:mt-8">
+          {/* <Receipt
             className=""
             //TODO pass correct token names
             gasAmount={form.getFieldValue("gasAmount")}
@@ -93,14 +105,15 @@ export default function CreateOrderFormSimple({
             gasCostTokenName={TOKEN_NAME[form.getFieldValue("gasPriceToken")] ?? form.getFieldValue("gasPriceToken")}
           /> */}
 
-        <Form.Item>
-          <Buttons type="primary" htmlType="submit" className="primary_btn">
-            {"Create Gas Order"}
-          </Buttons>
-          {/* <Buttons onClick={handleSubmit} className="primary_btn">
-          {"Create Gas Order"}
-        </Buttons> */}
-        </Form.Item>
+          <Form.Item>
+            <Buttons type="primary" htmlType="submit" className="primary_btn hidden old-lg:inline-flex">
+              {"Create Gas Order"}
+            </Buttons>
+            <Buttons type="primary" htmlType="submit" className="primary_btn old-lg:hidden" block>
+              {"Create Gas Order"}
+            </Buttons>
+          </Form.Item>
+        </div>
       </div>
     </Form>
   )
