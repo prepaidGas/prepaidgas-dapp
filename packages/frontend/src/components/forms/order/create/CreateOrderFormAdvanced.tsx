@@ -1,11 +1,11 @@
 "use client"
-import Receipt from "@/components/Receipt"
 import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
 import { TOKEN_ADDRESS, TOKEN_NAME } from "@/constants/tokens"
 import { Input, DatePicker, TimePicker, Form, FormInstance, FormProps, InputNumber } from "antd"
 import { Buttons } from "@/components/buttons"
 import dayjs, { Dayjs } from "dayjs"
-import TokenSearchSelectAntd from "@/components/TokenSearchSelectAntd"
+import CreateOrderReceipt from "@/components/CreateOrderReceipt"
+import TokenSearchSelect from "@/components/TokenSearchSelect"
 
 export type AdvancedOrderProps = {
   gasAmount: number
@@ -48,6 +48,10 @@ export default function CreateOrderFormAdvanced({
   handleSubmit: (values: AdvancedOrderProps) => void
   disabled: boolean
 }) {
+  const gasAmount = Form.useWatch("gasAmount", form)
+  const gasPriceToken = Form.useWatch("gasPriceToken", form)
+  const gasPricePerUnit = Form.useWatch("gasPricePerUnit", form)
+
   const onFinish: FormProps<AdvancedOrderProps>["onFinish"] = (values) => {
     console.log("Success:", values)
     handleSubmit(values)
@@ -184,7 +188,7 @@ export default function CreateOrderFormAdvanced({
         <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
           <div className="flex flex-col flex-1">
             <Form.Item name={"gasPriceToken"} label={"Gas Price Token"} colon={false}>
-              <TokenSearchSelectAntd />
+              <TokenSearchSelect />
             </Form.Item>
           </div>
 
@@ -214,7 +218,7 @@ export default function CreateOrderFormAdvanced({
         <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
           <div className="flex flex-col flex-1">
             <Form.Item name={"guaranteeToken"} label={"Guarantee Token"} colon={false}>
-              <TokenSearchSelectAntd />
+              <TokenSearchSelect />
             </Form.Item>
           </div>
 
@@ -286,12 +290,7 @@ export default function CreateOrderFormAdvanced({
         </div>
 
         <div className="flex flex-col old-sm:flex-row old-sm:items-end old-sm:justify-between gap-4 mt-4 old-sm:mt-8">
-          {/* <Receipt
-            //TODO pass correct token names
-            gasAmount={inputValues.gasAmount}
-            gasCostValue={inputValues.gasPricePerUnit}
-            gasCostTokenName={TOKEN_NAME[inputValues.gasPriceToken] ?? inputValues.gasPriceToken}
-          /> */}
+          <CreateOrderReceipt gasAmount={gasAmount} gasPricePerUnit={gasPricePerUnit} gasPriceToken={gasPriceToken} />
           <Form.Item>
             <Buttons type="primary" htmlType="submit" className="primary_btn hidden old-lg:inline-flex">
               {"Create Gas Order"}

@@ -1,16 +1,17 @@
-import { List } from "antd"
+import { FormInstance, List } from "antd"
 import { UilQuestionCircle } from "@iconscout/react-unicons"
 import { Tooltip } from "antd"
+import { TOKEN_NAME } from "@/constants/tokens"
 
-export default function Receipt({
+export default function CreateOrderReceipt({
   gasAmount,
-  gasCostTokenName = "NULL",
-  gasCostValue,
+  gasPriceToken,
+  gasPricePerUnit,
   className = "",
 }: {
   gasAmount: number
-  gasCostTokenName?: string
-  gasCostValue: number
+  gasPriceToken: string
+  gasPricePerUnit: number
   className?: string
 }) {
   return (
@@ -27,7 +28,7 @@ export default function Receipt({
             </span>
           </div>
         }
-        dataSource={[`${gasCostValue * gasAmount} ${gasCostTokenName}`]}
+        dataSource={[`${gasAmount * gasPricePerUnit} ${TOKEN_NAME[gasPriceToken] ?? gasPriceToken}`]}
         bordered={true}
         renderItem={(item) => <List.Item.Meta className="dark:[&>div>div]:text-white/60" description={item} />}
       />

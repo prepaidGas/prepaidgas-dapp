@@ -1,12 +1,13 @@
 "use client"
 
-import Receipt from "@/components/Receipt"
 import { TOKEN_ADDRESS, TOKEN_NAME } from "@/constants/tokens"
 
 import { Form, FormInstance, FormProps, Input, InputNumber, List, Select, Tabs, TabsProps } from "antd"
 
 import { Buttons } from "@/components/buttons"
-import TokenSearchSelectAntd from "@/components/TokenSearchSelectAntd"
+import CreateOrderReceipt from "@/components/CreateOrderReceipt"
+import { useEffect } from "react"
+import TokenSearchSelect from "@/components/TokenSearchSelect"
 
 export type SimpleOrderProps = {
   gasAmount: number
@@ -33,6 +34,14 @@ export default function CreateOrderFormSimple({
   handleSubmit: (values: SimpleOrderProps) => void
   disabled: boolean
 }) {
+  const gasAmount = Form.useWatch("gasAmount", form)
+  const gasPriceToken = Form.useWatch("gasPriceToken", form)
+  const gasPricePerUnit = Form.useWatch("gasPricePerUnit", form)
+
+  useEffect(() => {
+    console.log("Receipt Data: ", { gasAmount, gasPricePerUnit, gasPriceToken })
+  }, [gasAmount, gasPricePerUnit, gasPriceToken])
+
   const onFinish: FormProps<SimpleOrderProps>["onFinish"] = (values) => {
     console.log("Success:", values)
     handleSubmit(values)
@@ -71,7 +80,7 @@ export default function CreateOrderFormSimple({
           <div className="flex flex-col old-md:flex-row gap-4">
             <div className="flex flex-col grow justify-start ">
               <Form.Item name={"gasPriceToken"} label={"Token"} colon={false}>
-                <TokenSearchSelectAntd />
+                <TokenSearchSelect />
               </Form.Item>
             </div>
             <div className="flex flex-col grow justify-start">
@@ -97,13 +106,7 @@ export default function CreateOrderFormSimple({
           </div>
         </div>
         <div className="flex flex-col old-sm:flex-row old-sm:items-end old-sm:justify-between gap-4 mt-4 old-sm:mt-8">
-          {/* <Receipt
-            className=""
-            //TODO pass correct token names
-            gasAmount={form.getFieldValue("gasAmount")}
-            gasCostValue={form.getFieldValue("gasPricePerUnit")}
-            gasCostTokenName={TOKEN_NAME[form.getFieldValue("gasPriceToken")] ?? form.getFieldValue("gasPriceToken")}
-          /> */}
+          <CreateOrderReceipt gasAmount={gasAmount} gasPricePerUnit={gasPricePerUnit} gasPriceToken={gasPriceToken} />
 
           <Form.Item>
             <Buttons type="primary" htmlType="submit" className="primary_btn hidden old-lg:inline-flex">

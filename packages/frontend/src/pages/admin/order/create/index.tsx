@@ -86,15 +86,6 @@ const CreateOrder = () => {
         <div className="h-full w-full">
           <Cards headless className="max-w-[1024px] mx-auto">
             <div className="p-[25px]">
-              <CreateOrderCard
-                setShowDialogWindow={setShowDialogWindow}
-                setTransactionDetails={setTransactionDetails}
-              />
-            </div>
-          </Cards>
-
-          <Cards headless className="max-w-[1024px] mx-auto mt-4">
-            <div className="p-[25px]">
               <CreateOrderForm
                 setShowDialogWindow={setShowDialogWindow}
                 setTransactionDetails={setTransactionDetails}

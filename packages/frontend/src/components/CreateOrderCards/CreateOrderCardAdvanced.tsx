@@ -1,7 +1,7 @@
 "use client"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { CreateOrderState } from "./CreateOrderCard"
-import Receipt from "../Receipt"
+import Receipt from "../CreateOrderReceipt"
 import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
 import TokenSearchSelect from "../TokenSearchSelect"
 import { TOKEN_NAME } from "@/constants/tokens"
