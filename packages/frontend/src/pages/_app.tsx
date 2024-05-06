@@ -1,10 +1,8 @@
 import "@/styles/globals.css"
 import "@rainbow-me/rainbowkit/styles.css"
-import { useRouter } from "next/navigation"
 import type { AppProps } from "next/app"
 
 import { Provider, useDispatch } from "react-redux"
-import { UserProvider } from "@auth0/nextjs-auth0/client"
 import AdminLayout from "./adminLayout"
 import { wrapper, store } from "../redux/store"
 import "../i18n/config"
@@ -60,8 +58,6 @@ const Disclaimer: DisclaimerComponent = ({ Text, Link }) => (
 )
 
 function App({ Component, pageProps }: AppProps) {
-  const router = useRouter()
-
   const renderLayout = () => {
     return (
       <>
