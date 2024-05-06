@@ -56,38 +56,38 @@ export default function CreateOrderForm({
     setIsLoading(true)
 
     //todo call allowance and if allowance is bigger than the amount we need to approve - approve isn't needed
-    let allowance = 0
-    try {
-      const data = await readContract({
-        address: order.gasPrice.token as `0x${string}`,
-        abi: MockTokenABI,
-        functionName: "allowance",
-        args: [address, prepaidGasTreasuryContractAddress()],
-      })
-      console.log("Allowance Data: ", { data })
-      allowance = Number(data)
-    } catch (e) {
-      console.log("Allowance ERROR: ", e)
-    }
+    // let allowance = 0
+    // try {
+    //   const data = await readContract({
+    //     address: order.gasPrice.token as `0x${string}`,
+    //     abi: MockTokenABI,
+    //     functionName: "allowance",
+    //     args: [address, prepaidGasTreasuryContractAddress()],
+    //   })
+    //   console.log("Allowance Data: ", { data })
+    //   allowance = Number(data)
+    // } catch (e) {
+    //   console.log("Allowance ERROR: ", e)
+    // }
 
     const overallPrice = Number(order.gasPrice.perUnit) * Number(order.gas)
 
-    if (allowance < overallPrice) {
-      //Approve gasCost * gasAmount
-      try {
-        const data = await writeContract({
-          address: order.gasPrice.token as `0x${string}`,
-          abi: MockTokenABI,
-          functionName: "approve",
-          args: [prepaidGasTreasuryContractAddress(), overallPrice],
-        })
-        console.log("Approve Data: ", data)
-        console.log("APPROVED")
-      } catch (e) {
-        console.log("Approve Error: ", e)
-        console.log("APPROVE ERROR")
-      }
+    // if (allowance < overallPrice) {
+    //Approve gasCost * gasAmount
+    try {
+      const data = await writeContract({
+        address: order.gasPrice.token as `0x${string}`,
+        abi: MockTokenABI,
+        functionName: "approve",
+        args: [prepaidGasTreasuryContractAddress(), overallPrice],
+      })
+      console.log("Approve Data: ", data)
+      console.log("APPROVED")
+    } catch (e) {
+      console.log("Approve Error: ", e)
+      console.log("APPROVE ERROR")
     }
+    // }
 
     console.log("prepaidGasTreasuryContractAddress(): ", prepaidGasTreasuryContractAddress())
     console.log("USER ADDRESS: ", address)
@@ -150,7 +150,8 @@ export default function CreateOrderForm({
       txWindow: 600,
       redeemWindow: 7200,
       gasPrice: { token: values.gasPriceToken, perUnit: values.gasPricePerUnit } as GasPaymentStruct,
-      gasGuarantee: { token: values.gasPriceToken, perUnit: values.gasPricePerUnit } as GasPaymentStruct,
+      // use values.gasPricePerUnit as guarantee perUnit value in prod
+      gasGuarantee: { token: values.gasPriceToken, perUnit: 0 } as GasPaymentStruct,
     }
     console.log("handleSimpleSubmit: ", { order })
 

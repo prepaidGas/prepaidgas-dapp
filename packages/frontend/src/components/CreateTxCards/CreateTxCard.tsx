@@ -60,8 +60,6 @@ export default function CreateTxCard({
 
   const { address } = useAccount()
 
-  console.log(dayjs("00:00", "HH:mm"))
-
   const initialState: TransactionFormState = {
     nonce: Date.now(),
     gasOrder: 0,
@@ -210,7 +208,7 @@ export default function CreateTxCard({
       }
 
       try {
-        const response = await fetch("http://192.168.1.100:8001/validate", {
+        const response = await fetch("http://78.111.67.31:8001/validate", {
           method: "POST",
           body: JSON.stringify(payload),
         })
