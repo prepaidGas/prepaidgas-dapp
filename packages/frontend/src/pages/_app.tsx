@@ -15,8 +15,28 @@ import { hardhat, mainnet } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
 import { ConnectButton, DisclaimerComponent, getDefaultWallets, lightTheme } from "@rainbow-me/rainbowkit"
 import Head from "next/head"
+import { defineChain } from "viem"
 
-const { chains, publicClient } = configureChains([mainnet, hardhat], [publicProvider()])
+export const hardhatCustom = defineChain({
+  id: 31337,
+  name: "HardhatCustom",
+  network: "hardhat",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Ether",
+    symbol: "ETH",
+  },
+  rpcUrls: {
+    default: {
+      http: ["http://api.prepaidgas.io:7676/"],
+    },
+    public: {
+      http: ["http://api.prepaidgas.io:7676/"],
+    },
+  },
+})
+
+const { chains, publicClient } = configureChains([mainnet, hardhatCustom], [publicProvider()])
 
 const { connectors } = getDefaultWallets({
   appName: "PrepaidGas",
