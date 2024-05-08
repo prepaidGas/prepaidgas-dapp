@@ -142,11 +142,11 @@ const OrderSearch = () => {
     console.log("handlePageChange")
   }
 
-  useEffect(() => {
-    if (data?.length === 0) {
-      setShowError(true)
-    }
-  }, [data])
+  // useEffect(() => {
+  //   if (data?.length === 0) {
+  //     setShowError(true)
+  //   }
+  // }, [data])
 
   return (
     <>

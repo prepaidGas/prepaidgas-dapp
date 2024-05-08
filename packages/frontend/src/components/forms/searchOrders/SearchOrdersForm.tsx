@@ -47,9 +47,18 @@ export default function SearchOrdersForm({
             label="Manager"
             colon={false}
             rules={[
+              // {
+              //   validator: (_, value) =>
+              //     !value.includes(" ") ? Promise.resolve() : Promise.reject(new Error("No spaces allowed")),
+              // },
               {
-                validator: (_, value) =>
-                  !value.includes(" ") ? Promise.resolve() : Promise.reject(new Error("No spaces allowed")),
+                validator: (_, value) => {
+                  if (ETH_ADDRESS_OR_EMPTY_STRING_REGEX.test(value)) {
+                    return Promise.resolve()
+                  } else {
+                    return Promise.reject(new Error("Please enter a valid address or leave the field empty"))
+                  }
+                },
               },
             ]}
           >

@@ -1,29 +1,8 @@
 import { PageHeaders } from "@/components/page-headers"
-import { DatePicker, Form, Input, List, Select, Tabs, TabsProps, TimePicker } from "antd"
-import { UilQuestionCircle } from "@iconscout/react-unicons"
-const { Option } = Select
-const { TextArea } = Input
-
 import { Cards } from "@/components/cards/frame/cards-frame"
-import { Buttons } from "@/components/buttons"
-import dayjs from "dayjs"
 import CreateTxCard from "@/components/CreateTxCards/CreateTxCard"
 import { useState } from "react"
 import DialogWindow from "@/components/DialogWindow"
-import { TailSpin } from "react-loader-spinner"
-
-const items: TabsProps["items"] = [
-  {
-    key: "1",
-    label: "Simple",
-    children: null,
-  },
-  {
-    key: "2",
-    label: "Advanced",
-    children: null,
-  },
-]
 
 const CreateTx = () => {
   const [showDialogWindow, setShowDialogWindow] = useState(false)
@@ -106,6 +85,7 @@ const CreateTx = () => {
           description={"Transaction was successful"}
         ></DialogWindow>
       ) : null}
+
       <div className="min-h-[715px] lg:min-h-[580px] flex-1 h-auto px-8 xl:px-[15px] pb-[30px] bg-transparent">
         <div className="h-full w-full">
           <Cards headless className="max-w-[1024px] mx-auto">
