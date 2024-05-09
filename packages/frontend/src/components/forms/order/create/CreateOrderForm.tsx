@@ -34,7 +34,11 @@ export default function CreateOrderForm({
   setShowDialogWindow: Dispatch<SetStateAction<boolean>>
   setTransactionDetails: Dispatch<SetStateAction<{}>>
 }) {
-  const { address, isConnecting, isDisconnected } = useAccount()
+  const { address } = useAccount()
+
+  const [formSimple] = Form.useForm<SimpleOrderProps>()
+  const [formAdvanced] = Form.useForm<AdvancedOrderProps>()
+
   const [showWalletConnectionWindow, setShowWalletConnectionWindow] = useState(false)
   const [pendingOrder, setPendingOrder] = useState<PendingOrderProps>({ isOrderPending: false, order: undefined })
 
@@ -111,10 +115,6 @@ export default function CreateOrderForm({
     setIsLoading(false)
     console.log("CreateOrder: END")
   }
-
-  //todo: delete if not using 2 different forms
-  const [formSimple] = Form.useForm<SimpleOrderProps>()
-  const [formAdvanced] = Form.useForm()
 
   const handleTabChange = (tabKey: string) => {
     console.log("TabKey: ", tabKey)
