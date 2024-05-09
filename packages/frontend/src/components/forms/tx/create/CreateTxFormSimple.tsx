@@ -11,24 +11,25 @@ import { TEST_ABI_STRING } from "@/constants"
 export type SimpleTxProps = {
   nonce: number
   gasOrder: number
-  deadlineDate: Dayjs
-  deadlineTime: Dayjs
+  startDate: Dayjs
+  startTime: Dayjs
   to: string
   gas: number
   userAbi: string
+  parsedAbi: null | any
   selectedFunction: string
 }
 
 const initialState: SimpleTxProps = {
   nonce: Date.now(),
   gasOrder: 0,
-  deadlineDate: dayjs().add(1, "d"),
-  deadlineTime: dayjs("00:00", "HH:mm"),
+  startDate: dayjs().add(1, "d"),
+  startTime: dayjs("00:00", "HH:mm"),
   to: "0x0000000000000000000000000000000000000000",
   gas: 25000,
   userAbi: TEST_ABI_STRING,
+  parsedAbi: null,
   selectedFunction: "",
-  argValues: [],
 }
 
 export default function CreateTxFormSimple({
@@ -37,25 +38,27 @@ export default function CreateTxFormSimple({
   disabled,
 }: {
   form: FormInstance<SimpleTxProps>
-  handleSubmit: (values: SimpleTxProps) => void
+  handleSubmit: (values: SimpleTxProps, argValues: any) => void
   disabled: boolean
 }) {
+  const parsedAbi = Form.useWatch("parsedAbi", form)
+  const selectedFunction = Form.useWatch("selectedFunction", form)
+
   const [isLoading, setIsLoading] = useState(false)
-  const [isAbiParsed, setIsAbiParsed] = useState(false)
   const [numberOfOrders, setNumberOfOrders] = useState(0)
+  const [argInputs, setArgInputs] = useState<any>([])
+  const [argValues, setArgValues] = useState<any>([])
 
   const parseAbi = () => {
-    setIsAbiParsed(false)
     try {
-      let parsed = JSON.parse(inputValues.userAbi)
+      let parsed = JSON.parse(form.getFieldValue("userAbi"))
       console.log("Parsed ABI: ", parsed)
       parsed = parsed.filter((item) => item.type === "function")
       console.log("Filtered ABI: ", parsed)
-
-      setParsedAbi(parsed)
-      setIsAbiParsed(true)
+      form.setFieldValue("parsedAbi", parsed)
     } catch (e) {
       console.log("parseAbi Error: ", e)
+      form.setFieldValue("parsedAbi", null)
     }
   }
 
@@ -196,6 +199,17 @@ export default function CreateTxFormSimple({
     })
   }
 
+  const values = Form.useWatch([], form)
+
+  useEffect(() => {
+    console.log("Values: ", values)
+  }, [values])
+
+  useEffect(() => {
+    console.log("parsedAbi: ", parsedAbi)
+    console.log("parsedAbiBoolean: ", !!parsedAbi)
+  }, [parsedAbi])
+
   const renderArgInputs = () => {
     const foundEntry = parsedAbi.find((item) => item.name === selectedFunction)
     console.log("Found Entry: ", foundEntry)
@@ -208,11 +222,12 @@ export default function CreateTxFormSimple({
   }
 
   useEffect(() => {
-    if (selectedFunction === "") {
+    if (selectedFunction) {
+      renderArgInputs()
+    } else {
       setArgInputs([])
       return
     }
-    renderArgInputs()
   }, [selectedFunction])
 
   useEffect(() => {
@@ -223,13 +238,12 @@ export default function CreateTxFormSimple({
     console.log("Arg Values: ", argValues)
   }, [argValues])
 
-  console.log("isAbiParsed: ", { isAbiParsed })
   console.log("selectedFunction: ", { selectedFunction })
   console.log("argInputs: ", { argInputs })
 
   const onFinish: FormProps<SimpleTxProps>["onFinish"] = (values) => {
     console.log("Success:", values)
-    handleSubmit(values)
+    handleSubmit(values, argValues)
   }
 
   const onFinishFailed: FormProps<SimpleTxProps>["onFinishFailed"] = (errorInfo) => {
@@ -249,115 +263,92 @@ export default function CreateTxFormSimple({
     >
       <div className="mt-6 flex flex-col w-full gap-6">
         <div className="flex flex-col">
-          <label className="base-text">Gas Order</label>
-          <Input
-            value={inputValues.gasOrder.toString()}
-            onChange={(e) => setInputValues({ ...inputValues, gasOrder: Number(e.target.value) })}
-            // error={!!validationErrors?.gasOrder}
-            // errorMessage={validationErrors?.gasOrder}
-            spellCheck={false}
-            placeholder="123"
-            size="middle"
-            className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-          />
+          <Form.Item name={"gasOrder"} label={"Gas Order"} colon={false}>
+            <Input
+              spellCheck={false}
+              placeholder="123"
+              size="middle"
+              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+            />
+          </Form.Item>
         </div>
 
         <div className="flex flex-col">
-          <label className="base-text mb-1">Execution period End</label>
           <div className="flex flex-col gap-4">
-            <DatePicker
-              // defaultValue={dayjs().add(1, "d")}
-              value={inputValues.deadlineDate}
-              presets={[
-                {
-                  label: "Tommorrow",
-                  value: dayjs().add(1, "d"),
-                },
-                {
-                  label: "Next Week",
-                  value: dayjs().add(7, "d"),
-                },
-                {
-                  label: "Next Month",
-                  value: dayjs().add(1, "month"),
-                },
-              ]}
-              onChange={(date) => {
-                if (date) {
-                  setInputValues({ ...inputValues, deadlineDate: date })
-                }
-              }}
-            />
-            <TimePicker
-              className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
-              // defaultValue={dayjs("00:00", "HH:mm")}
-              format={"HH:mm"}
-              value={inputValues.deadlineTime}
-              onChange={(value) => setInputValues({ ...inputValues, deadlineTime: value })}
-              // error={!!validationErrors?.executionPeriodEndTime}
-              // errorMessage={validationErrors?.executionPeriodEndTime}
-            />
+            <Form.Item name={"startDate"} label={"Start Date"} colon={false}>
+              <DatePicker
+                presets={[
+                  {
+                    label: "Tommorrow",
+                    value: dayjs().add(1, "d"),
+                  },
+                  {
+                    label: "Next Week",
+                    value: dayjs().add(7, "d"),
+                  },
+                  {
+                    label: "Next Month",
+                    value: dayjs().add(1, "month"),
+                  },
+                ]}
+              />
+            </Form.Item>
+
+            <Form.Item name={"startTime"} label={"Start Time"} colon={false}>
+              <TimePicker
+                className="dark:[&>div>input]:text-white/60 dark:[&>div>.ant-picker-suffix]:text-white/60"
+                format={"HH:mm"}
+              />
+            </Form.Item>
           </div>
         </div>
 
         <div className="flex flex-col">
-          <label className="base-text">To</label>
-          <Input
-            value={inputValues.to}
-            onChange={(e) => setInputValues({ ...inputValues, to: e.target.value })}
-            placeholder={inputValues.to}
-            // error={!!validationErrors?.to}
-            // errorMessage={validationErrors?.to}
-            spellCheck={false}
-            size="middle"
-            className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-          />
+          <Form.Item name={"to"} label={"To"} colon={false}>
+            <Input
+              placeholder={"0x..."}
+              spellCheck={false}
+              size="middle"
+              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+            />
+          </Form.Item>
         </div>
 
         <div className="flex flex-col">
-          <label className="base-text">Gas</label>
-          <Input
-            value={inputValues.gas.toString()}
-            onChange={(e) => setInputValues({ ...inputValues, gas: Number(e.target.value) })}
-            // error={!!validationErrors?.gas}
-            // errorMessage={validationErrors?.gas}
-            spellCheck={false}
-            placeholder="123"
-            size="middle"
-            className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
-          />
+          <Form.Item name={"gas"} label={"Gas"} colon={false}>
+            <Input
+              spellCheck={false}
+              placeholder="123"
+              size="middle"
+              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+            />
+          </Form.Item>
         </div>
 
-        {isAbiParsed ? null : (
+        {!!parsedAbi ? null : (
           <div className="flex flex-col">
             <label className="base-text">ABI</label>
-            <Input.TextArea
-              value={inputValues.userAbi}
-              onChange={(e) => {
-                e.target.style.height = ""
-                e.target.style.height = e.target.scrollHeight + "px"
-                setInputValues({ ...inputValues, userAbi: e.target.value })
-              }}
-              // error={!!validationErrors?.userAbi}
-              // errorMessage={validationErrors?.userAbi}
-              placeholder="Copy and paste your ABI here"
-              spellCheck={false}
-              className="border-normal dark:border-whiteDark hover:border-primary focus:border-primary"
-            />
+            <Form.Item name={"userAbi"} label={"ABI"} colon={false}>
+              <Input.TextArea
+                placeholder="Copy and paste your ABI here"
+                spellCheck={false}
+                className="border-normal dark:border-whiteDark hover:border-primary focus:border-primary"
+              />
+            </Form.Item>
           </div>
         )}
 
-        {isAbiParsed ? (
+        {!!parsedAbi ? (
           <div className="flex flex-row old-md:justify-between mt-4">
             <span className="text-primary">Abi was successfully parsed</span>
             <Buttons
               onClick={() => {
-                setIsAbiParsed(false)
-                setParsedAbi(undefined)
-                setInputValues({ ...inputValues, userAbi: "" })
+                form.setFieldValue("parsedAbi", null)
+                form.setFieldValue("userAbi", "")
+                form.setFieldValue("selectedFunction", "")
+
                 setArgInputs([])
                 setArgValues([])
-                setSelectedFunction("")
               }}
               className="secondary_btn"
             >
@@ -372,35 +363,42 @@ export default function CreateTxFormSimple({
           </div>
         )}
 
-        {isAbiParsed && (
+        {!!parsedAbi && (
           <div className="flex flex-col old-lg:flex-row gap-6 mt-4">
             <div className="flex flex-col grow">
               <span className="base-text">Function</span>
               <div className="flex flex-col mt-2">
-                <Select value={selectedFunction} onChange={setSelectedFunction}>
-                  {parsedAbi
-                    .filter((item) => item.type === "function")
-                    .map((item, index) => {
-                      return <Select.Option value={item.name}>{item.name}</Select.Option>
-                    })}
-                </Select>
+                <Form.Item name={"selectedFunction"} label={"Function to execute"} colon={false}>
+                  <Select>
+                    {parsedAbi
+                      .filter((item) => item.type === "function")
+                      .map((item, index) => {
+                        return <Select.Option value={item.name}>{item.name}</Select.Option>
+                      })}
+                  </Select>
+                </Form.Item>
               </div>
             </div>
           </div>
         )}
 
-        {isAbiParsed && selectedFunction && argInputs.length !== 0 && (
+        {!!parsedAbi && selectedFunction && argInputs.length !== 0 && (
           <div className="mt-8 flex flex-col">
             <span className="base-text">Function Arguments</span>
             {argInputs}
           </div>
         )}
 
-        {isAbiParsed && (
+        {!!parsedAbi && (
           <div className="flex flex-row old-md:justify-end mt-4">
-            <Buttons onClick={handleSubmit} className="primary_btn">
-              {"Submit"}
-            </Buttons>
+            <Form.Item>
+              <Buttons type="primary" htmlType="submit" className="primary_btn hidden old-lg:inline-flex">
+                {"Submit"}
+              </Buttons>
+              <Buttons type="primary" htmlType="submit" className="primary_btn old-lg:hidden" block>
+                {"Submit"}
+              </Buttons>
+            </Form.Item>
           </div>
         )}
       </div>

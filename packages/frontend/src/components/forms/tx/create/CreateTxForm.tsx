@@ -93,7 +93,7 @@ export default function CreateTxForm({
 
   const handleTabChange = (tabKey: string) => {}
 
-  const handleSubmit = (values: SimpleTxProps) => {
+  const handleSubmit = (values: SimpleTxProps, argValues: any) => {
     let contractInterface = new ethers.Interface(TEST_ABI_STRING)
 
     const encodedData = contractInterface.encodeFunctionData(values.selectedFunction, argValues)
@@ -104,9 +104,7 @@ export default function CreateTxForm({
       from: address as string,
       nonce: `0x${values.nonce.toString(16)}`,
       order: `0x${values.gasOrder.toString(16)}`,
-      start: `0x${getUnixTimestampInSeconds(combineDateAndTime(values.deadlineDate, values.deadlineTime)).toString(
-        16,
-      )}`,
+      start: `0x${getUnixTimestampInSeconds(combineDateAndTime(values.startDate, values.startTime)).toString(16)}`,
       to: values.to,
       gas: `0x${values.gas.toString(16)}`,
       data: encodedData,
