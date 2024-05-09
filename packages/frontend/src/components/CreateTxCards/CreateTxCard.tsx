@@ -208,7 +208,7 @@ export default function CreateTxCard({
       }
 
       try {
-        const response = await fetch("http://78.111.67.31:8001/validate", {
+        const response = await fetch("http://api.prepaidgas.io:8001/validate", {
           method: "POST",
           body: JSON.stringify(payload),
         })

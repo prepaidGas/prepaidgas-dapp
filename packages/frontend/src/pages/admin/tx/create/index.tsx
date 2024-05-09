@@ -3,6 +3,7 @@ import { Cards } from "@/components/cards/frame/cards-frame"
 import CreateTxCard from "@/components/CreateTxCards/CreateTxCard"
 import { useState } from "react"
 import DialogWindow from "@/components/DialogWindow"
+import CreateTxForm from "@/components/forms/tx/create/CreateTxForm"
 
 const CreateTx = () => {
   const [showDialogWindow, setShowDialogWindow] = useState(false)
@@ -91,6 +92,12 @@ const CreateTx = () => {
           <Cards headless className="max-w-[1024px] mx-auto">
             <div className="p-[25px]">
               <CreateTxCard setShowDialogWindow={setShowDialogWindow} setTransactionDetails={setTransactionDetails} />
+            </div>
+          </Cards>
+
+          <Cards headless className="max-w-[1024px] mx-auto mt-4">
+            <div className="p-[25px]">
+              {/* <CreateTxForm setShowDialogWindow={setShowDialogWindow} setTransactionDetails={setTransactionDetails} /> */}
             </div>
           </Cards>
         </div>
