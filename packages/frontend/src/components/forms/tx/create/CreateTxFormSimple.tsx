@@ -1,6 +1,6 @@
 "use client"
 
-import { DatePicker, Form, FormInstance, FormProps, Input, Select, TimePicker } from "antd"
+import { DatePicker, Form, FormInstance, FormProps, Input, InputNumber, Select, TimePicker } from "antd"
 
 import { useEffect, useState } from "react"
 import { ABIEntry, FieldEntry, prepaidGasCoreContractAddress } from "@/helpers"
@@ -16,10 +16,10 @@ export type SimpleTxProps = {
   to: string
   gas: number
   userAbi: string
-  parsedAbi: null | any
   selectedFunction: string
 }
 
+//TODO: Move parsed abi to useState, cuz antd doesn't invokes onChange event if field value was set by setFieldValue()
 const initialState: SimpleTxProps = {
   nonce: Date.now(),
   gasOrder: 0,
@@ -28,7 +28,6 @@ const initialState: SimpleTxProps = {
   to: "0x0000000000000000000000000000000000000000",
   gas: 25000,
   userAbi: TEST_ABI_STRING,
-  parsedAbi: null,
   selectedFunction: "",
 }
 
@@ -41,11 +40,10 @@ export default function CreateTxFormSimple({
   handleSubmit: (values: SimpleTxProps, argValues: any) => void
   disabled: boolean
 }) {
-  const parsedAbi = Form.useWatch("parsedAbi", form)
   const selectedFunction = Form.useWatch("selectedFunction", form)
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [numberOfOrders, setNumberOfOrders] = useState(0)
+  // const [numberOfOrders, setNumberOfOrders] = useState(0)
+  const [parsedAbi, setParsedAbi] = useState<null | ABIEntry[]>(null)
   const [argInputs, setArgInputs] = useState<any>([])
   const [argValues, setArgValues] = useState<any>([])
 
@@ -55,10 +53,10 @@ export default function CreateTxFormSimple({
       console.log("Parsed ABI: ", parsed)
       parsed = parsed.filter((item) => item.type === "function")
       console.log("Filtered ABI: ", parsed)
-      form.setFieldValue("parsedAbi", parsed)
+      setParsedAbi(parsed)
     } catch (e) {
       console.log("parseAbi Error: ", e)
-      form.setFieldValue("parsedAbi", null)
+      setParsedAbi(null)
     }
   }
 
@@ -90,7 +88,7 @@ export default function CreateTxFormSimple({
                     return nextState
                   })
                 }}
-                className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+                className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
               />
             </div>
           )
@@ -136,7 +134,7 @@ export default function CreateTxFormSimple({
                     return nextState
                   })
                 }}
-                className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+                className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
               />
             </div>
           )
@@ -152,7 +150,7 @@ export default function CreateTxFormSimple({
             {/* <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput> */}
             <Input
               onChange={(e) => handleArgInputChange(e.target.value, index)}
-              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+              className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
             />
           </div>
         )
@@ -163,7 +161,7 @@ export default function CreateTxFormSimple({
             {/* <NumberInput onChange={(e) => handleArgInputChange(Number(e.target.value), index)}></NumberInput> */}
             <Input
               onChange={(e) => handleArgInputChange(Number(e.target.value), index)}
-              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+              className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
             />
           </div>
         )
@@ -184,7 +182,7 @@ export default function CreateTxFormSimple({
             {/* <TextInput onChange={(e) => handleArgInputChange(e.target.value, index)}></TextInput> */}
             <Input
               onChange={(e) => handleArgInputChange(e.target.value, index)}
-              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+              className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
             />
           </div>
         )
@@ -222,6 +220,7 @@ export default function CreateTxFormSimple({
   }
 
   useEffect(() => {
+    console.log("SelectedFunction: ", { selectedFunction })
     if (selectedFunction) {
       renderArgInputs()
     } else {
@@ -264,11 +263,12 @@ export default function CreateTxFormSimple({
       <div className="mt-6 flex flex-col w-full gap-6">
         <div className="flex flex-col">
           <Form.Item name={"gasOrder"} label={"Gas Order"} colon={false}>
-            <Input
+            <InputNumber
               spellCheck={false}
               placeholder="123"
               size="middle"
-              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+              className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+              style={{ width: "100%" }}
             />
           </Form.Item>
         </div>
@@ -309,28 +309,44 @@ export default function CreateTxFormSimple({
               placeholder={"0x..."}
               spellCheck={false}
               size="middle"
-              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+              className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
             />
           </Form.Item>
         </div>
 
         <div className="flex flex-col">
           <Form.Item name={"gas"} label={"Gas"} colon={false}>
-            <Input
+            <InputNumber
               spellCheck={false}
               placeholder="123"
               size="middle"
-              className="h-12 p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+              className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+              style={{ width: "100%" }}
             />
           </Form.Item>
         </div>
 
         {!!parsedAbi ? null : (
           <div className="flex flex-col">
-            <label className="base-text">ABI</label>
-            <Form.Item name={"userAbi"} label={"ABI"} colon={false}>
+            <Form.Item
+              name={"userAbi"}
+              label={"ABI"}
+              colon={false}
+              rules={[
+                {
+                  validator: (_, value) => {
+                    try {
+                      let parsed = JSON.parse(form.getFieldValue("userAbi"))
+                      return Promise.resolve()
+                    } catch (e) {
+                      return Promise.reject(new Error("Please enter an ABI in a valid JSON format"))
+                    }
+                  },
+                },
+              ]}
+            >
               <Input.TextArea
-                placeholder="Copy and paste your ABI here"
+                placeholder="Copy and paste your ABI JSON here"
                 spellCheck={false}
                 className="border-normal dark:border-whiteDark hover:border-primary focus:border-primary"
               />
@@ -343,22 +359,22 @@ export default function CreateTxFormSimple({
             <span className="text-primary">Abi was successfully parsed</span>
             <Buttons
               onClick={() => {
-                form.setFieldValue("parsedAbi", null)
                 form.setFieldValue("userAbi", "")
                 form.setFieldValue("selectedFunction", "")
 
+                setParsedAbi(null)
                 setArgInputs([])
                 setArgValues([])
               }}
               className="secondary_btn"
             >
-              {isLoading ? "" : "Clear ABI"}
+              {"Clear ABI"}
             </Buttons>
           </div>
         ) : (
           <div className="flex flex-row old-md:justify-end mt-4">
             <Buttons onClick={parseAbi} className="secondary_btn">
-              {isLoading ? "" : "Parse ABI"}
+              {"Parse ABI"}
             </Buttons>
           </div>
         )}
@@ -390,7 +406,7 @@ export default function CreateTxFormSimple({
         )}
 
         {!!parsedAbi && (
-          <div className="flex flex-row old-md:justify-end mt-4">
+          <div>
             <Form.Item>
               <Buttons type="primary" htmlType="submit" className="primary_btn hidden old-lg:inline-flex">
                 {"Submit"}
