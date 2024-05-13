@@ -47,3 +47,6 @@ next-env.d.ts
 # Typechain
 typechain/
 typechain-types/
+
+#Environment
+.env
