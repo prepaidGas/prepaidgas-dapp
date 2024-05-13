@@ -326,33 +326,33 @@ export default function CreateTxFormSimple({
           </Form.Item>
         </div>
 
-        {!!parsedAbi ? null : (
-          <div className="flex flex-col">
-            <Form.Item
-              name={"userAbi"}
-              label={"ABI"}
-              colon={false}
-              rules={[
-                {
-                  validator: (_, value) => {
-                    try {
-                      let parsed = JSON.parse(form.getFieldValue("userAbi"))
-                      return Promise.resolve()
-                    } catch (e) {
-                      return Promise.reject(new Error("Please enter an ABI in a valid JSON format"))
-                    }
-                  },
+        <div className="flex flex-col">
+          <Form.Item
+            name={"userAbi"}
+            label={"ABI"}
+            colon={false}
+            rules={[
+              {
+                validator: (_, value) => {
+                  try {
+                    let parsed = JSON.parse(value)
+                    console.log("VALIDATOR Parsed ABI: ", parsed)
+                    return Promise.resolve()
+                  } catch (e) {
+                    return Promise.reject(new Error("Please enter an ABI in a valid JSON format"))
+                  }
                 },
-              ]}
-            >
-              <Input.TextArea
-                placeholder="Copy and paste your ABI JSON here"
-                spellCheck={false}
-                className="border-normal dark:border-whiteDark hover:border-primary focus:border-primary"
-              />
-            </Form.Item>
-          </div>
-        )}
+              },
+            ]}
+            className={`${!!parsedAbi ? "hidden" : ""}`}
+          >
+            <Input.TextArea
+              placeholder="Copy and paste your ABI JSON here"
+              spellCheck={false}
+              className="border-normal dark:border-whiteDark hover:border-primary focus:border-primary"
+            />
+          </Form.Item>
+        </div>
 
         {!!parsedAbi ? (
           <div className="flex flex-row old-md:justify-between mt-4">

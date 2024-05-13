@@ -92,9 +92,22 @@ export default function CreateTxForm({
   const handleTabChange = (tabKey: string) => {}
 
   const handleSubmit = (values: SimpleTxProps, argValues: any) => {
-    let contractInterface = new ethers.Interface(values.userAbi)
+    let contractInterface
+    let encodedData
 
-    const encodedData = contractInterface.encodeFunctionData(values.selectedFunction, argValues)
+    try {
+      contractInterface = new ethers.Interface(values.userAbi)
+    } catch (e) {
+      console.log("ERROR contractInterface: ", { error: e })
+      return
+    }
+
+    try {
+      encodedData = contractInterface.encodeFunctionData(values.selectedFunction, argValues)
+    } catch (e) {
+      console.log("ERROR encodeFunctionData: ", { error: e })
+      return
+    }
 
     console.log("EncodedData: ", encodedData)
 
@@ -107,7 +120,7 @@ export default function CreateTxForm({
       gas: `0x${values.gas.toString(16)}`,
       data: encodedData,
     }
-    //setShowDialogWindow(true)
+
     signMessage(message)
   }
 
