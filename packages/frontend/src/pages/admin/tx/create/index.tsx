@@ -91,13 +91,13 @@ const CreateTx = () => {
         <div className="h-full w-full">
           <Cards headless className="max-w-[1024px] mx-auto">
             <div className="p-[25px]">
-              <CreateTxCard setShowDialogWindow={setShowDialogWindow} setTransactionDetails={setTransactionDetails} />
+              {/* <CreateTxCard setShowDialogWindow={setShowDialogWindow} setTransactionDetails={setTransactionDetails} /> */}
             </div>
           </Cards>
 
           <Cards headless className="max-w-[1024px] mx-auto mt-4">
             <div className="p-[25px]">
-              {/* <CreateTxForm setShowDialogWindow={setShowDialogWindow} setTransactionDetails={setTransactionDetails} /> */}
+              <CreateTxForm setShowDialogWindow={setShowDialogWindow} setTransactionDetails={setTransactionDetails} />
             </div>
           </Cards>
         </div>

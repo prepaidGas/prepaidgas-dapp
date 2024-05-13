@@ -21,11 +21,11 @@ export default function CreateOrderReceipt({
         header={
           <div className="flex flex-row justify-between items-center">
             <div className="dark:text-white/[.87]">Receipt</div>
-            <span className="absolute [&>*]:fill-secondary right-1 top-1">
+            {/* <span className="absolute [&>*]:fill-secondary right-1 top-1">
               <Tooltip className="" title="This is just a placeholder">
                 <UilQuestionCircle />
               </Tooltip>
-            </span>
+            </span> */}
           </div>
         }
         dataSource={[`${gasAmount * gasPricePerUnit} ${TOKEN_NAME[gasPriceToken] ?? gasPriceToken}`]}

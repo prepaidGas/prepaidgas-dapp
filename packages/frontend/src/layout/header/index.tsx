@@ -35,6 +35,7 @@ const HeaderTop = () => {
   })
 
   const [isBrowser, setIsBrowser] = useState(false)
+  const customizer = process.env.NODE_ENV == "production" ? null : <Customizer rtl={rtl} />
 
   useEffect(() => {
     setIsBrowser(true)
@@ -105,12 +106,10 @@ const HeaderTop = () => {
             </div>
           </div>
           <div className="flex items-center justify-between flex-auto ltr:mr-[10px] rtl:ml-[10px] [&>div:first-child]:flex [&>div]:items-center ">
-            {isBrowser && window.innerWidth > 1200 && topMenu ? <TopMenu /> : <Customizer rtl={rtl} />}
+            {isBrowser && window.innerWidth > 1200 && topMenu ? <TopMenu /> : customizer}
             <div className="flex flex-row items-center md:hidden me-[17px]">
               {isBrowser && window.innerWidth > 1200 && topMenu ? (
-                <div className="flex top-right-wrap">
-                  <Customizer rtl={rtl} />
-                </div>
+                <div className="flex top-right-wrap">{customizer}</div>
               ) : null}
             </div>
           </div>
