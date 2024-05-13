@@ -86,15 +86,13 @@ export default function CreateTxForm({
   const [formSimple] = Form.useForm<SimpleTxProps>()
   // const [formAdvanced] = Form.useForm<AdvancedOrderProps>()
 
-  const [isAbiParsed, setIsAbiParsed] = useState(false)
-  const [parsedAbi, setParsedAbi] = useState<ABIEntry[] | undefined>()
   const [showWalletConnectionWindow, setShowWalletConnectionWindow] = useState(false)
   const [pendingData, setPendingData] = useState<PendingTxProps>({ isPending: false, data: undefined })
 
   const handleTabChange = (tabKey: string) => {}
 
   const handleSubmit = (values: SimpleTxProps, argValues: any) => {
-    let contractInterface = new ethers.Interface(TEST_ABI_STRING)
+    let contractInterface = new ethers.Interface(values.userAbi)
 
     const encodedData = contractInterface.encodeFunctionData(values.selectedFunction, argValues)
 
