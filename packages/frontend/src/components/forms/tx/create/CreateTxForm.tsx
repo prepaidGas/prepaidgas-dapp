@@ -88,12 +88,27 @@ export default function CreateTxForm({
 
   const [showWalletConnectionWindow, setShowWalletConnectionWindow] = useState(false)
   const [pendingData, setPendingData] = useState<PendingTxProps>({ isPending: false, data: undefined })
+  const [inputs, setInputs] = useState({})
 
   const handleTabChange = (tabKey: string) => {}
 
-  const handleSubmit = (values: SimpleTxProps, argValues: any) => {
+  const handleSubmit = (values: SimpleTxProps) => {
     let contractInterface
     let encodedData
+    let parsedAbi = JSON.parse(values.userAbi)
+    let argsArray: any = []
+
+    parsedAbi = parsedAbi.filter((item) => item.type === "function" && item.name === values.selectedFunction)
+    const parsedItem = parsedAbi[0]
+
+    console.log("Submit Parse: ", parsedAbi)
+    console.log("Submit Parse Item: ", parsedItem)
+    parsedItem.inputs.forEach((element) => {
+      const input = inputs[element.name]
+      argsArray.push(input)
+    })
+
+    console.log("argsArray: ", argsArray)
 
     try {
       contractInterface = new ethers.Interface(values.userAbi)
@@ -103,7 +118,7 @@ export default function CreateTxForm({
     }
 
     try {
-      encodedData = contractInterface.encodeFunctionData(values.selectedFunction, argValues)
+      encodedData = contractInterface.encodeFunctionData(values.selectedFunction, argsArray)
     } catch (e) {
       console.log("ERROR encodeFunctionData: ", { error: e })
       return
@@ -238,7 +253,15 @@ export default function CreateTxForm({
     {
       key: "1",
       label: "Simple",
-      children: <CreateTxCardSimple form={formSimple} handleSubmit={handleSubmit} disabled={false} />,
+      children: (
+        <CreateTxCardSimple
+          form={formSimple}
+          handleSubmit={handleSubmit}
+          disabled={false}
+          inputs={inputs}
+          setInputs={setInputs}
+        />
+      ),
     },
   ]
 
