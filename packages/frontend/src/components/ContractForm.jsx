@@ -112,7 +112,7 @@ const ContractForm = ({ abi, contractAddress = undefined, selectedFunction = "",
               {func.inputs.map((input, idx) => (
                 <RecursiveInput key={idx} structure={input} inputs={inputs} setInputs={setInputs} />
               ))}
-              <button type="submit">Invoke</button>
+              {/* <button type="submit">Invoke</button> */}
             </div>
           ),
       )}
