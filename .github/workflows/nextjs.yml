@@ -79,6 +79,8 @@ jobs:
         run: npm run fe-build #$ {{ steps.detect-package-manager.outputs.runner }} next build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+      - name: List directory structure
+        run: ls -R
         with:
           path: ./packages/frontend/out
   # Deployment job
