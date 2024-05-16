@@ -13,6 +13,7 @@
     "fe-build": "npm run build -w prepaidgas-frontend",
     "fe-export": "npm run export -w prepaidgas-frontend",
     "sc-dev": "npm run dev -w prepaidgas-contracts",
+    "sc-build": "npm run build -w prepaidgas-contracts",
     "dev": "npm run fe-dev & npm run sc-dev; wait",
     "docker-build": "docker build -t wednesday .",
     "docker-dev": "docker run -it --rm -v .:/app -p 3000:3000 -p 8545:8545 wednesday npm run dev",
