@@ -21,7 +21,7 @@ export default function DialogWindow({
   title = "Title",
   description = "Description",
   actionButtons = null,
-  onClose = null,
+  onClose,
 }: DialogWindowProps) {
   const renderDivider = () => {
     if (!withoutDescription && actionButtons !== null) {

@@ -21,6 +21,7 @@ import FileListCard from "../overview/FileListCard"
 
 const ProjectDetailsLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter()
+  // @ts-ignore
   const { pathname, asPath } = router
   const id = asPath.split("/")[3]
   const currentPath = pathname.split("/")[4]

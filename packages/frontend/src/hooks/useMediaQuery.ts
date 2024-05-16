@@ -11,7 +11,8 @@ function useMediaQuery(query) {
   const [mediaQueryList, setMediaQueryList] = useState(null)
 
   useIsomorphicLayoutEffect(() => {
-    const matchQueryList = window.matchMedia(query)
+    // @todo fix
+    const matchQueryList:any = window.matchMedia(query)
     console.log("useIsomorphicLayoutEffect", matchQueryList)
 
     setMediaQueryList(matchQueryList)

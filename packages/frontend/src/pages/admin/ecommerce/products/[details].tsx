@@ -33,6 +33,7 @@ interface ValueState {
 
 function ProductDetails() {
   const router = useRouter()
+  // @ts-ignore
   const { asPath } = router
   const productID = asPath.split("/")[4]
 

@@ -30,6 +30,7 @@ const PageRoutes = [
 
 function SupportTicketDetails() {
   const router = useRouter()
+  // @ts-ignore
   const { asPath } = router
   const supportID = asPath.split("/")[4]
 

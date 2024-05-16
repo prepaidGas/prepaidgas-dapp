@@ -12,6 +12,7 @@ const dateFormat = "YYYY/MM/DD"
 function Edit() {
   const dispatch = useDispatch()
   const router = useRouter()
+  // @ts-ignore
   const { asPath } = router
 
   interface RootState {

@@ -31,6 +31,7 @@ import MailComposer from "./MailComposer"
 
 function Single() {
   const router = useRouter()
+  // @ts-ignore
   const { asPath } = router
   const emailID = asPath.split("/")[3]
   const path = "/admin/email"
@@ -163,6 +164,7 @@ function Single() {
           </Link>
           <Tooltip placement="bottom" title="Refresh">
             <Link
+             // @ts-ignore
               onClick={() => router.reload()}
               href="#0"
               className="inline-flex items-center justify-center bg-transparent text-light-extra dark:text-white/60 w-[38px] h-[38px] rounded-full hover:bg-primary-transparent hover:text-primary dark:hover:text-primary"

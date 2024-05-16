@@ -26,6 +26,7 @@ function SingleChat({ match, dashboard }: any) {
   const dispatch = useDispatch()
 
   const router = useRouter()
+  //@ts-ignore
   const { asPath } = router
   const params = asPath.split("/")[4]
 

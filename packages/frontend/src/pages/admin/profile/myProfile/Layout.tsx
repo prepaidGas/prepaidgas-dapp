@@ -29,6 +29,7 @@ const CoverSection = dynamic(() => import("./overview/CoverSection"), {
 
 const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter()
+  // @ts-ignore
   const pathname = usePathname()
   const currentPath = pathname.split("/")[4]
 

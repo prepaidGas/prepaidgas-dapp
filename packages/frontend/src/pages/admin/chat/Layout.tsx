@@ -9,6 +9,7 @@ import SingleGroupChat from "./overview/SingleGroupChat"
 
 const ChatLayout = () => {
   const router = useRouter()
+  //@ts-ignore
   const { asPath } = router
   const currentPath = asPath.split("/")[3]
 

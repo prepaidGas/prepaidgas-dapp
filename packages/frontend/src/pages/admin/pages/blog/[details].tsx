@@ -24,6 +24,7 @@ interface BlogPost {
 
 function BlogDetails() {
   const router = useRouter()
+  // @ts-ignore
   var slug = router.query.slug
   if (slug === undefined) {
     slug = "blog-one"

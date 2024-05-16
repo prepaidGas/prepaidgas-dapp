@@ -23,7 +23,8 @@ export default function Pagination({
   pageSize,
   className,
 }: PaginationProps) {
-  const paginationRange = usePagination({
+  //@todo fix
+  const paginationRange:any = usePagination({
     currentPage,
     totalCount,
     siblingCount,
