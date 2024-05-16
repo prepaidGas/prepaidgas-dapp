@@ -11,6 +11,7 @@
   "scripts": {
     "fe-dev": "npm run dev -w prepaidgas-frontend",
     "fe-build": "npm run build -w prepaidgas-frontend",
+    "fe-export": "npm run export -w prepaidgas-frontend",
     "sc-dev": "npm run dev -w prepaidgas-contracts",
     "dev": "npm run fe-dev & npm run sc-dev; wait",
     "docker-build": "docker build -t wednesday .",
