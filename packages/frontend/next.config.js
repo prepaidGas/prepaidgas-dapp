@@ -7,13 +7,12 @@ const nextConfig = {
         ...config.watchOptions,
         poll: 800,
         aggregateTimeout: 300,
-      }
+      },
     }
     config.resolve.fallback = { fs: false, net: false, tls: false }
     return config
   },
-  outdir: "export",
-  images: { unoptimized: true }
+  images: { unoptimized: true },
 }
 
 module.exports = nextConfig
