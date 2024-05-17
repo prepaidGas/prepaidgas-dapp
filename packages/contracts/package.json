@@ -11,8 +11,7 @@
     "size": "npx hardhat size-contracts",
     "node": "npx hardhat node",
     "deploy": "npx hardhat run scripts/deploy/deploy.ts --network localhost",
-    "executor": "npx hardhat run scripts/executor/executor.ts --network localhost",
-    "dev": "npm run node & (sleep 12 && npm run deploy) & (sleep 24 && npm run executor); wait"
+    "dev": "npm run node & (sleep 12 && npm run deploy); wait"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
