@@ -16,11 +16,11 @@ const CreateOrder = () => {
 
   const PageRoutes = [
     {
-      path: "admin",
+      path: "/admin/order/create",
       breadcrumbName: "Home",
     },
     {
-      path: "create",
+      path: "",
       breadcrumbName: "Create Order",
     },
   ]

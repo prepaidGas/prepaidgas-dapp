@@ -20,11 +20,11 @@ import SearchOrdersForm, { FilterOptions } from "@/components/forms/searchOrders
 const OrderSearch = () => {
   const PageRoutes = [
     {
-      path: "admin",
-      breadcrumbName: "Dashboard",
+      path: "/admin/order/create",
+      breadcrumbName: "Home",
     },
     {
-      path: "create",
+      path: "",
       breadcrumbName: "Order Search",
     },
   ]

@@ -17,11 +17,11 @@ const TestingField = () => {
 
   const PageRoutes = [
     {
-      path: "admin",
+      path: "admin/order/create",
       breadcrumbName: "Dashboard",
     },
     {
-      path: "testingfield",
+      path: "",
       breadcrumbName: "Testing Field",
     },
   ]

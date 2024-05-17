@@ -10,11 +10,11 @@ const CreateTx = () => {
 
   const PageRoutes = [
     {
-      path: "admin",
+      path: "/admin/order/create",
       breadcrumbName: "Dashboard",
     },
     {
-      path: "create",
+      path: "",
       breadcrumbName: "Create Transaction",
     },
   ]
