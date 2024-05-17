@@ -4,6 +4,8 @@ import versions from "@/demoData/changelog.json"
 
 const { Panel } = Collapse
 
+const urlRegex = /(https?:\/\/[^\s]+)/g
+
 function ChangeLog() {
   const PageRoutes = [
     {
@@ -45,14 +47,19 @@ function ChangeLog() {
                         <span className="inline-block bg-success mb-4 px-2 py-[5px] text-white dark:text-white/[.87] text-xs font-medium leading-4 tracking-[1.4px] rounded">
                           New
                         </span>
-                        <ul className="mb-0 max-w-screen-old-md">
+                        <ul className="mb-0">
                           {versions[0].new.map((item, key) => {
                             return (
                               <li
+                                dangerouslySetInnerHTML={{
+                                  __html: item.replace(urlRegex, function (url) {
+                                    return '<a target="_blank" href="' + url + '">' + url + "</a>"
+                                  }),
+                                }}
                                 key={key + 1}
                                 className="mb-2 relative ltr:pl-5 rtl:pr-5 text-body dark:text-white/60 text-base after:absolute ltr:after:left-0 rtl:after:right-0 after:top-1/2 after:-translate-y-1/2 after:w-1.5 after:h-1.5 after:bg-success after:rounded-full"
                               >
-                                {item}
+                                {/* {item} */}
                               </li>
                             )
                           })}
