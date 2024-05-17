@@ -6,7 +6,9 @@
     "new": [
       "Initial Release",
       "This week, we've released our initial project documentation https://docs.prepaidgas.io/, we're still polishing it up.",
-      "Last weeks we've finished the initial executor and validator script versions.\nThe validator script makes tx creation free of on-chain fees.\nThe executor script is a configurable protocol part that accepts orders and executes the incoming tx requests."
+      "Last weeks we've finished the initial executor and validator script versions.",
+      "The executor script is a configurable protocol part that accepts orders and executes the incoming tx requests.",
+      "The validator script makes tx creation free of on-chain fees."
     ]
   }
 ]
