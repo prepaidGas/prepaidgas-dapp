@@ -191,7 +191,7 @@ export default function CreateTxForm({
       }
 
       try {
-        const response = await fetch("http://api.prepaidgas.io:8001/validate", {
+        const response = await fetch("https://api.prepaidgas.io:443/validate", {
           method: "POST",
           body: JSON.stringify(payload),
         })
