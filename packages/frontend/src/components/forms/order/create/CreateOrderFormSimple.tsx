@@ -7,7 +7,6 @@ import { Form, FormInstance, FormProps, Input, InputNumber, List, Select, Tabs, 
 import { Buttons } from "@/components/buttons"
 import CreateOrderReceipt from "@/components/CreateOrderReceipt"
 import { useEffect } from "react"
-import TokenSearchSelect from "@/components/TokenSearchSelect"
 import CustomSearchSelect from "@/components/CustomSearchSelect"
 
 export type SimpleOrderProps = {
@@ -80,9 +79,6 @@ export default function CreateOrderFormSimple({
           </div>
           <div className="flex flex-col old-md:flex-row gap-4">
             <div className="flex flex-col grow justify-start ">
-              {/* <Form.Item name={"gasPriceToken"} label={"Token"} colon={false}>
-                <TokenSearchSelect />
-              </Form.Item> */}
               <Form.Item name={"gasPriceToken"} label={"Token"} colon={false}>
                 <CustomSearchSelect />
               </Form.Item>
