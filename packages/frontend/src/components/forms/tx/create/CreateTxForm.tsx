@@ -144,7 +144,7 @@ export default function CreateTxForm({
       name: PROJECT_NAME,
       version: PROJECT_VERSION,
       chainId: CHAIN_ID,
-      verifyingContract: prepaidGasCoreContractAddress(),
+      verifyingContract: prepaidGasCoreContractAddress() as `0x${string}`,
     }
 
     const types = {
@@ -165,7 +165,7 @@ export default function CreateTxForm({
 
       try {
         const validateMessage = await readContract({
-          address: prepaidGasCoreContractAddress(),
+          address: prepaidGasCoreContractAddress() as `0x${string}`,
           abi: PrepaidGasABI,
           functionName: "messageValidate",
           args: [message],
