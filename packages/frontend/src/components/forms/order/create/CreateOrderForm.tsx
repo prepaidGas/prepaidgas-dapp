@@ -85,6 +85,8 @@ export default function CreateOrderForm({
         })
         console.log("Approve Data: ", data)
         console.log("APPROVED")
+        const txData = await waitForTransaction({ hash: data.hash })
+        console.log("Approve transaction details: ", txData)
       } catch (e) {
         console.log("Approve Error: ", e)
         console.log("APPROVE ERROR")
