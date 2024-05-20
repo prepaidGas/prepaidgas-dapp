@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { ethers } from "ethers"
-import { Input } from "antd"
+import { Input, Select, InputNumber } from "antd"
 
 // Utility to set deeply nested values in an object
 const setNestedState = (path, value, obj) => {
@@ -37,6 +37,59 @@ const RecursiveInput = ({ structure, inputs, setInputs, basePath = "" }) => {
     })
   }
 
+  const resolveInput = (path) => {
+    console.log("Structure: ", structure)
+
+    if (structure.type.includes("int") || structure.type.includes("fixed")) {
+      return (
+        <InputNumber
+          className="mb-2"
+          size="middle"
+          placeholder={structure.name}
+          value={getNestedValue(inputs, path) || ""}
+          onChange={(value) => handleChange(path, value)}
+          style={{ width: "100%" }}
+        />
+      )
+    }
+
+    switch (structure.type) {
+      case "string":
+      case "address":
+        return (
+          <Input
+            className="mb-2"
+            size="middle"
+            placeholder={structure.name}
+            value={getNestedValue(inputs, path) || ""}
+            onChange={(e) => handleChange(path, e.target.value)}
+          />
+        )
+      case "bool":
+        return (
+          <Select
+            className="min-w-[8rem]"
+            placeholder={structure.name}
+            value={getNestedValue(inputs, path) || ""}
+            onChange={(value) => handleChange(path, value)}
+          >
+            <Select.Option value={true}>True</Select.Option>
+            <Select.Option value={false}>False</Select.Option>
+          </Select>
+        )
+      default:
+        return (
+          <Input
+            className="mb-2"
+            size="middle"
+            placeholder={structure.name}
+            value={getNestedValue(inputs, path) || ""}
+            onChange={(e) => handleChange(path, e.target.value)}
+          />
+        )
+    }
+  }
+
   if (structure.type === "tuple") {
     return (
       <fieldset className="flex flex-col mb-4 mt-4">
@@ -58,20 +111,15 @@ const RecursiveInput = ({ structure, inputs, setInputs, basePath = "" }) => {
     const path = `${basePath}${structure.name}`
     return (
       <>
-        {/* // <input
-      //   type="text"
-      //   placeholder={structure.name}
-      //   value={getNestedValue(inputs, path) || ""}
-      //   onChange={(e) => handleChange(path, e.target.value)}
-      // /> */}
         <label>{structure.name}</label>
-        <Input
+        {/* <Input
           className="mb-2"
           size="middle"
           placeholder={structure.name}
           value={getNestedValue(inputs, path) || ""}
           onChange={(e) => handleChange(path, e.target.value)}
-        />
+        /> */}
+        {resolveInput(path)}
       </>
     )
   }
@@ -85,7 +133,7 @@ const ContractForm = ({ abi, contractAddress = undefined, selectedFunction = "",
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    const method = abi.find((item) => item.type === "function" && item.name === "testFunc")
+    // const method = abi.find((item) => item.type === "function" && item.name === "testFunc")
     // if (method) {
     //   const args = method.inputs.map((input) => getNestedValue(inputs, input.name)) // Retrieve inputs for the function call
     //   try {
