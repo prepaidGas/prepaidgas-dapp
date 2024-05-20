@@ -22,7 +22,7 @@ const initialState: SimpleOrderProps = {
   gasAmount: 100000,
   txWindow: 600,
   redeemWindow: 7200,
-  gasPriceToken: TOKEN_ADDRESS.MockUSD,
+  gasPriceToken: TOKEN_ADDRESS.MockGasPrice,
   gasPricePerUnit: 10,
 }
 

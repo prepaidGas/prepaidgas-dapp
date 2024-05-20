@@ -60,9 +60,10 @@ const OrderSearch = () => {
       (pageNumber - 1) * numberOfEntries,
     ]
     console.log("SearchArgs: ", searchArgs)
+    const test = prepaidGasCoreContractAddress() as `0x${string}`
     try {
       const data = await readContract({
-        address: prepaidGasCoreContractAddress(),
+        address: prepaidGasCoreContractAddress() as `0x${string}`,
         abi: PrepaidGasABI,
         functionName: "getManagerOrders",
         args: searchArgs,
@@ -142,11 +143,17 @@ const OrderSearch = () => {
     console.log("handlePageChange")
   }
 
-  // useEffect(() => {
-  //   if (data?.length === 0) {
-  //     setShowError(true)
-  //   }
-  // }, [data])
+  useEffect(() => {
+    if (!data) {
+      return setShowError(true)
+    }
+
+    if (data?.length === 0) {
+      setShowError(true)
+    } else {
+      setShowError(false)
+    }
+  }, [data])
 
   return (
     <>

@@ -4,7 +4,7 @@ async function listener() {
   console.log("Executor script start")
 
   // TODO: Make link to be script flag
-  let httpProvider = new ethers.getDefaultProvider("http://api.prepaidgas.io:7676/")
+  let httpProvider = new ethers.getDefaultProvider("https://rpc.sepolia.org")
 
   // TODO: Get from file | 0x14dC79964da2C08b23698B3D3cc7Ca32193d9955 accounts[6]
   let privateKey = "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"

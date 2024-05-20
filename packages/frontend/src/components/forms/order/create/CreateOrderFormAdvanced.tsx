@@ -5,7 +5,7 @@ import { Input, DatePicker, TimePicker, Form, FormInstance, FormProps, InputNumb
 import { Buttons } from "@/components/buttons"
 import dayjs, { Dayjs } from "dayjs"
 import CreateOrderReceipt from "@/components/CreateOrderReceipt"
-import TokenSearchSelect from "@/components/TokenSearchSelect"
+import CustomSearchSelect from "@/components/CustomSearchSelect"
 
 export type AdvancedOrderProps = {
   gasAmount: number
@@ -33,9 +33,9 @@ const initialState: AdvancedOrderProps = {
   endTime: dayjs(),
   txWindow: 600,
   redeemWindow: 7200,
-  gasPriceToken: TOKEN_ADDRESS.MockUSD,
+  gasPriceToken: TOKEN_ADDRESS.MockGasPrice,
   gasPricePerUnit: 10,
-  guaranteeToken: TOKEN_ADDRESS.MockUSD,
+  guaranteeToken: TOKEN_ADDRESS.MockGuarantee,
   guaranteePerUnit: 0,
 }
 
@@ -188,7 +188,7 @@ export default function CreateOrderFormAdvanced({
         <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
           <div className="flex flex-col flex-1">
             <Form.Item name={"gasPriceToken"} label={"Gas Price Token"} colon={false}>
-              <TokenSearchSelect />
+              <CustomSearchSelect />
             </Form.Item>
           </div>
 
@@ -218,7 +218,7 @@ export default function CreateOrderFormAdvanced({
         <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
           <div className="flex flex-col flex-1">
             <Form.Item name={"guaranteeToken"} label={"Guarantee Token"} colon={false}>
-              <TokenSearchSelect />
+              <CustomSearchSelect />
             </Form.Item>
           </div>
 

@@ -34,7 +34,26 @@ export const hardhatCustom = defineChain({
   },
 })
 
-const { chains, publicClient } = configureChains([mainnet, hardhatCustom], [publicProvider()])
+export const sepolia = defineChain({
+  id: 11155111,
+  name: "sepolia",
+  network: "sepolia",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Ether",
+    symbol: "ETH",
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.sepolia.org"],
+    },
+    public: {
+      http: ["https://rpc.sepolia.org"],
+    },
+  },
+})
+
+const { chains, publicClient } = configureChains([mainnet, hardhatCustom, sepolia], [publicProvider()])
 
 const { connectors } = getDefaultWallets({
   appName: "PrepaidGas",

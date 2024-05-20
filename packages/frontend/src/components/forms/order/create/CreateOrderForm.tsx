@@ -132,9 +132,9 @@ export default function CreateOrderForm({
         endTime: dayjs(),
         txWindow: 600,
         redeemWindow: 7200,
-        gasPriceToken: formSimple.getFieldValue("gasPriceToken"),
+        gasPriceToken: TOKEN_ADDRESS.MockGasPrice,
         gasPricePerUnit: formSimple.getFieldValue("gasPricePerUnit"),
-        guaranteeToken: formSimple.getFieldValue("gasPriceToken"),
+        guaranteeToken: TOKEN_ADDRESS.MockGuarantee,
         guaranteePerUnit: 0,
       })
     }
