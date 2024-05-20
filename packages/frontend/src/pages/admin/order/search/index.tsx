@@ -144,14 +144,16 @@ const OrderSearch = () => {
   }
 
   useEffect(() => {
-    if (!data) {
-      return setShowError(true)
-    }
+    if (!isLoading) {
+      if (!data) {
+        return setShowError(true)
+      }
 
-    if (data?.length === 0) {
-      setShowError(true)
-    } else {
-      setShowError(false)
+      if (data?.length === 0) {
+        setShowError(true)
+      } else {
+        setShowError(false)
+      }
     }
   }, [data])
 
