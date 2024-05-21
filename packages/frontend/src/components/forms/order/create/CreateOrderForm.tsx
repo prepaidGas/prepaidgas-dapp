@@ -84,16 +84,13 @@ export default function CreateOrderForm({
           args: [prepaidGasTreasuryContractAddress(), overallPrice],
         })
         console.log("Approve Data: ", data)
-        console.log("APPROVED")
         const txData = await waitForTransaction({ hash: data.hash })
         console.log("Approve transaction details: ", txData)
       } catch (e) {
         console.log("Approve Error: ", e)
-        console.log("APPROVE ERROR")
       }
     }
 
-    console.log("prepaidGasTreasuryContractAddress(): ", prepaidGasTreasuryContractAddress())
     console.log("USER ADDRESS: ", address)
 
     // Create Order

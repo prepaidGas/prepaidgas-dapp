@@ -46,12 +46,38 @@ const RecursiveInput = ({ structure, inputs, setInputs, basePath = "" }) => {
           className="mb-2"
           size="middle"
           placeholder={structure.name}
-          value={getNestedValue(inputs, path) || ""}
+          value={getNestedValue(inputs, path) || 0}
           onChange={(value) => handleChange(path, value)}
           style={{ width: "100%" }}
         />
       )
     }
+
+    if (structure.type.includes("bytes")) {
+      return (
+        <Input
+          className="mb-2"
+          size="middle"
+          placeholder={structure.name}
+          value={getNestedValue(inputs, path) || 0}
+          onChange={(value) => handleChange(path, value)}
+          style={{ width: "100%" }}
+        />
+      )
+    }
+
+    // if (structure.type.includes("bytes")) {
+    //   return (
+    //     <Input
+    //       className="mb-2"
+    //       size="middle"
+    //       placeholder={structure.name}
+    //       value={getNestedValue(inputs, path) || 0}
+    //       onChange={(value) => handleChange(path, value)}
+    //       style={{ width: "100%" }}
+    //     />
+    //   )
+    // }
 
     switch (structure.type) {
       case "string":

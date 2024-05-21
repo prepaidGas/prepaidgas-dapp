@@ -126,7 +126,7 @@ export default function CreateTxForm({
 
     const message: MessageStruct = {
       from: address as string,
-      nonce: `0x${values.nonce.toString(16)}`,
+      nonce: `0x${Date.now().toString(16)}`,
       order: `0x${values.gasOrder.toString(16)}`,
       start: `0x${getUnixTimestampInSeconds(combineDateAndTime(values.startDate, values.startTime)).toString(16)}`,
       to: values.to,
@@ -139,6 +139,8 @@ export default function CreateTxForm({
 
   const signMessage = async (message: MessageStruct) => {
     console.log("Submit started")
+
+    // await switchNetwork({ chainId: 1 });
 
     const domain: domainProps = {
       name: PROJECT_NAME,
@@ -175,20 +177,29 @@ export default function CreateTxForm({
         console.log("ERROR: ", e)
       }
 
-      //todo check typescript
-      // @ts-ignore
-      const signature = await signTypedData({
-        domain,
-        message,
-        primaryType: "Message",
-        types,
-      })
+      let signature = undefined
+      try {
+        //todo check typescript
+        // @ts-ignore
+        signature = await signTypedData({
+          domain,
+          message,
+          primaryType: "Message",
+          types,
+        })
+      } catch (e) {
+        console.log("ERROR: ", e)
+        return
+      }
+
       console.log("signature: ", signature)
 
       const payload = {
         origSign: signature,
         message: message,
       }
+
+      console.log("payload: ", payload)
 
       try {
         const response = await fetch("https://api.prepaidgas.io:443/validate", {

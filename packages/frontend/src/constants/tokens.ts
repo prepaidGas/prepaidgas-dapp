@@ -16,6 +16,6 @@ export const TOKEN_ADDRESS = {
 }
 
 export const TOKEN_NAME = {
-  [TOKEN_ADDRESS.MockGasPrice]: "Mock Gas Price",
-  [TOKEN_ADDRESS.MockGuarantee]: "Mock Guarantee",
+  [TOKEN_ADDRESS.MockGasPrice]: "Mock USD",
+  [TOKEN_ADDRESS.MockGuarantee]: "Mock EUR",
 }

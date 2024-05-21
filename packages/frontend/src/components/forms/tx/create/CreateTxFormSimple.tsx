@@ -11,7 +11,6 @@ import { Cards } from "@/components/cards/frame/cards-frame"
 import ContractForm from "../../../ContractForm"
 
 export type SimpleTxProps = {
-  nonce: number
   gasOrder: number
   startDate: Dayjs
   startTime: Dayjs
@@ -23,7 +22,6 @@ export type SimpleTxProps = {
 
 //TODO: Move parsed abi to useState, cuz antd doesn't invokes onChange event if field value was set by setFieldValue()
 const initialState: SimpleTxProps = {
-  nonce: Date.now(),
   gasOrder: 0,
   startDate: dayjs().add(1, "d"),
   startTime: dayjs("00:00", "HH:mm"),

@@ -14,6 +14,8 @@ import { publicProvider } from "wagmi/providers/public"
 import { ConnectButton, DisclaimerComponent, getDefaultWallets, lightTheme } from "@rainbow-me/rainbowkit"
 import Head from "next/head"
 import { defineChain } from "viem"
+import { Button, Modal, Space } from "antd"
+import { createContext, useState } from "react"
 
 export const hardhatCustom = defineChain({
   id: 31337,
@@ -76,7 +78,23 @@ const Disclaimer: DisclaimerComponent = ({ Text, Link }) => (
   </Text>
 )
 
+const ReachableContext = createContext<string | null>(null)
+const UnreachableContext = createContext<string | null>(null)
+
+const config = {
+  title: "Use Hook!",
+  content: (
+    <>
+      <ReachableContext.Consumer>{(name) => `Reachable: ${name}!`}</ReachableContext.Consumer>
+      <br />
+      <UnreachableContext.Consumer>{(name) => `Unreachable: ${name}!`}</UnreachableContext.Consumer>
+    </>
+  ),
+}
+
 function App({ Component, pageProps }: AppProps) {
+  const [modal, contextHolder] = Modal.useModal()
+
   const renderLayout = () => {
     return (
       <>
@@ -108,6 +126,47 @@ function App({ Component, pageProps }: AppProps) {
         <title>prepaidGas</title>
       </Head>
       <Provider store={store}>{renderLayout()}</Provider>
+
+      {/* Modal stuff */}
+      <ReachableContext.Provider value="Light">
+        <Space>
+          <Button
+            onClick={async () => {
+              const confirmed = await modal.confirm(config)
+              console.log("Confirmed: ", confirmed)
+            }}
+          >
+            Confirm
+          </Button>
+          <Button
+            onClick={() => {
+              modal.warning(config)
+            }}
+          >
+            Warning
+          </Button>
+          <Button
+            onClick={async () => {
+              modal.info(config)
+            }}
+          >
+            Info
+          </Button>
+          <Button
+            onClick={async () => {
+              modal.error(config)
+            }}
+          >
+            Error
+          </Button>
+        </Space>
+        {/* `contextHolder` should always be placed under the context you want to access */}
+        {contextHolder}
+
+        {/* Can not access this context since `contextHolder` is not in it */}
+        <UnreachableContext.Provider value="Bamboo" />
+      </ReachableContext.Provider>
+      {contextHolder}
     </>
   )
 }
