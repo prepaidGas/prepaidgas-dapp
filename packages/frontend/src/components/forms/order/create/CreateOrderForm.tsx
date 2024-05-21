@@ -11,35 +11,87 @@ import {
 } from "@/helpers"
 import { GasPaymentStruct, OrderStruct } from "typechain-types/PrepaidGas"
 import { useAccount } from "wagmi"
-import { UilWallet } from "@iconscout/react-unicons"
+import { UilWallet, UiProcess } from "@iconscout/react-unicons"
 
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import DialogWindow from "@/components/DialogWindow"
 import UserAgreement from "@/components/UserAgreement"
-import { Tabs, TabsProps, Form, FormProps } from "antd"
+import { Tabs, TabsProps, Form, FormProps, Modal } from "antd"
 import dayjs, { type Dayjs } from "dayjs"
 import { TOKEN_ADDRESS } from "@/constants/tokens"
 import CreateOrderFormSimple, { SimpleOrderProps } from "./CreateOrderFormSimple"
 import CreateOrderFormAdvanced, { AdvancedOrderProps } from "./CreateOrderFormAdvanced"
+import { TailSpin } from "react-loader-spinner"
+import CustomConnectBttn from "@/components/CustomConnectBttn"
+
+const { confirm } = Modal
+
+const showWalletConnectionModal = () => {
+  confirm({
+    title: "Wallet Connection",
+    icon: <UilWallet />,
+    content: "Please connect your wallet to continue with order creation",
+    closable: true,
+    footer: [<CustomConnectBttn />],
+  })
+}
+
+const showSuccess = (txData: any) => {
+  Modal.success({
+    title: "Success",
+    closable: true,
+    content: (
+      <div className="flex flex-col break-words gap-4">
+        From
+        <span>{txData.from}</span>
+        To
+        <span>{txData.to}</span>
+        Transaction Hash
+        <span>{txData.transactionHash}</span>
+        Status
+        <span>{txData.status}</span>
+      </div>
+    ),
+  })
+}
+
+const showError = (error: any) => {
+  Modal.error({ title: "Error", closable: true, content: error })
+}
+
+const showProcessing = () => {
+  confirm({
+    title: "Processing",
+    icon: <UiProcess />,
+    closable: false,
+    content: (
+      <div className="flex justify-center">
+        <TailSpin
+          height={40}
+          width={40}
+          color={"#009688"}
+          ariaLabel="tail-spin-loading"
+          radius="0"
+          wrapperStyle={{}}
+          wrapperClass=""
+          visible={true}
+        />
+      </div>
+    ),
+  })
+}
 
 type PendingOrderProps = {
   isOrderPending: boolean
   order: OrderStruct | undefined
 }
 
-export default function CreateOrderForm({
-  setShowDialogWindow,
-  setTransactionDetails,
-}: {
-  setShowDialogWindow: Dispatch<SetStateAction<boolean>>
-  setTransactionDetails: Dispatch<SetStateAction<{}>>
-}) {
+export default function CreateOrderForm() {
   const { address } = useAccount()
 
   const [formSimple] = Form.useForm<SimpleOrderProps>()
   const [formAdvanced] = Form.useForm<AdvancedOrderProps>()
 
-  const [showWalletConnectionWindow, setShowWalletConnectionWindow] = useState(false)
   const [pendingOrder, setPendingOrder] = useState<PendingOrderProps>({ isOrderPending: false, order: undefined })
 
   const [isLoading, setIsLoading] = useState(true)
@@ -47,17 +99,16 @@ export default function CreateOrderForm({
   const createOrder = async (order: OrderStruct) => {
     console.log("CreateOrder: START")
     console.log("Order data to submit: ", { order })
+    showProcessing()
+    setIsLoading(true)
 
     if (!isWalletConnected()) {
       setPendingOrder({ isOrderPending: true, order })
-      setShowWalletConnectionWindow(true)
+      showWalletConnectionModal()
       return
     }
 
     console.log("Wallet is connected: ", { address })
-
-    setShowDialogWindow(true)
-    setIsLoading(true)
 
     let allowance = 0
     try {
@@ -71,6 +122,7 @@ export default function CreateOrderForm({
       allowance = Number(data)
     } catch (e) {
       console.log("Allowance ERROR: ", e)
+      showError(e)
     }
 
     const overallPrice = Number(order.gasPrice.perUnit) * Number(order.gas)
@@ -88,6 +140,7 @@ export default function CreateOrderForm({
         console.log("Approve transaction details: ", txData)
       } catch (e) {
         console.log("Approve Error: ", e)
+        showError(e)
       }
     }
 
@@ -104,10 +157,10 @@ export default function CreateOrderForm({
       console.log("orderCreate: ", data)
       const txData = await waitForTransaction({ hash: data.hash })
       console.log("orderCreate transaction details: ", txData)
-      setTransactionDetails(txData)
+      showSuccess(txData)
     } catch (e) {
       console.log("orderCreate Error: ", e)
-      setTransactionDetails({ error: e })
+      showError(e)
     }
     setIsLoading(false)
     console.log("CreateOrder: END")
@@ -183,7 +236,7 @@ export default function CreateOrderForm({
 
   useEffect(() => {
     if (address !== undefined && pendingOrder.isOrderPending === true) {
-      setShowWalletConnectionWindow(false)
+      // showWalletConnectionModal()
       if (pendingOrder.order === undefined) {
         console.log("ORDER IS UNDEFINED")
         return
@@ -192,27 +245,6 @@ export default function CreateOrderForm({
       setPendingOrder({ isOrderPending: false, order: undefined })
     }
   }, [address])
-
-  // const order: OrderStruct = {
-  //   manager: address as string,
-  //   gas: inputValues.gasAmount,
-  //   expire: isOrderSimple
-  //     ? getUnixTimestampInSeconds(combineDateAndTime(dayjs(), dayjs().add(15, "minute")))
-  //     : getUnixTimestampInSeconds(combineDateAndTime(inputValues.expireDate, inputValues.expireTime)),
-  //   start: isOrderSimple
-  //     ? 0
-  //     : getUnixTimestampInSeconds(combineDateAndTime(inputValues.startDate, inputValues.startTime)),
-  //   end: isOrderSimple
-  //     ? getUnixTimestampInSeconds(combineDateAndTime(dayjs().add(1, "day"), dayjs()))
-  //     : getUnixTimestampInSeconds(combineDateAndTime(inputValues.endDate, inputValues.endTime)),
-  //   txWindow: inputValues.txWindow,
-  //   redeemWindow: inputValues.redeemWindow,
-  //   gasPrice: { token: inputValues.gasPriceToken, perUnit: inputValues.gasPricePerUnit } as GasPaymentStruct,
-  //   gasGuarantee: {
-  //     token: inputValues.guaranteeToken,
-  //     perUnit: inputValues.guaranteePerUnit,
-  //   } as GasPaymentStruct,
-  // }
 
   //todo: make sure this is the best way to store data for tabs. const inside of function may lead to re-renders
   const items: TabsProps["items"] = [
@@ -244,24 +276,6 @@ export default function CreateOrderForm({
 
   return (
     <>
-      {showWalletConnectionWindow && (
-        <DialogWindow
-          isClosable={true}
-          withoutDescription={true}
-          title={
-            <div className="flex flex-row items-center [&>*]:fill-[#404040] [&>*]:dark:fill-[#A4A5AA]">
-              <UilWallet />
-              <span className="ml-4 base-text text-xl">Wallet Connection</span>
-            </div>
-          }
-          description="Please accept our terms of service and connect your wallet to continue with order creation"
-          actionButtons={[<UserAgreement />]}
-          onClose={() => {
-            setShowWalletConnectionWindow(false)
-            setPendingOrder({ isOrderPending: false, order: undefined })
-          }}
-        />
-      )}
       <div className="flex flex-col w-full">
         <Tabs defaultActiveKey="1" items={items} onChange={handleTabChange} />
       </div>
