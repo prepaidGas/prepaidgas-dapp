@@ -4,7 +4,13 @@ import { Buttons } from "./buttons"
 import { UilWallet } from "@iconscout/react-unicons"
 import { UilUser } from "@iconscout/react-unicons"
 
-export default function CustomConnectBttn({ isActive = true, collapsed }: { isActive?: boolean; collapsed: boolean }) {
+export default function CustomConnectBttnSidebar({
+  isActive = true,
+  collapsed = false,
+}: {
+  isActive?: boolean
+  collapsed?: boolean
+}) {
   return (
     <ConnectButton.Custom>
       {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {

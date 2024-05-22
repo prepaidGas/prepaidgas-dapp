@@ -1,5 +1,5 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { useState, useEffect } from "react"
+import { useState, useEffect, DOMAttributes, MouseEventHandler } from "react"
 import { Buttons } from "./buttons"
 import { UilWallet } from "@iconscout/react-unicons"
 import { UilUser } from "@iconscout/react-unicons"
@@ -7,10 +7,14 @@ import { UilUser } from "@iconscout/react-unicons"
 export default function CustomConnectBttn({
   isActive = true,
   collapsed = false,
+  onClick,
 }: {
   isActive?: boolean
   collapsed?: boolean
+  onClick: (...args: any[]) => void
 }) {
+  const [isLoading, setIsLoading] = useState(false)
+
   return (
     <ConnectButton.Custom>
       {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
@@ -40,24 +44,34 @@ export default function CustomConnectBttn({
                   // </Button>
                   <Buttons
                     disabled={!isActive}
-                    onClick={openConnectModal}
+                    onClick={() => {
+                      openConnectModal()
+                      setIsLoading(true)
+                    }}
+                    loading={isLoading}
                     className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px]   w-full `}
                   >
                     {collapsed ? <UilWallet size="16" /> : "Connect Wallet"}
                   </Buttons>
                 )
-              }
+              } else {
+                setIsLoading(false)
 
-              if (chain.unsupported) {
+                if (chain.unsupported) {
+                  return (
+                    <Buttons
+                      loading={isLoading}
+                      onClick={openChainModal}
+                      className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px]   w-full `}
+                    >
+                      Wrong network
+                    </Buttons>
+                  )
+                }
+
+                onClick?.()
+
                 return (
-                  <button onClick={openChainModal} type="button">
-                    Wrong network
-                  </button>
-                )
-              }
-
-              return (
-                <div className="flex flex-col gap-4">
                   <Buttons
                     disabled={!isActive}
                     onClick={openChainModal}
@@ -80,23 +94,8 @@ export default function CustomConnectBttn({
                     )}
                     {!collapsed && <span className="my-auto">{chain.name}</span>}
                   </Buttons>
-
-                  <Buttons
-                    disabled={!isActive}
-                    onClick={openAccountModal}
-                    className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] w-full gap-4`}
-                  >
-                    {collapsed ? (
-                      <UilUser />
-                    ) : (
-                      <p>
-                        {account.displayName}
-                        {account.displayBalance ? ` (${account.displayBalance})` : ""}
-                      </p>
-                    )}
-                  </Buttons>
-                </div>
-              )
+                )
+              }
             })()}
           </div>
         )

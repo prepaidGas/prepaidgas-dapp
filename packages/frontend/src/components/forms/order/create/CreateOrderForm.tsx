@@ -1,7 +1,7 @@
 "use client"
 import { readContract } from "@wagmi/core"
 import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTime.utils"
-import { writeContract, waitForTransaction } from "@wagmi/core"
+import { writeContract, waitForTransaction, WriteContractResult } from "@wagmi/core"
 import {
   MockTokenABI,
   PrepaidGasABI,
@@ -24,63 +24,6 @@ import CreateOrderFormAdvanced, { AdvancedOrderProps } from "./CreateOrderFormAd
 import { TailSpin } from "react-loader-spinner"
 import CustomConnectBttn from "@/components/CustomConnectBttn"
 
-const { confirm } = Modal
-
-const showWalletConnectionModal = () => {
-  confirm({
-    title: "Wallet Connection",
-    icon: <UilWallet />,
-    content: "Please connect your wallet to continue with order creation",
-    closable: true,
-    footer: [<CustomConnectBttn />],
-  })
-}
-
-const showSuccess = (txData: any) => {
-  Modal.success({
-    title: "Success",
-    closable: true,
-    content: (
-      <div className="flex flex-col break-words gap-4">
-        From
-        <span>{txData.from}</span>
-        To
-        <span>{txData.to}</span>
-        Transaction Hash
-        <span>{txData.transactionHash}</span>
-        Status
-        <span>{txData.status}</span>
-      </div>
-    ),
-  })
-}
-
-const showError = (error: any) => {
-  Modal.error({ title: "Error", closable: true, content: error })
-}
-
-const showProcessing = () => {
-  confirm({
-    title: "Processing",
-    icon: <UiProcess />,
-    closable: false,
-    content: (
-      <div className="flex justify-center">
-        <TailSpin
-          height={40}
-          width={40}
-          color={"#009688"}
-          ariaLabel="tail-spin-loading"
-          radius="0"
-          wrapperStyle={{}}
-          wrapperClass=""
-          visible={true}
-        />
-      </div>
-    ),
-  })
-}
-
 type PendingOrderProps = {
   isOrderPending: boolean
   order: OrderStruct | undefined
@@ -96,10 +39,70 @@ export default function CreateOrderForm() {
 
   const [isLoading, setIsLoading] = useState(true)
 
+  const [modal, contextHolder] = Modal.useModal()
+
+  const showWalletConnectionModal = () => {
+    const instance = modal.confirm({
+      title: "Wallet Connection",
+      // icon: <UilWallet />,
+      content: "Please connect your wallet to continue with order creation",
+      footer: (_, { OkBtn, CancelBtn }) => (
+        <>
+          <CustomConnectBttn onClick={() => instance.destroy()} />
+        </>
+      ),
+    })
+  }
+
+  const showSuccess = (txData: any) => {
+    modal.success({
+      title: "Success",
+      closable: true,
+      content: (
+        <div className="flex flex-col break-words gap-4">
+          From
+          <span>{txData.from}</span>
+          To
+          <span>{txData.to}</span>
+          Transaction Hash
+          <span>{txData.transactionHash}</span>
+          Status
+          <span>{txData.status}</span>
+        </div>
+      ),
+    })
+  }
+
+  const showError = (error: any) => {
+    modal.error({ title: "Error", closable: true, content: error })
+  }
+
+  const showProcessing = () => {
+    return modal.info({
+      title: "Processing",
+      // icon: <UiProcess />,
+      closable: false,
+      content: (
+        <div className="flex justify-center">
+          <TailSpin
+            height={40}
+            width={40}
+            color={"#009688"}
+            ariaLabel="tail-spin-loading"
+            radius="0"
+            wrapperStyle={{}}
+            wrapperClass=""
+            visible={true}
+          />
+        </div>
+      ),
+    })
+  }
+
   const createOrder = async (order: OrderStruct) => {
     console.log("CreateOrder: START")
     console.log("Order data to submit: ", { order })
-    showProcessing()
+    const processingModal = showProcessing()
     setIsLoading(true)
 
     if (!isWalletConnected()) {
@@ -122,26 +125,29 @@ export default function CreateOrderForm() {
       allowance = Number(data)
     } catch (e) {
       console.log("Allowance ERROR: ", e)
-      showError(e)
+      processingModal.destroy()
+      return showError(e)
     }
 
     const overallPrice = Number(order.gasPrice.perUnit) * Number(order.gas)
 
+    let data = undefined
     if (allowance < overallPrice) {
       try {
-        const data = await writeContract({
+        data = await writeContract({
           address: order.gasPrice.token as `0x${string}`,
           abi: MockTokenABI,
           functionName: "approve",
           args: [prepaidGasTreasuryContractAddress(), overallPrice],
         })
         console.log("Approve Data: ", data)
-        const txData = await waitForTransaction({ hash: data.hash })
-        console.log("Approve transaction details: ", txData)
       } catch (e) {
         console.log("Approve Error: ", e)
-        showError(e)
+        return showError(e)
       }
+
+      const txData = await waitForTransaction({ hash: data.hash })
+      console.log("Approve transaction details: ", txData)
     }
 
     console.log("USER ADDRESS: ", address)
@@ -157,10 +163,12 @@ export default function CreateOrderForm() {
       console.log("orderCreate: ", data)
       const txData = await waitForTransaction({ hash: data.hash })
       console.log("orderCreate transaction details: ", txData)
+      processingModal.destroy()
       showSuccess(txData)
     } catch (e) {
       console.log("orderCreate Error: ", e)
-      showError(e)
+      processingModal.destroy()
+      return showError(e)
     }
     setIsLoading(false)
     console.log("CreateOrder: END")
@@ -236,7 +244,6 @@ export default function CreateOrderForm() {
 
   useEffect(() => {
     if (address !== undefined && pendingOrder.isOrderPending === true) {
-      // showWalletConnectionModal()
       if (pendingOrder.order === undefined) {
         console.log("ORDER IS UNDEFINED")
         return
@@ -278,6 +285,7 @@ export default function CreateOrderForm() {
     <>
       <div className="flex flex-col w-full">
         <Tabs defaultActiveKey="1" items={items} onChange={handleTabChange} />
+        {contextHolder}
       </div>
     </>
   )
