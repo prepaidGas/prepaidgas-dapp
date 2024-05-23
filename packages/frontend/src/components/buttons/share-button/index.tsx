@@ -1,14 +1,7 @@
-import Link from 'next/link';
-import {
-  UilFacebook,
-  UilInstagram,
-  UilLinkedin,
-  UilRss,
-  UilShareAlt,
-  UilTwitter
-} from '@iconscout/react-unicons';
-import PopOver from '@/components/popup';
-import { Buttons } from '@/components/buttons';
+import Link from "next/link"
+import { UilFacebook, UilInstagram, UilLinkedin, UilRss, UilShareAlt, UilTwitter } from "@iconscout/react-unicons"
+import PopOver from "@/components/popup"
+import { Buttons } from "@/components/buttons"
 
 function ShareButtonPageHeader() {
   const content = (
@@ -51,20 +44,20 @@ function ShareButtonPageHeader() {
         </Link>
       </div>
     </>
-  );
+  )
   return (
     <PopOver placement="bottomLeft" content={content} trigger="click">
       <Buttons
         className="text-[14px] font-medium border-none leading-[22px] dark:bg-white/10 text-theme-gray dark:text-white/60 dark:focus:text-dark dark:hover:text-dark inline-flex items-center justify-center rounded-[4px] px-[20px] h-[34px] gap-[8px]"
         size="small"
-        type="white"
+        type="default"
         key="3"
       >
         <UilShareAlt className="w-[14px] h-[14px] text-primary" />
         Share
       </Buttons>
     </PopOver>
-  );
+  )
 }
 
-export { ShareButtonPageHeader };
+export { ShareButtonPageHeader }

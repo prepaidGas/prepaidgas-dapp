@@ -1,7 +1,7 @@
-import Image from 'next/image';
-import { Carousel, Col, Row } from 'antd';
-import { Buttons } from '../buttons';
-import { Cards } from '../cards/frame/cards-frame';
+import Image from "next/image"
+import { Carousel, Col, Row } from "antd"
+import { Buttons } from "../buttons"
+import { Cards } from "../cards/frame/cards-frame"
 
 function Banner1() {
   return (
@@ -18,7 +18,7 @@ function Banner1() {
         </Buttons>
       </div>
     </div>
-  );
+  )
 }
 
 function Banner2() {
@@ -28,7 +28,7 @@ function Banner2() {
         <div className="mb-0">
           <Image
             className="absolute bottom-2.5 ltr:right-6 rtl:left-6 3xl:max-w-[150px]"
-            src='/hexadash-nextjs/img/banner/1.png'
+            src="/hexadash-nextjs/img/banner/1.png"
             alt=""
             width="145"
             height="100"
@@ -42,7 +42,7 @@ function Banner2() {
             </p>
             <Buttons
               size="large"
-              type="white"
+              type="default"
               className="px-5 mt-6 text-sm font-semibold bg-white dark:bg-whiteDark text-primary dark:text-white border-white hover:border-white dark:border-whiteDark hover:dark:border-whiteDark h-11"
             >
               Upgrade
@@ -51,7 +51,7 @@ function Banner2() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function Banner3() {
@@ -61,7 +61,7 @@ function Banner3() {
         <div>
           <Image
             className="absolute bottom-2.5 ltr:right-6 rtl:left-6 3xl:max-w-[150px]"
-            src='/hexadash-nextjs/img/banner/2.png'
+            src="/hexadash-nextjs/img/banner/2.png"
             alt=""
             width="195"
             height="175"
@@ -72,7 +72,7 @@ function Banner3() {
             </h2>
             <Buttons
               size="large"
-              type="white"
+              type="default"
               className="px-5 mt-6 text-sm font-semibold dark:bg-dark bg-white dark:bg-whiteDark text-primary dark:text-white border-none h-11"
             >
               Learn More
@@ -81,7 +81,7 @@ function Banner3() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function Banner4() {
@@ -91,7 +91,7 @@ function Banner4() {
         <div>
           <Image
             className="absolute bottom-2.5 ltr:right-0 rtl:left-0 3xl:max-w-[150px]"
-            src='/hexadash-nextjs/img/banner/3.png'
+            src="/hexadash-nextjs/img/banner/3.png"
             alt=""
             width="150"
             height="160"
@@ -100,10 +100,12 @@ function Banner4() {
             <h2 className="mb-3 text-white dark:text-white/[.87] text-3xl lg:text-[26px] sm:text-2xl font-semibold">
               Win Your Bonus
             </h2>
-            <p className="mb-4 font-normal text-white dark:text-white/[.87] opacity-70 text-15">Weekly performance bonus</p>
+            <p className="mb-4 font-normal text-white dark:text-white/[.87] opacity-70 text-15">
+              Weekly performance bonus
+            </p>
             <Buttons
               size="large"
-              type="white"
+              type="default"
               className="px-5 mt-6 text-sm font-semibold bg-white dark:bg-whiteDark text-primary dark:text-white border-white hover:border-white dark:border-whiteDark hover:whiteDark:border-dark h-11"
             >
               Learn More
@@ -112,7 +114,7 @@ function Banner4() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function Banner5() {
@@ -122,7 +124,7 @@ function Banner5() {
         <div>
           <Image
             className="absolute ltr:right-0 rtl:left-0 bottom-5 3xl:max-w-[150px]"
-            src='/hexadash-nextjs/img/banner/4.png'
+            src="/hexadash-nextjs/img/banner/4.png"
             alt=""
             width="225"
             height="225"
@@ -134,7 +136,7 @@ function Banner5() {
             </p>
             <Buttons
               size="large"
-              type="white"
+              type="default"
               className="px-5 mt-6 text-sm font-semibold bg-white dark:bg-whiteDark text-primary dark:text-white border-white hover:border-white dark:border-whiteDark hover:whiteDark:border-dark h-11"
             >
               Learn More
@@ -143,7 +145,7 @@ function Banner5() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function Banner6() {
@@ -151,29 +153,26 @@ function Banner6() {
     <div className="mb-[72px]">
       <Cards
         bodyStyle={{
-          background: `url(${'/hexadash-nextjs/img/banner/5.png'})`,
-          backgroundSize: 'cover',
-          borderRadius: '10px',
-          minHeight: '270px',
-          display: 'flex',
-          direction: 'ltr',
-          alignItems: 'center',
-          backgroundPosition: 'center bottom',
+          background: `url(${"/hexadash-nextjs/img/banner/5.png"})`,
+          backgroundSize: "cover",
+          borderRadius: "10px",
+          minHeight: "270px",
+          display: "flex",
+          direction: "ltr",
+          alignItems: "center",
+          backgroundPosition: "center bottom",
         }}
         headless
       >
         <figcaption className="pb-8 pt-9 px-7">
           <h2 className="mb-3 text-2xl font-semibold text-white dark:text-white/[.87]">Up to 50 OFF</h2>
-          <Buttons
-            size="small"
-            className="px-5 text-sm font-semibold bg-transparent text-danger h-9 border-danger"
-          >
+          <Buttons size="small" className="px-5 text-sm font-semibold bg-transparent text-danger h-9 border-danger">
             Buy Now
           </Buttons>
         </figcaption>
       </Cards>
     </div>
-  );
+  )
 }
 
 function Banner7() {
@@ -181,20 +180,18 @@ function Banner7() {
     <div className="mb-[72px]">
       <div className="relative bg-white dark:bg-white/10 min-h-[270px] pt-10 px-[30px] sm:px-[15px] pb-[70px] rounded-[10px]">
         <div className="flex items-center gap-4 sm:flex-col mb-0">
-          <Image 
-            src='/hexadash-nextjs/img/banner/6.png' 
-            alt="" 
-            width="145"
-            height="160"
-          />
+          <Image src="/hexadash-nextjs/img/banner/6.png" alt="" width="145" height="160" />
           <figcaption className="sm:text-center">
-            <h2 className="mb-2.5 text-dark dark:text-white/[.87] text-2xl font-semibold">Subscribe to our newsletter</h2>
+            <h2 className="mb-2.5 text-dark dark:text-white/[.87] text-2xl font-semibold">
+              Subscribe to our newsletter
+            </h2>
             <p className="mb-4 font-normal text-body dark:text-white/60 text-15">
-              Lorem ipsum dolor sit amet, consetetur{' '}
+              Lorem ipsum dolor sit amet, consetetur{" "}
             </p>
             <Buttons
               size="small"
-              type="secondary"
+              type="default"
+              ghost
               className="px-5 text-sm font-semibold bg-transparent text-secondary h-11 border-secondary"
             >
               Subscribe Now
@@ -203,7 +200,7 @@ function Banner7() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function Banner8() {
@@ -211,7 +208,7 @@ function Banner8() {
     <div className="relative bg-dark dark:bg-white/10 min-h-[360px] p-[25px] rounded-[10px]">
       <Image
         className="absolute ltr:right-0 rtl:left-0 bottom-0 w-[200px] 3xl:max-w-[150px]"
-        src='/hexadash-nextjs/img/banner/10.png'
+        src="/hexadash-nextjs/img/banner/10.png"
         alt=""
         width="195"
         height="175"
@@ -223,14 +220,14 @@ function Banner8() {
         </p>
         <Buttons
           size="small"
-          type="white"
+          type="default"
           className="px-5 text-[15px] font-semibold bg-body hover:bg-light text-white h-11 border-none"
         >
           Learn More
         </Buttons>
       </figcaption>
     </div>
-  );
+  )
 }
 
 function Banner9() {
@@ -239,7 +236,7 @@ function Banner9() {
       <div>
         <Image
           className="absolute ltr:right-0 rtl:left-0 bottom-0 w-[200px] 3xl:max-w-[150px]"
-          src='/hexadash-nextjs/img/trophy-2.png'
+          src="/hexadash-nextjs/img/trophy-2.png"
           alt=""
           width="195"
           height="175"
@@ -251,7 +248,7 @@ function Banner9() {
           </p>
           <Buttons
             size="large"
-            type="white"
+            type="default"
             className="px-5 text-[15px] font-semibold bg-white hover:bg-white/60 text-primary h-11 border-none"
           >
             Learn More
@@ -259,16 +256,19 @@ function Banner9() {
         </figcaption>
       </div>
     </div>
-  );
+  )
 }
 
 function BannerCarousel() {
   return (
     <div className="relative pb-16 mb-8 bg-primary pt-14 rounded-10 max-w-[550px] lg:max-w-[calc(100vw-30px)]">
-      <Carousel autoplay className="[&>.slick-dots.slick-dots-bottom]:-bottom-2.5 [&>.slick-dots>li]:w-auto [&>.slick-dots>li>button]:w-[5px] [&>.slick-dots>li>button]:h-[5px] [&>.slick-dots>li>button]:m-0 [&>.slick-dots>li>button]:rounded-full">
+      <Carousel
+        autoplay
+        className="[&>.slick-dots.slick-dots-bottom]:-bottom-2.5 [&>.slick-dots>li]:w-auto [&>.slick-dots>li>button]:w-[5px] [&>.slick-dots>li>button]:h-[5px] [&>.slick-dots>li>button]:m-0 [&>.slick-dots>li>button]:rounded-full"
+      >
         <div className="flex flex-col items-center justify-center px-5">
           <div className="banner-single__img">
-            <Image src='/hexadash-nextjs/img/banner/8.png' alt="" width="164" height="10" />
+            <Image src="/hexadash-nextjs/img/banner/8.png" alt="" width="164" height="10" />
           </div>
           <div className="text-center mt-7 px-3">
             <h3 className="mb-2 text-2xl font-semibold text-white dark:text-white/[.87]">Achievements</h3>
@@ -280,7 +280,7 @@ function BannerCarousel() {
         {/* End of /.banner-single */}
         <div className="flex flex-col items-center justify-center">
           <div className="banner-single__img">
-            <Image src='/hexadash-nextjs/img/banner/8.png' alt="" width="164" height="10" />
+            <Image src="/hexadash-nextjs/img/banner/8.png" alt="" width="164" height="10" />
           </div>
           <div className="text-center mt-7 px-3">
             <h3 className="mb-2 text-2xl font-semibold text-white dark:text-white/[.87]">Achievements</h3>
@@ -292,7 +292,7 @@ function BannerCarousel() {
         {/* End of /.banner-single */}
         <div className="flex flex-col items-center justify-center">
           <div className="banner-single__img">
-            <Image src='/hexadash-nextjs/img/banner/8.png' alt="" width="164" height="10" />
+            <Image src="/hexadash-nextjs/img/banner/8.png" alt="" width="164" height="10" />
           </div>
           <div className="text-center mt-7 px-3">
             <h3 className="mb-2 text-2xl font-semibold text-white dark:text-white/[.87]">Achievements</h3>
@@ -304,7 +304,7 @@ function BannerCarousel() {
         {/* End of /.banner-single */}
       </Carousel>
     </div>
-  );
+  )
 }
 
 function BannerLong() {
@@ -312,16 +312,10 @@ function BannerLong() {
     <div className="mb-8">
       <div className="px-5 py-8 text-center bg-white dark:bg-white/10 rounded-10">
         <h2 className="font-semibold mb-7 text-dark dark:text-white/[.87] text-22">Up To Date </h2>
-        <Image 
-          className="mx-auto" 
-          src='/hexadash-nextjs/img/banner/9.png' 
-          alt="" 
-          width="175"
-          height="340"
-        />
+        <Image className="mx-auto" src="/hexadash-nextjs/img/banner/9.png" alt="" width="175" height="340" />
       </div>
     </div>
-  );
+  )
 }
 
 function BannerCard() {
@@ -330,10 +324,10 @@ function BannerCard() {
       <div
         className="pt-9 px-10 pb-10 rounded-[10px]"
         style={{
-          backgroundImage: `url("${'/hexadash-nextjs/img/banner/card-banner-1.png'}")`,
-          minHeight: '450px',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center bottom',
+          backgroundImage: `url("${"/hexadash-nextjs/img/banner/card-banner-1.png"}")`,
+          minHeight: "450px",
+          backgroundSize: "cover",
+          backgroundPosition: "center bottom",
         }}
       >
         <h2 className="mb-5 text-white dark:text-white/[.87] text-3xl lg:text-[26px] sm:text-2xl font-semibold">
@@ -341,14 +335,14 @@ function BannerCard() {
         </h2>
         <Buttons
           size="large"
-          type="white"
+          type="default"
           className="px-5 text-sm font-semibold bg-white dark:bg-dark border border-white hover:border-white dark:border-dark  hover:dark:border-dark rounded text-primary dark:text-white h-11"
         >
           Buy Storage
         </Buttons>
       </div>
     </div>
-  );
+  )
 }
 
 function BannerCard2() {
@@ -357,10 +351,10 @@ function BannerCard2() {
       <div
         className="pt-9 px-10 pb-10 rounded-[10px]"
         style={{
-          backgroundImage: `url("${'/hexadash-nextjs/img/banner/card-banner-2.png'}")`,
-          minHeight: '450px',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center bottom',
+          backgroundImage: `url("${"/hexadash-nextjs/img/banner/card-banner-2.png"}")`,
+          minHeight: "450px",
+          backgroundSize: "cover",
+          backgroundPosition: "center bottom",
         }}
       >
         <h2 className="mb-5 text-white dark:text-white/[.87] text-3xl lg:text-[26px] sm:text-2xl font-semibold">
@@ -371,14 +365,14 @@ function BannerCard2() {
         </p>
         <Buttons
           size="large"
-          type="white"
+          type="default"
           className="px-5 text-sm font-semibold bg-white dark:bg-dark border border-white hover:border-white dark:border-dark  hover:dark:border-dark rounded text-primary dark:text-white h-11"
         >
           Learn More
         </Buttons>
       </div>
     </div>
-  );
+  )
 }
 
 function BannerCta() {
@@ -387,8 +381,8 @@ function BannerCta() {
       <div
         className="flex justify-end items-center text-center min-h-[270px] bg-cover rounded-[10px]"
         style={{
-          backgroundImage: `url("${'/hexadash-nextjs/img/banner/cta-banner-1.png'}")`,
-          backgroundPosition: 'center bottom',
+          backgroundImage: `url("${"/hexadash-nextjs/img/banner/cta-banner-1.png"}")`,
+          backgroundPosition: "center bottom",
         }}
       >
         <div className="py-8 ltr:pr-8 rtl:pl-8">
@@ -397,7 +391,7 @@ function BannerCta() {
           </h2>
           <Buttons
             size="large"
-            type="white"
+            type="default"
             className="px-5 mt-6 ssm:mt-3 text-sm font-semibold text-white border rounded bg-primary dark:text-white/[.87] h-11 border-primary"
           >
             Learn More
@@ -405,7 +399,7 @@ function BannerCta() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function BannerCta2() {
@@ -413,18 +407,18 @@ function BannerCta2() {
     <div className="mb-8 rounded-10">
       <div
         className="flex items-center min-h-[270px] bg-cover rounded-[10px]"
-        style={{ backgroundImage: `url("${'/hexadash-nextjs/img/banner/cta-banner-2.png'}")` }}
+        style={{ backgroundImage: `url("${"/hexadash-nextjs/img/banner/cta-banner-2.png"}")` }}
       >
         <div className="p-8">
           <h2 className="mb-3 text-dark dark:text-white/[.87] text-3xl lg:text-[26px] sm:text-2xl font-semibold">
             Welcome Back Garry Sobars!
           </h2>
           <p className="text-white/70 dark:text-white/60">
-            Lorem ipsum dolor amet, consetetur sadipscing elitr sed diam{' '}
+            Lorem ipsum dolor amet, consetetur sadipscing elitr sed diam{" "}
           </p>
           <Buttons
             size="large"
-            type="dark"
+            type="default"
             className="px-5 mt-6 text-sm font-semibold bg-white border border-white hover:border-white dark:border-dark hover:dark:border-dark rounded dark:bg-dark text-dark dark:text-white h-11"
           >
             Learn More
@@ -432,19 +426,19 @@ function BannerCta2() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 interface PageHeaderBannerProps {
-  type?: string;
-  title?: string;
-  subtitle?: string;
+  type?: string
+  title?: string
+  subtitle?: string
 }
 
-function PageHeaderBanner({ type, title, subtitle }:PageHeaderBannerProps) {
+function PageHeaderBanner({ type, title, subtitle }: PageHeaderBannerProps) {
   return (
     <div
-      className={type === 'corporate' ? 'bg-white dark:bg-white/10 rounded-10' : 'bg-white dark:bg-white/10 rounded-10'}
+      className={type === "corporate" ? "bg-white dark:bg-white/10 rounded-10" : "bg-white dark:bg-white/10 rounded-10"}
     >
       <div>
         <Row gutter={25} className="items-center">
@@ -464,17 +458,12 @@ function PageHeaderBanner({ type, title, subtitle }:PageHeaderBannerProps) {
             </figcaption>
           </Col>
           <Col xs={24} sm={24} md={24} lg={24} xl={14} className="flex justify-center">
-            {type === 'corporate' ? (
-              <Image 
-                src='/hexadash-nextjs/img/corporate.png' 
-                alt="HexaDash Admin Template" 
-                width="195"
-                height="175"
-              />
+            {type === "corporate" ? (
+              <Image src="/hexadash-nextjs/img/corporate.png" alt="HexaDash Admin Template" width="195" height="175" />
             ) : (
-              <Image 
-                src='/hexadash-nextjs/img/banner/header-banner.png' 
-                alt="HexaDash Admin Template" 
+              <Image
+                src="/hexadash-nextjs/img/banner/header-banner.png"
+                alt="HexaDash Admin Template"
                 width="195"
                 height="175"
               />
@@ -483,7 +472,7 @@ function PageHeaderBanner({ type, title, subtitle }:PageHeaderBannerProps) {
         </Row>
       </div>
     </div>
-  );
+  )
 }
 
 export {
@@ -503,4 +492,4 @@ export {
   BannerCard2,
   BannerCta,
   BannerCta2,
-};
+}
