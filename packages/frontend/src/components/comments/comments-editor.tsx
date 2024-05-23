@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import moment from 'moment';
-import { Avatar, Form, Input, List } from 'antd';
-import { Comment } from '@ant-design/compatible';
-import { Buttons } from '../buttons';
+import React, { useState } from "react"
+import moment from "moment"
+import { Avatar, Form, Input, List } from "antd"
+import { Comment } from "@ant-design/compatible"
+import { Buttons } from "../buttons"
 
-const { TextArea } = Input;
+const { TextArea } = Input
 
-function CommentList({ comments }:any) {
+function CommentList({ comments }: any) {
   return (
     <List
       dataSource={comments}
-      header={`${comments.length} ${comments.length > 1 ? 'replies' : 'reply'}`}
+      header={`${comments.length} ${comments.length > 1 ? "replies" : "reply"}`}
       itemLayout="horizontal"
       renderItem={(props: any) => <Comment {...props} />}
     />
-  );
+  )
 }
 
-function Editor({ onChange, onSubmit, submitting, value }:any) {
+function Editor({ onChange, onSubmit, submitting, value }: any) {
   return (
     <div>
       <Form.Item>
@@ -29,60 +29,59 @@ function Editor({ onChange, onSubmit, submitting, value }:any) {
           htmlType="submit"
           loading={submitting}
           onClick={onSubmit}
-          size="default"
-          raised
+          size="middle"
           type="primary"
         >
           Add Comment
         </Buttons>
       </Form.Item>
     </div>
-  );
+  )
 }
 
 function CommentEditor() {
-  const [state, setState]:any = useState({
+  const [state, setState]: any = useState({
     comments: [],
     submitting: false,
-    value: '',
-  });
+    value: "",
+  })
 
   const handleSubmit = () => {
     if (!state.value) {
-      return;
+      return
     }
 
     setState({
       ...state,
       submitting: true,
-    });
+    })
 
     setTimeout(() => {
       setState({
         ...state,
         submitting: false,
-        value: '',
+        value: "",
         comments: [
           {
-            author: 'Han Solo',
-            avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
+            author: "Han Solo",
+            avatar: "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
             content: <p>{state.value}</p>,
             datetime: moment().fromNow(),
           },
           ...state.comments,
         ],
-      });
-    }, 1000);
-  };
+      })
+    }, 1000)
+  }
 
-  const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setState({
       ...state,
       value: e.target.value,
-    });
-  };
+    })
+  }
 
-  const { comments, submitting, value } = state;
+  const { comments, submitting, value } = state
 
   return (
     <>
@@ -93,6 +92,6 @@ function CommentEditor() {
         content={<Editor onChange={handleChange} onSubmit={handleSubmit} submitting={submitting} value={value} />}
       />
     </>
-  );
+  )
 }
-export default CommentEditor;
+export default CommentEditor
