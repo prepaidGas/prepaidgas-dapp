@@ -1,74 +1,70 @@
-import Link from 'next/link'
-import {
-  UilEllipsisH,
-  UilEye,
-  UilHeart
-} from '@iconscout/react-unicons';
-import DropDown from '../dropdown';
-import { Buttons } from '../buttons';
+import Link from "next/link"
+import { UilEllipsisH, UilEye, UilHeart } from "@iconscout/react-unicons"
+import DropDown from "../dropdown"
+import { Buttons } from "../buttons"
 
 interface BannerCardProps {
   item: {
-    id: number;
-    content: string;
-    icon: string;
-    title: string;
-    authorName: string;
-    authorImg: string;
-    type?: string;
-    bgImage?: string;
-    titleColor?: string;
-    subTitleColor?: string;
+    id: number
+    content: string
+    icon: string
+    title: string
+    authorName: string
+    authorImg: string
+    type?: string
+    bgImage?: string
+    titleColor?: string
+    subTitleColor?: string
   }
 }
 
-function BannerCard( { item }:BannerCardProps ) {
-  const { content, icon, title, authorName, authorImg, type, bgImage, titleColor, subTitleColor } = item;
+function BannerCard({ item }: BannerCardProps) {
+  const { content, icon, title, authorName, authorImg, type, bgImage, titleColor, subTitleColor } = item
 
   const moreContent = [
     {
-        key: '1',
-        label: (
-            <Link
-                className="group flex items-center text-theme-gray dark:text-white/60 hover:bg-primary-transparent hover:text-primary px-3 py-1.5 text-sm gap-[10px] [&>svg]:w-[14px] [&>svg]:h-[14px] [&>svg]:text-light-extra dark:[&>svg]:text-white/60"
-                href="#"
-            >
-                View
-            </Link>
-        ),
+      key: "1",
+      label: (
+        <Link
+          className="group flex items-center text-theme-gray dark:text-white/60 hover:bg-primary-transparent hover:text-primary px-3 py-1.5 text-sm gap-[10px] [&>svg]:w-[14px] [&>svg]:h-[14px] [&>svg]:text-light-extra dark:[&>svg]:text-white/60"
+          href="#"
+        >
+          View
+        </Link>
+      ),
     },
     {
-        key: '2',
-        label: (
-            <Link
-                className="group flex items-center text-theme-gray dark:text-white/60 hover:bg-primary-transparent hover:text-primary px-3 py-1.5 text-sm gap-[10px] [&>svg]:w-[14px] [&>svg]:h-[14px] [&>svg]:text-light-extra dark:[&>svg]:text-white/60"
-                href="#"
-            >
-                Edit
-            </Link>
-        ),
+      key: "2",
+      label: (
+        <Link
+          className="group flex items-center text-theme-gray dark:text-white/60 hover:bg-primary-transparent hover:text-primary px-3 py-1.5 text-sm gap-[10px] [&>svg]:w-[14px] [&>svg]:h-[14px] [&>svg]:text-light-extra dark:[&>svg]:text-white/60"
+          href="#"
+        >
+          Edit
+        </Link>
+      ),
     },
     {
-        key: '3',
-        label: (
-            <Link
-                className="group flex items-center text-theme-gray dark:text-white/60 hover:bg-primary-transparent hover:text-primary px-3 py-1.5 text-sm gap-[10px] [&>svg]:w-[14px] [&>svg]:h-[14px] [&>svg]:text-light-extra dark:[&>svg]:text-white/60"
-                href="#"
-            >
-                Delete
-            </Link>
-        ),
+      key: "3",
+      label: (
+        <Link
+          className="group flex items-center text-theme-gray dark:text-white/60 hover:bg-primary-transparent hover:text-primary px-3 py-1.5 text-sm gap-[10px] [&>svg]:w-[14px] [&>svg]:h-[14px] [&>svg]:text-light-extra dark:[&>svg]:text-white/60"
+          href="#"
+        >
+          Delete
+        </Link>
+      ),
     },
   ]
 
   return (
     <div
       className={`border-regular dark:border-white/10 border-1 pt-[20px] px-[25px] pb-[25px] bg-${type} [&.bg-primary]:border-none dark:[&.bg-white]:bg-dark rounded-10 bg-cover bg-center`}
-      style={{ 
-        backgroundImage: bgImage && `url(/hexadash-nextjs/img/sampleCards/${bgImage})`, 
-        backgroundSize: 'cover', 
-        backgroundRepeat: 'no-repeat', 
-        backgroundPosition: 'center center' 
+      style={{
+        backgroundImage: bgImage && `url(/hexadash-nextjs/img/sampleCards/${bgImage})`,
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center center",
       }}
     >
       <div className="flex items-center justify-between">
@@ -78,10 +74,11 @@ function BannerCard( { item }:BannerCardProps ) {
           <img className="w-[14px] h-[14px]" src={`/hexadash-nextjs/img/icon/${icon}`} alt="HexaDash Banner" />
           <span>{title}</span>
         </h4>
-        <DropDown
-          customContent={moreContent}
-        >
-          <Buttons className="text-light-extra dark:text-white/60 -mt-[15px] border-0 shadow-none outline-none" onClick={(e:React.ChangeEvent<HTMLInputElement>) => e.preventDefault()}>
+        <DropDown customContent={moreContent}>
+          <Buttons
+            className="text-light-extra dark:text-white/60 -mt-[15px] border-0 shadow-none outline-none"
+            onClick={(e) => e.preventDefault()}
+          >
             <UilEllipsisH className="w-[24px] h-[24px] m-0 dark:text-white/60" />
           </Buttons>
         </DropDown>
@@ -108,8 +105,7 @@ function BannerCard( { item }:BannerCardProps ) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-
-export default BannerCard;
+export default BannerCard
