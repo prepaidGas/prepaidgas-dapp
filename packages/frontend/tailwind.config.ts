@@ -72,7 +72,7 @@ module.exports = {
         "linkedin-transparent": "rgba(0, 122, 185, 0.063)",
         "instagram-transparent": "rgba(209, 32, 143, 0.063)",
         "shadow-transparent": "rgba(130, 49, 211, 0.02)",
-        "primary-hbr": "#6726A8",
+        "primary-hbr": "#33a6a1",
         "secondary-hbr": "#3520C8",
         "success-hbr": "#0D811D",
         "info-hbr": "#0787C7",
