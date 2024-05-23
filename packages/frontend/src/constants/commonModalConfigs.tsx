@@ -7,6 +7,7 @@ const WalletConnectionConfig: ModalFuncProps = {
   title: "Wallet Connection",
   // icon: <UilWallet />,
   content: "Please connect your wallet to continue with order creation",
+  closable: true,
   footer: (_, { OkBtn, CancelBtn }) => <>{/* <CustomConnectBttn onClick={() => instance.destroy()} /> */}</>,
 }
 
@@ -15,7 +16,7 @@ const SuccessConfig: ModalFuncProps = {
   closable: true,
 }
 
-const ErrorConfig: ModalFuncProps = { title: "Error", closable: true, content: "" }
+const ErrorConfig: ModalFuncProps = { title: "Error", closable: true }
 
 const ProcessingConfig: ModalFuncProps = {
   title: "Processing",

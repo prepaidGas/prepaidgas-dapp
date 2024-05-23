@@ -23,6 +23,7 @@ import CreateOrderFormSimple, { SimpleOrderProps } from "./CreateOrderFormSimple
 import CreateOrderFormAdvanced, { AdvancedOrderProps } from "./CreateOrderFormAdvanced"
 import { TailSpin } from "react-loader-spinner"
 import CustomConnectBttn from "@/components/CustomConnectBttn"
+import commonModalConfigs from "@/constants/commonModalConfigs"
 
 type PendingOrderProps = {
   isOrderPending: boolean
@@ -31,21 +32,17 @@ type PendingOrderProps = {
 
 export default function CreateOrderForm() {
   const { address } = useAccount()
+  const { SuccessConfig, ErrorConfig, ProcessingConfig, WalletConnectionConfig } = commonModalConfigs
 
   const [formSimple] = Form.useForm<SimpleOrderProps>()
   const [formAdvanced] = Form.useForm<AdvancedOrderProps>()
-
   const [pendingOrder, setPendingOrder] = useState<PendingOrderProps>({ isOrderPending: false, order: undefined })
-
   const [isLoading, setIsLoading] = useState(true)
-
   const [modal, contextHolder] = Modal.useModal()
 
   const showWalletConnectionModal = () => {
     const instance = modal.confirm({
-      title: "Wallet Connection",
-      // icon: <UilWallet />,
-      content: "Please connect your wallet to continue with order creation",
+      ...WalletConnectionConfig,
       footer: (_, { OkBtn, CancelBtn }) => (
         <>
           <CustomConnectBttn onClick={() => instance.destroy()} />
@@ -78,38 +75,21 @@ export default function CreateOrderForm() {
   }
 
   const showProcessing = () => {
-    return modal.info({
-      title: "Processing",
-      // icon: <UiProcess />,
-      closable: false,
-      content: (
-        <div className="flex justify-center">
-          <TailSpin
-            height={40}
-            width={40}
-            color={"#009688"}
-            ariaLabel="tail-spin-loading"
-            radius="0"
-            wrapperStyle={{}}
-            wrapperClass=""
-            visible={true}
-          />
-        </div>
-      ),
-    })
+    return modal.info({ ...ProcessingConfig })
   }
 
   const createOrder = async (order: OrderStruct) => {
     console.log("CreateOrder: START")
     console.log("Order data to submit: ", { order })
-    const processingModal = showProcessing()
-    setIsLoading(true)
 
     if (!isWalletConnected()) {
       setPendingOrder({ isOrderPending: true, order })
       showWalletConnectionModal()
       return
     }
+
+    const processingModal = showProcessing()
+    setIsLoading(true)
 
     console.log("Wallet is connected: ", { address })
 

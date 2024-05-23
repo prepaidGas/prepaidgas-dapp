@@ -7,57 +7,20 @@ import { MockTokenABI, PrepaidGasABI, prepaidGasCoreContractAddress, ABIEntry } 
 import { useAccount } from "wagmi"
 import { UilWallet } from "@iconscout/react-unicons"
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react"
 import DialogWindow from "@/components/DialogWindow"
 import UserAgreement from "@/components/UserAgreement"
 import CreateTxCardSimple, { SimpleTxProps } from "./CreateTxFormSimple"
 import { ethers } from "ethers"
 import { CHAIN_ID, PROJECT_NAME, PROJECT_VERSION, TEST_ABI_STRING } from "@/constants"
-import { Tabs, TabsProps, Form } from "antd"
+import { Tabs, TabsProps, Form, Modal } from "antd"
 
 import dayjs, { type Dayjs } from "dayjs"
 import { MessageStruct } from "typechain-types/PrepaidGas"
-
-// const formSchema = z.object({
-//   nonce: z.number(),
-//   gasOrder: z.number(),
-//   onBehalf: z.string(),
-//   deadlineDate: z.instanceof(dayjs as unknown as typeof Dayjs),
-//   deadlineTime: z.instanceof(dayjs as unknown as typeof Dayjs),
-//   to: z.string().min(1),
-//   gas: z.number(),
-//   tips: z.number(),
-//   data: z.string().min(1),
-//   smartContractAddress: z.string(),
-//   userAbi: z.string(),
-// })
-
-// const signedScheme = z.object({
-//   signedMsg: z.string(),
-//   data: z.string(),
-// })
-
-// export type TransactionFormState = z.infer<typeof formSchema>
-// export type SignedMsgAndDataState = z.infer<typeof signedScheme>
-
-// const initialState: TransactionFormState = {
-//   nonce: Date.now(),
-//   gasOrder: 0,
-//   onBehalf: address as string,
-//   deadlineDate: dayjs().add(1, "d"),
-//   deadlineTime: dayjs("00:00", "HH:mm"),
-//   to: "0x0000000000000000000000000000000000000000",
-//   gas: 25000,
-//   tips: 0,
-//   data: "0x",
-//   smartContractAddress: "",
-//   userAbi: TEST_ABI_STRING,
-// }
-
-// const signedInitialState: SignedMsgAndDataState = {
-//   signedMsg: "",
-//   data: "0x",
-// }
+import CustomConnectBttn from "@/components/CustomConnectBttn"
+import { TailSpin } from "react-loader-spinner"
+import commonModalConfigs from "@/constants/commonModalConfigs"
+import { boolean } from "zod"
 
 type PendingTxProps = {
   isPending: boolean
@@ -78,23 +41,46 @@ export default function CreateTxForm({
   setShowDialogWindow: Dispatch<SetStateAction<boolean>>
   setTransactionDetails: Dispatch<SetStateAction<{}>>
 }) {
+  const { WalletConnectionConfig, ProcessingConfig, SuccessConfig, ErrorConfig } = commonModalConfigs
+
   const { address } = useAccount()
 
   //todo: remove if using only one form
   const [formSimple] = Form.useForm<SimpleTxProps>()
   // const [formAdvanced] = Form.useForm<AdvancedOrderProps>()
 
-  const [showWalletConnectionWindow, setShowWalletConnectionWindow] = useState(false)
   const [pendingData, setPendingData] = useState<PendingTxProps>({ isPending: false, data: undefined })
   const [inputs, setInputs] = useState({})
+  const [modal, contextHolder] = Modal.useModal()
 
   const handleTabChange = (tabKey: string) => {}
 
   const handleSubmit = (values: SimpleTxProps) => {
+    if (!address) {
+      // setPendingData({ isPending: true, data: message })
+      const instance = modal.confirm({
+        ...WalletConnectionConfig,
+        footer: (_, { OkBtn, CancelBtn }) => (
+          <>
+            <CustomConnectBttn onClick={() => instance.destroy()} />
+          </>
+        ),
+      })
+      return
+    }
+
+    const processingInstance = modal.info({ ...ProcessingConfig, open: false })
+
+    if (Object.keys(inputs).length === 0) {
+      return
+    }
+
     let contractInterface
     let encodedData
     let parsedAbi = JSON.parse(values.userAbi)
     let argsArray: any = []
+
+    showProcessingModal(processingInstance, true)
 
     parsedAbi = parsedAbi.filter((item) => item.type === "function" && item.name === values.selectedFunction)
     const parsedItem = parsedAbi[0]
@@ -112,14 +98,16 @@ export default function CreateTxForm({
       contractInterface = new ethers.Interface(values.userAbi)
     } catch (e) {
       console.log("ERROR contractInterface: ", { error: e })
-      return
+      // showProcessingModal(false)
+      // return modal.error({ ...ErrorConfig, content: e.toString() })
     }
 
     try {
       encodedData = contractInterface.encodeFunctionData(values.selectedFunction, argsArray)
     } catch (e) {
       console.log("ERROR encodeFunctionData: ", { error: e })
-      return
+      // showProcessingModal(false)
+      // return modal.error({ ...ErrorConfig, content: e.toString() })
     }
 
     console.log("EncodedData: ", encodedData)
@@ -134,11 +122,12 @@ export default function CreateTxForm({
       data: encodedData,
     }
 
-    signMessage(message)
+    signMessage(message, processingInstance)
   }
 
-  const signMessage = async (message: MessageStruct) => {
+  const signMessage = async (message: MessageStruct, processingInstance) => {
     console.log("Submit started")
+    showProcessingModal(processingInstance, true)
 
     // await switchNetwork({ chainId: 1 });
 
@@ -175,6 +164,9 @@ export default function CreateTxForm({
         console.log("IsValid: ", validateMessage)
       } catch (e) {
         console.log("ERROR: ", e)
+        showProcessingModal(processingInstance, false)
+
+        return modal.error({ ...ErrorConfig, content: e.toString() })
       }
 
       let signature = undefined
@@ -189,7 +181,9 @@ export default function CreateTxForm({
         })
       } catch (e) {
         console.log("ERROR: ", e)
-        return
+        showProcessingModal(processingInstance, false)
+
+        return modal.error({ ...ErrorConfig, content: e.toString() })
       }
 
       console.log("signature: ", signature)
@@ -208,52 +202,35 @@ export default function CreateTxForm({
         })
         const result = await response
         console.log("POST Success:", result)
-      } catch (error) {
-        console.error("POST Error:", error)
-      }
+      } catch (e) {
+        console.error("POST Error:", e)
+        showProcessingModal(processingInstance, false)
 
-      // const data = await writeContract({
-      //   address: prepaidGasCoreContractAddress(),
-      //   abi: PrepaidGasABI,
-      //   functionName: "addTransaction",
-      //   args: [message, signature],
-      // })
-      // console.log("addTransactionData: ", data)
-      // const txData = await waitForTransaction({ hash: data.hash })
-      // console.log("waitForTxData: ", txData)
-      // setTransactionDetails({ ...txData })
+        return modal.error({ ...ErrorConfig, content: e.toString() })
+      }
+      modal.success({ ...SuccessConfig, content: <span>"Transaction was successful"</span> })
     } catch (e) {
       console.log("ERROR: ", e)
-      setTransactionDetails({ error: e })
+      showProcessingModal(processingInstance, false)
+      return modal.error({ ...ErrorConfig, content: e.toString() })
     }
-
-    setShowDialogWindow(true)
-
-    // try {
-    //   const data = await readContract({
-    //     address: prepaidGasCoreContractAddress(),
-    //     abi: GasOrderABI,
-    //     functionName: "messageHash",
-    //     args: [messageTuple],
-    //   })
-    //   console.log("Data: ", data)
-    //   const result = ethers.recoverAddress(data as BytesLike, signature as SignatureLike)
-    //   console.log("RecoverAddres: ", result)
-    // } catch (e) {
-    //   console.log("ERROR: ", e)
-    // }
 
     console.log("Submit ended")
   }
 
+  function showProcessingModal(instance, isOpen: boolean) {
+    console.log("isopen: ", isOpen)
+    instance.update((prevState) => ({ ...prevState, open: isOpen }))
+  }
+
   useEffect(() => {
     if (address !== undefined && pendingData.isPending === true) {
-      setShowWalletConnectionWindow(false)
       if (pendingData.data === undefined) {
         console.log("ORDER IS UNDEFINED")
         return
       }
-      signMessage({ ...pendingData.data, from: address })
+      const processingInstance = modal.info({ ...ProcessingConfig, open: false })
+      signMessage({ ...pendingData.data, from: address } as MessageStruct, processingInstance)
       setPendingData({ isPending: false, data: undefined })
     }
   }, [address])
@@ -276,23 +253,9 @@ export default function CreateTxForm({
 
   return (
     <>
-      {showWalletConnectionWindow && (
-        <DialogWindow
-          isClosable={true}
-          withoutDescription={true}
-          title={
-            <div className="flex flex-row items-center [&>*]:fill-[#404040] [&>*]:dark:fill-[#A4A5AA]">
-              <UilWallet />
-              <span className="ml-4 base-text text-xl">Wallet Connection</span>
-            </div>
-          }
-          description="Please accept our terms of service and connect your wallet to continue with order creation"
-          actionButtons={[<UserAgreement />]}
-          onClose={() => setShowWalletConnectionWindow(false)}
-        />
-      )}
       <div className="flex flex-col w-full">
         <Tabs defaultActiveKey="1" items={items} onChange={handleTabChange} />
+        {contextHolder}
       </div>
     </>
   )
