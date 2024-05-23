@@ -1051,63 +1051,6 @@ as conflicts may arise in other places
   @apply bg-white dark:bg-white/10 text-light dark:text-white/60 !important;
 }
 
-.ant-modal .ant-modal-content {
-  @apply dark:bg-[#282b36] !important;
-}
-
-.ant-modal .ant-modal-header {
-  @apply dark:bg-transparent dark:border-white/10 !important;
-}
-
-.ant-modal-title {
-  @apply dark:text-white/[.87];
-}
-.ant-modal-content {
-  @apply !p-0;
-}
-.ant-modal-footer {
-  @apply px-4 py-2.5 border-t border-regular dark:border-white/10;
-}
-
-.ant-modal-close {
-  @apply !flex items-center justify-center !bg-transparent text-body dark:text-white/[.87] h-[54px] w-[54px] text-[17px];
-}
-.ant-modal-content .ant-modal-close-x svg {
-  @apply text-dark dark:text-white/[.87];
-}
-.ant-modal-content .ant-modal-close-x p {
-  @apply text-white dark:text-whiteDark;
-}
-
-.ant-modal-confirm-body .ant-modal-confirm-title {
-  @apply dark:text-white/[.87];
-}
-
-.ant-modal-confirm .ant-modal-confirm-body .ant-modal-confirm-content {
-  @apply dark:text-white/60;
-}
-
-.ant-modal-content,
-.ant-modal-header {
-  @apply bg-white !important;
-}
-.ant-modal-content {
-  @apply relative p-0 border-none pointer-events-auto rounded-4 bg-clip-padding shadow-[0_3px_6px_-4px_rgb(0_0_0_/_12%),0_6px_16px_0_rgb(0_0_0_/_8%),0_9px_28px_8px_rgb(0_0_0_/_5%)];
-}
-.ant-modal-header {
-  @apply bg-white px-6 py-4 text-[#666d92] border-b-1 border-[#f0f0f0] dark:border-white/10 rounded-t-4;
-}
-.ant-modal-body {
-  @apply break-words text-[15px] leading-[22px] p-6;
-}
-.ant-modal-footer button {
-  @apply bg-white dark:bg-whiteDark text-[#999] border border-white;
-}
-
-.ant-modal-content .ant-modal-confirm-btns button:not(.ant-btn-primary) {
-  @apply hover:text-primary hover:border-primary !important;
-}
-
 .ant-notification-notice {
   @apply dark:bg-[#323540];
 }
