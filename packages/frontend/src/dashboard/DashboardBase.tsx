@@ -1,20 +1,20 @@
-import { Row, Col } from 'antd';
-import { PageHeaders } from '@/components/page-headers';
-import { Cards } from '@/components/cards/frame/cards-frame';
-import { Buttons } from '@/components/buttons';
-import Heading from '@/components/heading';
+import { Row, Col } from "antd"
+import { PageHeaders } from "@/components/page-headers"
+import { Cards } from "@/components/cards/frame/cards-frame"
+import { Buttons } from "@/components/buttons"
+import Heading from "@/components/heading"
 
 function DashboardBase() {
   const PageRoutes = [
     {
-      path: '/admin',
-      breadcrumbName: 'Theme Configuration',
+      path: "/admin",
+      breadcrumbName: "Theme Configuration",
     },
     {
-      path: '',
-      breadcrumbName: 'Theme Configuration',
+      path: "",
+      breadcrumbName: "Theme Configuration",
     },
-  ];
+  ]
   return (
     <>
       <div>
@@ -492,22 +492,13 @@ function DashboardBase() {
                           <Buttons className="bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[32px] shadow-btn">
                             Extra Small
                           </Buttons>
-                          <Buttons
-                            className="bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[38px] shadow-btn"
-                            raised
-                          >
+                          <Buttons className="bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[38px] shadow-btn">
                             Small
                           </Buttons>
-                          <Buttons
-                            className="bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px] shadow-btn"
-                            raised
-                          >
+                          <Buttons className="bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px] shadow-btn">
                             Normal
                           </Buttons>
-                          <Buttons
-                            className="bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[50px] shadow-btn"
-                            raised
-                          >
+                          <Buttons className="bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[50px] shadow-btn">
                             Large Buttons
                           </Buttons>
                         </div>
@@ -750,7 +741,7 @@ function DashboardBase() {
         </main>
       </div>
     </>
-  );
+  )
 }
 
-export default DashboardBase;
+export default DashboardBase

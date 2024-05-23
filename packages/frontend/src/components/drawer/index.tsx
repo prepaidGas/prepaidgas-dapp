@@ -1,63 +1,63 @@
-import { useState } from 'react';
-import { Radio, Drawer, RadioChangeEvent } from 'antd';
-import { Buttons } from '../buttons';
+import { useState } from "react"
+import { Radio, Drawer, RadioChangeEvent } from "antd"
+import { Buttons } from "../buttons"
 
-const RadioGroup = Radio.Group;
+const RadioGroup = Radio.Group
 
 interface RootState {
-  width?: string;
-  title?: string;
-  placement?: any;
-  children?: any;
-  customPlacement?: boolean;
-  render?: boolean;
-  childDrawer?: any;
-  childTitle?: string;
-  btnText?: string;
+  width?: string
+  title?: string
+  placement?: any
+  children?: any
+  customPlacement?: boolean
+  render?: boolean
+  childDrawer?: any
+  childTitle?: string
+  btnText?: string
 }
 
-function Drawers(props:RootState) {
-  const { width, title, placement, children, customPlacement, render, childDrawer, childTitle, btnText } = props;
+function Drawers(props: RootState) {
+  const { width, title, placement, children, customPlacement, render, childDrawer, childTitle, btnText } = props
   const [state, setState] = useState({
     open: false,
-    placement: placement || 'right',
+    placement: placement || "right",
     childrenDrawer: false,
-  });
+  })
 
   const showDrawer = () => {
     setState({
       ...state,
       open: true,
-    });
-  };
+    })
+  }
 
   const onClose = () => {
     setState({
       ...state,
       open: false,
-    });
-  };
+    })
+  }
 
-  const onChange = (e:RadioChangeEvent) => {
+  const onChange = (e: RadioChangeEvent) => {
     setState({
       ...state,
       placement: e.target.value,
-    });
-  };
+    })
+  }
 
   const showChildrenDrawer = () => {
     setState({
       ...state,
       childrenDrawer: true,
-    });
-  };
+    })
+  }
 
   const onChildrenDrawerClose = () => {
     setState({
       ...state,
       childrenDrawer: false,
-    });
-  };
+    })
+  }
 
   return (
     <>
@@ -74,11 +74,9 @@ function Drawers(props:RootState) {
       <Buttons
         className="bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px]"
         type="primary"
-        size="default"
         onClick={showDrawer}
-        raised
       >
-        {btnText ? btnText : 'Open'}
+        {btnText ? btnText : "Open"}
       </Buttons>
       <Drawer
         title={title}
@@ -87,7 +85,7 @@ function Drawers(props:RootState) {
         onClose={onClose}
         open={state.open}
         getContainer={false}
-        style={{ position: !render ? 'fixed' : 'absolute' }}
+        style={{ position: !render ? "fixed" : "absolute" }}
         width={width}
       >
         {!childDrawer ? (
@@ -109,9 +107,7 @@ function Drawers(props:RootState) {
             </Drawer>
             {children}
 
-            <div
-              className="absolute bottom-0 w-full bg-white border-t dark:bg-white/10 dark:border-white/10 border-[#e8e8e8] py-[10px] px-[16px] start-0 text-end rounded-s-4"
-            >
+            <div className="absolute bottom-0 w-full bg-white border-t dark:bg-white/10 dark:border-white/10 border-[#e8e8e8] py-[10px] px-[16px] start-0 text-end rounded-s-4">
               <Buttons
                 className=" dark:bg-transparent dark:border-white/10 dark:text-white/[.87]"
                 style={{
@@ -129,7 +125,7 @@ function Drawers(props:RootState) {
         )}
       </Drawer>
     </>
-  );
+  )
 }
 
-export { Drawers };
+export { Drawers }

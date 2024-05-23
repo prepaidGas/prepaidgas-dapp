@@ -1,51 +1,47 @@
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
-import {
-  UilEdit,
-  UilExpandArrows,
-  UilTrashAlt 
-} from '@iconscout/react-unicons';
-import { CSS } from '@dnd-kit/utilities';
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import Heading from '@/components/heading';
-import { Buttons } from '@/components/buttons';
+import { useState } from "react"
+import { useSelector } from "react-redux"
+import { UilEdit, UilExpandArrows, UilTrashAlt } from "@iconscout/react-unicons"
+import { CSS } from "@dnd-kit/utilities"
+import { DndContext, closestCenter } from "@dnd-kit/core"
+import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from "@dnd-kit/sortable"
+import Heading from "@/components/heading"
+import { Buttons } from "@/components/buttons"
 
 interface RootState {
-  users: User[];
+  users: User[]
 }
 
 interface User {
-  name: string;
-  designation: string;
-  img: string;
+  name: string
+  designation: string
+  img: string
 }
 
-interface Value { 
-  value: Item; 
-  index:number;
+interface Value {
+  value: Item
+  index: number
 }
 
 interface Item {
-  user: string;
-  id: string;
-  email: string;
-  company: string;
-  position: string;
-  joinDate: string;
-  action: string;
+  user: string
+  id: string
+  email: string
+  company: string
+  position: string
+  joinDate: string
+  action: string
 }
 
 function DragAndDropTable() {
-  const { users } = useSelector((state:RootState) => {
+  const { users } = useSelector((state: RootState) => {
     return {
       users: state.users,
-    };
-  });
+    }
+  })
 
-  const usersTableData:any = [];
-  users.map((user:User, index:number) => {
-    const { name, designation, img } = user;
+  const usersTableData: any = []
+  users.map((user: User, index: number) => {
+    const { name, designation, img } = user
 
     return usersTableData.push({
       key: index + 1,
@@ -53,7 +49,7 @@ function DragAndDropTable() {
       user: (
         <div className="flex items-center gap-x-[10px] gap-y-[10px]">
           <figure className="mb-0">
-            <img style={{ width: '40px' }} src={`/hexadash-nextjs/${img}`} alt="" />
+            <img style={{ width: "40px" }} src={`/hexadash-nextjs/${img}`} alt="" />
           </figure>
           <figcaption>
             <Heading className="user-name text-dark dark:text-white/[.87] text-[14px] font-semibold mb-0" as="h6">
@@ -70,36 +66,34 @@ function DragAndDropTable() {
         <div className="flex items-center justify-end dark:gap-[6px]">
           <Buttons
             className="inline-flex items-center justify-center border-none shadow-none text-light-extra dark:text-white/60 dark:bg-white/10 hover:bg-info-transparent hover:text-info"
-            to="#"
             shape="circle"
           >
             <UilEdit className="text-[currentColor] dark:text-white/60 w-[14px] h-[14px]" />
           </Buttons>
           <Buttons
             className="inline-flex items-center justify-center border-none shadow-none text-light-extra dark:text-white/60 dark:bg-white/10 hover:bg-danger-transparent hover:text-danger"
-            to="#"
             shape="circle"
           >
             <UilTrashAlt className="text-[currentColor] dark:text-white/60 w-[14px] h-[14px]" />
           </Buttons>
         </div>
       ),
-    });
-  });
+    })
+  })
 
   const [state, setState] = useState({
     dataSource: usersTableData,
-  });
+  })
 
-  const { dataSource } = state;
+  const { dataSource } = state
 
   function SortableItem(value: Value) {
-    const item = value.value;
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
+    const item = value.value
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id })
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
-    };
+    }
 
     return (
       <tr className="ant-table-row" ref={setNodeRef} style={style} {...attributes} {...listeners}>
@@ -113,18 +107,18 @@ function DragAndDropTable() {
         <td className="ant-table-cell">{item.joinDate}</td>
         <td className="ant-table-cell">{item.action}</td>
       </tr>
-    );
+    )
   }
 
-  function handleDragEnd(event:any) {
-    const { active, over } = event;
+  function handleDragEnd(event: any) {
+    const { active, over } = event
 
     if (active && over && active.id !== over.id) {
-      const activeIndex = dataSource.findIndex((item:{key:string}) => item.key === active.id.key);
-      const overIndex = dataSource.findIndex((item:{key:string}) => item.key === over.id.key);
-      const newData = arrayMove(dataSource, activeIndex, overIndex);
+      const activeIndex = dataSource.findIndex((item: { key: string }) => item.key === active.id.key)
+      const overIndex = dataSource.findIndex((item: { key: string }) => item.key === over.id.key)
+      const newData = arrayMove(dataSource, activeIndex, overIndex)
 
-      setState({ ...state, dataSource: newData });
+      setState({ ...state, dataSource: newData })
     }
   }
 
@@ -146,7 +140,7 @@ function DragAndDropTable() {
                       <table>
                         <tbody className="ant-table-tbody">
                           <SortableContext items={dataSource} strategy={rectSortingStrategy}>
-                            {dataSource.map((value:Item, index:number) => (
+                            {dataSource.map((value: Item, index: number) => (
                               <SortableItem key={index} index={index} value={value} />
                             ))}
                           </SortableContext>
@@ -161,7 +155,7 @@ function DragAndDropTable() {
         </div>
       </DndContext>
     </>
-  );
+  )
 }
 
-export default DragAndDropTable;
+export default DragAndDropTable

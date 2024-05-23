@@ -41,7 +41,7 @@ function NotFound() {
             Sorry! the page you are looking for does not exist.
           </p>
           <Link href="/admin/order/create">
-            <Buttons size="default" type="primary" to="/admin" className="bg-primary text-white h-11">
+            <Buttons type="primary" className="bg-primary text-white h-11">
               Return Home
             </Buttons>
           </Link>
