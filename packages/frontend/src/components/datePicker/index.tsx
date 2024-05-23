@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { DatePicker } from 'antd';
-import { addDays } from 'date-fns';
-import { DateRangePicker } from 'react-date-range';
-import 'react-date-range/dist/styles.css'; // main style file
-import 'react-date-range/dist/theme/default.css'; // theme css file
-import { Buttons } from '../buttons';
+import React, { useState } from "react"
+import { DatePicker } from "antd"
+import { addDays } from "date-fns"
+import { DateRangePicker } from "react-date-range"
+import "react-date-range/dist/styles.css" // main style file
+import "react-date-range/dist/theme/default.css" // theme css file
+import { Buttons } from "../buttons"
 
 function DateRangePickerOne() {
   const [state, setState] = useState({
@@ -13,24 +13,24 @@ function DateRangePickerOne() {
       selection: {
         startDate: new Date(),
         endDate: addDays(new Date(), 7),
-        key: 'selection',
+        key: "selection",
       },
     },
-  });
+  })
 
-  const handleRangeChange = (which:any) => {
+  const handleRangeChange = (which: any) => {
     setState({
       ...state,
       dateRangePicker: {
         ...state.dateRangePicker,
         ...which,
       },
-    });
-  };
+    })
+  }
 
-  const { dateRangePicker } = state;
-  const start = dateRangePicker.selection.startDate.toString().split(' ');
-  const end = dateRangePicker.selection.endDate.toString().split(' ');
+  const { dateRangePicker } = state
+  const start = dateRangePicker.selection.startDate.toString().split(" ")
+  const end = dateRangePicker.selection.endDate.toString().split(" ")
 
   return (
     <>
@@ -51,15 +51,14 @@ function DateRangePickerOne() {
         </Buttons>
         <Buttons
           size="small"
-          type="white"
+          type="default"
           className="bg-transparent dark:text-white/60 dark:border-white/10 h-[32px] inline-flex items-center px-[13px] text-[12px]"
-          outlined
         >
           Cancel
         </Buttons>
       </div>
     </>
-  );
+  )
 }
 
 class CustomDateRange extends React.Component {
@@ -68,50 +67,50 @@ class CustomDateRange extends React.Component {
     startValue: null,
     endValue: null,
     endOpen: false,
-  };
+  }
 
-  disabledStartDate = (startValue:any) => {
-    const { endValue }:any = this.state;
+  disabledStartDate = (startValue: any) => {
+    const { endValue }: any = this.state
     if (!startValue || !endValue) {
-      return false;
+      return false
     }
-    return startValue.valueOf() > endValue.valueOf();
-  };
+    return startValue.valueOf() > endValue.valueOf()
+  }
 
-  disabledEndDate = (endValue:any) => {
-    const { startValue }:any = this.state;
+  disabledEndDate = (endValue: any) => {
+    const { startValue }: any = this.state
     if (!endValue || !startValue) {
-      return false;
+      return false
     }
-    return endValue.valueOf() <= startValue.valueOf();
-  };
+    return endValue.valueOf() <= startValue.valueOf()
+  }
 
-  onChange = (field:any, value:any) => {
+  onChange = (field: any, value: any) => {
     this.setState({
       [field]: value,
-    });
-  };
+    })
+  }
 
-  onStartChange = (value:any) => {
-    this.onChange('startValue', value);
-  };
+  onStartChange = (value: any) => {
+    this.onChange("startValue", value)
+  }
 
-  onEndChange = (value:any) => {
-    this.onChange('endValue', value);
-  };
+  onEndChange = (value: any) => {
+    this.onChange("endValue", value)
+  }
 
-  handleStartOpenChange = (open:any) => {
+  handleStartOpenChange = (open: any) => {
     if (!open) {
-      this.setState({ endOpen: true });
+      this.setState({ endOpen: true })
     }
-  };
+  }
 
-  handleEndOpenChange = (open:any) => {
-    this.setState({ endOpen: open });
-  };
+  handleEndOpenChange = (open: any) => {
+    this.setState({ endOpen: open })
+  }
 
   render() {
-    const { startValue, endValue, endOpen } = this.state;
+    const { startValue, endValue, endOpen } = this.state
 
     return (
       <div>
@@ -123,7 +122,7 @@ class CustomDateRange extends React.Component {
           placeholder="Start"
           onChange={this.onStartChange}
           onOpenChange={this.handleStartOpenChange}
-          style={{ margin: '5px' }}
+          style={{ margin: "5px" }}
         />
 
         <DatePicker
@@ -135,11 +134,11 @@ class CustomDateRange extends React.Component {
           onChange={this.onEndChange}
           open={endOpen}
           onOpenChange={this.handleEndOpenChange}
-          style={{ margin: '5px' }}
+          style={{ margin: "5px" }}
         />
       </div>
-    );
+    )
   }
 }
 
-export { DateRangePickerOne, CustomDateRange };
+export { DateRangePickerOne, CustomDateRange }
