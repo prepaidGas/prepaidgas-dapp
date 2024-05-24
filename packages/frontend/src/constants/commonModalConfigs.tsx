@@ -6,7 +6,7 @@ import { ModalFuncProps } from "antd"
 const WalletConnectionConfig: ModalFuncProps = {
   title: "Wallet Connection",
   // icon: <UilWallet />,
-  content: "Please connect your wallet to continue with order creation",
+  content: "Please connect your wallet to continue",
   closable: true,
   footer: (_, { OkBtn, CancelBtn }) => <>{/* <CustomConnectBttn onClick={() => instance.destroy()} /> */}</>,
 }
@@ -22,6 +22,7 @@ const ProcessingConfig: ModalFuncProps = {
   title: "Processing",
   // icon: <UiProcess />,
   closable: false,
+  footer: null,
   content: (
     <div className="flex justify-center">
       <TailSpin

@@ -21,10 +21,11 @@ import CustomConnectBttn from "@/components/CustomConnectBttn"
 import { TailSpin } from "react-loader-spinner"
 import commonModalConfigs from "@/constants/commonModalConfigs"
 import { boolean } from "zod"
+import { isValid } from "date-fns"
 
 type PendingTxProps = {
   isPending: boolean
-  data: MessageStruct | undefined
+  data: SimpleTxProps | undefined
 }
 
 interface domainProps {
@@ -32,6 +33,15 @@ interface domainProps {
   version: string
   chainId: number
   verifyingContract: `0x${string}`
+}
+
+const ValidationMsg = {
+  0: "None",
+  1: "Start In Future",
+  2: "Nonce Exhaustion",
+  3: "Balance Compliance",
+  4: "Owner Compliance",
+  5: "Timeline Compliance",
 }
 
 export default function CreateTxForm({
@@ -55,9 +65,21 @@ export default function CreateTxForm({
 
   const handleTabChange = (tabKey: string) => {}
 
+  const showError = (error: any) => {
+    modal.error({ ...ErrorConfig, content: error.details ? error.details : error })
+  }
+
+  const encodeFuncData = (abi: any, selectedFunc: string, argsArray: any) => {
+    const contractInterface = new ethers.Interface(abi)
+
+    const encodedData = contractInterface.encodeFunctionData(selectedFunc, argsArray)
+
+    return encodedData
+  }
+
   const handleSubmit = (values: SimpleTxProps) => {
     if (!address) {
-      // setPendingData({ isPending: true, data: message })
+      setPendingData({ isPending: true, data: values })
       const instance = modal.confirm({
         ...WalletConnectionConfig,
         footer: (_, { OkBtn, CancelBtn }) => (
@@ -69,22 +91,13 @@ export default function CreateTxForm({
       return
     }
 
-    const processingInstance = modal.info({ ...ProcessingConfig, open: false })
-
-    if (Object.keys(inputs).length === 0) {
-      return
-    }
-
-    let contractInterface
-    let encodedData
     let parsedAbi = JSON.parse(values.userAbi)
     let argsArray: any = []
 
-    showProcessingModal(processingInstance, true)
+    modal.info({ ...ProcessingConfig })
 
     parsedAbi = parsedAbi.filter((item) => item.type === "function" && item.name === values.selectedFunction)
     const parsedItem = parsedAbi[0]
-
     console.log("Submit Parse: ", parsedAbi)
     console.log("Submit Parse Item: ", parsedItem)
     parsedItem.inputs.forEach((element) => {
@@ -94,24 +107,8 @@ export default function CreateTxForm({
 
     console.log("argsArray: ", argsArray)
 
-    try {
-      contractInterface = new ethers.Interface(values.userAbi)
-    } catch (e) {
-      console.log("ERROR contractInterface: ", { error: e })
-      // showProcessingModal(false)
-      // return modal.error({ ...ErrorConfig, content: e.toString() })
-    }
-
-    try {
-      encodedData = contractInterface.encodeFunctionData(values.selectedFunction, argsArray)
-    } catch (e) {
-      console.log("ERROR encodeFunctionData: ", { error: e })
-      // showProcessingModal(false)
-      // return modal.error({ ...ErrorConfig, content: e.toString() })
-    }
-
+    const encodedData = encodeFuncData(values.userAbi, values.selectedFunction, argsArray)
     console.log("EncodedData: ", encodedData)
-
     const message: MessageStruct = {
       from: address as string,
       nonce: `0x${Date.now().toString(16)}`,
@@ -122,12 +119,11 @@ export default function CreateTxForm({
       data: encodedData,
     }
 
-    signMessage(message, processingInstance)
+    signMessage(message)
   }
 
-  const signMessage = async (message: MessageStruct, processingInstance) => {
+  const signMessage = async (message: MessageStruct) => {
     console.log("Submit started")
-    showProcessingModal(processingInstance, true)
 
     // await switchNetwork({ chainId: 1 });
 
@@ -150,77 +146,67 @@ export default function CreateTxForm({
       ],
     }
 
-    console.log("Try bloock reached")
     try {
-      //todo: Why is it using TEST ABI STRING????
-
-      try {
-        const validateMessage = await readContract({
-          address: prepaidGasCoreContractAddress() as `0x${string}`,
-          abi: PrepaidGasABI,
-          functionName: "messageValidate",
-          args: [message],
-        })
-        console.log("IsValid: ", validateMessage)
-      } catch (e) {
-        console.log("ERROR: ", e)
-        showProcessingModal(processingInstance, false)
-
-        return modal.error({ ...ErrorConfig, content: e.toString() })
+      const validateMessage = await readContract({
+        address: prepaidGasCoreContractAddress() as `0x${string}`,
+        abi: PrepaidGasABI,
+        functionName: "messageValidate",
+        args: [message],
+      })
+      console.log("IsValid: ", validateMessage)
+      if (validateMessage != 0) {
+        Modal.destroyAll()
+        return modal.error({ ...ErrorConfig, content: <span>{ValidationMsg[validateMessage as number]}</span> })
       }
-
-      let signature = undefined
-      try {
-        //todo check typescript
-        // @ts-ignore
-        signature = await signTypedData({
-          domain,
-          message,
-          primaryType: "Message",
-          types,
-        })
-      } catch (e) {
-        console.log("ERROR: ", e)
-        showProcessingModal(processingInstance, false)
-
-        return modal.error({ ...ErrorConfig, content: e.toString() })
-      }
-
-      console.log("signature: ", signature)
-
-      const payload = {
-        origSign: signature,
-        message: message,
-      }
-
-      console.log("payload: ", payload)
-
-      try {
-        const response = await fetch("https://api.prepaidgas.io:443/validate", {
-          method: "POST",
-          body: JSON.stringify(payload),
-        })
-        const result = await response
-        console.log("POST Success:", result)
-      } catch (e) {
-        console.error("POST Error:", e)
-        showProcessingModal(processingInstance, false)
-
-        return modal.error({ ...ErrorConfig, content: e.toString() })
-      }
-      modal.success({ ...SuccessConfig, content: <span>"Transaction was successful"</span> })
     } catch (e) {
       console.log("ERROR: ", e)
-      showProcessingModal(processingInstance, false)
-      return modal.error({ ...ErrorConfig, content: e.toString() })
+      Modal.destroyAll()
+      return showError(e)
     }
 
-    console.log("Submit ended")
-  }
+    let signature = undefined
+    try {
+      //todo check typescript
+      // @ts-ignore
+      signature = await signTypedData({
+        domain,
+        message,
+        primaryType: "Message",
+        types,
+      })
+    } catch (e) {
+      console.log("ERROR: ", e)
+      Modal.destroyAll()
 
-  function showProcessingModal(instance, isOpen: boolean) {
-    console.log("isopen: ", isOpen)
-    instance.update((prevState) => ({ ...prevState, open: isOpen }))
+      return showError(e)
+    }
+
+    console.log("signature: ", signature)
+
+    const payload = {
+      origSign: signature,
+      message: message,
+    }
+
+    console.log("payload: ", payload)
+
+    try {
+      const response = await fetch("https://api.prepaidgas.io:443/validate", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      })
+      const result = await response
+      console.log("POST Success:", result)
+      Modal.destroyAll()
+
+      modal.success({ ...SuccessConfig, content: <span>"Transaction was successful"</span> })
+    } catch (e) {
+      console.error("POST Error:", e)
+      Modal.destroyAll()
+
+      return showError(e)
+    }
+    console.log("Submit ended")
   }
 
   useEffect(() => {
@@ -229,8 +215,9 @@ export default function CreateTxForm({
         console.log("ORDER IS UNDEFINED")
         return
       }
-      const processingInstance = modal.info({ ...ProcessingConfig, open: false })
-      signMessage({ ...pendingData.data, from: address } as MessageStruct, processingInstance)
+      handleSubmit(pendingData.data)
+      console.log("Pending Submit: ", pendingData)
+
       setPendingData({ isPending: false, data: undefined })
     }
   }, [address])

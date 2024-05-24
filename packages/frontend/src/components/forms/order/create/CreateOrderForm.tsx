@@ -82,16 +82,21 @@ export default function CreateOrderForm() {
     console.log("CreateOrder: START")
     console.log("Order data to submit: ", { order })
 
-    if (!isWalletConnected()) {
+    if (!address) {
       setPendingOrder({ isOrderPending: true, order })
-      showWalletConnectionModal()
+      const instance = modal.confirm({
+        ...WalletConnectionConfig,
+        footer: (_, { OkBtn, CancelBtn }) => (
+          <>
+            <CustomConnectBttn onClick={() => instance.destroy()} />
+          </>
+        ),
+      })
       return
     }
 
-    const processingModal = showProcessing()
+    modal.info({ ...ProcessingConfig })
     setIsLoading(true)
-
-    console.log("Wallet is connected: ", { address })
 
     let allowance = 0
     try {
@@ -105,8 +110,8 @@ export default function CreateOrderForm() {
       allowance = Number(data)
     } catch (e) {
       console.log("Allowance ERROR: ", e)
-      processingModal.destroy()
-      return showError(e)
+      Modal.destroyAll()
+      return showError(e.details ? e.details : e)
     }
 
     const overallPrice = Number(order.gasPrice.perUnit) * Number(order.gas)
@@ -123,7 +128,9 @@ export default function CreateOrderForm() {
         console.log("Approve Data: ", data)
       } catch (e) {
         console.log("Approve Error: ", e)
-        return showError(e)
+        Modal.destroyAll()
+        console.log({ e })
+        return showError(e.details ? e.details : e)
       }
 
       const txData = await waitForTransaction({ hash: data.hash })
@@ -143,12 +150,13 @@ export default function CreateOrderForm() {
       console.log("orderCreate: ", data)
       const txData = await waitForTransaction({ hash: data.hash })
       console.log("orderCreate transaction details: ", txData)
-      processingModal.destroy()
+      Modal.destroyAll()
       showSuccess(txData)
     } catch (e) {
-      console.log("orderCreate Error: ", e)
-      processingModal.destroy()
-      return showError(e)
+      console.log("orderCreate Error: ", { e })
+      Modal.destroyAll()
+
+      return showError(e.details ? e.details : e)
     }
     setIsLoading(false)
     console.log("CreateOrder: END")
