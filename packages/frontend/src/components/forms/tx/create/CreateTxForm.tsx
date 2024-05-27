@@ -82,10 +82,14 @@ export default function CreateTxForm({
       setPendingData({ isPending: true, data: values })
       const instance = modal.confirm({
         ...WalletConnectionConfig,
+        onCancel() {
+          setPendingData({ isPending: false, data: undefined })
+        },
         footer: (_, { OkBtn, CancelBtn }) => (
-          <>
+          <div className="flex flex-row-reverse gap-2">
             <CustomConnectBttn onClick={() => instance.destroy()} />
-          </>
+            <CancelBtn />
+          </div>
         ),
       })
       return
