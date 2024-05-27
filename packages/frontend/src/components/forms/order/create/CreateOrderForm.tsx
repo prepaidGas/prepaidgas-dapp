@@ -40,17 +40,6 @@ export default function CreateOrderForm() {
   const [isLoading, setIsLoading] = useState(true)
   const [modal, contextHolder] = Modal.useModal()
 
-  const showWalletConnectionModal = () => {
-    const instance = modal.confirm({
-      ...WalletConnectionConfig,
-      footer: (_, { OkBtn, CancelBtn }) => (
-        <>
-          <CustomConnectBttn onClick={() => instance.destroy()} />
-        </>
-      ),
-    })
-  }
-
   const showSuccess = (txData: any) => {
     modal.success({
       title: "Success",
@@ -86,10 +75,14 @@ export default function CreateOrderForm() {
       setPendingOrder({ isOrderPending: true, order })
       const instance = modal.confirm({
         ...WalletConnectionConfig,
+        onCancel() {
+          setPendingOrder({ isOrderPending: false, order: undefined })
+        },
         footer: (_, { OkBtn, CancelBtn }) => (
-          <>
+          <div className="flex flex-row-reverse gap-2">
             <CustomConnectBttn onClick={() => instance.destroy()} />
-          </>
+            <CancelBtn />
+          </div>
         ),
       })
       return
