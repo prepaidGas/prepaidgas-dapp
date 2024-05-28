@@ -185,13 +185,13 @@ export default function CreateOrderFormAdvanced({
 
         {/* Gas Cost Settings */}
         <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
-          <div className="flex flex-col flex-1">
+          <div className="flex flex-col grow">
             <Form.Item name={"gasPriceToken"} label={"Gas Price Token"} colon={false}>
               <CustomSearchSelect />
             </Form.Item>
           </div>
 
-          <div className="flex flex-col flex-1">
+          <div className="flex flex-col grow">
             <Form.Item
               name={"gasPricePerUnit"}
               label={"Gas Price Per Unit"}
@@ -214,13 +214,13 @@ export default function CreateOrderFormAdvanced({
 
         {/* Guarantee Settings */}
         <div className="flex flex-col mt-4 old-lg:flex-row gap-6">
-          <div className="flex flex-col flex-1">
+          <div className="flex flex-col grow">
             <Form.Item name={"guaranteeToken"} label={"Guarantee Token"} colon={false}>
               <CustomSearchSelect />
             </Form.Item>
           </div>
 
-          <div className="flex flex-col flex-1">
+          <div className="flex flex-col grow">
             <Form.Item
               name={"guaranteePerUnit"}
               label={"Guarantee Per Unit"}
