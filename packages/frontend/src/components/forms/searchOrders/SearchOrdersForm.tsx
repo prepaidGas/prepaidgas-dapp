@@ -65,14 +65,13 @@ export default function SearchOrdersForm({
             <Input
               spellCheck={false}
               placeholder="0x1dA..."
-              size="middle"
-              className="h-[40px] p-3 rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
+              className="h-[40px] !border-normal dark:border-whiteDark hover:!border-primary focus:!border-primary dark:placeholder-white/60"
             />
           </Form.Item>
         </div>
         <div className="flex flex-col grow w-full">
           <Form.Item name="status" label="Status" colon={false}>
-            <Select className="[&>div]:border-normal dark:[&>div]:border-white/10 [&>div]:rounded-6 [&>.ant-select-arrow]:text-theme-gray dark:[&>.ant-select-arrow]:text-white/60 [&>div>div>div>span]:bg-transparent [&>div>div>div>span]:h-[26px] [&>div>div>div>span]:items-center h-[48px] py-0">
+            <Select className="h-[40px]">
               <Option value={0}>Any</Option>
               <Option value={1}>Pending</Option>
               <Option value={2}>Accepted</Option>
@@ -85,7 +84,7 @@ export default function SearchOrdersForm({
         </div>
         <div className="flex flex-col grow w-full">
           <Form.Item name="numberOfEntries" label="Items Per Page">
-            <Select className="[&>div]:border-normal dark:[&>div]:border-white/10 [&>div]:rounded-6 [&>.ant-select-arrow]:text-theme-gray dark:[&>.ant-select-arrow]:text-white/60 [&>div>div>div>span]:bg-transparent [&>div>div>div>span]:h-[26px] [&>div>div>div>span]:items-center h-[48px] py-0">
+            <Select className="h-[40px]">
               <Option value={10}>10</Option>
               <Option value={20}>20</Option>
               <Option value={30}>30</Option>
