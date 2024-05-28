@@ -53,14 +53,11 @@ const OrderSearch = () => {
     const { manager, status, numberOfEntries } = filterOptions
     const searchArgs = [
       manager === "" ? defaultManager : manager,
-      //todo: check
-      //address,
       status,
       numberOfEntries,
       (pageNumber - 1) * numberOfEntries,
     ]
     console.log("SearchArgs: ", searchArgs)
-    const test = prepaidGasCoreContractAddress() as `0x${string}`
     try {
       const data = await readContract({
         address: prepaidGasCoreContractAddress() as `0x${string}`,
