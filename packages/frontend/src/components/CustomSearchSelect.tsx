@@ -32,11 +32,7 @@ export default function CustomSearchSelect({
   }
 
   const selectAddon = (
-    <Select
-      value={selectValue}
-      onChange={handleSelectChange}
-      className={`[&>div]:border-normal dark:[&>div]:border-white/10 [&>div]:rounded-6 [&>.ant-select-arrow]:text-theme-gray dark:[&>.ant-select-arrow]:text-white/60 [&>div>div>div>span]:bg-transparent [&>div>div>div>span]:h-[26px] [&>div>div>div>span]:items-center h-[48px] py-0 ${className}`}
-    >
+    <Select value={selectValue} onChange={handleSelectChange} className="w-[8rem]">
       <Option value={TOKEN_ADDRESS.MockGasPrice}>{TOKEN_NAME[TOKEN_ADDRESS.MockGasPrice]}</Option>
       <Option value={TOKEN_ADDRESS.MockGuarantee}>{TOKEN_NAME[TOKEN_ADDRESS.MockGuarantee]}</Option>
     </Select>

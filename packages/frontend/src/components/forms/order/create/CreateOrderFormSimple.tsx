@@ -71,7 +71,6 @@ export default function CreateOrderFormSimple({
                 min={100000}
                 spellCheck={false}
                 placeholder="123"
-                size="middle"
                 className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60"
                 style={{ width: "100%" }}
               />
@@ -97,7 +96,6 @@ export default function CreateOrderFormSimple({
                 <InputNumber
                   spellCheck={false}
                   placeholder="123"
-                  size="middle"
                   className="rounded-6 border-normal dark:border-whiteDark hover:border-primary focus:border-primary dark:placeholder-white/60 grow"
                   style={{ width: "100%" }}
                 />

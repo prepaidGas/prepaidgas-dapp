@@ -75,10 +75,20 @@ h6 {
 .ant-btn-primary i {
   @apply text-white !important;
 }
-.ant-picker,
+/* TODO: REMOVE, THIS CSS RUINED CUSTOM SELECT */
+/* .ant-picker,
 .ant-form-item-control-input input,
 .ant-input-number-input-wrap input {
   @apply h-10 px-5 border-normal;
+} */
+.ant-select-focused span {
+  color: #009688 !important;
+}
+
+.ant-picker,
+.ant-form-item-control-input input,
+.ant-input-number-input-wrap input {
+  @apply border-normal;
 }
 
 .ant-input-number .ant-input-number-input {
@@ -89,9 +99,10 @@ h6 {
 Avoid using the "important" declaration in global CSS,
 as conflicts may arise in other places
 */
-.ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
+/* TODO: REMOVE, THIS CSS RUINED CUSTOM SELECT */
+/* .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
   @apply h-10;
-}
+} */
 
 .ant-select .ant-select-selector .ant-select-selection-placeholder {
   @apply leading-[36px] !important;
