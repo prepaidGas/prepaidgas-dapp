@@ -4,61 +4,20 @@ import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
 
 import { COLOR_BY_STATUS, STATUS, STATUS_NAMES } from "@/constants"
 
-import { Badge, Card, Text, Metric, Flex, ProgressBar, Icon, Button } from "@tremor/react"
-
-import {
-  ArrowPathIcon,
-  CheckCircleIcon,
-  PlayIcon,
-  ExclamationTriangleIcon,
-  XCircleIcon,
-  StarIcon,
-} from "@heroicons/react/24/outline"
 import { useState } from "react"
-import StatusBadge from "./StatusBadge"
-import { redirect } from "next/navigation"
-import Link from "next/link"
 import TruncatedTextWithTooltip from "./TruncatedTextWithTooltip"
 import { TOKEN_NAME } from "@/constants/tokens"
-import { string } from "zod"
 
 import { Cards } from "@/components/cards/frame/cards-frame"
-import { UilQuestionCircle, UilClipboardNotes, UilFavorite } from "@iconscout/react-unicons"
+import { UilFavorite } from "@iconscout/react-unicons"
 import { Buttons } from "./buttons"
-import { DescriptionsProps } from "antd"
+import { DescriptionsProps, Divider, Descriptions, Statistic, Tooltip } from "antd"
+const { Countdown } = Statistic
 
 interface OrderCard extends FilteredOrderStructOutput {
   onFavorited(favorited: boolean): void
   className?: string
 }
-
-const items: DescriptionsProps["items"] = [
-  {
-    key: "1",
-    label: "UserName",
-    children: <p>Zhou Maomao</p>,
-  },
-  {
-    key: "2",
-    label: "Telephone",
-    children: <p>1810000000</p>,
-  },
-  {
-    key: "3",
-    label: "Live",
-    children: <p>Hangzhou, Zhejiang</p>,
-  },
-  {
-    key: "4",
-    label: "Remark",
-    children: <p>empty</p>,
-  },
-  {
-    key: "5",
-    label: "Address",
-    children: <p>No. 18, Wantang Road, Xihu District, Hangzhou, Zhejiang, China</p>,
-  },
-]
 
 // @todo display order data
 export default function OrderCard({
@@ -70,6 +29,121 @@ export default function OrderCard({
   onFavorited = () => {},
   className = "",
 }: OrderCard) {
+  // const getTimeUntilExpiration = () => {
+  //   const expirationDate = new Date(Number(order.expire) * 1000)
+  //   const currentDate = new Date()
+  //   const diff = expirationDate.getTime() - currentDate.getTime()
+  //   console.log("msUntillExpiration to date")
+  //   if (diff <= 0) {
+  //     return "Already expired"
+  //   } else {
+  //     const day_to_miliseconds = 1000 * 60 * 60 * 24
+  //     // 1 day equivalent in milliseconds
+  //     const hour_to_miliseconds = 1000 * 60 * 60
+  //     // 1 hour equivalent in milliseconds
+  //     const minute_to_miliseconds = 1000 * 60
+  //     // 1 minute equivalent in milliseconds
+  //     const second_to_miliseconds = 1000
+  //     // 1 second equivalent in milliseconds
+
+  //     let days = Math.floor(diff / day_to_miliseconds)
+  //     // number of days from the difference in dates
+  //     let hours = Math.floor((diff % day_to_miliseconds) / hour_to_miliseconds)
+  //     // number of hours from the remaining time after removing days
+  //     let minutes = Math.floor((diff % hour_to_miliseconds) / minute_to_miliseconds)
+  //     // number of minutes from the remaining time after removing hours
+  //     let seconds = Math.floor((diff % minute_to_miliseconds) / second_to_miliseconds)
+  //     // number of hours from the remaining time after removing seconds
+
+  //     console.log(days, hours, minutes, seconds)
+  //     return `${days} Days, ${hours}:${minutes}:${seconds}`
+  //   }
+  // }
+
+  const checkIfExpired = () => {
+    const expirationDate = new Date(Number(order.expire) * 1000)
+    const currentDate = new Date()
+    const diff = expirationDate.getTime() - currentDate.getTime()
+    if (diff <= 0) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  const [isExpired, setIsExpired] = useState(checkIfExpired())
+
+  const items: DescriptionsProps["items"] = [
+    {
+      label: "Manager",
+      children: <TruncatedTextWithTooltip text={order.manager} isCopyable />,
+      span: 2,
+    },
+    {
+      label: "Execution timeframe",
+      children: `${format(new Date(Number(order.start) * 1000), "MMM d y, HH:mm:ss")} - ${format(
+        new Date(Number(order.end) * 1000),
+        "MMM d y, HH:mm:ss",
+      )}`,
+      span: 2,
+    },
+    {
+      label: "Time until expiration",
+      children: isExpired ? (
+        "Already expired"
+      ) : (
+        <div className="flex w-auto">
+          <Tooltip
+            title={format(new Date(Number(order.expire) * 1000), "MMM d y, HH:mm:ss")}
+            overlayStyle={{ maxWidth: "500px" }}
+          >
+            <Countdown value={Number(order.expire) * 1000} onFinish={() => setIsExpired(true)} />
+          </Tooltip>
+        </div>
+      ),
+      span: 2,
+    },
+    {
+      label: "Transaction window",
+      children: `${order.txWindow.toString()}`,
+    },
+    {
+      label: "Redeem window",
+      children: `${order.redeemWindow.toString()}`,
+    },
+    {
+      label: "Gas Price",
+      children: (
+        <div className="flex flex-row items-center gap-2">
+          <span className="text-primary">{` ${order.gasPrice.perUnit}`}</span>
+          <TruncatedTextWithTooltip
+            title={TOKEN_NAME[order.gasPrice.token] ?? ""}
+            text={order.gasPrice.token}
+            isCopyable
+          />
+        </div>
+      ),
+      span: 2,
+    },
+    {
+      label: "Guarantee",
+      children:
+        Number(order.gasGuarantee.perUnit) === 0 ? (
+          "N/A"
+        ) : (
+          <div className="flex flex-row items-center gap-2">
+            <span className="text-primary">{`${order.gasGuarantee.perUnit}`}</span>
+            <TruncatedTextWithTooltip
+              title={TOKEN_NAME[order.gasGuarantee.token] ?? ""}
+              text={order.gasGuarantee.token}
+              isCopyable
+            />
+          </div>
+        ),
+      span: 2,
+    },
+  ]
+
   const checkIfIsFavorite = () => {
     let favOrders = localStorage.getItem("FAVORITE_ORDERS")
     if (favOrders === null) {
@@ -141,12 +215,34 @@ export default function OrderCard({
     }
   }
 
+  const getTextColor = () => {
+    switch (Number(status)) {
+      case STATUS.Any:
+        return "text-[#000000]"
+      case STATUS.Pending:
+        return "text-[#ffd600]"
+      case STATUS.Accepted:
+        return "text-[#4caf50]"
+      case STATUS.Active:
+        return "text-[#2196f3]"
+      case STATUS.Inactive:
+        return "text-[#80cbc4]"
+      case STATUS.Untaken:
+        return "text-[#ff9800]"
+      case STATUS.Closed:
+        return "text-[#f44336]"
+
+      default:
+        return "text-[#404040] dark:text-[#A4A5AA]"
+    }
+  }
+
   return (
     <>
       <Cards headless className={`max-w-[1024px] mx-auto relative mt-4 border-t-4  ${getCardColor()}`}>
         <div className="flex flex-col gap-3">
           {/* todo: finish order manager page and add to favorites functionality */}
-          {process.env.NODE_ENV === "development" && (
+          {/* {process.env.NODE_ENV === "development" && (
             <>
               <Buttons className="absolute [&>*]:fill-primary right-3 top-3 h-[40px] ml-4 bg-transparent hover:bg-primary-hbr border-solid border-1 border-primary text-primary hover:text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] ">
                 <UilFavorite />
@@ -155,50 +251,20 @@ export default function OrderCard({
                 Manage Order
               </Buttons>
             </>
+          )} */}
+          <div className="flex flex-row justify-start items-center gap-2">
+            <span className="text-[#404040] dark:text-[#A4A5AA] font-bold text-2xl">{`#${id.toString()}`}</span>
+            <Divider type="vertical" style={{ borderLeft: "1px solid #404040", height: "30px" }} />
+            <span className={`font-bold text-2xl ${getTextColor()}`}>{STATUS_NAMES[Number(status)]}</span>
+          </div>
+
+          {typeof window !== "undefined" && window.innerWidth < 768 ? (
+            <Descriptions column={1} layout="vertical" bordered items={items} />
+          ) : (
+            <div className="order-card">
+              <Descriptions column={1} layout="horizontal" bordered items={items} />
+            </div>
           )}
-          <span className="text-[#404040] dark:text-[#A4A5AA] font-bold text-2xl">{`#${id.toString()}`}</span>
-
-          <div className="flex flex-row items-center gap-2">
-            <span className="text-[#404040] dark:text-[#A4A5AA]">Status: {STATUS_NAMES[Number(status)]}</span>
-          </div>
-
-          <div className="flex flex-row items-center gap-2">
-            <span className="text-[#404040] dark:text-[#A4A5AA]">Manager: </span>
-            <TruncatedTextWithTooltip text={order.manager} isCopyable />
-          </div>
-
-          <span className="text-[#404040] dark:text-[#A4A5AA]">
-            Execution timeframe: {format(new Date(Number(order.start) * 1000), "MMM d y, HH:mm:ss")} -{" "}
-            {format(new Date(Number(order.end) * 1000), "MMM d y, HH:mm:ss")}
-          </span>
-
-          <span className="text-[#404040] dark:text-[#A4A5AA]">
-            Expire date: {format(new Date(Number(order.expire) * 1000), "MMM d y, HH:mm:ss")}
-          </span>
-
-          <span className="text-[#404040] dark:text-[#A4A5AA]">Transaction window: {order.txWindow.toString()}</span>
-
-          <span className="text-[#404040] dark:text-[#A4A5AA]">Redeem window: {order.redeemWindow.toString()}</span>
-
-          <div className="flex flex-row items-center gap-2">
-            <span className="text-[#404040] dark:text-[#A4A5AA]">Gas Price:</span>
-            <span className="text-primary">{` ${order.gasPrice.perUnit}`}</span>
-            <TruncatedTextWithTooltip
-              title={TOKEN_NAME[order.gasPrice.token] ?? ""}
-              text={order.gasPrice.token}
-              isCopyable
-            />
-          </div>
-
-          <div className="flex flex-row items-center gap-2">
-            <span className="text-[#404040] dark:text-[#A4A5AA]">Guarantee:</span>
-            <span className="text-primary">{`${order.gasGuarantee.perUnit}`}</span>
-            <TruncatedTextWithTooltip
-              title={TOKEN_NAME[order.gasGuarantee.token] ?? ""}
-              text={order.gasGuarantee.token}
-              isCopyable
-            />
-          </div>
         </div>
       </Cards>
     </>

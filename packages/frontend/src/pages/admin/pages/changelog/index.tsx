@@ -44,7 +44,7 @@ function ChangeLog() {
                   <div className="p-[25px] whitespace-pre-wrap">
                     {versions[0].new && (
                       <div className="mb-[30px]">
-                        <span className="inline-block bg-success mb-4 px-2 py-[5px] text-white dark:text-white/[.87] text-xs font-medium leading-4 tracking-[1.4px] rounded">
+                        <span className="inline-block bg-primary mb-4 px-2 py-[5px] text-white dark:text-white/[.87] text-xs font-medium leading-4 tracking-[1.4px] rounded">
                           New
                         </span>
                         <ul className="mb-0">
@@ -57,7 +57,7 @@ function ChangeLog() {
                                   }),
                                 }}
                                 key={key + 1}
-                                className="mb-2 relative ltr:pl-5 rtl:pr-5 text-body dark:text-white/60 text-base after:absolute ltr:after:left-0 rtl:after:right-0 after:top-1/2 after:-translate-y-1/2 after:w-1.5 after:h-1.5 after:bg-success after:rounded-full"
+                                className="mb-2 relative ltr:pl-5 rtl:pr-5 text-body dark:text-white/60 text-base after:absolute ltr:after:left-0 rtl:after:right-0 after:top-1/2 after:-translate-y-1/2 after:w-1.5 after:h-1.5 after:bg-primary after:rounded-full"
                               >
                                 {/* {item} */}
                               </li>
@@ -125,7 +125,7 @@ function ChangeLog() {
                               <div>
                                 {version.new && (
                                   <div>
-                                    <span className="inline-block bg-success mb-4 px-2 py-[5px] text-white dark:text-white/[.87] text-xs font-medium leading-4 tracking-[1.4px] rounded">
+                                    <span className="inline-block bg-primary mb-4 px-2 py-[5px] text-white dark:text-white/[.87] text-xs font-medium leading-4 tracking-[1.4px] rounded">
                                       New
                                     </span>
                                     <ul>
@@ -133,7 +133,7 @@ function ChangeLog() {
                                         return (
                                           <li
                                             key={key + 1}
-                                            className="relative ltr:pl-5 rtl:pr-5 text-body dark:text-white/60 text-base after:absolute ltr:after:left-0 rtl:after:right-0 after:top-1/2 after:-translate-y-1/2 after:w-1.5 after:h-1.5 after:bg-success after:rounded-full"
+                                            className="relative ltr:pl-5 rtl:pr-5 text-body dark:text-white/60 text-base after:absolute ltr:after:left-0 rtl:after:right-0 after:top-1/2 after:-translate-y-1/2 after:w-1.5 after:h-1.5 after:bg-primary after:rounded-full"
                                           >
                                             {item}
                                           </li>
