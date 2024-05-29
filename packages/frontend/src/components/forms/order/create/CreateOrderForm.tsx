@@ -16,7 +16,7 @@ import { UilWallet, UiProcess } from "@iconscout/react-unicons"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import DialogWindow from "@/components/DialogWindow"
 import UserAgreement from "@/components/UserAgreement"
-import { Tabs, TabsProps, Form, FormProps, Modal } from "antd"
+import { Tabs, TabsProps, Form, FormProps, Modal, Descriptions, DescriptionsProps } from "antd"
 import dayjs, { type Dayjs } from "dayjs"
 import { TOKEN_ADDRESS } from "@/constants/tokens"
 import CreateOrderFormSimple, { SimpleOrderProps } from "./CreateOrderFormSimple"
@@ -41,23 +41,35 @@ export default function CreateOrderForm() {
   const [modal, contextHolder] = Modal.useModal()
 
   const showSuccess = (txData: any) => {
+    const items: DescriptionsProps["items"] = [
+      {
+        label: "From",
+        children: txData.from,
+      },
+      {
+        label: "To",
+        children: txData.to,
+      },
+      {
+        label: "Transaction Hash",
+        children: txData.transactionHash,
+      },
+      {
+        label: "Status",
+        children: txData.status,
+      },
+    ]
+
     modal.success({
       title: "Success",
       closable: true,
-      content: (
-        <div className="flex flex-col break-words gap-4">
-          From
-          <span>{txData.from}</span>
-          To
-          <span>{txData.to}</span>
-          Transaction Hash
-          <span>{txData.transactionHash}</span>
-          Status
-          <span>{txData.status}</span>
-        </div>
-      ),
+      content: <Descriptions className="mt-4 mb-4" column={1} layout="vertical" bordered items={items} />,
     })
   }
+
+  useEffect(() => {
+    showSuccess({ from: "any", to: "any", transactionHash: "something something", status: "OK" })
+  }, [])
 
   const showError = (error: any) => {
     modal.error({ title: "Error", closable: true, content: error })
