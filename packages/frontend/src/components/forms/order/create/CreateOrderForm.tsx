@@ -67,10 +67,6 @@ export default function CreateOrderForm() {
     })
   }
 
-  useEffect(() => {
-    showSuccess({ from: "any", to: "any", transactionHash: "something something", status: "OK" })
-  }, [])
-
   const showError = (error: any) => {
     modal.error({ title: "Error", closable: true, content: error })
   }
