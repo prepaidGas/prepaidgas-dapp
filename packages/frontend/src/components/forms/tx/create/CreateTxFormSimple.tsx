@@ -1,14 +1,15 @@
 "use client"
 
-import { DatePicker, Form, FormInstance, FormProps, Input, InputNumber, Select, TimePicker } from "antd"
+import { DatePicker, Form, FormInstance, FormProps, Input, InputNumber, Select, TimePicker, Switch } from "antd"
 
 import { useEffect, useState } from "react"
 import { ABIEntry, FieldEntry, prepaidGasCoreContractAddress } from "@/helpers"
 import dayjs, { Dayjs } from "dayjs"
 import { Buttons } from "@/components/buttons"
-import { TEST_ABI_STRING, TEST_ABI_STRING_OLD } from "@/constants"
+import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX, TEST_ABI_STRING, TEST_ABI_STRING_OLD } from "@/constants"
 import { Cards } from "@/components/cards/frame/cards-frame"
 import ContractForm from "../../../ContractForm"
+import { set } from "date-fns"
 
 export type SimpleTxProps = {
   gasOrder: number
@@ -17,6 +18,7 @@ export type SimpleTxProps = {
   to: string
   gas: number
   userAbi: string
+  etherscanContractAddress: string
   selectedFunction: string
 }
 
@@ -28,6 +30,7 @@ const initialState: SimpleTxProps = {
   to: "0x0000000000000000000000000000000000000000",
   gas: 25000,
   userAbi: TEST_ABI_STRING,
+  etherscanContractAddress: "0xBB9bc244D798123fDe783fCc1C72d3Bb8C189413",
   selectedFunction: "",
 }
 
@@ -139,6 +142,9 @@ export default function CreateTxFormSimple({
 
   const [parsedAbi, setParsedAbi] = useState<null | ABIEntry[]>(null)
 
+  const [isUsingEtherscanAbi, setIsUsingEtherscanAbi] = useState(true)
+  const [isLoadingAbi, setIsLoadingAbi] = useState(false)
+
   const parseAbi = () => {
     try {
       let parsed = JSON.parse(form.getFieldValue("userAbi"))
@@ -153,6 +159,23 @@ export default function CreateTxFormSimple({
       console.log("parseAbi Error: ", e)
       setParsedAbi(null)
     }
+  }
+
+  const fetchAbiFromEtherscan = async () => {
+    setIsLoadingAbi(true)
+    try {
+      const fetchUrl = `https://api.etherscan.io/api?module=contract&action=getabi&address=${form.getFieldValue(
+        "etherscanContractAddress",
+      )}&apikey=RV9VA5BZT1TP42JYWV45KWU7G26UASVWZ1`
+      console.log("fetchAbiFromEtherscan: ", fetchUrl)
+      const response = await fetch(fetchUrl, { method: "GET" })
+      const result = await response.json()
+      console.log("fetchAbiFromEtherscan: ", result)
+      setParsedAbi(JSON.parse(result.result))
+    } catch (error) {
+      console.log("ERROR fetchAbiFromEtherscan: ", { error })
+    }
+    setIsLoadingAbi(false)
   }
 
   const values = Form.useWatch([], form)
@@ -257,33 +280,72 @@ export default function CreateTxFormSimple({
           </Form.Item>
         </div>
 
-        <div className="flex flex-col">
-          <Form.Item
-            name={"userAbi"}
-            label={"ABI"}
-            colon={false}
-            rules={[
-              {
-                validator: (_, value) => {
-                  try {
-                    let parsed = JSON.parse(value)
-                    console.log("VALIDATOR Parsed ABI: ", parsed)
-                    return Promise.resolve()
-                  } catch (e) {
-                    return Promise.reject(new Error("Please enter an ABI in a valid JSON format"))
-                  }
-                },
-              },
-            ]}
-            className={`${!!parsedAbi ? "hidden" : ""}`}
-          >
-            <Input.TextArea
-              placeholder="Copy and paste your ABI JSON here"
-              spellCheck={false}
-              className="border-normal dark:border-whiteDark hover:border-primary focus:border-primary"
-            />
-          </Form.Item>
+        <div className="flex flex-row items-center justify-center">
+          <Switch
+            disabled={isLoadingAbi || !!parsedAbi}
+            checkedChildren={"Etherscan ABI"}
+            unCheckedChildren={"Custom ABI"}
+            value={isUsingEtherscanAbi}
+            onChange={(checked: boolean) => {
+              setIsUsingEtherscanAbi(checked)
+            }}
+          />
         </div>
+
+        {isUsingEtherscanAbi ? (
+          <div className="flex flex-col">
+            <Form.Item
+              name="etherscanContractAddress"
+              label="Etherscan smart contract address"
+              colon={false}
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (ETH_ADDRESS_OR_EMPTY_STRING_REGEX.test(value)) {
+                      return Promise.resolve()
+                    } else {
+                      return Promise.reject(new Error("Please enter a valid address"))
+                    }
+                  },
+                },
+              ]}
+            >
+              <Input
+                spellCheck={false}
+                placeholder="0x1dA..."
+                className="!border-normal dark:border-whiteDark hover:!border-primary focus:!border-primary dark:placeholder-white/60"
+              />
+            </Form.Item>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            <Form.Item
+              name={"userAbi"}
+              label={"ABI"}
+              colon={false}
+              rules={[
+                {
+                  validator: (_, value) => {
+                    try {
+                      let parsed = JSON.parse(value)
+                      console.log("VALIDATOR Parsed ABI: ", parsed)
+                      return Promise.resolve()
+                    } catch (e) {
+                      return Promise.reject(new Error("Please enter an ABI in a valid JSON format"))
+                    }
+                  },
+                },
+              ]}
+              className={`${!!parsedAbi ? "hidden" : ""}`}
+            >
+              <Input.TextArea
+                placeholder="Copy and paste your ABI JSON here"
+                spellCheck={false}
+                className="border-normal dark:border-whiteDark hover:border-primary focus:border-primary"
+              />
+            </Form.Item>
+          </div>
+        )}
 
         {!!parsedAbi ? (
           <div className="flex flex-row old-md:justify-between mt-4">
@@ -304,9 +366,15 @@ export default function CreateTxFormSimple({
           </div>
         ) : (
           <div className="flex flex-row old-md:justify-end mt-4">
-            <Buttons onClick={parseAbi} className="secondary_btn">
-              {"Parse ABI"}
-            </Buttons>
+            {isUsingEtherscanAbi ? (
+              <Buttons loading={isLoadingAbi} onClick={fetchAbiFromEtherscan} className="secondary_btn">
+                {"Get ABI"}
+              </Buttons>
+            ) : (
+              <Buttons onClick={parseAbi} className="secondary_btn">
+                {"Parse ABI"}
+              </Buttons>
+            )}
           </div>
         )}
 

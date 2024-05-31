@@ -2,26 +2,21 @@
 
 import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTime.utils"
 
-import { readContract, writeContract, waitForTransaction, signTypedData } from "@wagmi/core"
-import { MockTokenABI, PrepaidGasABI, prepaidGasCoreContractAddress, ABIEntry } from "@/helpers"
+import { readContract, signTypedData } from "@wagmi/core"
+import { PrepaidGasABI, prepaidGasCoreContractAddress } from "@/helpers"
 import { useAccount } from "wagmi"
-import { UilWallet } from "@iconscout/react-unicons"
 
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react"
-import DialogWindow from "@/components/DialogWindow"
-import UserAgreement from "@/components/UserAgreement"
+import { useEffect, useState } from "react"
+
 import CreateTxCardSimple, { SimpleTxProps } from "./CreateTxFormSimple"
 import { ethers } from "ethers"
 import { CHAIN_ID, PROJECT_NAME, PROJECT_VERSION, TEST_ABI_STRING } from "@/constants"
 import { Tabs, TabsProps, Form, Modal } from "antd"
 
-import dayjs, { type Dayjs } from "dayjs"
 import { MessageStruct } from "typechain-types/PrepaidGas"
 import CustomConnectBttn from "@/components/CustomConnectBttn"
-import { TailSpin } from "react-loader-spinner"
+
 import commonModalConfigs from "@/constants/commonModalConfigs"
-import { boolean } from "zod"
-import { isValid } from "date-fns"
 
 type PendingTxProps = {
   isPending: boolean
@@ -233,7 +228,7 @@ export default function CreateTxForm() {
         <CreateTxCardSimple
           form={formSimple}
           handleSubmit={handleSubmit}
-          disabled={false}
+          disabled={pendingData.isPending}
           inputs={inputs}
           setInputs={setInputs}
         />
