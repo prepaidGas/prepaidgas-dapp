@@ -65,9 +65,7 @@ export default function CreateTxForm() {
 
   const encodeFuncData = (abi: any, selectedFunc: string, argsArray: any) => {
     const contractInterface = new ethers.Interface(abi)
-
     const encodedData = contractInterface.encodeFunctionData(selectedFunc, argsArray)
-
     return encodedData
   }
 
@@ -105,7 +103,14 @@ export default function CreateTxForm() {
 
     console.log("argsArray: ", argsArray)
 
-    const encodedData = encodeFuncData(values.userAbi, values.selectedFunction, argsArray)
+    let encodedData = undefined
+    try {
+      encodedData = encodeFuncData(values.userAbi, values.selectedFunction, argsArray)
+    } catch (error) {
+      console.log("ERROR encodeFuncData: ", error)
+      Modal.destroyAll()
+      return showError(error)
+    }
     console.log("EncodedData: ", encodedData)
     const message: MessageStruct = {
       from: address as string,
