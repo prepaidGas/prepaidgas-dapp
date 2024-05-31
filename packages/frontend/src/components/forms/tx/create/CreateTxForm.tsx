@@ -44,13 +44,7 @@ const ValidationMsg = {
   5: "Timeline Compliance",
 }
 
-export default function CreateTxForm({
-  setShowDialogWindow,
-  setTransactionDetails,
-}: {
-  setShowDialogWindow: Dispatch<SetStateAction<boolean>>
-  setTransactionDetails: Dispatch<SetStateAction<{}>>
-}) {
+export default function CreateTxForm() {
   const { WalletConnectionConfig, ProcessingConfig, SuccessConfig, ErrorConfig } = commonModalConfigs
 
   const { address } = useAccount()
