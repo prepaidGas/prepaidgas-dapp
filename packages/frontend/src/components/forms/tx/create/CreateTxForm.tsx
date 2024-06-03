@@ -39,9 +39,9 @@ const ValidationMsg = {
   5: "Timeline Compliance",
 }
 
-export default function CreateTxForm() {
-  const { WalletConnectionConfig, ProcessingConfig, SuccessConfig, ErrorConfig } = commonModalConfigs
+const { WalletConnectionConfig, ProcessingConfig, SuccessConfig, ErrorConfig } = commonModalConfigs
 
+export default function CreateTxForm() {
   const { address } = useAccount()
 
   //todo: remove if using only one form
