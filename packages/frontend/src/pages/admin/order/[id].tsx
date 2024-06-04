@@ -48,6 +48,7 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
     return false
   }
 
+  //replace old function names
   const fetchOrderData = async () => {
     setIsLoading(true)
     try {
