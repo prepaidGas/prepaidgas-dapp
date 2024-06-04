@@ -35,9 +35,18 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
   const [specifiedManager, setSpecifiedManager] = useState("")
   const [transactionDetailsChangeManager, setTransactionDetailsChangeManager] = useState<null | any>(null)
 
-  const isRevocable =
-    orderData?.order?.manager === address &&
-    (Number(orderData.status) === STATUS.Pending || Number(orderData.status) === STATUS.Untaken)
+  const checkIfRevocable = () => {
+    if (!!orderData) {
+      if (
+        orderData?.order?.manager === address &&
+        (Number(orderData.status) === STATUS.Pending || Number(orderData.status) === STATUS.Untaken)
+      ) {
+        return true
+      }
+    }
+
+    return false
+  }
 
   const fetchOrderData = async () => {
     setIsLoading(true)
@@ -170,7 +179,47 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
       )}
       {orderData && !isLoading && (
         <>
-          {/* {showWindowRetrieveGas &&
+          <Cards headless className="max-w-[1024px] mx-auto">
+            <OrderCard
+              {...orderData}
+              className={"mt-4"}
+              // onFavorited={onOrderCardAction}
+              key={`order-${orderData.id}`}
+            />
+            <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
+              {checkIfRevocable() && <Buttons onClick={revokeOrder}>Revoke</Buttons>}
+              {Number(orderData.status) === STATUS.Inactive && (
+                <Buttons onClick={retrieveGuarantee}>Retrieve Guarantee</Buttons>
+              )}
+              {Number(orderData.gasLeft) > 0 && (
+                <Buttons onClick={() => setShowWindowRetrieveGas(true)}>Retrieve Gas</Buttons>
+              )}
+              {orderData.order.manager === address && (
+                <Buttons onClick={() => setShowWindowChangeManager(true)}>Change Manager</Buttons>
+              )}
+              {/*TODO: Remove test buttons*/}
+              <Buttons onClick={revokeOrder}>TEST Revoke</Buttons>
+              <Buttons onClick={retrieveGuarantee}>TEST Retrieve Guarantee</Buttons>
+              <Buttons onClick={() => setShowWindowRetrieveGas(true)}>TEST Retrieve Gas</Buttons>
+              <Buttons onClick={() => setShowWindowChangeManager(true)}>TEST Change Manager</Buttons>
+            </div>
+          </Cards>
+        </>
+      )}
+      {isError && (
+        <Cards headless className="mt-4 max-w-[1024px] mx-auto">
+          <div className="flex flex-row gap-4 justify-center items-center">
+            {/* <Icon icon={ExclamationCircleIcon} size="xl"></Icon> */}
+            <span>No such order was found</span>
+          </div>
+        </Cards>
+      )}
+    </>
+  )
+}
+
+//todo: replace code under with antd modals
+/* {showWindowRetrieveGas &&
             (Boolean(transactionDetailsRetrieveGas) ? (
               <DialogWindow
                 onClose={() => {
@@ -309,42 +358,4 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
                   </Buttons>,
                 ]}
               ></DialogWindow>
-            ))} */}
-          <Cards headless className="max-w-[1024px] mx-auto">
-            <OrderCard
-              {...orderData}
-              className={"mt-4"}
-              // onFavorited={onOrderCardAction}
-              key={`order-${orderData.id}`}
-            />
-            <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
-              {isRevocable && <Buttons onClick={revokeOrder}>Revoke</Buttons>}
-              {Number(orderData.status) === STATUS.Inactive && (
-                <Buttons onClick={retrieveGuarantee}>Retrieve Guarantee</Buttons>
-              )}
-              {Number(orderData.gasLeft) > 0 && (
-                <Buttons onClick={() => setShowWindowRetrieveGas(true)}>Retrieve Gas</Buttons>
-              )}
-              {orderData.order.manager === address && (
-                <Buttons onClick={() => setShowWindowChangeManager(true)}>Change Manager</Buttons>
-              )}
-              {/*TODO: Remove test buttons*/}
-              <Buttons onClick={revokeOrder}>TEST Revoke</Buttons>
-              <Buttons onClick={retrieveGuarantee}>TEST Retrieve Guarantee</Buttons>
-              <Buttons onClick={() => setShowWindowRetrieveGas(true)}>TEST Retrieve Gas</Buttons>
-              <Buttons onClick={() => setShowWindowChangeManager(true)}>TEST Change Manager</Buttons>
-            </div>
-          </Cards>
-        </>
-      )}
-      {isError && (
-        <Cards headless className="mt-4 max-w-[1024px] mx-auto">
-          <div className="flex flex-row gap-4 justify-center items-center">
-            {/* <Icon icon={ExclamationCircleIcon} size="xl"></Icon> */}
-            <span>No such order was found</span>
-          </div>
-        </Cards>
-      )}
-    </>
-  )
-}
+            ))} */
