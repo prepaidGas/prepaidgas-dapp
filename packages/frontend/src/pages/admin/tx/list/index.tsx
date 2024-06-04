@@ -3,7 +3,7 @@ import { PageHeaders } from "@/components/page-headers"
 import { Cards } from "@/components/cards/frame/cards-frame"
 // import OrderCard, { OrderCardProps } from "@/components/cards/orderCard"
 import { useEffect, useState } from "react"
-import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
+import { FilteredOrderStructOutput, MessageStruct } from "typechain-types/PrepaidGas"
 import { readContract } from "@wagmi/core"
 import Pagination from "@/components/Pagination"
 import { prepaidGasCoreContractAddress, PrepaidGasABI } from "@/helpers"
@@ -11,15 +11,16 @@ import { TailSpin } from "react-loader-spinner"
 import { SPINNER_COLOR } from "@/constants"
 import OrderCard from "@/components/OrderCard"
 import SearchOrdersForm, { FilterOptions } from "@/components/forms/searchOrders/SearchOrdersForm"
+import TransactionCard from "@/components/TransactionCard"
 
 const PageRoutes = [
   {
-    path: "/admin/order/create",
+    path: "/admin",
     breadcrumbName: "Home",
   },
   {
     path: "",
-    breadcrumbName: "Order Search",
+    breadcrumbName: "Transactions List",
   },
 ]
 
@@ -28,9 +29,17 @@ const initialState: FilterOptions = {
   status: 0,
   numberOfEntries: 50,
 }
-const OrderSearch = () => {
+
+export interface Transaction {
+  id: number
+  validSign: string
+  origSign: string
+  message: MessageStruct
+}
+
+const TransactionsListPage = () => {
   const [filterState, setFilterState] = useState({ ...initialState })
-  const [data, setOrdersData] = useState<undefined | FilteredOrderStructOutput[]>(undefined)
+  const [data, setData] = useState<undefined | Transaction[]>(undefined)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalEntries, setTotalEntries] = useState<undefined | number>(undefined)
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -38,102 +47,32 @@ const OrderSearch = () => {
 
   const defaultManager = "0x0000000000000000000000000000000000000000"
 
-  const executeSearch = async (filterOptions: FilterOptions, pageNumber: number) => {
+  const getTransactions = async () => {
     setIsLoading(true)
-    setShowError(false)
-    console.log("executeSearch", { pageNumber })
-    await getTotalEntriesNumber(filterOptions)
-
-    console.log("starting search")
-    const { manager, status, numberOfEntries } = filterOptions
-    const searchArgs = [
-      manager === "" ? defaultManager : manager,
-      status,
-      numberOfEntries,
-      (pageNumber - 1) * numberOfEntries,
-    ]
-    console.log("SearchArgs: ", searchArgs)
     try {
-      const data = await readContract({
-        address: prepaidGasCoreContractAddress() as `0x${string}`,
-        abi: PrepaidGasABI,
-        functionName: "getManagerOrders",
-        args: searchArgs,
-      })
-      console.log("DATA", data)
-      setOrdersData(data as FilteredOrderStructOutput[])
-    } catch (e) {
-      console.log("ERROR: ", e)
-      setShowError(true)
+      const fetchUrl = `https://api.prepaidgas.io/load?offset=0&reverse=false`
+      const response = await fetch(fetchUrl, { method: "GET" })
+      const result = await response.json()
+      console.log("fetchedData: ", result)
+      if (result.length === 0) {
+        console.log("Result is Empty")
+        setShowError(true)
+      } else {
+        setShowError(false)
+        setData(result)
+        console.log("Result is NOT OK")
+      }
+      setIsLoading(false)
+    } catch (error) {
+      console.log("ERROR getTransactions: ", { error })
+      setIsLoading(false)
+      // modal.error({ ...commonModalConfigs.ErrorConfig, content: result.result })
     }
     setIsLoading(false)
   }
-
-  const getTotalEntriesNumber = async (filterOptions) => {
-    try {
-      const data = await readContract({
-        address: prepaidGasCoreContractAddress() as `0x${string}`,
-        abi: PrepaidGasABI,
-        functionName: "getManagerOrdersCount",
-        args: [filterOptions.manager || defaultManager, filterOptions.status],
-      })
-      console.log("getTotalEntriesNumber", { filterOptions })
-      console.log("getMaxEntriesNumber", data)
-      console.log("getMaxEntriesNumber2", Number(data))
-
-      setTotalEntries(Number(data))
-    } catch (e) {
-      console.log("ERROR: ", e)
-    }
-  }
-
   useEffect(() => {
-    executeSearch(filterState, currentPage)
+    getTransactions()
   }, [])
-
-  // const [showPopup, setShowPopup] = useState(false)
-  // const [popupTimer, setPopupTimer] = useState<NodeJS.Timeout | undefined>()
-  // const [popupProps, setPopupProps] = useState<{ msgTitle: string; msgBody: string; color: Color }>({
-  //   msgTitle: "",
-  //   msgBody: "",
-  //   color: "blue",
-  // })
-
-  // const onOrderCardAction = (favorited: boolean) => {
-  //   if (favorited) {
-  //     setPopupProps({
-  //       msgTitle: "Order was added to favorites",
-  //       msgBody: "",
-  //       color: "green",
-  //     })
-  //   } else {
-  //     setPopupProps({
-  //       msgTitle: "Order was removed from favorites",
-  //       msgBody: "",
-  //       color: "amber",
-  //     })
-  //   }
-  //   setShowPopup(true)
-  //   if (popupTimer !== undefined) {
-  //     clearTimeout(popupTimer)
-  //   }
-  //   const timer = setTimeout(() => setShowPopup(false), 5000)
-  //   setPopupTimer(timer)
-  // }
-
-  const onFilterSubmit = (filterOptions: FilterOptions) => {
-    console.log("handleFilterSubmit START")
-    setFilterState(filterOptions)
-    setCurrentPage(1)
-    executeSearch(filterOptions, 1)
-    console.log("handleFilterSubmit END")
-  }
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    executeSearch(filterState, page)
-    console.log("handlePageChange")
-  }
 
   useEffect(() => {
     if (!isLoading) {
@@ -153,28 +92,20 @@ const OrderSearch = () => {
     <>
       <PageHeaders
         routes={PageRoutes}
-        title="Order Search"
+        title="Transactions List"
         className="flex items-center justify-between px-8 xl:px-[15px] pt-[18px] pb-6 sm:pb-[30px] bg-transparent sm:flex-col"
       />
       <div className="min-h-[715px] lg:min-h-[580px] flex-1 h-auto px-8 xl:px-[15px] pb-[30px] bg-transparent">
         <div className="h-full w-full">
-          {/* <Cards headless className="max-w-[1024px] mx-auto">
-            <div className="px-[25px] py-0">
-              <div className="flex flex-row items-center gap-4 w-full grow">
-                <SearchFiltersCard initialValue={initialState} onSubmit={onFilterSubmit} />
-              </div>
-            </div>
-          </Cards> */}
-
-          <Cards headless className="max-w-[1024px] mx-auto mt-4">
+          {/* <Cards headless className="max-w-[1024px] mx-auto mt-4">
             <div className="px-[25px] py-0">
               <div className="flex flex-row items-center gap-4 w-full grow">
                 <SearchOrdersForm initialValues={initialState} handleSubmit={onFilterSubmit} />
               </div>
             </div>
-          </Cards>
+          </Cards> */}
 
-          {data && (
+          {/* {data && (
             <Pagination
               className="flex flex-col"
               onPageChange={handlePageChange}
@@ -182,7 +113,7 @@ const OrderSearch = () => {
               totalCount={totalEntries ? totalEntries : 0}
               pageSize={filterState.numberOfEntries}
             />
-          )}
+          )} */}
 
           {isLoading ? (
             <div className="flex justify-center my-4">
@@ -198,8 +129,8 @@ const OrderSearch = () => {
               />
             </div>
           ) : (
-            data?.map((item: any, index) => (
-              <OrderCard
+            data?.map((item, index) => (
+              <TransactionCard
                 {...item}
                 className={index === 0 ? "mt-4" : "mt-4"}
                 // onFavorited={onOrderCardAction}
@@ -208,7 +139,7 @@ const OrderSearch = () => {
             ))
           )}
 
-          {data && (
+          {/* {data && (
             <Pagination
               className="flex flex-col"
               onPageChange={handlePageChange}
@@ -216,7 +147,7 @@ const OrderSearch = () => {
               totalCount={totalEntries ? totalEntries : 0}
               pageSize={filterState.numberOfEntries}
             />
-          )}
+          )} */}
 
           {showError && (
             <Cards headless className="mt-4 max-w-[1024px] mx-auto">
@@ -232,4 +163,4 @@ const OrderSearch = () => {
   )
 }
 
-export default OrderSearch
+export default TransactionsListPage

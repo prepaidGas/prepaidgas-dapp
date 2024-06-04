@@ -290,6 +290,7 @@ function MenuItems() {
     ]),
     getItem(t("Transactions"), "transactions", !topMenu && <UilFilePlusAlt />, [
       getItem(<Link href={`${path}/tx/create`}>{t("Create Transaction")}</Link>, "createTransaction", null, null),
+      getItem(<Link href={`${path}/tx/list`}>{t("Transactions List")}</Link>, "transactionsList", null, null),
     ]),
     // getItem(t("email"), "email", !topMenu && <UilEnvelope />, [
     //   getItem(<Link href={`${path}/email/inbox`}>{t("inbox")}</Link>, "inbox", null, null),
