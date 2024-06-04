@@ -15,7 +15,7 @@ import { DescriptionsProps, Divider, Descriptions, Statistic, Tooltip } from "an
 const { Countdown } = Statistic
 
 interface OrderCard extends FilteredOrderStructOutput {
-  onFavorited(favorited: boolean): void
+  // onFavorited(favorited: boolean): void
   className?: string
 }
 
@@ -26,7 +26,7 @@ export default function OrderCard({
   status,
   gasLeft,
   executor,
-  onFavorited = () => {},
+  // onFavorited = () => {},
   className = "",
 }: OrderCard) {
   // const getTimeUntilExpiration = () => {
