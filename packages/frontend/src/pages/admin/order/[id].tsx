@@ -5,7 +5,7 @@ import { readContract, writeContract, waitForTransaction } from "@wagmi/core"
 import { useEffect, useState } from "react"
 import format from "date-fns/format"
 
-import { TreasuryABI, PrepaidGasABI, prepaidGasCoreContractAddress } from "@/helpers"
+import { PrepaidGasABI, prepaidGasCoreContractAddress } from "@/helpers"
 
 import { useAccount } from "wagmi"
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
@@ -44,7 +44,7 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
     try {
       const data = await readContract({
         address: prepaidGasCoreContractAddress() as `0x${string}`,
-        abi: TreasuryABI,
+        abi: PrepaidGasABI,
         functionName: "getOrdersByIds",
         args: [[params.slug], address],
       })
@@ -60,8 +60,8 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
 
     try {
       const data = await readContract({
-        address: prepaidGasCoreContractAddress(),
-        abi: GasOrderABI,
+        address: prepaidGasCoreContractAddress() as `0x${string}`,
+        abi: PrepaidGasABI,
         functionName: "balanceAvailable",
         args: [address, params.slug],
       })
