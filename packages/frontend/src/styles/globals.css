@@ -2764,3 +2764,7 @@ as conflicts may arise in other places
 .order-card .ant-descriptions-item-label {
   @apply max-w-[5rem];
 }
+
+.order-card-management .ant-descriptions-item-label {
+  @apply max-w-[7rem];
+}

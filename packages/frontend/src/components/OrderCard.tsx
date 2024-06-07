@@ -11,11 +11,18 @@ import { TOKEN_NAME } from "@/constants/tokens"
 import { Cards } from "@/components/cards/frame/cards-frame"
 import { UilFavorite } from "@iconscout/react-unicons"
 import { Buttons } from "./buttons"
-import { DescriptionsProps, Divider, Descriptions, Statistic, Tooltip } from "antd"
+import { DescriptionsProps, Divider, Descriptions, Statistic, Tooltip, Progress, ProgressProps, Button } from "antd"
 const { Countdown } = Statistic
+
+type Undefinable<T> = T | undefined
 
 interface OrderCard extends FilteredOrderStructOutput {
   // onFavorited(favorited: boolean): void
+  managementSettings?: Undefinable<{
+    canRetrieveGuarantee: boolean
+    canRetrieveGas: boolean
+    canChangeManager: boolean
+  }>
   className?: string
 }
 
@@ -27,6 +34,7 @@ export default function OrderCard({
   gasLeft,
   executor,
   // onFavorited = () => {},
+  managementSettings = undefined,
   className = "",
 }: OrderCard) {
   // const getTimeUntilExpiration = () => {
@@ -60,6 +68,18 @@ export default function OrderCard({
   //   }
   // }
 
+  const getProgressBarStatus: () => ProgressProps["status"] = () => {
+    if (Number(gasLeft) === 0) {
+      return "exception"
+    }
+
+    if (Number(status) === STATUS.Active) {
+      return "active"
+    }
+
+    return "normal"
+  }
+
   const checkIfExpired = () => {
     const expirationDate = new Date(Number(order.expire) * 1000)
     const currentDate = new Date()
@@ -75,7 +95,15 @@ export default function OrderCard({
 
   const items: DescriptionsProps["items"] = [
     {
-      label: "Manager",
+      label:
+        !!managementSettings && managementSettings.canChangeManager ? (
+          <div className="flex flex-row justify-between items-center">
+            <span>Manager</span>
+            <Button>Change</Button>
+          </div>
+        ) : (
+          "Manager"
+        ),
       children: <TruncatedTextWithTooltip text={order.manager} isCopyable />,
       span: 2,
     },
@@ -126,9 +154,17 @@ export default function OrderCard({
       span: 2,
     },
     {
-      label: "Guarantee",
+      label:
+        !!managementSettings && managementSettings.canRetrieveGuarantee ? (
+          <div className="flex flex-row justify-between items-center ">
+            <span>Guarantee</span>
+            <Button>Retrieve</Button>
+          </div>
+        ) : (
+          "Guarantee"
+        ),
       children:
-        Number(order.gasGuarantee.perUnit) === 0 ? (
+        Number(order.gas) === 0 ? (
           "N/A"
         ) : (
           <div className="flex flex-row items-center gap-2">
@@ -140,6 +176,32 @@ export default function OrderCard({
             />
           </div>
         ),
+      span: 2,
+    },
+    {
+      label:
+        !!managementSettings && managementSettings.canRetrieveGas ? (
+          <div className="flex flex-row justify-between items-center">
+            <span>Gas Available</span>
+            <Button>Retrieve</Button>
+          </div>
+        ) : (
+          "Gas Available"
+        ),
+      children: (
+        <div className="flex flex-row items-center gap-2">
+          <Tooltip title={`${Number(gasLeft)} / ${Number(order.gas)}`} overlayStyle={{ maxWidth: "500px" }}>
+            <Progress
+              size={"default"}
+              className="w-full"
+              format={(percent) => `${Math.round(percent * 10) / 10}%`}
+              status={getProgressBarStatus()}
+              strokeColor={{ from: "#108ee9", to: "#87d068" }}
+              percent={(Number(gasLeft) / Number(order.gas)) * 100}
+            />
+          </Tooltip>
+        </div>
+      ),
       span: 2,
     },
   ]
@@ -261,7 +323,7 @@ export default function OrderCard({
           {typeof window !== "undefined" && window.innerWidth < 768 ? (
             <Descriptions column={1} layout="vertical" bordered items={items} />
           ) : (
-            <div className="order-card">
+            <div className={!!managementSettings ? "order-card-management" : "order-card"}>
               <Descriptions column={1} layout="horizontal" bordered items={items} />
             </div>
           )}

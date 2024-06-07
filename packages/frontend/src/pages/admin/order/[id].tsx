@@ -18,10 +18,29 @@ import { Cards } from "@/components/cards/frame/cards-frame"
 import OrderCard from "@/components/OrderCard"
 import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
 import { Buttons } from "@/components/buttons"
+import { PageHeaders } from "@/components/page-headers"
+
+const testOrder = {
+  executor: "0x6b7d3a21183ff2bcA15b1556Ad5945D7E5b46420",
+  gasLeft: 100000,
+  id: 29,
+  status: 4,
+  order: {
+    gasGuarantee: { perUnit: 0, token: "0x7b48c77640d60B3088E0F519E66cE6eDA1ca8Db3" },
+    gasPrice: { perUnit: 10, token: "0x4baBf49F774d6249C0B497E45C7B19B2BdbB2378" },
+    end: 1717086060,
+    expire: 1717000560,
+    gas: 100000,
+    manager: "0xA375835807cF54C3445c13a71A44dfd7f16A83F3",
+    redeemWindow: 7200,
+    start: 1716999732,
+    txWindow: 600,
+  },
+}
 
 export default function SingleOrderPage({ params }: { params: { slug: string } }) {
   const [isLoading, setIsLoading] = useState(true)
-  const [orderData, setOrderData] = useState<null | FilteredOrderStructOutput>(null)
+  const [orderData, setOrderData] = useState<any>(testOrder)
   const { address, isConnecting, isDisconnected } = useAccount()
   const [isError, setIsError] = useState(false)
 
@@ -34,6 +53,17 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
   const [showWindowChangeManager, setShowWindowChangeManager] = useState(false)
   const [specifiedManager, setSpecifiedManager] = useState("")
   const [transactionDetailsChangeManager, setTransactionDetailsChangeManager] = useState<null | any>(null)
+
+  const PageRoutes = [
+    {
+      path: "/admin",
+      breadcrumbName: "Home",
+    },
+    {
+      path: "",
+      breadcrumbName: "Order Management",
+    },
+  ]
 
   const checkIfRevocable = () => {
     if (!!orderData) {
@@ -164,57 +194,65 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
 
   return (
     <>
-      {isLoading && (
-        <div className="flex justify-center my-4">
-          <TailSpin
-            height={40}
-            width={40}
-            color={SPINNER_COLOR}
-            ariaLabel="tail-spin-loading"
-            radius="0"
-            wrapperStyle={{}}
-            wrapperClass=""
-            visible={true}
-          />
-        </div>
-      )}
-      {orderData && !isLoading && (
-        <>
-          <Cards headless className="max-w-[1024px] mx-auto">
-            <OrderCard
-              {...orderData}
-              className={"mt-4"}
-              // onFavorited={onOrderCardAction}
-              key={`order-${orderData.id}`}
-            />
-            <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
-              {checkIfRevocable() && <Buttons onClick={revokeOrder}>Revoke</Buttons>}
-              {Number(orderData.status) === STATUS.Inactive && (
-                <Buttons onClick={retrieveGuarantee}>Retrieve Guarantee</Buttons>
-              )}
-              {Number(orderData.gasLeft) > 0 && (
-                <Buttons onClick={() => setShowWindowRetrieveGas(true)}>Retrieve Gas</Buttons>
-              )}
-              {orderData.order.manager === address && (
-                <Buttons onClick={() => setShowWindowChangeManager(true)}>Change Manager</Buttons>
-              )}
-              {/*TODO: Remove test buttons*/}
-              <Buttons onClick={revokeOrder}>TEST Revoke</Buttons>
-              <Buttons onClick={retrieveGuarantee}>TEST Retrieve Guarantee</Buttons>
-              <Buttons onClick={() => setShowWindowRetrieveGas(true)}>TEST Retrieve Gas</Buttons>
-              <Buttons onClick={() => setShowWindowChangeManager(true)}>TEST Change Manager</Buttons>
+      <PageHeaders
+        routes={PageRoutes}
+        title="Order Management"
+        className="flex items-center justify-between px-8 xl:px-[15px] pt-[18px] pb-6 sm:pb-[30px] bg-transparent sm:flex-col"
+      />
+      <div className="min-h-[715px] lg:min-h-[580px] flex-1 h-auto px-8 xl:px-[15px] pb-[30px] bg-transparent">
+        <div className="h-full w-full">
+          {isLoading && (
+            <div className="flex justify-center my-4">
+              <TailSpin
+                height={40}
+                width={40}
+                color={SPINNER_COLOR}
+                ariaLabel="tail-spin-loading"
+                radius="0"
+                wrapperStyle={{}}
+                wrapperClass=""
+                visible={true}
+              />
             </div>
-          </Cards>
-        </>
-      )}
-      {isError && (
-        <Cards headless className="mt-4 max-w-[1024px] mx-auto">
-          <div className="flex flex-row gap-4 justify-center items-center">
-            {/* <Icon icon={ExclamationCircleIcon} size="xl"></Icon> */}
-            <span>No such order was found</span>
-          </div>
-        </Cards>
-      )}
+          )}
+          {orderData && !isLoading && (
+            <Cards headless className="max-w-[1024px] mx-auto">
+              <OrderCard
+                managementSettings={{ canChangeManager: true, canRetrieveGas: true, canRetrieveGuarantee: true }}
+                {...orderData}
+                className={"mt-4"}
+                // onFavorited={onOrderCardAction}
+                key={`order-${orderData.id}`}
+              />
+              <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
+                {checkIfRevocable() && <Buttons onClick={revokeOrder}>Revoke</Buttons>}
+                {Number(orderData.status) === STATUS.Inactive && (
+                  <Buttons onClick={retrieveGuarantee}>Retrieve Guarantee</Buttons>
+                )}
+                {Number(orderData.gasLeft) > 0 && (
+                  <Buttons onClick={() => setShowWindowRetrieveGas(true)}>Retrieve Gas</Buttons>
+                )}
+                {orderData.order.manager === address && (
+                  <Buttons onClick={() => setShowWindowChangeManager(true)}>Change Manager</Buttons>
+                )}
+                {/*TODO: Remove test buttons*/}
+                <Buttons onClick={revokeOrder}>TEST Revoke</Buttons>
+                <Buttons onClick={retrieveGuarantee}>TEST Retrieve Guarantee</Buttons>
+                <Buttons onClick={() => setShowWindowRetrieveGas(true)}>TEST Retrieve Gas</Buttons>
+                <Buttons onClick={() => setShowWindowChangeManager(true)}>TEST Change Manager</Buttons>
+              </div>
+            </Cards>
+          )}
+          {isError && (
+            <Cards headless className="mt-4 max-w-[1024px] mx-auto">
+              <div className="flex flex-row gap-4 justify-center items-center">
+                {/* <Icon icon={ExclamationCircleIcon} size="xl"></Icon> */}
+                <span>No such order was found</span>
+              </div>
+            </Cards>
+          )}
+        </div>
+      </div>
     </>
   )
 }
