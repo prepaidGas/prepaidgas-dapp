@@ -11,6 +11,7 @@ import { TailSpin } from "react-loader-spinner"
 import { SPINNER_COLOR } from "@/constants"
 import OrderCard from "@/components/OrderCard"
 import SearchOrdersForm, { FilterOptions } from "@/components/forms/searchOrders/SearchOrdersForm"
+import { useNetwork } from "wagmi"
 
 const PageRoutes = [
   {
@@ -29,6 +30,8 @@ const initialState: FilterOptions = {
   numberOfEntries: 50,
 }
 const OrderSearch = () => {
+  const { chain } = useNetwork()
+
   const [filterState, setFilterState] = useState({ ...initialState })
   const [data, setOrdersData] = useState<undefined | FilteredOrderStructOutput[]>(undefined)
   const [currentPage, setCurrentPage] = useState(1)
@@ -55,7 +58,7 @@ const OrderSearch = () => {
     console.log("SearchArgs: ", searchArgs)
     try {
       const data = await readContract({
-        address: prepaidGasCoreContractAddress() as `0x${string}`,
+        address: prepaidGasCoreContractAddress(chain.id) as `0x${string}`,
         abi: PrepaidGasABI,
         functionName: "getManagerOrders",
         args: searchArgs,
@@ -72,7 +75,7 @@ const OrderSearch = () => {
   const getTotalEntriesNumber = async (filterOptions) => {
     try {
       const data = await readContract({
-        address: prepaidGasCoreContractAddress() as `0x${string}`,
+        address: prepaidGasCoreContractAddress(chain.id) as `0x${string}`,
         abi: PrepaidGasABI,
         functionName: "getManagerOrdersCount",
         args: [filterOptions.manager || defaultManager, filterOptions.status],

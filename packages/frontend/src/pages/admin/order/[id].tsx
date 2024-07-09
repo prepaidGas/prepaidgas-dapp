@@ -3,7 +3,7 @@
 // @todo fill the page with the basic order information
 import { readContract, writeContract, waitForTransaction } from "@wagmi/core"
 import { useEffect, useState } from "react"
-import { useAccount } from "wagmi"
+import { useAccount, useNetwork } from "wagmi"
 import format from "date-fns/format"
 
 import { PrepaidGasABI, prepaidGasCoreContractAddress } from "@/helpers"
@@ -41,6 +41,7 @@ const testOrder = {
 
 export default function SingleOrderPage() {
   const router = useRouter()
+  const { chain } = useNetwork()
 
   const [modal, contextHolder] = Modal.useModal()
   const [Notification, contextHolderNotification] = notification.useNotification()
@@ -87,7 +88,7 @@ export default function SingleOrderPage() {
     setIsLoading(true)
     try {
       const data = await readContract({
-        address: prepaidGasCoreContractAddress() as `0x${string}`,
+        address: prepaidGasCoreContractAddress(chain.id) as `0x${string}`,
         abi: PrepaidGasABI,
         functionName: "getOrdersByIds",
         args: [[Number(router.query.id)]],
@@ -118,7 +119,7 @@ export default function SingleOrderPage() {
   const closeOrder = async () => {
     try {
       const data = await writeContract({
-        address: prepaidGasCoreContractAddress(),
+        address: prepaidGasCoreContractAddress(chain.id),
         abi: PrepaidGasABI,
         functionName: "orderClose",
         args: [router.query.id],
@@ -151,7 +152,7 @@ export default function SingleOrderPage() {
   const withdrawOrder = async () => {
     try {
       const data = await writeContract({
-        address: prepaidGasCoreContractAddress(),
+        address: prepaidGasCoreContractAddress(chain.id),
         abi: PrepaidGasABI,
         functionName: "orderWithdraw",
         args: [router.query.id],

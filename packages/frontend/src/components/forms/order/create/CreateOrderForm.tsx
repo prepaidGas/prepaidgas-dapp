@@ -10,7 +10,7 @@ import {
   prepaidGasTreasuryContractAddress,
 } from "@/helpers"
 import { GasPaymentStruct, OrderStruct } from "typechain-types/PrepaidGas"
-import { useAccount } from "wagmi"
+import { useAccount, useNetwork } from "wagmi"
 import { UilWallet, UiProcess } from "@iconscout/react-unicons"
 
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
@@ -32,6 +32,7 @@ type PendingOrderProps = {
 
 export default function CreateOrderForm() {
   const { address } = useAccount()
+  const { chain } = useNetwork()
   const { SuccessConfig, ErrorConfig, ProcessingConfig, WalletConnectionConfig } = commonModalConfigs
 
   const [formSimple] = Form.useForm<SimpleOrderProps>()
@@ -105,7 +106,7 @@ export default function CreateOrderForm() {
         address: order.gasPrice.token as `0x${string}`,
         abi: MockTokenABI,
         functionName: "allowance",
-        args: [address, prepaidGasTreasuryContractAddress()],
+        args: [address, prepaidGasTreasuryContractAddress(chain.id)],
       })
       console.log("Allowance Data: ", { data })
       allowance = Number(data)
@@ -124,7 +125,7 @@ export default function CreateOrderForm() {
           address: order.gasPrice.token as `0x${string}`,
           abi: MockTokenABI,
           functionName: "approve",
-          args: [prepaidGasTreasuryContractAddress(), overallPrice],
+          args: [prepaidGasTreasuryContractAddress(chain.id), overallPrice],
         })
         console.log("Approve Data: ", data)
       } catch (e) {
@@ -143,7 +144,7 @@ export default function CreateOrderForm() {
     // Create Order
     try {
       const data = await writeContract({
-        address: prepaidGasTreasuryContractAddress(),
+        address: prepaidGasTreasuryContractAddress(chain.id),
         abi: TreasuryABI,
         functionName: "orderCreate",
         args: [order],
