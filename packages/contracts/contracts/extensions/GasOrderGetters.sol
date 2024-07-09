@@ -201,7 +201,7 @@ contract GasOrderGetters is GasOrder {
     for (uint256 i = 0; i < length; i++) {
       uint256 id = ids[i];
 
-      filtered[length] = FilteredOrder(id, _order[id], status(id), gasLeft[id], executor[id]);
+      filtered[i] = FilteredOrder(id, _order[id], status(id), gasLeft[id], executor[id]);
     }
 
     return filtered;
