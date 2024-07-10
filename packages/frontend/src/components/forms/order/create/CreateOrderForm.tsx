@@ -2,26 +2,16 @@
 import { readContract } from "@wagmi/core"
 import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTime.utils"
 import { writeContract, waitForTransaction, WriteContractResult } from "@wagmi/core"
-import {
-  MockTokenABI,
-  PrepaidGasABI,
-  TreasuryABI,
-  prepaidGasCoreContractAddress,
-  prepaidGasTreasuryContractAddress,
-} from "@/helpers"
+import { MockTokenABI, TreasuryABI, prepaidGasTreasuryContractAddress } from "@/helpers"
 import { GasPaymentStruct, OrderStruct } from "typechain-types/PrepaidGas"
 import { useAccount, useNetwork } from "wagmi"
-import { UilWallet, UiProcess } from "@iconscout/react-unicons"
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import DialogWindow from "@/components/DialogWindow"
-import UserAgreement from "@/components/UserAgreement"
+import { useEffect, useState } from "react"
 import { Tabs, TabsProps, Form, FormProps, Modal, Descriptions, DescriptionsProps } from "antd"
 import dayjs, { type Dayjs } from "dayjs"
 import { TOKEN_ADDRESS } from "@/constants/tokens"
 import CreateOrderFormSimple, { SimpleOrderProps } from "./CreateOrderFormSimple"
 import CreateOrderFormAdvanced, { AdvancedOrderProps } from "./CreateOrderFormAdvanced"
-import { TailSpin } from "react-loader-spinner"
 import CustomConnectBttn from "@/components/CustomConnectBttn"
 import commonModalConfigs from "@/constants/commonModalConfigs"
 
@@ -33,7 +23,7 @@ type PendingOrderProps = {
 export default function CreateOrderForm() {
   const { address } = useAccount()
   const { chain } = useNetwork()
-  const { SuccessConfig, ErrorConfig, ProcessingConfig, WalletConnectionConfig } = commonModalConfigs
+  const { ProcessingConfig, WalletConnectionConfig } = commonModalConfigs
 
   const [formSimple] = Form.useForm<SimpleOrderProps>()
   const [formAdvanced] = Form.useForm<AdvancedOrderProps>()

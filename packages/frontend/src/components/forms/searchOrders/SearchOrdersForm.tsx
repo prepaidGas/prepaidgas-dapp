@@ -1,9 +1,8 @@
-import { FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import { Buttons } from "@/components/buttons"
-import { Form, FormProps, Input, List, Select, Tabs, TabsProps } from "antd"
+import { Form, FormProps, Input, Select } from "antd"
 const { Option } = Select
 
-import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX, ICON_BY_STATUS } from "@/constants"
+import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX } from "@/constants"
 
 export type FilterOptions = {
   manager: string
@@ -47,10 +46,6 @@ export default function SearchOrdersForm({
             label="Manager"
             colon={false}
             rules={[
-              // {
-              //   validator: (_, value) =>
-              //     !value.includes(" ") ? Promise.resolve() : Promise.reject(new Error("No spaces allowed")),
-              // },
               {
                 validator: (_, value) => {
                   if (ETH_ADDRESS_OR_EMPTY_STRING_REGEX.test(value)) {

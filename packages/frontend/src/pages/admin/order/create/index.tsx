@@ -1,19 +1,11 @@
 import { PageHeaders } from "@/components/page-headers"
-import { Form, Input, List, Select, Tabs, TabsProps } from "antd"
-import { UilQuestionCircle } from "@iconscout/react-unicons"
-const { Option } = Select
 
 import { Cards } from "@/components/cards/frame/cards-frame"
-import { Buttons } from "@/components/buttons"
 import { useState } from "react"
-import DialogWindow from "@/components/DialogWindow"
-import { TailSpin } from "react-loader-spinner"
+
 import CreateOrderForm from "@/components/forms/order/create/CreateOrderForm"
 
 const CreateOrder = () => {
-  const [showDialogWindow, setShowDialogWindow] = useState(false)
-  const [transactionDetails, setTransactionDetails] = useState<null | any>(null)
-
   const PageRoutes = [
     {
       path: "/admin/order/create",

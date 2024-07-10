@@ -1,12 +1,9 @@
 import { MIN_NUM_OF_CHARACTERS_FOR_TRUNCATION } from "@/constants"
-import CustomTooltip from "./CustomTooltip"
 import { useTooltip } from "@/hooks/tremor/useTooltip"
 import React, { useState } from "react"
-import { mergeRefs } from "react-merge-refs"
-import { Icon, Text } from "@tremor/react"
-import { ClipboardDocumentIcon } from "@heroicons/react/24/outline"
+
 import { Tooltip } from "antd"
-import { UilQuestionCircle, UilClipboardNotes, UilFavorite } from "@iconscout/react-unicons"
+import { UilClipboardNotes } from "@iconscout/react-unicons"
 
 const TruncatedTextWithTooltip = React.forwardRef(
   ({ text, isCopyable = false, title = "" }: { text: string; isCopyable?: boolean; title?: string }, ref) => {
