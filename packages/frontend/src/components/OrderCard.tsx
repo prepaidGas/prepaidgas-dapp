@@ -19,9 +19,10 @@ type Undefinable<T> = T | undefined
 interface OrderCard extends FilteredOrderStructOutput {
   // onFavorited(favorited: boolean): void
   managementSettings?: Undefinable<{
-    canRetrieveGuarantee: boolean
-    canRetrieveGas: boolean
-    canChangeManager: boolean
+    canWithdrawOrder: boolean
+    onWithdrawOrder: () => {}
+    canCloseOrder: boolean
+    onCloseOrder: () => {}
   }>
   className?: string
 }
@@ -95,15 +96,7 @@ export default function OrderCard({
 
   const items: DescriptionsProps["items"] = [
     {
-      label:
-        !!managementSettings && managementSettings.canChangeManager ? (
-          <div className="flex flex-row justify-between items-center">
-            <span>Manager</span>
-            <Button>Change</Button>
-          </div>
-        ) : (
-          "Manager"
-        ),
+      label: "Manager",
       children: <TruncatedTextWithTooltip text={order.manager} isCopyable />,
       span: 2,
     },
@@ -154,15 +147,7 @@ export default function OrderCard({
       span: 2,
     },
     {
-      label:
-        !!managementSettings && managementSettings.canRetrieveGuarantee ? (
-          <div className="flex flex-row justify-between items-center ">
-            <span>Guarantee</span>
-            <Button>Retrieve</Button>
-          </div>
-        ) : (
-          "Guarantee"
-        ),
+      label: "Guarantee",
       children:
         Number(order.gas) === 0 ? (
           "N/A"
@@ -179,15 +164,7 @@ export default function OrderCard({
       span: 2,
     },
     {
-      label:
-        !!managementSettings && managementSettings.canRetrieveGas ? (
-          <div className="flex flex-row justify-between items-center">
-            <span>Gas Available</span>
-            <Button>Retrieve</Button>
-          </div>
-        ) : (
-          "Gas Available"
-        ),
+      label: "Gas Available",
       children: (
         <div className="flex flex-row items-center gap-2">
           <Tooltip title={`${Number(gasLeft)} / ${Number(order.gas)}`} overlayStyle={{ maxWidth: "500px" }}>
@@ -314,10 +291,22 @@ export default function OrderCard({
               </Buttons>
             </>
           )} */}
-          <div className="flex flex-row justify-start items-center gap-2">
-            <span className="text-[#404040] dark:text-[#A4A5AA] font-bold text-2xl">{`#${id.toString()}`}</span>
-            <Divider type="vertical" style={{ borderLeft: "1px solid #404040", height: "30px" }} />
-            <span className={`font-bold text-2xl ${getTextColor()}`}>{STATUS_NAMES[Number(status)]}</span>
+          <div className="flex flex-row justify-between items-center">
+            <div className="flex flex-row justify-start items-center gap-2">
+              <span className="text-[#404040] dark:text-[#A4A5AA] font-bold text-2xl">{`#${id.toString()}`}</span>
+              <Divider type="vertical" style={{ borderLeft: "1px solid #404040", height: "30px" }} />
+              <span className={`font-bold text-2xl ${getTextColor()}`}>{STATUS_NAMES[Number(status)]}</span>
+            </div>
+            <div className="flex flex-row gap-2">
+              {!!managementSettings && managementSettings.canWithdrawOrder && (
+                <Button onClick={managementSettings.onWithdrawOrder}>Withdraw Order</Button>
+              )}
+              {!!managementSettings && managementSettings.canCloseOrder && (
+                <Button danger onClick={managementSettings.onCloseOrder}>
+                  Close Order
+                </Button>
+              )}
+            </div>
           </div>
 
           {typeof window !== "undefined" && window.innerWidth < 768 ? (

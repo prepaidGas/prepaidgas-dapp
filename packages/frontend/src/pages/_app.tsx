@@ -8,31 +8,33 @@ import { wrapper, store } from "../redux/store"
 import "../i18n/config"
 
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit"
-import { WagmiConfig, configureChains, createConfig } from "wagmi"
+import { WagmiConfig, configureChains, createConfig, useNetwork } from "wagmi"
 import { hardhat, mainnet } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
 import { ConnectButton, DisclaimerComponent, getDefaultWallets, lightTheme } from "@rainbow-me/rainbowkit"
 import Head from "next/head"
 import { defineChain } from "viem"
+import { useEffect, useState } from "react"
 
-export const hardhatCustom = defineChain({
-  id: 31337,
-  name: "HardhatCustom",
-  network: "hardhat",
-  nativeCurrency: {
-    decimals: 18,
-    name: "Ether",
-    symbol: "ETH",
-  },
-  rpcUrls: {
-    default: {
-      http: ["http://api.prepaidgas.io:7676/"],
-    },
-    public: {
-      http: ["http://api.prepaidgas.io:7676/"],
-    },
-  },
-})
+//TODO: Decide wether to delete hardhat chain
+// export const hardhatCustom = defineChain({
+//   id: 31337,
+//   name: "HardhatCustom",
+//   network: "hardhat",
+//   nativeCurrency: {
+//     decimals: 18,
+//     name: "Ether",
+//     symbol: "ETH",
+//   },
+//   rpcUrls: {
+//     default: {
+//       http: ["http://api.prepaidgas.io:7676/"],
+//     },
+//     public: {
+//       http: ["http://api.prepaidgas.io:7676/"],
+//     },
+//   },
+// })
 
 export const sepolia = defineChain({
   id: 11155111,
@@ -53,7 +55,7 @@ export const sepolia = defineChain({
   },
 })
 
-const { chains, publicClient } = configureChains([mainnet, hardhatCustom, sepolia], [publicProvider()])
+const { chains, publicClient } = configureChains([mainnet, sepolia], [publicProvider()])
 
 const { connectors } = getDefaultWallets({
   appName: "PrepaidGas",
@@ -77,6 +79,21 @@ const Disclaimer: DisclaimerComponent = ({ Text, Link }) => (
 )
 
 function App({ Component, pageProps }: AppProps) {
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
+
+  const { chain } = useNetwork()
+  console.log("Chain", chain)
+
+  useEffect(() => {
+    if (isInitialLoad) {
+      setIsInitialLoad(false)
+      return
+    }
+
+    console.log("Chain was changed")
+    location.reload()
+  }, [chain])
+
   const renderLayout = () => {
     return (
       <>

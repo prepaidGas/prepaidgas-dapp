@@ -3,22 +3,23 @@
 // @todo fill the page with the basic order information
 import { readContract, writeContract, waitForTransaction } from "@wagmi/core"
 import { useEffect, useState } from "react"
+import { useAccount, useNetwork } from "wagmi"
 import format from "date-fns/format"
 
 import { PrepaidGasABI, prepaidGasCoreContractAddress } from "@/helpers"
 
-import { useAccount } from "wagmi"
-import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
-import StatusBadge from "@/components/StatusBadge"
 import { COLOR_BY_STATUS, SPINNER_COLOR, STATUS } from "@/constants"
 
+import { Input, Modal, notification } from "antd"
+
 import { TailSpin } from "react-loader-spinner"
-import DialogWindow from "@/components/DialogWindow"
 import { Cards } from "@/components/cards/frame/cards-frame"
 import OrderCard from "@/components/OrderCard"
 import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
 import { Buttons } from "@/components/buttons"
 import { PageHeaders } from "@/components/page-headers"
+
+import { useRouter } from "next/router"
 
 const testOrder = {
   executor: "0x6b7d3a21183ff2bcA15b1556Ad5945D7E5b46420",
@@ -38,21 +39,17 @@ const testOrder = {
   },
 }
 
-export default function SingleOrderPage({ params }: { params: { slug: string } }) {
+export default function SingleOrderPage() {
+  const router = useRouter()
+  const { chain } = useNetwork()
+
+  const [modal, contextHolder] = Modal.useModal()
+  const [Notification, contextHolderNotification] = notification.useNotification()
+
   const [isLoading, setIsLoading] = useState(true)
   const [orderData, setOrderData] = useState<any>(testOrder)
-  const { address, isConnecting, isDisconnected } = useAccount()
+  const { address } = useAccount()
   const [isError, setIsError] = useState(false)
-
-  const [showWindowRetrieveGas, setShowWindowRetrieveGas] = useState(false)
-  const [gasAmountHasChanged, setGasAmountHasChanged] = useState(false)
-  const [userBalance, setUserBalance] = useState<Number>(0)
-  const [specifiedBalance, setSpecifiedBalance] = useState<Number>(0)
-  const [transactionDetailsRetrieveGas, setTransactionDetailsRetrieveGas] = useState<null | any>(null)
-
-  const [showWindowChangeManager, setShowWindowChangeManager] = useState(false)
-  const [specifiedManager, setSpecifiedManager] = useState("")
-  const [transactionDetailsChangeManager, setTransactionDetailsChangeManager] = useState<null | any>(null)
 
   const PageRoutes = [
     {
@@ -65,7 +62,7 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
     },
   ]
 
-  const checkIfRevocable = () => {
+  const checkIfClosable = () => {
     if (!!orderData) {
       if (
         orderData?.order?.manager === address &&
@@ -80,13 +77,21 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
 
   //replace old function names
   const fetchOrderData = async () => {
+    console.log("ID Numeric: ", Number(router.query.id))
+    console.log("Typeof ID Numeric: ", typeof Number(router.query.id))
+    console.log("ID HEX: ", `0x${Number(router.query.id).toString(16)}`)
+
+    if (!router.query.id) {
+      return
+    }
+
     setIsLoading(true)
     try {
       const data = await readContract({
-        address: prepaidGasCoreContractAddress() as `0x${string}`,
+        address: prepaidGasCoreContractAddress(chain.id) as `0x${string}`,
         abi: PrepaidGasABI,
         functionName: "getOrdersByIds",
-        args: [[params.slug], address],
+        args: [[Number(router.query.id)]],
       })
       console.log("getOrdersByIds DATA", data)
       setOrderData(data[0] as FilteredOrderStructOutput)
@@ -97,103 +102,91 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
       setIsError(true)
       return
     }
+  }
 
-    try {
-      const data = await readContract({
-        address: prepaidGasCoreContractAddress() as `0x${string}`,
-        abi: PrepaidGasABI,
-        functionName: "balanceAvailable",
-        args: [address, params.slug],
-      })
-      console.log("BalanceAvailable: ", data)
-      setUserBalance(Number(data))
-    } catch (e) {
-      console.log("getOrdersByIds ERROR: ", e)
-      setIsError(true)
+  const handleCloseOrder = async () => {
+    const isConfirmed = await modal.confirm({
+      title: "Close this order?",
+      closable: false,
+      content: "You're about to close this order. Proceed?",
+    })
+    if (isConfirmed) {
+      closeOrder()
     }
   }
 
-  //closeOrder
-  const revokeOrder = async () => {
+  //orderClose
+  const closeOrder = async () => {
     try {
       const data = await writeContract({
-        address: prepaidGasCoreContractAddress(),
+        address: prepaidGasCoreContractAddress(chain.id),
         abi: PrepaidGasABI,
-        functionName: "revokeOrder",
-        args: [params.slug],
+        functionName: "orderClose",
+        args: [router.query.id],
       })
       console.log("SingleOrderPage Revoke Order DATA", data)
       const txData = await waitForTransaction({ hash: data.hash })
       console.log("SingleOrderPageTXData: ", txData)
+      Notification.success({ message: "Order was successfully closed" })
     } catch (e) {
+      Notification.error({
+        message: "We've encountered an issue on our end",
+        description: "Please try closing the order later",
+      })
       console.log("SingleOrderPage Revoke Order ERROR", e)
     }
   }
 
-  //
-  const retrieveGuarantee = async () => {
-    try {
-      const data = await writeContract({
-        address: prepaidGasCoreContractAddress(),
-        abi: PrepaidGasABI,
-        functionName: "retrieveGuarantee",
-        args: [params.slug],
-      })
-      console.log("SingleOrderPage Retrieve Guarantee DATA", data)
-      const txData = await waitForTransaction({ hash: data.hash })
-      console.log("SingleOrderPageTXData: ", txData)
-    } catch (e) {
-      console.log("SingleOrderPage Retrieve Guarantee ERROR", e)
+  const handleWithdrawOrder = async () => {
+    const isConfirmed = await modal.confirm({
+      title: "Withdraw this order?",
+      closable: false,
+      content: "You're about to withdraw this order. Proceed?",
+    })
+    if (isConfirmed) {
+      withdrawOrder()
     }
   }
 
-  const retrieveGasCost = async () => {
+  //orderClose
+  const withdrawOrder = async () => {
     try {
       const data = await writeContract({
-        address: prepaidGasCoreContractAddress(),
+        address: prepaidGasCoreContractAddress(chain.id),
         abi: PrepaidGasABI,
-        functionName: "retrieveGasCost",
-        args: [address, params.slug, gasAmountHasChanged ? specifiedBalance : userBalance],
+        functionName: "orderWithdraw",
+        args: [router.query.id],
       })
-      console.log("SingleOrderPage Retrieve Gas DATA", data)
+      console.log("SingleOrderPage Revoke Order DATA", data)
       const txData = await waitForTransaction({ hash: data.hash })
-      setTransactionDetailsRetrieveGas({ ...txData })
       console.log("SingleOrderPageTXData: ", txData)
+      Notification.success({ message: "Order was successfully closed" })
     } catch (e) {
-      setTransactionDetailsRetrieveGas({ error: e })
-      console.log("SingleOrderPage Retrieve Gas ERROR", e)
-    }
-  }
-
-  const transferOrderManagement = async () => {
-    try {
-      const data = await writeContract({
-        address: prepaidGasCoreContractAddress(),
-        abi: PrepaidGasABI,
-        functionName: "transferOrderManagement",
-        args: [params.slug, specifiedManager],
+      Notification.error({
+        message: "We've encountered an issue on our end",
+        description: "Please try closing the order later",
       })
-      console.log("SingleOrderPage Change Manager DATA", data)
-      const txData = await waitForTransaction({ hash: data.hash })
-      setTransactionDetailsChangeManager({ ...txData })
-      console.log("SingleOrderPageTXData: ", txData)
-    } catch (e) {
-      setTransactionDetailsChangeManager({ error: e })
-      console.log("SingleOrderPage Change Manager ERROR", e)
+      console.log("SingleOrderPage Revoke Order ERROR", e)
     }
   }
 
   useEffect(() => {
     fetchOrderData()
-  }, [transactionDetailsRetrieveGas, transactionDetailsChangeManager])
+  }, [router])
 
-  useEffect(() => {
-    console.log("UseEffect TXDetails: ", transactionDetailsRetrieveGas)
-    console.log("UseEffect TXDetails bool: ", Boolean(transactionDetailsRetrieveGas))
-  }, [transactionDetailsRetrieveGas])
+  // useEffect(() => {
+  //   fetchOrderData()
+  // }, [transactionDetailsRetrieveGas, transactionDetailsChangeManager])
+
+  // useEffect(() => {
+  //   console.log("UseEffect TXDetails: ", transactionDetailsRetrieveGas)
+  //   console.log("UseEffect TXDetails bool: ", Boolean(transactionDetailsRetrieveGas))
+  // }, [transactionDetailsRetrieveGas])
 
   return (
     <>
+      {contextHolder}
+      {contextHolderNotification}
       <PageHeaders
         routes={PageRoutes}
         title="Order Management"
@@ -218,28 +211,29 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
           {orderData && !isLoading && (
             <Cards headless className="max-w-[1024px] mx-auto">
               <OrderCard
-                managementSettings={{ canChangeManager: true, canRetrieveGas: true, canRetrieveGuarantee: true }}
+                //todo: add correct conditions instead of true
+                managementSettings={{
+                  canWithdrawOrder: true,
+                  onWithdrawOrder: handleWithdrawOrder,
+                  canCloseOrder: true,
+                  onCloseOrder: handleCloseOrder,
+                }}
                 {...orderData}
                 className={"mt-4"}
                 // onFavorited={onOrderCardAction}
                 key={`order-${orderData.id}`}
               />
               <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
-                {checkIfRevocable() && <Buttons onClick={revokeOrder}>Revoke</Buttons>}
-                {Number(orderData.status) === STATUS.Inactive && (
-                  <Buttons onClick={retrieveGuarantee}>Retrieve Guarantee</Buttons>
-                )}
-                {Number(orderData.gasLeft) > 0 && (
-                  <Buttons onClick={() => setShowWindowRetrieveGas(true)}>Retrieve Gas</Buttons>
-                )}
-                {orderData.order.manager === address && (
-                  <Buttons onClick={() => setShowWindowChangeManager(true)}>Change Manager</Buttons>
-                )}
+                {checkIfClosable() && <Buttons onClick={handleCloseOrder}>Revoke</Buttons>}
+                {checkIfClosable() && <Buttons onClick={handleWithdrawOrder}>Revoke</Buttons>}
+
                 {/*TODO: Remove test buttons*/}
-                <Buttons onClick={revokeOrder}>TEST Revoke</Buttons>
-                <Buttons onClick={retrieveGuarantee}>TEST Retrieve Guarantee</Buttons>
-                <Buttons onClick={() => setShowWindowRetrieveGas(true)}>TEST Retrieve Gas</Buttons>
-                <Buttons onClick={() => setShowWindowChangeManager(true)}>TEST Change Manager</Buttons>
+                {process.env.NODE_ENV === "development" && (
+                  <>
+                    <Buttons onClick={handleCloseOrder}>TEST Close</Buttons>
+                    <Buttons onClick={handleWithdrawOrder}>TEST Retrieve Guarantee</Buttons>
+                  </>
+                )}
               </div>
             </Cards>
           )}
@@ -256,145 +250,3 @@ export default function SingleOrderPage({ params }: { params: { slug: string } }
     </>
   )
 }
-
-//todo: replace code under with antd modals
-/* {showWindowRetrieveGas &&
-            (Boolean(transactionDetailsRetrieveGas) ? (
-              <DialogWindow
-                onClose={() => {
-                  setShowWindowRetrieveGas(false)
-                  setTransactionDetailsRetrieveGas(null)
-                }}
-                isClosable={true}
-                title="Transaction Result"
-                description={
-                  transactionDetailsRetrieveGas.error ? (
-                    "There seems to be an error with your request :("
-                  ) : (
-                    <div className="flex flex-col break-words gap-4">
-                      From
-                      <Text>{transactionDetailsRetrieveGas.from}</Text>
-                      To
-                      <Text>{transactionDetailsRetrieveGas.to}</Text>
-                      Transaction Hash
-                      <Text>{transactionDetailsRetrieveGas.transactionHash}</Text>
-                      Status
-                      <Text>{transactionDetailsRetrieveGas.status}</Text>
-                    </div>
-                  )
-                }
-              ></DialogWindow>
-            ) : (
-              <DialogWindow
-                onClose={() => {
-                  setShowWindowRetrieveGas(false)
-                  setTransactionDetailsRetrieveGas(null)
-                  setGasAmountHasChanged(false)
-                }}
-                isClosable={true}
-                title="Retrieve Gas"
-                description={
-                  <div className="flex flex-col">
-                    <Text>Specify the amount of Gas you want to retrieve: </Text>
-                    <div className="flex flex-col mt-4">
-                      <NumberInput
-                        value={!gasAmountHasChanged ? userBalance.toString() : specifiedBalance.toString()}
-                        onChange={(e) => {
-                          setGasAmountHasChanged(true)
-                          setSpecifiedBalance(Number(e.target.value))
-                        }}
-                        // error={!!validationErrors?.to}
-                        // errorMessage={validationErrors?.to}
-                        spellCheck={false}
-                      ></NumberInput>
-                    </div>
-                    <Text className="mt-4">{`(Max amount available for retrieving: ${userBalance})`}</Text>
-                  </div>
-                }
-                actionButtons={[
-                  <Buttons variant="primary" onClick={retrieveGasCost}>
-                    Retrieve
-                  </Buttons>,
-                  <Buttons
-                    variant="secondary"
-                    color="red"
-                    onClick={() => {
-                      setShowWindowRetrieveGas(false)
-                      setTransactionDetailsRetrieveGas(null)
-                      setGasAmountHasChanged(false)
-                    }}
-                  >
-                    Cancel
-                  </Buttons>,
-                ]}
-              ></DialogWindow>
-            ))}
-          {showWindowChangeManager &&
-            (Boolean(transactionDetailsChangeManager) ? (
-              <DialogWindow
-                onClose={() => {
-                  setShowWindowChangeManager(false)
-                  setTransactionDetailsChangeManager(null)
-                }}
-                isClosable={true}
-                title="Transaction Result"
-                description={
-                  transactionDetailsChangeManager.error ? (
-                    "There seems to be an error with your request :("
-                  ) : (
-                    <div className="flex flex-col break-words gap-4">
-                      From
-                      <Text>{transactionDetailsChangeManager.from}</Text>
-                      To
-                      <Text>{transactionDetailsChangeManager.to}</Text>
-                      Transaction Hash
-                      <Text>{transactionDetailsChangeManager.transactionHash}</Text>
-                      Status
-                      <Text>{transactionDetailsChangeManager.status}</Text>
-                    </div>
-                  )
-                }
-              ></DialogWindow>
-            ) : (
-              <DialogWindow
-                onClose={() => {
-                  setShowWindowChangeManager(false)
-                  setTransactionDetailsChangeManager(null)
-                }}
-                isClosable={true}
-                title="Transfer Order Management"
-                description={
-                  <div className="flex flex-col">
-                    <Text>Specify the address of a new order manager: </Text>
-                    <div className="flex flex-col mt-4">
-                      <TextInput
-                        value={specifiedManager}
-                        onChange={(e) => {
-                          setSpecifiedManager(e.target.value)
-                        }}
-                        // error={!!validationErrors?.to}
-                        // errorMessage={validationErrors?.to}
-                        spellCheck={false}
-                      ></TextInput>
-                    </div>
-                  </div>
-                }
-                actionButtons={[
-                  <Buttons variant="primary" onClick={transferOrderManagement}>
-                    Submit
-                  </Buttons>,
-                  <Buttons
-                    variant="secondary"
-                    color="red"
-                    onClick={() => {
-                      {
-                        setShowWindowChangeManager(false)
-                        setTransactionDetailsChangeManager(null)
-                      }
-                    }}
-                  >
-                    Cancel
-                  </Buttons>,
-                ]}
-              ></DialogWindow>
-            ))} */

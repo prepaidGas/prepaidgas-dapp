@@ -4,7 +4,7 @@ import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTi
 
 import { readContract, signTypedData } from "@wagmi/core"
 import { PrepaidGasABI, prepaidGasCoreContractAddress } from "@/helpers"
-import { useAccount } from "wagmi"
+import { useAccount, useNetwork } from "wagmi"
 
 import { useEffect, useState } from "react"
 
@@ -43,6 +43,7 @@ const { WalletConnectionConfig, ProcessingConfig, SuccessConfig, ErrorConfig } =
 
 export default function CreateTxForm() {
   const { address } = useAccount()
+  const { chain } = useNetwork()
 
   //todo: remove if using only one form
   const [formSimple] = Form.useForm<SimpleTxProps>()
@@ -129,7 +130,7 @@ export default function CreateTxForm() {
       name: PROJECT_NAME,
       version: PROJECT_VERSION,
       chainId: CHAIN_ID,
-      verifyingContract: prepaidGasCoreContractAddress() as `0x${string}`,
+      verifyingContract: prepaidGasCoreContractAddress(chain.id) as `0x${string}`,
     }
 
     const types = {
@@ -146,7 +147,7 @@ export default function CreateTxForm() {
 
     try {
       const validateMessage = await readContract({
-        address: prepaidGasCoreContractAddress() as `0x${string}`,
+        address: prepaidGasCoreContractAddress(chain.id) as `0x${string}`,
         abi: PrepaidGasABI,
         functionName: "messageValidate",
         args: [message],
