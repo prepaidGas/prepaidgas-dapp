@@ -5,6 +5,7 @@ import { expect } from "chai"
 import { getDeployAddress } from "../scripts/helpers/deploy"
 import { domain } from "../scripts/helpers/eip712"
 import {
+  NO_ADDRESS,
   NAME,
   VERSION,
   DENOM,
@@ -73,11 +74,11 @@ describe("System", function () {
       const { treasury, pgas, admin } = await loadFixture(deployFixture)
 
       const message: Message = {
-        from: "0x0000000000000000000000000000000000000000",
+        from: NO_ADDRESS,
         nonce: "0x00",
         order: "0x00",
         start: "0x00",
-        to: "0x0000000000000000000000000000000000000000",
+        to: NO_ADDRESS,
         gas: "0x00",
         data: "0x0000000000000000000000000000000000000000000000000000000000000000",
       }
@@ -100,7 +101,7 @@ describe("System", function () {
       await fakefeeT.connect(admin).approve(treasury.target, 1000n * 10n ** 18n)
 
       const order: Order = {
-        manager: "0x0000000000000000000000000000000000000000",
+        manager: NO_ADDRESS,
         gas: 1000000000,
         expire: (await time.latest()) + MAX_PENDING / 2,
         start: START_ASAP,
@@ -108,7 +109,7 @@ describe("System", function () {
         txWindow: MIN_TX_WINDOW,
         redeemWindow: MAX_REDEEM_WINDOW,
         gasPrice: { token: fakefeeT.target.toString(), perUnit: "0x0f" },
-        gasGuarantee: { token: "0x0000000000000000000000000000000000000000", perUnit: "0x00" },
+        gasGuarantee: { token: NO_ADDRESS, perUnit: "0x00" },
       }
 
       await expect(treasury.connect(admin).orderCreate(order))
@@ -117,6 +118,56 @@ describe("System", function () {
           (BigInt(order.gas) * BigInt(order.gasPrice.perUnit) * (BigInt(DENOM) - fee)) / BigInt(DENOM),
           BigInt(order.gas) * BigInt(order.gasPrice.perUnit),
         )
+    })
+  })
+
+  describe("Getters", function () {
+    it("Token details", async function () {
+      const { treasury, pgas, admin, users, guaranteeT, priceT } = await loadFixture(deployFixture)
+
+      expect(await pgas.getTokensDetails([guaranteeT, priceT, treasury])).to.be.deep.equal([
+        [guaranteeT.target, "Gas Guarantee Token", "GGT", 18, 0],
+        [priceT.target, "Gas Price Token", "GPT", 18, 0],
+        [treasury.target, "", "", 0, 7],
+      ])
+    })
+
+    it("Total balance", async function () {
+      const { treasury, pgas, admin, users, guaranteeT, priceT } = await loadFixture(deployFixture)
+      const client = users[0]
+      const bot = users[1]
+      const executor = users[2]
+
+      const order: Order = {
+        manager: client.address,
+        gas: 1000000000,
+        expire: (await time.latest()) + 100,
+        start: (await time.latest()) + 10,
+        end: (await time.latest()) + MAX_PENDING,
+        txWindow: MIN_TX_WINDOW,
+        redeemWindow: MAX_REDEEM_WINDOW,
+        gasPrice: { token: priceT.target.toString(), perUnit: 8 },
+        gasGuarantee: { token: guaranteeT.target.toString(), perUnit: 9 },
+      }
+      const orderDup: Order = { ...order, manager: bot.address, gas: 500000000 }
+
+      await treasury.connect(client).orderCreate(order)
+      await treasury.connect(bot).orderCreate(orderDup)
+
+      expect(await pgas.getTotalBalances([client, bot, executor])).to.be.deep.equal([0, 0, 0])
+
+      await treasury.connect(executor).orderAccept(0)
+      await treasury.connect(executor).orderAccept(1)
+
+      expect(await pgas.getTotalBalances([client, bot, executor])).to.be.deep.equal([0, 0, 0])
+
+      await time.increase(10)
+
+      expect(await pgas.getTotalBalances([client, bot, executor])).to.be.deep.equal([order.gas, orderDup.gas, 0])
+
+      await time.increaseTo(BigInt(order.end) + BigInt(order.redeemWindow) + 1n)
+
+      expect(await pgas.getTotalBalances([client, bot, executor])).to.be.deep.equal([0, 0, 0])
     })
   })
 
