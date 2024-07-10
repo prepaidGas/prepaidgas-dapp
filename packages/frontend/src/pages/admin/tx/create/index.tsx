@@ -1,7 +1,6 @@
 import { PageHeaders } from "@/components/page-headers"
 import { Cards } from "@/components/cards/frame/cards-frame"
 import { useState } from "react"
-import DialogWindow from "@/components/DialogWindow"
 import CreateTxForm from "@/components/forms/tx/create/CreateTxForm"
 
 const CreateTx = () => {
