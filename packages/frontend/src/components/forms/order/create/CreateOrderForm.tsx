@@ -148,7 +148,7 @@ export default function CreateOrderForm() {
       console.log("orderCreate Error: ", { e })
       Modal.destroyAll()
 
-      return showError(e.details ? e.details : e)
+      return showError(e.details ? e.details : e.message ? e.message : e)
     }
     setIsLoading(false)
     console.log("CreateOrder: END")
