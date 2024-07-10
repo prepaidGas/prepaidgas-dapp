@@ -2,7 +2,7 @@ import { ethers } from "hardhat"
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
-import { MockToken, PrepaidGas, Treasury } from "../../typechain-types"
+import { TryToken, PrepaidGas, Treasury } from "../../typechain-types"
 
 import { getDeployAddress } from "../helpers/deploy"
 import { randNum, randOpt } from "../helpers/math"
@@ -31,14 +31,14 @@ async function deploy(admin: HardhatEthersSigner) {
 }
 
 async function mockTokens(testers: HardhatEthersSigner[]) {
-  const MockToken = await ethers.getContractFactory("MockToken")
+  const TryToken = await ethers.getContractFactory("TryToken")
 
-  const guaranteeT = await MockToken.deploy("Gas Guarantee Token", "GGT")
-  const priceT = await MockToken.deploy("Gas Price Token", "GPT")
+  const guaranteeT = await TryToken.deploy("Gas Guarantee Token", "GGT")
+  const priceT = await TryToken.deploy("Gas Price Token", "GPT")
 
   for (const tester of testers) {
-    await priceT.mint(tester.address, 1000n * 10n ** 18n)
-    await guaranteeT.mint(tester.address, 1000n * 10n ** 18n)
+    await priceT.connect(tester).mint()
+    await guaranteeT.connect(tester).mint()
   }
 
   return { priceT, guaranteeT }
@@ -47,8 +47,8 @@ async function mockTokens(testers: HardhatEthersSigner[]) {
 async function mockOrders(
   treasury: Treasury,
   pgas: PrepaidGas,
-  priceT: MockToken,
-  guaranteeT: MockToken,
+  priceT: TryToken,
+  guaranteeT: TryToken,
   client: HardhatEthersSigner,
   executor: HardhatEthersSigner,
 ) {
