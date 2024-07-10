@@ -71,7 +71,7 @@ contract GasOrderGetters is GasOrder {
       uint256 left = gasLeft[id];
 
       for (uint256 i = 0; i < length; i++) {
-        if (_order[id].manager == users[i]) {
+        if (_order[id].manager == users[i] && status(id) == OrderStatus.Active) {
           balances[i] += left;
           break;
         }

@@ -1,3 +1,5 @@
+export const NO_ADDRESS = "0x0000000000000000000000000000000000000000"
+
 export const NAME = "prepaidGas"
 export const VERSION = "0.1.0"
 
