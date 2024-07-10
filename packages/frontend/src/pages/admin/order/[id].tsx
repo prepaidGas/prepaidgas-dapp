@@ -64,10 +64,17 @@ export default function SingleOrderPage() {
 
   const checkIfClosable = () => {
     if (!!orderData) {
-      if (
-        orderData?.order?.manager === address &&
-        (Number(orderData.status) === STATUS.Pending || Number(orderData.status) === STATUS.Untaken)
-      ) {
+      if (orderData?.order?.manager === address && Number(orderData.status) === STATUS.Inactive) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  const checkIfWithdrawable = () => {
+    if (!!orderData) {
+      if (orderData?.order?.manager === address && Number(orderData.status) === STATUS.Untaken) {
         return true
       }
     }
@@ -164,7 +171,7 @@ export default function SingleOrderPage() {
     } catch (e) {
       Notification.error({
         message: "We've encountered an issue on our end",
-        description: "Please try closing the order later",
+        description: "Please try withdrawing later",
       })
       console.log("SingleOrderPage Revoke Order ERROR", e)
     }
@@ -173,15 +180,6 @@ export default function SingleOrderPage() {
   useEffect(() => {
     fetchOrderData()
   }, [router])
-
-  // useEffect(() => {
-  //   fetchOrderData()
-  // }, [transactionDetailsRetrieveGas, transactionDetailsChangeManager])
-
-  // useEffect(() => {
-  //   console.log("UseEffect TXDetails: ", transactionDetailsRetrieveGas)
-  //   console.log("UseEffect TXDetails bool: ", Boolean(transactionDetailsRetrieveGas))
-  // }, [transactionDetailsRetrieveGas])
 
   return (
     <>
@@ -213,9 +211,9 @@ export default function SingleOrderPage() {
               <OrderCard
                 //todo: add correct conditions instead of true
                 managementSettings={{
-                  canWithdrawOrder: true,
+                  canWithdrawOrder: checkIfWithdrawable(),
                   onWithdrawOrder: handleWithdrawOrder,
-                  canCloseOrder: true,
+                  canCloseOrder: checkIfClosable(),
                   onCloseOrder: handleCloseOrder,
                 }}
                 {...orderData}
@@ -224,14 +222,11 @@ export default function SingleOrderPage() {
                 key={`order-${orderData.id}`}
               />
               <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
-                {checkIfClosable() && <Buttons onClick={handleCloseOrder}>Revoke</Buttons>}
-                {checkIfClosable() && <Buttons onClick={handleWithdrawOrder}>Revoke</Buttons>}
-
                 {/*TODO: Remove test buttons*/}
                 {process.env.NODE_ENV === "development" && (
                   <>
                     <Buttons onClick={handleCloseOrder}>TEST Close</Buttons>
-                    <Buttons onClick={handleWithdrawOrder}>TEST Retrieve Guarantee</Buttons>
+                    <Buttons onClick={handleWithdrawOrder}>TEST Withdraw</Buttons>
                   </>
                 )}
               </div>

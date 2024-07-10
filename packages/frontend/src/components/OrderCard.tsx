@@ -12,6 +12,7 @@ import { Cards } from "@/components/cards/frame/cards-frame"
 import { UilFavorite } from "@iconscout/react-unicons"
 import { Buttons } from "./buttons"
 import { DescriptionsProps, Divider, Descriptions, Statistic, Tooltip, Progress, ProgressProps, Button } from "antd"
+import Link from "next/link"
 const { Countdown } = Statistic
 
 type Undefinable<T> = T | undefined
@@ -260,6 +261,7 @@ export default function OrderCard({
               </Buttons>
             </>
           )} */}
+
           <div className="flex flex-row justify-between items-center">
             <div className="flex flex-row justify-start items-center gap-2">
               <span className="text-[#404040] dark:text-[#A4A5AA] font-bold text-2xl">{`#${id.toString()}`}</span>
@@ -267,13 +269,33 @@ export default function OrderCard({
               <span className={`font-bold text-2xl ${getTextColor()}`}>{STATUS_NAMES[Number(status)]}</span>
             </div>
             <div className="flex flex-row gap-2">
+              {!managementSettings && (
+                <Link
+                  href={
+                    process.env.NODE_ENV === "development"
+                      ? `http://localhost:3000/admin/order/${id.toString()}`
+                      : `https://app.prepaidgas.io/admin/order/${id.toString()}`
+                  }
+                >
+                  <Button>Manage Order</Button>
+                </Link>
+              )}
               {!!managementSettings && managementSettings.canWithdrawOrder && (
                 <Button onClick={managementSettings.onWithdrawOrder}>Withdraw Order</Button>
               )}
+              {!!managementSettings && managementSettings.canWithdrawOrder === false && (
+                <Tooltip title="You must be a manager of this order and also order must be of Untaken status">
+                  <Button disabled>Withdraw Order</Button>
+                </Tooltip>
+              )}
+
               {!!managementSettings && managementSettings.canCloseOrder && (
-                <Button danger onClick={managementSettings.onCloseOrder}>
-                  Close Order
-                </Button>
+                <Button onClick={managementSettings.onWithdrawOrder}>Withdraw Order</Button>
+              )}
+              {!!managementSettings && managementSettings.canCloseOrder === false && (
+                <Tooltip title="You must be a manager of this order and also order must be of Inactive status">
+                  <Button disabled>Close Order</Button>
+                </Tooltip>
               )}
             </div>
           </div>
