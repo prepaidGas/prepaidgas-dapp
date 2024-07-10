@@ -3,13 +3,12 @@
 import { DatePicker, Form, FormInstance, FormProps, Input, InputNumber, Select, TimePicker, Switch, Modal } from "antd"
 
 import { useEffect, useState } from "react"
-import { ABIEntry, FieldEntry, prepaidGasCoreContractAddress } from "@/helpers"
+import { ABIEntry } from "@/helpers"
 import dayjs, { Dayjs } from "dayjs"
 import { Buttons } from "@/components/buttons"
-import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX, TEST_ABI_STRING, TEST_ABI_STRING_OLD } from "@/constants"
+import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX, TEST_ABI_STRING } from "@/constants"
 import { Cards } from "@/components/cards/frame/cards-frame"
 import ContractForm from "../../../ContractForm"
-import { set } from "date-fns"
 import commonModalConfigs from "@/constants/commonModalConfigs"
 
 export type SimpleTxProps = {
@@ -23,7 +22,6 @@ export type SimpleTxProps = {
   selectedFunction: string
 }
 
-//TODO: Move parsed abi to useState, cuz antd doesn't invokes onChange event if field value was set by setFieldValue()
 const initialState: SimpleTxProps = {
   gasOrder: 0,
   startDate: dayjs().add(1, "d"),

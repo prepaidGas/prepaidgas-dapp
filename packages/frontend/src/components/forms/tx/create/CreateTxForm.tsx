@@ -10,7 +10,7 @@ import { useEffect, useState } from "react"
 
 import CreateTxCardSimple, { SimpleTxProps } from "./CreateTxFormSimple"
 import { ethers } from "ethers"
-import { CHAIN_ID, PROJECT_NAME, PROJECT_VERSION, TEST_ABI_STRING } from "@/constants"
+import { CHAIN_ID, PROJECT_NAME, PROJECT_VERSION } from "@/constants"
 import { Tabs, TabsProps, Form, Modal } from "antd"
 
 import { MessageStruct } from "typechain-types/PrepaidGas"

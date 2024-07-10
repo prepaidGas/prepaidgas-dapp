@@ -38,37 +38,6 @@ export default function OrderCard({
   managementSettings = undefined,
   className = "",
 }: OrderCard) {
-  // const getTimeUntilExpiration = () => {
-  //   const expirationDate = new Date(Number(order.expire) * 1000)
-  //   const currentDate = new Date()
-  //   const diff = expirationDate.getTime() - currentDate.getTime()
-  //   console.log("msUntillExpiration to date")
-  //   if (diff <= 0) {
-  //     return "Already expired"
-  //   } else {
-  //     const day_to_miliseconds = 1000 * 60 * 60 * 24
-  //     // 1 day equivalent in milliseconds
-  //     const hour_to_miliseconds = 1000 * 60 * 60
-  //     // 1 hour equivalent in milliseconds
-  //     const minute_to_miliseconds = 1000 * 60
-  //     // 1 minute equivalent in milliseconds
-  //     const second_to_miliseconds = 1000
-  //     // 1 second equivalent in milliseconds
-
-  //     let days = Math.floor(diff / day_to_miliseconds)
-  //     // number of days from the difference in dates
-  //     let hours = Math.floor((diff % day_to_miliseconds) / hour_to_miliseconds)
-  //     // number of hours from the remaining time after removing days
-  //     let minutes = Math.floor((diff % hour_to_miliseconds) / minute_to_miliseconds)
-  //     // number of minutes from the remaining time after removing hours
-  //     let seconds = Math.floor((diff % minute_to_miliseconds) / second_to_miliseconds)
-  //     // number of hours from the remaining time after removing seconds
-
-  //     console.log(days, hours, minutes, seconds)
-  //     return `${days} Days, ${hours}:${minutes}:${seconds}`
-  //   }
-  // }
-
   const getProgressBarStatus: () => ProgressProps["status"] = () => {
     if (Number(gasLeft) === 0) {
       return "exception"
