@@ -47,7 +47,7 @@ export default function SingleOrderPage() {
   const [Notification, contextHolderNotification] = notification.useNotification()
 
   const [isLoading, setIsLoading] = useState(true)
-  const [orderData, setOrderData] = useState<any>(testOrder)
+  const [orderData, setOrderData] = useState<FilteredOrderStructOutput>()
   const { address } = useAccount()
   const [isError, setIsError] = useState(false)
 
