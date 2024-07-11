@@ -1,8 +1,8 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useState, useEffect, DOMAttributes, MouseEventHandler } from "react"
-import { Buttons } from "./buttons"
 import { UilWallet } from "@iconscout/react-unicons"
 import { UilUser } from "@iconscout/react-unicons"
+import { Button } from "antd"
 
 export default function CustomConnectBttn({
   isActive = true,
@@ -32,60 +32,79 @@ export default function CustomConnectBttn({
                   // <Button disabled={!isActive} onClick={openConnectModal} type="button">
                   //   Connect Wallet
                   // </Button>
-                  <Buttons
+                  <Button
                     disabled={!isActive}
                     onClick={() => {
                       openConnectModal()
                       setIsLoading(true)
                     }}
                     loading={isLoading}
-                    className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] gap-2`}
+                    type="primary"
                   >
                     {/* {collapsed ? <UilWallet size="16" /> : "Connect Wallet"} */}
                     <UilWallet size="16" />
                     Connect Wallet
-                  </Buttons>
+                  </Button>
                 )
               } else {
                 setIsLoading(false)
 
                 if (chain.unsupported) {
                   return (
-                    <Buttons
-                      loading={isLoading}
-                      onClick={openChainModal}
-                      className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px]   w-full `}
-                    >
+                    <Button loading={isLoading} onClick={openChainModal}>
                       Wrong network
-                    </Buttons>
+                    </Button>
                   )
                 }
 
                 onClick?.()
 
                 return (
-                  <Buttons
-                    disabled={!isActive}
-                    onClick={openChainModal}
-                    className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] w-full gap-1`}
-                  >
-                    {chain.hasIcon && (
-                      <div
-                        style={{
-                          background: chain.iconBackground,
-                          width: 20,
-                          height: 20,
-                          borderRadius: 999,
-                          overflow: "hidden",
-                        }}
-                      >
-                        {chain.iconUrl && (
-                          <img alt={chain.name ?? "Chain icon"} src={chain.iconUrl} style={{ width: 20, height: 20 }} />
-                        )}
-                      </div>
-                    )}
-                    {!collapsed && <span className="my-auto">{chain.name}</span>}
-                  </Buttons>
+                  <div className="flex items-center justify-center flex-row gap-4">
+                    <Button
+                      disabled={!isActive}
+                      onClick={openChainModal}
+                      type="primary"
+                      className="flex flex-row justify-center items-center gap-2 "
+                    >
+                      {chain.hasIcon && (
+                        <div
+                          style={{
+                            background: chain.iconBackground,
+                            width: 20,
+                            height: 20,
+                            borderRadius: 999,
+                            overflow: "hidden",
+                          }}
+                        >
+                          {chain.iconUrl && (
+                            <img
+                              alt={chain.name ?? "Chain icon"}
+                              src={chain.iconUrl}
+                              style={{ width: 20, height: 20 }}
+                            />
+                          )}
+                        </div>
+                      )}
+                      {!collapsed && <span className="my-auto">{chain.name}</span>}
+                    </Button>
+
+                    <Button
+                      disabled={!isActive}
+                      onClick={openAccountModal}
+                      type="primary"
+                      className="flex flex-row justify-center items-center gap-2"
+                    >
+                      {collapsed ? (
+                        <UilUser />
+                      ) : (
+                        <p>
+                          {account.displayName}
+                          {account.displayBalance ? ` (${account.displayBalance})` : ""}
+                        </p>
+                      )}
+                    </Button>
+                  </div>
                 )
               }
             })()}
