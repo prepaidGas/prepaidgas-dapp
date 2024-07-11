@@ -11,8 +11,8 @@
 // }
 
 export const TOKEN_ADDRESS = {
-  MockGasPrice: "0x4baBf49F774d6249C0B497E45C7B19B2BdbB2378",
-  MockGuarantee: "0x7b48c77640d60B3088E0F519E66cE6eDA1ca8Db3",
+  MockGasPrice: "0xfc95d5e349c8901df01c0581e5ae22cf26e50c91",
+  MockGuarantee: "0x13d874f42391859c6f4d7d6b52db85e5f9215c7b",
 }
 
 export const TOKEN_NAME = {
