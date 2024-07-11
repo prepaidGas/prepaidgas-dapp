@@ -1,6 +1,7 @@
 const Treasury = require("abi/Treasury.sol/Treasury.json")
 const PrepaidGas = require("abi/PrepaidGas.sol/PrepaidGas.json")
 const MockToken = require("abi/mock/MockToken.sol/MockToken.json")
+const TryToken = require("abi/TryToken.sol/TryToken.json")
 
 export interface FieldEntry {
   indexed?: boolean
@@ -22,5 +23,6 @@ export interface ABIEntry {
 const TreasuryABI: ABIEntry[] = Treasury.abi
 const PrepaidGasABI: ABIEntry[] = PrepaidGas.abi
 const MockTokenABI: ABIEntry[] = MockToken.abi
+const TryTokenABI: ABIEntry[] = TryToken.abi
 
-export { TreasuryABI, PrepaidGasABI, MockTokenABI }
+export { TreasuryABI, PrepaidGasABI, MockTokenABI, TryTokenABI }
