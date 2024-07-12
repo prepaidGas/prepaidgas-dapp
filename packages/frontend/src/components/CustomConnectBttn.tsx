@@ -13,8 +13,6 @@ export default function CustomConnectBttn({
   collapsed?: boolean
   onClick: (...args: any[]) => void
 }) {
-  const [isLoading, setIsLoading] = useState(false)
-
   return (
     <ConnectButton.Custom>
       {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
@@ -29,16 +27,11 @@ export default function CustomConnectBttn({
             {(() => {
               if (!connected) {
                 return (
-                  // <Button disabled={!isActive} onClick={openConnectModal} type="button">
-                  //   Connect Wallet
-                  // </Button>
                   <Button
                     disabled={!isActive}
                     onClick={() => {
                       openConnectModal()
-                      setIsLoading(true)
                     }}
-                    loading={isLoading}
                     type="primary"
                     className="flex flex-row items-center gap-2"
                   >
@@ -48,14 +41,8 @@ export default function CustomConnectBttn({
                   </Button>
                 )
               } else {
-                setIsLoading(false)
-
                 if (chain.unsupported) {
-                  return (
-                    <Button loading={isLoading} onClick={openChainModal}>
-                      Wrong network
-                    </Button>
-                  )
+                  return <Button onClick={openChainModal}>Wrong network</Button>
                 }
 
                 onClick?.()
