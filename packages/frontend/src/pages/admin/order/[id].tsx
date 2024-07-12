@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { useAccount, useNetwork } from "wagmi"
 import format from "date-fns/format"
 
-import { PrepaidGasABI, prepaidGasCoreContractAddress } from "@/helpers"
+import { PrepaidGasABI, prepaidGasCoreContractAddress, prepaidGasTreasuryContractAddress, TreasuryABI } from "@/helpers"
 
 import { COLOR_BY_STATUS, SPINNER_COLOR, STATUS } from "@/constants"
 
@@ -131,16 +131,17 @@ export default function SingleOrderPage() {
         functionName: "orderClose",
         args: [router.query.id],
       })
-      console.log("SingleOrderPage Revoke Order DATA", data)
+      console.log("Close Order DATA", data)
       const txData = await waitForTransaction({ hash: data.hash })
-      console.log("SingleOrderPageTXData: ", txData)
+      console.log("Close Order TXData: ", txData)
       Notification.success({ message: "Order was successfully closed" })
+      fetchOrderData()
     } catch (e) {
       Notification.error({
         message: "We've encountered an issue on our end",
         description: "Please try closing the order later",
       })
-      console.log("SingleOrderPage Revoke Order ERROR", e)
+      console.log("Close Order ERROR", e)
     }
   }
 
@@ -159,21 +160,22 @@ export default function SingleOrderPage() {
   const withdrawOrder = async () => {
     try {
       const data = await writeContract({
-        address: prepaidGasCoreContractAddress(chain.id),
-        abi: PrepaidGasABI,
+        address: prepaidGasTreasuryContractAddress(chain.id),
+        abi: TreasuryABI,
         functionName: "orderWithdraw",
-        args: [router.query.id],
+        args: [Number(router.query.id)],
       })
-      console.log("SingleOrderPage Revoke Order DATA", data)
+      console.log("withdrawOrder DATA", data)
       const txData = await waitForTransaction({ hash: data.hash })
-      console.log("SingleOrderPageTXData: ", txData)
-      Notification.success({ message: "Order was successfully closed" })
+      console.log("withdrawOrder TXData: ", txData)
+      Notification.success({ message: "Order was successfully withdrawn" })
+      fetchOrderData()
     } catch (e) {
       Notification.error({
         message: "We've encountered an issue on our end",
         description: "Please try withdrawing later",
       })
-      console.log("SingleOrderPage Revoke Order ERROR", e)
+      console.log("withdrawOrder ERROR", e)
     }
   }
 
