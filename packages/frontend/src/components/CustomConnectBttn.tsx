@@ -40,6 +40,7 @@ export default function CustomConnectBttn({
                     }}
                     loading={isLoading}
                     type="primary"
+                    className="flex flex-row items-center gap-2"
                   >
                     {/* {collapsed ? <UilWallet size="16" /> : "Connect Wallet"} */}
                     <UilWallet size="16" />
