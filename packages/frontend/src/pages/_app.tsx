@@ -47,10 +47,10 @@ export const sepolia = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ["https://rpc.sepolia.org"],
+      http: ["https://ethereum-sepolia-rpc.publicnode.com"],
     },
     public: {
-      http: ["https://rpc.sepolia.org"],
+      http: ["https://ethereum-sepolia-rpc.publicnode.com"],
     },
   },
 })
