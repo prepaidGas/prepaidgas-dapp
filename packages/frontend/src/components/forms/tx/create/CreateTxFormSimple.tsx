@@ -289,6 +289,7 @@ export default function CreateTxFormSimple({
 
           <div className="flex flex-row items-center justify-center">
             <Switch
+              style={{ backgroundColor: isUsingEtherscanAbi ? "#009688" : "#ff6977" }}
               disabled={isLoadingAbi || !!parsedAbi}
               checkedChildren={"Etherscan ABI"}
               unCheckedChildren={"Custom ABI"}
