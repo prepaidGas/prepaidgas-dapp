@@ -1,6 +1,6 @@
 "use client"
 
-import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTime.utils"
+import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utility/dateAndTime.utils"
 
 import { readContract, signTypedData } from "@wagmi/core"
 import { PrepaidGasABI, prepaidGasCoreContractAddress } from "@/helpers"

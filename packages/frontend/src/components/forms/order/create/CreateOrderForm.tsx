@@ -1,6 +1,6 @@
 "use client"
 import { readContract } from "@wagmi/core"
-import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utils/dateAndTime.utils"
+import { combineDateAndTime, getUnixTimestampInSeconds } from "@/utility/dateAndTime.utils"
 import { writeContract, waitForTransaction } from "@wagmi/core"
 import { MockTokenABI, TreasuryABI, prepaidGasTreasuryContractAddress } from "@/helpers"
 import { GasPaymentStruct, OrderStruct } from "typechain-types/PrepaidGas"
