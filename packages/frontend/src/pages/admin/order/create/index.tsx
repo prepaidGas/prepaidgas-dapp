@@ -5,11 +5,13 @@ import { useEffect, useState } from "react"
 
 import CreateOrderForm from "@/components/forms/order/create/CreateOrderForm"
 import { Button, Modal, Steps } from "antd"
-import { useAccount } from "wagmi"
+import { useAccount, useNetwork } from "wagmi"
 import CustomConnectBttn from "@/components/CustomConnectBttn"
 import { writeContract, waitForTransaction } from "@wagmi/core"
 import { TOKEN_ADDRESS } from "@/constants/tokens"
 import { TryTokenABI } from "@/helpers"
+import { SPINNER_COLOR } from "@/constants"
+import { TailSpin } from "react-loader-spinner"
 
 const CreateOrder = () => {
   const PageRoutes = [
@@ -24,10 +26,13 @@ const CreateOrder = () => {
   ]
 
   const { address } = useAccount()
-  const [currentStep, setCurrentStep] = useState(0)
-  const [isLoading, setIsLoading] = useState(false)
+  const { chain } = useNetwork()
 
   const [modal, contextHolder] = Modal.useModal()
+  const [currentStep, setCurrentStep] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [stepsItems, setStepsItems] = useState(undefined)
+  const [stepsContent, setStepsContent] = useState(undefined)
 
   const handleGetTestTokens = async () => {
     setIsLoading(true)
@@ -69,19 +74,58 @@ const CreateOrder = () => {
     modal.error({ title: "Error", closable: true, content: error })
   }
 
-  const stepsContent = [
-    <CustomConnectBttn onClick={() => null} />,
-    <Button loading={isLoading} type="primary" onClick={handleGetTestTokens}>
-      Get test tokens
-    </Button>,
-    null,
-  ]
-
   useEffect(() => {
     if (address) {
       setCurrentStep(1)
     }
   }, [address])
+
+  useEffect(() => {
+    console.log("ID_CHAIN: ", { chain })
+    if (chain) {
+      if (chain.id === 11155111) {
+        setStepsItems([
+          {
+            title: "Step 1",
+            description: "Connect your wallet and choose sepolia network",
+          },
+          {
+            title: "Step 2",
+            description: "Get some test tokens",
+          },
+          {
+            title: "Step 3",
+            description: "Create an order",
+          },
+        ])
+
+        setStepsContent([
+          <CustomConnectBttn onClick={() => null} />,
+          <Button loading={isLoading} type="primary" onClick={handleGetTestTokens}>
+            Get test tokens
+          </Button>,
+          null,
+        ])
+      } else {
+        setStepsItems([
+          {
+            title: "Step 1",
+            description: "Connect your wallet and choose sepolia network",
+          },
+          {
+            title: "Step 2",
+            description: "Create an order",
+          },
+        ])
+
+        setStepsContent([<CustomConnectBttn onClick={() => null} />, null])
+      }
+    }
+  }, [chain])
+
+  useEffect(() => {
+    console.log("CHAIN_ID_2: ", { chain })
+  }, [])
 
   return (
     <>
@@ -95,25 +139,23 @@ const CreateOrder = () => {
         <div className="h-full w-full">
           <Cards headless className="max-w-[1024px] mx-auto">
             <div className="p-[25px]">
-              <Steps
-                current={currentStep}
-                onChange={(value: number) => setCurrentStep(value)}
-                items={[
-                  {
-                    title: "Step 1",
-                    description: "Connect your wallet and choose sepolia network",
-                  },
-                  {
-                    title: "Step 2",
-                    description: "Get some test tokens",
-                  },
-                  {
-                    title: "Step 3",
-                    description: "Create an order",
-                  },
-                ]}
-              />
-              <div className="flex flex-row justify-center items-center mt-2 h-4">{stepsContent[currentStep]}</div>
+              {stepsItems ? (
+                <Steps current={currentStep} onChange={(value: number) => setCurrentStep(value)} items={stepsItems} />
+              ) : (
+                <TailSpin
+                  height={40}
+                  width={40}
+                  color={SPINNER_COLOR}
+                  ariaLabel="tail-spin-loading"
+                  radius="0"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                  visible={true}
+                />
+              )}
+              {stepsContent && (
+                <div className="flex flex-row justify-center items-center mt-2 h-4">{stepsContent[currentStep]}</div>
+              )}
             </div>
           </Cards>
           <Cards headless className="max-w-[1024px] mx-auto mt-6">
