@@ -1,5 +1,5 @@
 "use client"
-import { getGuaranteeValue, getRewardValue } from "@/utils/utils"
+import { getGuaranteeValue, getRewardValue } from "@/utility/utils"
 import { TOKEN_ADDRESS, TOKEN_NAME } from "@/constants/tokens"
 import { Input, DatePicker, TimePicker, Form, FormInstance, FormProps, InputNumber } from "antd"
 import { Buttons } from "@/components/buttons"
