@@ -1,13 +1,24 @@
 "use client"
 
-import { DatePicker, Form, FormInstance, FormProps, Input, InputNumber, Select, TimePicker, Switch, Modal } from "antd"
+import {
+  DatePicker,
+  Form,
+  FormInstance,
+  FormProps,
+  Input,
+  InputNumber,
+  Select,
+  TimePicker,
+  Switch,
+  Modal,
+  Button,
+  Card,
+} from "antd"
 
 import { useEffect, useState } from "react"
 import { ABIEntry } from "@/helpers"
 import dayjs, { Dayjs } from "dayjs"
-import { Buttons } from "@/components/buttons"
 import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX, TEST_ABI_STRING } from "@/constants"
-import { Cards } from "@/components/cards/frame/cards-frame"
 import ContractForm from "../../../ContractForm"
 import commonModalConfigs from "@/constants/commonModalConfigs"
 
@@ -358,7 +369,7 @@ export default function CreateTxFormSimple({
           {!!parsedAbi ? (
             <div className="flex flex-row old-md:justify-between mt-4">
               <span className="text-primary">Abi was successfully parsed</span>
-              <Buttons
+              <Button
                 onClick={() => {
                   form.setFieldValue("userAbi", "")
                   form.setFieldValue("selectedFunction", "")
@@ -370,18 +381,18 @@ export default function CreateTxFormSimple({
                 className="secondary_btn"
               >
                 {"Clear ABI"}
-              </Buttons>
+              </Button>
             </div>
           ) : (
             <div className="flex flex-row old-md:justify-end mt-4">
               {isUsingEtherscanAbi ? (
-                <Buttons loading={isLoadingAbi} onClick={fetchAbiFromEtherscan} className="secondary_btn">
+                <Button loading={isLoadingAbi} onClick={fetchAbiFromEtherscan} className="secondary_btn">
                   {"Get ABI"}
-                </Buttons>
+                </Button>
               ) : (
-                <Buttons onClick={parseAbi} className="secondary_btn">
+                <Button onClick={parseAbi} className="secondary_btn">
                   {"Parse ABI"}
-                </Buttons>
+                </Button>
               )}
             </div>
           )}
@@ -406,23 +417,23 @@ export default function CreateTxFormSimple({
           )}
 
           {!!parsedAbi && !!selectedFunction && (
-            <Cards
+            <Card
               title={`Fill out a form for the "${selectedFunction}" function`}
               className="mt-8 border-2 border-primary"
             >
               <ContractForm abi={parsedAbi} selectedFunction={selectedFunction} inputs={inputs} setInputs={setInputs} />
-            </Cards>
+            </Card>
           )}
 
           {!!parsedAbi && (
             <div>
               <Form.Item>
-                <Buttons type="primary" htmlType="submit" className="primary_btn hidden old-lg:inline-flex">
+                <Button type="primary" htmlType="submit" className="primary_btn hidden old-lg:inline-flex">
                   {"Submit"}
-                </Buttons>
-                <Buttons type="primary" htmlType="submit" className="primary_btn old-lg:hidden" block>
+                </Button>
+                <Button type="primary" htmlType="submit" className="primary_btn old-lg:hidden" block>
                   {"Submit"}
-                </Buttons>
+                </Button>
               </Form.Item>
             </div>
           )}

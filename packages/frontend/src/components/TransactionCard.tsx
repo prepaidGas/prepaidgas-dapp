@@ -8,10 +8,8 @@ import { useState } from "react"
 import TruncatedTextWithTooltip from "./TruncatedTextWithTooltip"
 import { TOKEN_NAME } from "@/constants/tokens"
 
-import { Cards } from "@/components/cards/frame/cards-frame"
 import { UilFavorite } from "@iconscout/react-unicons"
-import { Buttons } from "./buttons"
-import { DescriptionsProps, Divider, Descriptions, Statistic, Tooltip } from "antd"
+import { DescriptionsProps, Divider, Descriptions, Statistic, Tooltip, Card } from "antd"
 import { Transaction } from "@/pages/admin/tx/list"
 const { Countdown } = Statistic
 
@@ -106,7 +104,7 @@ export default function TransactionCard({ id, validSign, origSign, message, clas
 
   return (
     <>
-      <Cards headless className={`max-w-[1024px] mx-auto relative mt-4 border-t-4`}>
+      <Card className={`max-w-[1024px] mx-auto relative mt-4 border-t-4`}>
         <div className="flex flex-col gap-3">
           <div className="flex flex-row justify-start items-center gap-2">
             <span className="text-[#404040] dark:text-[#A4A5AA] font-bold text-2xl">{`#${id.toString()}`}</span>
@@ -120,7 +118,7 @@ export default function TransactionCard({ id, validSign, origSign, message, clas
             <Descriptions column={1} layout="horizontal" bordered items={items} />
           )}
         </div>
-      </Cards>
+      </Card>
     </>
   )
 }

@@ -1,10 +1,9 @@
 import { PageHeaders } from "@/components/page-headers"
 
-import { Cards } from "@/components/cards/frame/cards-frame"
 import { useEffect, useState } from "react"
 
 import CreateOrderForm from "@/components/forms/order/create/CreateOrderForm"
-import { Button, Modal, Steps } from "antd"
+import { Button, Card, Modal, Steps } from "antd"
 import { useAccount, useNetwork } from "wagmi"
 import CustomConnectBttn from "@/components/CustomConnectBttn"
 import { writeContract, waitForTransaction } from "@wagmi/core"
@@ -137,7 +136,7 @@ const CreateOrder = () => {
 
       <div className="min-h-[715px] lg:min-h-[580px] flex-1 h-auto px-8 xl:px-[15px] pb-[30px] bg-transparent">
         <div className="h-full w-full">
-          <Cards headless className="max-w-[1024px] mx-auto">
+          <Card className="max-w-[1024px] mx-auto">
             <div className="p-[25px]">
               {stepsItems ? (
                 <Steps current={currentStep} onChange={(value: number) => setCurrentStep(value)} items={stepsItems} />
@@ -157,12 +156,12 @@ const CreateOrder = () => {
                 <div className="flex flex-row justify-center items-center mt-2 h-4">{stepsContent[currentStep]}</div>
               )}
             </div>
-          </Cards>
-          <Cards headless className="max-w-[1024px] mx-auto mt-6">
+          </Card>
+          <Card className="max-w-[1024px] mx-auto mt-6">
             <div className="p-[25px]">
               <CreateOrderForm />
             </div>
-          </Cards>
+          </Card>
         </div>
       </div>
     </>

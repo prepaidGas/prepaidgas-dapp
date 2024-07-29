@@ -1,8 +1,7 @@
 "use client"
 import { getGuaranteeValue, getRewardValue } from "@/utility/utils"
 import { TOKEN_ADDRESS, TOKEN_NAME } from "@/constants/tokens"
-import { Input, DatePicker, TimePicker, Form, FormInstance, FormProps, InputNumber } from "antd"
-import { Buttons } from "@/components/buttons"
+import { Input, DatePicker, TimePicker, Form, FormInstance, FormProps, InputNumber, Button } from "antd"
 import dayjs, { Dayjs } from "dayjs"
 import CreateOrderReceipt from "@/components/CreateOrderReceipt"
 import CustomSearchSelect from "@/components/CustomSearchSelect"
@@ -287,12 +286,12 @@ export default function CreateOrderFormAdvanced({
         <div className="flex flex-col old-sm:flex-row old-sm:items-end old-sm:justify-between gap-4 mt-4 old-sm:mt-8">
           <CreateOrderReceipt gasAmount={gasAmount} gasPricePerUnit={gasPricePerUnit} gasPriceToken={gasPriceToken} />
           <Form.Item>
-            <Buttons type="primary" htmlType="submit" className="primary_btn hidden old-lg:inline-flex">
+            <Button type="primary" htmlType="submit" className="hidden old-lg:inline-flex">
               {"Create Gas Order"}
-            </Buttons>
-            <Buttons type="primary" htmlType="submit" className="primary_btn old-lg:hidden" block>
+            </Button>
+            <Button type="primary" htmlType="submit" className="old-lg:hidden" block>
               {"Create Gas Order"}
-            </Buttons>
+            </Button>
           </Form.Item>
         </div>
       </div>

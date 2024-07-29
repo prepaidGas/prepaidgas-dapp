@@ -1,7 +1,6 @@
 import { PageHeaders } from "@/components/page-headers"
 
-import { Cards } from "@/components/cards/frame/cards-frame"
-// import OrderCard, { OrderCardProps } from "@/components/cards/orderCard"
+// import OrderCard, { OrderCardProps } from "@/components/card/orderCard"
 import { useEffect, useState } from "react"
 import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
 import { readContract } from "@wagmi/core"
@@ -12,6 +11,7 @@ import { SPINNER_COLOR } from "@/constants"
 import OrderCard from "@/components/OrderCard"
 import SearchOrdersForm, { FilterOptions } from "@/components/forms/searchOrders/SearchOrdersForm"
 import { useNetwork } from "wagmi"
+import { Card } from "antd"
 
 const PageRoutes = [
   {
@@ -161,21 +161,21 @@ const OrderSearch = () => {
       />
       <div className="min-h-[715px] lg:min-h-[580px] flex-1 h-auto px-8 xl:px-[15px] pb-[30px] bg-transparent">
         <div className="h-full w-full">
-          {/* <Cards headless className="max-w-[1024px] mx-auto">
+          {/* <Card headless className="max-w-[1024px] mx-auto">
             <div className="px-[25px] py-0">
               <div className="flex flex-row items-center gap-4 w-full grow">
                 <SearchFiltersCard initialValue={initialState} onSubmit={onFilterSubmit} />
               </div>
             </div>
-          </Cards> */}
+          </Card> */}
 
-          <Cards headless className="max-w-[1024px] mx-auto mt-4">
+          <Card className="max-w-[1024px] mx-auto mt-4">
             <div className="px-[25px] py-0">
               <div className="flex flex-row items-center gap-4 w-full grow">
                 <SearchOrdersForm initialValues={initialState} handleSubmit={onFilterSubmit} />
               </div>
             </div>
-          </Cards>
+          </Card>
 
           {data && (
             <Pagination
@@ -222,12 +222,12 @@ const OrderSearch = () => {
           )}
 
           {showError && (
-            <Cards headless className="mt-4 max-w-[1024px] mx-auto">
+            <Card className="mt-4 max-w-[1024px] mx-auto">
               <div className="flex flex-row gap-4 justify-center items-center">
                 {/* <Icon icon={ExclamationCircleIcon} size="xl"></Icon> */}
                 <span>Sorry, we couldn&#39;t find any results</span>
               </div>
-            </Cards>
+            </Card>
           )}
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { PageHeaders } from "@/components/page-headers"
-import { Cards } from "@/components/cards/frame/cards-frame"
 import { useState } from "react"
 import CreateTxForm from "@/components/forms/tx/create/CreateTxForm"
+import { Card } from "antd"
 
 const CreateTx = () => {
   const PageRoutes = [
@@ -23,11 +23,11 @@ const CreateTx = () => {
       />
       <div className="min-h-[715px] lg:min-h-[580px] flex-1 h-auto px-8 xl:px-[15px] pb-[30px] bg-transparent">
         <div className="h-full w-full">
-          <Cards headless className="max-w-[1024px] mx-auto mt-4">
+          <Card className="max-w-[1024px] mx-auto mt-4">
             <div className="p-[25px]">
               <CreateTxForm />
             </div>
-          </Cards>
+          </Card>
         </div>
       </div>
     </>

@@ -2,9 +2,8 @@
 
 import { TOKEN_ADDRESS, TOKEN_NAME } from "@/constants/tokens"
 
-import { Form, FormInstance, FormProps, Input, InputNumber, List, Select, Tabs, TabsProps } from "antd"
+import { Button, Form, FormInstance, FormProps, Input, InputNumber, List, Select, Tabs, TabsProps } from "antd"
 
-import { Buttons } from "@/components/buttons"
 import CreateOrderReceipt from "@/components/CreateOrderReceipt"
 import { useEffect } from "react"
 import CustomSearchSelect from "@/components/CustomSearchSelect"
@@ -107,12 +106,12 @@ export default function CreateOrderFormSimple({
           <CreateOrderReceipt gasAmount={gasAmount} gasPricePerUnit={gasPricePerUnit} gasPriceToken={gasPriceToken} />
 
           <Form.Item>
-            <Buttons type="primary" htmlType="submit" className="primary_btn hidden old-lg:inline-flex">
+            <Button type="primary" htmlType="submit" className="hidden old-lg:inline-flex">
               {"Create Gas Order"}
-            </Buttons>
-            <Buttons type="primary" htmlType="submit" className="primary_btn old-lg:hidden" block>
+            </Button>
+            <Button type="primary" htmlType="submit" className="old-lg:hidden" block>
               {"Create Gas Order"}
-            </Buttons>
+            </Button>
           </Form.Item>
         </div>
       </div>

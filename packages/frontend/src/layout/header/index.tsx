@@ -82,7 +82,7 @@ const HeaderTop = () => {
             </Link>
             {!topMenu || (typeof window !== "undefined" && window.innerWidth <= 1200) ? (
               <button
-                className="p-0 bg-transparent border-none dark:border-transparent dark:bg-transparent dark:hover:text-primary text-[#525768] dark:text-white/60 hover:text-primary"
+                className="p-0 bg-transparent border-none dark:border-transparent dark:bg-transparent dark:hover:text-primary text-[#525768] dark:text-white/60 hover:text-primary flex old-lg:hidden"
                 onClick={() => {
                   toggleCollapsed(!collapsed)
                 }}

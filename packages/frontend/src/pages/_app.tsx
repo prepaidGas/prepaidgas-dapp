@@ -15,6 +15,10 @@ import { ConnectButton, DisclaimerComponent, getDefaultWallets, lightTheme } fro
 import Head from "next/head"
 import { defineChain } from "viem"
 import { useEffect, useState } from "react"
+import { Button, ConfigProvider, theme } from "antd"
+import { StyleProvider } from "@ant-design/cssinjs"
+
+const { defaultAlgorithm, darkAlgorithm } = theme
 
 //TODO: Decide wether to delete hardhat chain
 // export const hardhatCustom = defineChain({
@@ -80,6 +84,7 @@ const Disclaimer: DisclaimerComponent = ({ Text, Link }) => (
 
 function App({ Component, pageProps }: AppProps) {
   const [isInitialLoad, setIsInitialLoad] = useState(true)
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
   const { chain } = useNetwork()
   console.log("Chain", chain)
@@ -111,6 +116,10 @@ function App({ Component, pageProps }: AppProps) {
             // theme={lightTheme({ accentColor: "#f97316" })}
           >
             <AdminLayout>
+              {/* <Button onClick={() => setIsDarkMode(!isDarkMode)}>
+                Change Theme to {isDarkMode ? "Light" : "Dark"}
+              </Button> */}
+
               <Component {...pageProps} />
             </AdminLayout>
           </RainbowKitProvider>
@@ -120,12 +129,22 @@ function App({ Component, pageProps }: AppProps) {
   }
 
   return (
-    <>
-      <Head>
-        <title>prepaidGas</title>
-      </Head>
-      <Provider store={store}>{renderLayout()}</Provider>
-    </>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: "#009688",
+          colorInfo: "#009688",
+        },
+        algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm,
+      }}
+    >
+      <StyleProvider hashPriority="high">
+        <Head>
+          <title>prepaidGas</title>
+        </Head>
+        <Provider store={store}>{renderLayout()}</Provider>
+      </StyleProvider>
+    </ConfigProvider>
   )
 }
 

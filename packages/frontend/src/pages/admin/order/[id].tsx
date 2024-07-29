@@ -10,13 +10,11 @@ import { PrepaidGasABI, prepaidGasCoreContractAddress, prepaidGasTreasuryContrac
 
 import { COLOR_BY_STATUS, SPINNER_COLOR, STATUS } from "@/constants"
 
-import { Input, Modal, notification } from "antd"
+import { Button, Card, Input, Modal, notification } from "antd"
 
 import { TailSpin } from "react-loader-spinner"
-import { Cards } from "@/components/cards/frame/cards-frame"
 import OrderCard from "@/components/OrderCard"
 import { FilteredOrderStructOutput } from "typechain-types/PrepaidGas"
-import { Buttons } from "@/components/buttons"
 import { PageHeaders } from "@/components/page-headers"
 
 import { useRouter } from "next/router"
@@ -209,7 +207,7 @@ export default function SingleOrderPage() {
             </div>
           )}
           {orderData && !isLoading && (
-            <Cards headless className="max-w-[1024px] mx-auto">
+            <Card className="max-w-[1024px] mx-auto">
               <OrderCard
                 //todo: add correct conditions instead of true
                 managementSettings={{
@@ -224,23 +222,23 @@ export default function SingleOrderPage() {
                 key={`order-${orderData.id}`}
               />
               <div className="flex flex-col gap-2 mt-4 md:flex-row-reverse">
-                {/*TODO: Remove test buttons*/}
+                {/*TODO: Remove test button*/}
                 {process.env.NODE_ENV === "development" && (
                   <>
-                    <Buttons onClick={handleCloseOrder}>TEST Close</Buttons>
-                    <Buttons onClick={handleWithdrawOrder}>TEST Withdraw</Buttons>
+                    <Button onClick={handleCloseOrder}>TEST Close</Button>
+                    <Button onClick={handleWithdrawOrder}>TEST Withdraw</Button>
                   </>
                 )}
               </div>
-            </Cards>
+            </Card>
           )}
           {isError && (
-            <Cards headless className="mt-4 max-w-[1024px] mx-auto">
+            <Card className="mt-4 max-w-[1024px] mx-auto">
               <div className="flex flex-row gap-4 justify-center items-center">
                 {/* <Icon icon={ExclamationCircleIcon} size="xl"></Icon> */}
                 <span>No such order was found</span>
               </div>
-            </Cards>
+            </Card>
           )}
         </div>
       </div>

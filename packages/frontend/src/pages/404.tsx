@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react"
-import { Spin } from "antd"
+import { Button, Spin } from "antd"
 import Link from "next/link"
 import Image from "next/image"
 
 import Heading from "@/components/heading"
-import { Buttons } from "@/components/buttons"
 
 function NotFound() {
   const [state, setState] = useState({
@@ -41,9 +40,9 @@ function NotFound() {
             Sorry! the page you are looking for does not exist.
           </p>
           <Link href="/admin/order/create">
-            <Buttons type="primary" className="bg-primary text-white h-11">
+            <Button type="primary" className="bg-primary text-white h-11">
               Return Home
-            </Buttons>
+            </Button>
           </Link>
         </div>
       )}

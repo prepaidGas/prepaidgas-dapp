@@ -1,8 +1,8 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useState, useEffect } from "react"
-import { Buttons } from "./buttons"
 import { UilWallet } from "@iconscout/react-unicons"
 import { UilUser } from "@iconscout/react-unicons"
+import { Button } from "antd"
 
 export default function CustomConnectBttnSidebar({
   isActive = true,
@@ -38,13 +38,13 @@ export default function CustomConnectBttnSidebar({
                   // <Button disabled={!isActive} onClick={openConnectModal} type="button">
                   //   Connect Wallet
                   // </Button>
-                  <Buttons
+                  <Button
                     disabled={!isActive}
                     onClick={openConnectModal}
                     className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px]   w-full `}
                   >
                     {collapsed ? <UilWallet size="16" /> : "Connect Wallet"}
-                  </Buttons>
+                  </Button>
                 )
               }
 
@@ -58,7 +58,7 @@ export default function CustomConnectBttnSidebar({
 
               return (
                 <div className="flex flex-col gap-4">
-                  <Buttons
+                  <Button
                     disabled={!isActive}
                     onClick={openChainModal}
                     className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] w-full gap-1`}
@@ -79,9 +79,9 @@ export default function CustomConnectBttnSidebar({
                       </div>
                     )}
                     {!collapsed && <span className="my-auto">{chain.name}</span>}
-                  </Buttons>
+                  </Button>
 
-                  <Buttons
+                  <Button
                     disabled={!isActive}
                     onClick={openAccountModal}
                     className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] w-full gap-4`}
@@ -94,7 +94,7 @@ export default function CustomConnectBttnSidebar({
                         {account.displayBalance ? ` (${account.displayBalance})` : ""}
                       </p>
                     )}
-                  </Buttons>
+                  </Button>
                 </div>
               )
             })()}

@@ -1,5 +1,4 @@
-import { Buttons } from "@/components/buttons"
-import { Form, FormProps, Input, Select } from "antd"
+import { Button, Form, FormProps, Input, Select } from "antd"
 const { Option } = Select
 
 import { ETH_ADDRESS_OR_EMPTY_STRING_REGEX } from "@/constants"
@@ -92,27 +91,27 @@ export default function SearchOrdersForm({
           {/* <label className="base-text">&nbsp;</label> */}
           <div className="flex flex-col gap-4 old-lg:flex-row [&_label]:hidden old-lg:[&_label]:flex">
             <Form.Item colon={false} label=" " className="hidden old-lg:inline-flex">
-              <Buttons type="primary" htmlType="submit" className="primary_btn">
+              <Button type="primary" htmlType="submit" className="primary_btn">
                 {"Apply"}
-              </Buttons>
+              </Button>
             </Form.Item>
 
             <Form.Item colon={false} label=" " className="hidden old-lg:inline-flex">
-              <Buttons onClick={() => form.resetFields()} className="secondary_btn">
+              <Button onClick={() => form.resetFields()} className="secondary_btn">
                 {"Clear"}
-              </Buttons>
+              </Button>
             </Form.Item>
 
             <Form.Item colon={false} label=" " className="old-lg:hidden">
-              <Buttons type="primary" htmlType="submit" className="primary_btn" block>
+              <Button type="primary" htmlType="submit" className="primary_btn" block>
                 {"Apply"}
-              </Buttons>
+              </Button>
             </Form.Item>
 
             <Form.Item colon={false} label=" " className="old-lg:hidden">
-              <Buttons onClick={() => form.resetFields()} className="secondary_btn" block>
+              <Button onClick={() => form.resetFields()} className="secondary_btn" block>
                 {"Clear"}
-              </Buttons>
+              </Button>
             </Form.Item>
           </div>
         </div>

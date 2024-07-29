@@ -8,10 +8,18 @@ import { useState } from "react"
 import TruncatedTextWithTooltip from "./TruncatedTextWithTooltip"
 import { TOKEN_NAME } from "@/constants/tokens"
 
-import { Cards } from "@/components/cards/frame/cards-frame"
 import { UilFavorite } from "@iconscout/react-unicons"
-import { Buttons } from "./buttons"
-import { DescriptionsProps, Divider, Descriptions, Statistic, Tooltip, Progress, ProgressProps, Button } from "antd"
+import {
+  DescriptionsProps,
+  Divider,
+  Descriptions,
+  Statistic,
+  Tooltip,
+  Progress,
+  ProgressProps,
+  Button,
+  Card,
+} from "antd"
 import Link from "next/link"
 const { Countdown } = Statistic
 
@@ -248,7 +256,7 @@ export default function OrderCard({
 
   return (
     <>
-      <Cards headless className={`max-w-[1024px] mx-auto relative mt-4 border-t-4  ${getCardColor()}`}>
+      <Card className={`max-w-[1024px] mx-auto relative mt-4 border-t-4  ${getCardColor()}`}>
         <div className="flex flex-col gap-3">
           {/* todo: finish order manager page and add to favorites functionality */}
           {/* {process.env.NODE_ENV === "development" && (
@@ -308,7 +316,7 @@ export default function OrderCard({
             </div>
           )}
         </div>
-      </Cards>
+      </Card>
     </>
   )
 }

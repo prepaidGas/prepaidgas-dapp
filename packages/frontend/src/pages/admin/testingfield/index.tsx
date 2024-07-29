@@ -1,5 +1,5 @@
 import { PageHeaders } from "@/components/page-headers"
-import { Cards } from "@/components/cards/frame/cards-frame"
+import { Card } from "antd"
 
 const TestingField = () => {
   const PageRoutes = [
@@ -23,9 +23,9 @@ const TestingField = () => {
 
       <div className="min-h-[715px] lg:min-h-[580px] flex-1 h-auto px-8 xl:px-[15px] pb-[30px] bg-transparent">
         <div className="h-full w-full">
-          <Cards title={"React Hook Form Variant"} className="max-w-[1024px] mx-auto">
+          <Card title={"React Hook Form Variant"} className="max-w-[1024px] mx-auto">
             <div className="p-[25px]"></div>
-          </Cards>
+          </Card>
         </div>
       </div>
     </>
