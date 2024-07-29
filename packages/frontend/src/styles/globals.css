@@ -23,37 +23,9 @@
 .ant-menu-item,
 .ant-menu-submenu-title,
 .ant-menu .ant-menu-submenu .ant-menu-submenu-title {
-  @apply font-medium text-body dark:text-[#a4a5aa];
+  @apply font-medium;
 }
-.ant-menu-item.ant-menu-item-active,
-.ant-menu-item.ant-menu-item-selected,
-.ant-menu-item.ant-menu-item-active > svg,
-.ant-menu-item.ant-menu-item-selected > svg,
-.ant-menu-submenu-popup .ant-menu-item-selected a,
-.ant-menu-item.ant-menu-item-active > .menuItem-icon,
-.ant-menu-item.ant-menu-item-selected > .menuItem-icon,
-.ant-menu .ant-menu-submenu-open .ant-menu-submenu-title,
-.ant-menu .ant-menu-submenu-active .ant-menu-submenu-title,
-.ant-menu .ant-menu-submenu-open .ant-menu-submenu-title > svg,
-.ant-menu .ant-menu-submenu-active .ant-menu-submenu-title > svg,
-.ant-menu-submenu-popup .ant-menu .ant-menu-item.ant-menu-item-active,
-.ant-menu .ant-menu-item.ant-menu-item-active .ant-menu-item-icon > svg,
-.ant-menu .ant-menu-item.ant-menu-item-selected .ant-menu-item-icon > svg,
-.ant-menu .ant-menu-submenu-open .ant-menu-submenu-title > .ant-menu-submenu-arrow,
-.ant-menu .ant-menu-submenu-active .ant-menu-submenu-title > .ant-menu-submenu-arrow,
-.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item.ant-menu-item-active,
-.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item.ant-menu-item-selected,
-.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item.ant-menu-item-active > svg,
-.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item.ant-menu-item-selected > svg {
-  @apply text-primary !important;
-}
-.ant-layout-sider .ant-menu-item.ant-menu-item-selected {
-  @apply bg-primary-transparent !important;
-}
-.ant-menu-light.ant-menu-horizontal > .ant-menu-item:hover::after,
-.ant-menu-light.ant-menu-horizontal > .ant-menu-item-selected::after {
-  @apply border-primary;
-}
+
 .ant-layout-sider .ant-menu > .ant-menu-item {
   @apply w-full !ps-[15px] m-0;
 }
@@ -67,32 +39,21 @@
 .ant-menu .ant-menu-item .ant-menu-item-icon,
 .ant-menu-item .ant-menu-item-icon > svg,
 .ant-menu .ant-menu-submenu .ant-menu-submenu-title > svg {
-  @apply w-4 h-4 text-[#a0a0a0] dark:text-[#a4a5aa];
+  @apply w-4 h-4;
 }
 .ant-menu-item.ant-menu-item-only-child {
   @apply h-auto;
 }
-.ant-menu.ant-menu-inline .ant-menu-item.ant-menu-item-active,
-.ant-menu .ant-menu-submenu .ant-menu-submenu-title:hover,
-.ant-menu.ant-menu-inline .ant-menu-item:hover,
-.ant-menu-submenu-popup .ant-menu .ant-menu-item.ant-menu-item-active,
-.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item:hover,
-.ant-menu-item.ant-menu-item-selected.ant-menu-item-only-child,
-.ant-menu-item.ant-menu-item-active {
+.ant-menu-root > .ant-menu-item-only-child {
   @apply bg-transparent !important;
-}
-
-.ant-menu-submenu-popup .ant-menu .ant-menu-item.ant-menu-item-selected,
-.ant-menu .ant-menu-submenu .ant-menu-sub.ant-menu-inline .ant-menu-item.ant-menu-item-selected {
-  @apply bg-primary-transparent !important;
 }
 
 .ant-layout-sider .ant-layout-sider-children .ant-menu .ant-menu-item .badge,
 .ckbkee .ant-layout-sider .ant-layout-sider-children .ant-menu .ant-menu-submenu-title .badge {
-  @apply absolute ltr:right-[15px] rtl:left-[15px] top-1/2 -translate-y-1/2 inline-block bg-primary text-white text-[10px] leading-[10px] tracking-[1px] rounded-[3px] h-auto pt-[3px] pb-1 px-1;
+  @apply absolute ltr:right-[15px] rtl:left-[15px] top-1/2 -translate-y-1/2 inline-block text-[10px] leading-[10px] tracking-[1px] rounded-[3px] h-auto pt-[3px] pb-1 px-1;
 }
 .ant-menu .ant-menu-submenu-inline > .ant-menu-submenu-title > .ant-menu-submenu-arrow {
-  @apply rotate-[270deg] text-[#a0a0a0] dark:text-white/[.87];
+  @apply rotate-[270deg];
 }
 .ant-menu .ant-menu-submenu-open.ant-menu-submenu-inline > .ant-menu-submenu-title > .ant-menu-submenu-arrow {
   @apply rotate-[180deg];
@@ -103,12 +64,9 @@
 }
 .ant-menu .ant-menu-submenu-arrow::before,
 .ant-menu .ant-menu-submenu-arrow::after {
-  @apply h-[1.2px] dark:bg-white/[.87];
+  @apply h-[1.2px];
 }
 
-.ant-menu-submenu-popup > .ant-menu {
-  @apply bg-white dark:bg-[#1b1d2a];
-}
 .ant-menu-submenu-popup > .ant-menu::-webkit-scrollbar {
   @apply hidden;
 }
@@ -119,9 +77,7 @@
 .ant-menu-submenu-popup .ant-menu .ant-menu-item {
   @apply bg-transparent w-full my-1 [&:not(:last-child)]:mb-2 rounded-none !important;
 }
-.ant-tooltip .ant-tooltip-arrow:before {
-  @apply bg-white dark:bg-whiteDark;
-}
+
 .ant-tooltip .ant-tooltip-content a {
   @apply capitalize;
 }
