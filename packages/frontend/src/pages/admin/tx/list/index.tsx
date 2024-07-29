@@ -1,6 +1,5 @@
 import { PageHeaders } from "@/components/page-headers"
 
-import { Cards } from "@/components/cards/frame/cards-frame"
 // import OrderCard, { OrderCardProps } from "@/components/cards/orderCard"
 import { useEffect, useState } from "react"
 import { FilteredOrderStructOutput, MessageStruct } from "typechain-types/PrepaidGas"
@@ -12,6 +11,7 @@ import { SPINNER_COLOR } from "@/constants"
 import OrderCard from "@/components/OrderCard"
 import SearchOrdersForm, { FilterOptions } from "@/components/forms/searchOrders/SearchOrdersForm"
 import TransactionCard from "@/components/TransactionCard"
+import { Card } from "antd"
 
 const PageRoutes = [
   {
@@ -150,12 +150,12 @@ const TransactionsListPage = () => {
           )} */}
 
           {showError && (
-            <Cards headless className="mt-4 max-w-[1024px] mx-auto">
+            <Card className="mt-4 max-w-[1024px] mx-auto">
               <div className="flex flex-row gap-4 justify-center items-center">
                 {/* <Icon icon={ExclamationCircleIcon} size="xl"></Icon> */}
                 <span>Sorry, we couldn&#39;t find any results</span>
               </div>
-            </Cards>
+            </Card>
           )}
         </div>
       </div>
