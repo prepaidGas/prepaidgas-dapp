@@ -38,11 +38,7 @@ export default function CustomConnectBttnSidebar({
                   // <Button disabled={!isActive} onClick={openConnectModal} type="button">
                   //   Connect Wallet
                   // </Button>
-                  <Button
-                    disabled={!isActive}
-                    onClick={openConnectModal}
-                    className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px]   w-full `}
-                  >
+                  <Button type="primary" disabled={!isActive} onClick={openConnectModal}>
                     {collapsed ? <UilWallet size="16" /> : "Connect Wallet"}
                   </Button>
                 )
@@ -59,9 +55,10 @@ export default function CustomConnectBttnSidebar({
               return (
                 <div className="flex flex-col gap-4">
                   <Button
+                    type="primary"
                     disabled={!isActive}
                     onClick={openChainModal}
-                    className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] w-full gap-1`}
+                    className="flex flex-row justify-center items-center gap-2"
                   >
                     {chain.hasIcon && (
                       <div
@@ -82,9 +79,10 @@ export default function CustomConnectBttnSidebar({
                   </Button>
 
                   <Button
+                    type="primary"
                     disabled={!isActive}
                     onClick={openAccountModal}
-                    className={`bg-primary hover:bg-primary/80 border-solid border-1 border-primary hover:border-primary/80 text-white dark:text-white/[.87] text-[14px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-[4px] w-full gap-4`}
+                    className="flex flex-row justify-center items-center gap-2"
                   >
                     {collapsed ? (
                       <UilUser />
