@@ -105,21 +105,22 @@ const CreateOrder = () => {
           </Button>,
           null,
         ])
-      } else {
-        setStepsItems([
-          {
-            title: "Step 1",
-            description: "Connect your wallet and choose sepolia network",
-          },
-          {
-            title: "Step 2",
-            description: "Create an order",
-          },
-        ])
-
-        setStepsContent([<CustomConnectBttn onClick={() => null} />, null])
       }
+      return
     }
+
+    setStepsItems([
+      {
+        title: "Step 1",
+        description: "Connect your wallet",
+      },
+      {
+        title: "Step 2",
+        description: "Create an order",
+      },
+    ])
+
+    setStepsContent([<CustomConnectBttn onClick={() => null} />, null])
   }, [chain])
 
   useEffect(() => {
@@ -136,27 +137,16 @@ const CreateOrder = () => {
 
       <div className="min-h-[715px] lg:min-h-[580px] flex-1 h-auto px-8 xl:px-[15px] pb-[30px] bg-transparent">
         <div className="h-full w-full">
-          <Card className="max-w-[1024px] mx-auto">
-            <div className="p-[25px]">
-              {stepsItems ? (
+          {stepsItems ? (
+            <Card className="max-w-[1024px] mx-auto">
+              <div className="p-[25px]">
                 <Steps current={currentStep} onChange={(value: number) => setCurrentStep(value)} items={stepsItems} />
-              ) : (
-                <TailSpin
-                  height={40}
-                  width={40}
-                  color={SPINNER_COLOR}
-                  ariaLabel="tail-spin-loading"
-                  radius="0"
-                  wrapperStyle={{}}
-                  wrapperClass=""
-                  visible={true}
-                />
-              )}
-              {stepsContent && (
-                <div className="flex flex-row justify-center items-center mt-2 h-4">{stepsContent[currentStep]}</div>
-              )}
-            </div>
-          </Card>
+                {stepsContent && (
+                  <div className="flex flex-row justify-center items-center mt-2 h-4">{stepsContent[currentStep]}</div>
+                )}
+              </div>
+            </Card>
+          ) : null}
           <Card className="max-w-[1024px] mx-auto mt-6">
             <div className="p-[25px]">
               <CreateOrderForm />
